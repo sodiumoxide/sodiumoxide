@@ -1,4 +1,6 @@
 *~
 *.sw*
 *.o
+*.so
 /doc
+.rust
