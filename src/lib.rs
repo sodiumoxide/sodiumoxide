@@ -42,6 +42,8 @@ generation functions and the key-generation functions are thread-safe.
  `crypto::hash`
 
  `crypto::verify`
+
+ `crypto::shorthash`
  */
 #[link( name = "sodiumoxide"
       , package_id = "sodiumoxide"
@@ -90,6 +92,7 @@ pub mod crypto {
     pub mod secretbox;
     pub mod onetimeauth;
     pub mod stream;
+    pub mod shorthash;
 
     pub mod verify;
 }
