@@ -24,7 +24,7 @@ Testing
 
 Documentation
 -------------
-    rust doc src/lib.rs
+    rust doc html src/lib.rs
 
 Documentation will be generated in doc/...
 
@@ -40,6 +40,7 @@ Join in
 File bugs in the issue tracker
 
 Master git repository
+
     git clone https://github.com/dnaq/sodiumoxide.git
 
 License
