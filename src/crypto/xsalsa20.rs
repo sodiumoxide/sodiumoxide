@@ -13,15 +13,15 @@ use randombytes::randombytes_into;
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_stream(c: *mut u8,
-                     clen: c_ulonglong,
-                     n: *u8,
-                     k: *u8) -> c_int;
-    fn crypto_stream_xor(c: *mut u8,
-                         m: *u8,
-                         mlen: c_ulonglong,
-                         n: *u8,
-                         k: *u8) -> c_int;
+    fn crypto_stream_xsalsa20(c: *mut u8,
+                              clen: c_ulonglong,
+                              n: *u8,
+                              k: *u8) -> c_int;
+    fn crypto_stream_xsalsa20_xor(c: *mut u8,
+                                  m: *u8,
+                                  mlen: c_ulonglong,
+                                  n: *u8,
+                                  k: *u8) -> c_int;
 }
 
 pub static KEYBYTES: uint = 32;
@@ -79,7 +79,10 @@ fn gen_nonce() -> ~Nonce {
 fn stream(len: uint, n: &Nonce, k: &Key) -> ~[u8] {
     unsafe {
         let mut c = from_elem(len, 0u8);
-        crypto_stream(to_mut_ptr(c), c.len() as c_ulonglong, to_ptr(**n), to_ptr(**k));
+        crypto_stream_xsalsa20(to_mut_ptr(c), 
+                               c.len() as c_ulonglong, 
+                               to_ptr(**n), 
+                               to_ptr(**k));
         c
     }
 }
@@ -96,7 +99,7 @@ fn stream(len: uint, n: &Nonce, k: &Key) -> ~[u8] {
 fn stream_xor(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
     let (c, _) = do marshal(m, 0, 0) |dst, src, len| {
         unsafe {
-            crypto_stream_xor(dst, src, len, to_ptr(**n), to_ptr(**k))
+            crypto_stream_xsalsa20_xor(dst, src, len, to_ptr(**n), to_ptr(**k))
         }
     };
     c
@@ -113,10 +116,10 @@ fn stream_xor(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
 #[fixed_stack_segment]
 fn stream_xor_inplace(m: &mut [u8], n: &Nonce, k: &Key) {
     unsafe {
-        crypto_stream_xor(to_mut_ptr(m), 
-                          to_ptr(m), 
-                          m.len() as c_ulonglong, 
-                          to_ptr(**n), 
-                          to_ptr(**k));
+        crypto_stream_xsalsa20_xor(to_mut_ptr(m), 
+                                   to_ptr(m), 
+                                   m.len() as c_ulonglong, 
+                                   to_ptr(**n), 
+                                   to_ptr(**k));
     }
 }

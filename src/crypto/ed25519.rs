@@ -11,18 +11,18 @@ use std::vec::raw::{to_mut_ptr, to_ptr};
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_sign_keypair(pk: *mut u8,
-                           sk: *mut u8) -> c_int;
-    fn crypto_sign(sm: *mut u8,
-                   smlen: *mut c_ulonglong,
-                   m: *u8,
-                   mlen: c_ulonglong,
-                   sk: *u8) -> c_int;
-    fn crypto_sign_open(m: *mut u8,
-                        mlen: *mut c_ulonglong,
-                        sm: *u8,
-                        smlen: c_ulonglong,
-                        pk: *u8) -> c_int;
+    fn crypto_sign_ed25519_keypair(pk: *mut u8,
+                                   sk: *mut u8) -> c_int;
+    fn crypto_sign_ed25519(sm: *mut u8,
+                           smlen: *mut c_ulonglong,
+                           m: *u8,
+                           mlen: c_ulonglong,
+                           sk: *u8) -> c_int;
+    fn crypto_sign_ed25519_open(m: *mut u8,
+                                mlen: *mut c_ulonglong,
+                                sm: *u8,
+                                smlen: c_ulonglong,
+                                pk: *u8) -> c_int;
 }
 
 pub static SECRETKEYBYTES: uint = 64;
@@ -59,7 +59,7 @@ pub fn gen_keypair() -> (~PublicKey, ~SecretKey) {
     unsafe {
         let mut pk = ~PublicKey([0u8, ..PUBLICKEYBYTES]);
         let mut sk = ~SecretKey([0u8, ..SECRETKEYBYTES]);
-        crypto_sign_keypair(to_mut_ptr(**pk), to_mut_ptr(**sk));
+        crypto_sign_ed25519_keypair(to_mut_ptr(**pk), to_mut_ptr(**sk));
         (pk, sk)
     }
 }
@@ -73,7 +73,11 @@ pub fn sign(m: &[u8], sk: &SecretKey) -> ~[u8] {
     unsafe {
         let mut sm = from_elem(m.len() + SIGNATUREBYTES, 0u8);
         let mut smlen = 0;
-        crypto_sign(to_mut_ptr(sm), &mut smlen, to_ptr(m), m.len() as c_ulonglong, to_ptr(**sk));
+        crypto_sign_ed25519(to_mut_ptr(sm), 
+                            &mut smlen, 
+                            to_ptr(m), 
+                            m.len() as c_ulonglong, 
+                            to_ptr(**sk));
         sm.truncate(smlen as uint);
         sm
     }
@@ -89,7 +93,11 @@ pub fn verify(sm: &[u8], pk: &PublicKey) -> Option<~[u8]> {
     unsafe {
         let mut m = from_elem(sm.len(), 0u8);
         let mut mlen = 0;
-        if crypto_sign_open(to_mut_ptr(m), &mut mlen, to_ptr(sm), sm.len() as c_ulonglong, to_ptr(**pk)) == 0 {
+        if crypto_sign_ed25519_open(to_mut_ptr(m), 
+                                    &mut mlen, 
+                                    to_ptr(sm), 
+                                    sm.len() as c_ulonglong, 
+                                    to_ptr(**pk)) == 0 {
             m.truncate(mlen as uint);
             Some(m)
         } else {

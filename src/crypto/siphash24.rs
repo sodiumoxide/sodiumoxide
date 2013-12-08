@@ -9,10 +9,10 @@ use randombytes::randombytes_into;
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_shorthash(h: *mut u8,
-                        m: *u8,
-                        mlen: c_ulonglong,
-                        k: *u8) -> c_int;
+    fn crypto_shorthash_siphash24(h: *mut u8,
+                                  m: *u8,
+                                  mlen: c_ulonglong,
+                                  k: *u8) -> c_int;
 }
 
 pub static HASHBYTES: uint = 8;
@@ -58,9 +58,9 @@ pub fn gen_key() -> ~Key {
 pub fn shorthash(m: &[u8], k: &Key) -> ~Digest {
     unsafe {
         let mut h = ~Digest([0, ..HASHBYTES]);
-        crypto_shorthash(to_mut_ptr(**h), 
-                         to_ptr(m), m.len() as c_ulonglong,
-                         to_ptr(**k));
+        crypto_shorthash_siphash24(to_mut_ptr(**h), 
+                                   to_ptr(m), m.len() as c_ulonglong,
+                                   to_ptr(**k));
         h
     }
 }

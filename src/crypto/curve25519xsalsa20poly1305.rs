@@ -15,33 +15,33 @@ use randombytes::randombytes_into;
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_box_keypair(pk: *mut u8,
-                          sk: *mut u8) -> c_int;
-    fn crypto_box(c: *mut u8,
-                  m: *u8,
-                  mlen: c_ulonglong,
-                  n: *u8,
-                  pk: *u8,
-                  sk: *u8) -> c_int;
-    fn crypto_box_open(m: *mut u8,
-                       c: *u8,
-                       clen: c_ulonglong,
-                       n: *u8,
-                       pk: *u8,
-                       sk: *u8) -> c_int;
-    fn crypto_box_beforenm(k: *mut u8,
-                           pk: *u8,
-                           sk: *u8) -> c_int;
-    fn crypto_box_afternm(c: *mut u8,
-                          m: *u8,
-                          mlen: c_ulonglong,
-                          n: *u8,
-                          k: *u8) -> c_int;
-    fn crypto_box_open_afternm(m: *mut u8,
-                               c: *u8,
-                               clen: c_ulonglong,
-                               n: *u8,
-                               k: *u8) -> c_int;
+    fn crypto_box_curve25519xsalsa20poly1305_keypair(pk: *mut u8,
+                                                     sk: *mut u8) -> c_int;
+    fn crypto_box_curve25519xsalsa20poly1305(c: *mut u8,
+                                             m: *u8,
+                                             mlen: c_ulonglong,
+                                             n: *u8,
+                                             pk: *u8,
+                                             sk: *u8) -> c_int;
+    fn crypto_box_curve25519xsalsa20poly1305_open(m: *mut u8,
+                                                  c: *u8,
+                                                  clen: c_ulonglong,
+                                                  n: *u8,
+                                                  pk: *u8,
+                                                  sk: *u8) -> c_int;
+    fn crypto_box_curve25519xsalsa20poly1305_beforenm(k: *mut u8,
+                                                      pk: *u8,
+                                                      sk: *u8) -> c_int;
+    fn crypto_box_curve25519xsalsa20poly1305_afternm(c: *mut u8,
+                                                     m: *u8,
+                                                     mlen: c_ulonglong,
+                                                     n: *u8,
+                                                     k: *u8) -> c_int;
+    fn crypto_box_curve25519xsalsa20poly1305_open_afternm(m: *mut u8,
+                                                          c: *u8,
+                                                          clen: c_ulonglong,
+                                                          n: *u8,
+                                                          k: *u8) -> c_int;
 }
 
 pub static PUBLICKEYBYTES: size_t = 32;
@@ -85,7 +85,9 @@ pub fn gen_keypair() -> (~PublicKey, ~SecretKey) {
     unsafe {
         let mut pk = ~PublicKey([0u8, ..PUBLICKEYBYTES]);
         let mut sk = ~SecretKey([0u8, ..SECRETKEYBYTES]);
-        crypto_box_keypair(to_mut_ptr(**pk), to_mut_ptr(**sk));
+        crypto_box_curve25519xsalsa20poly1305_keypair(
+            to_mut_ptr(**pk), 
+            to_mut_ptr(**sk));
         (pk, sk)
     }
 }
@@ -111,7 +113,12 @@ pub fn gen_nonce() -> ~Nonce {
 pub fn seal(m: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> ~[u8] {
     let (c, _) = do marshal(m, ZEROBYTES, BOXZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_box(dst, src, len, to_ptr(**n), to_ptr(**pk), to_ptr(**sk));
+            crypto_box_curve25519xsalsa20poly1305(dst, 
+                                                  src, 
+                                                  len, 
+                                                  to_ptr(**n), 
+                                                  to_ptr(**pk), 
+                                                  to_ptr(**sk));
         }
     };
     c
@@ -129,7 +136,12 @@ pub fn open(c: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> Option<~[u8]
     }
     let (m, ret) = do marshal(c, BOXZEROBYTES, ZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_box_open(dst, src, len, to_ptr(**n), to_ptr(**pk), to_ptr(**sk))
+            crypto_box_curve25519xsalsa20poly1305_open(dst, 
+                                                       src, 
+                                                       len, 
+                                                       to_ptr(**n), 
+                                                       to_ptr(**pk), 
+                                                       to_ptr(**sk))
         }
     };
     if ret == 0 {
@@ -162,7 +174,9 @@ impl Drop for PrecomputedKey {
 pub fn precompute(pk: &PublicKey, sk: &SecretKey) -> ~PrecomputedKey {
     let mut k = ~PrecomputedKey([0u8, ..PRECOMPUTEDKEYBYTES]);
     unsafe {
-        crypto_box_beforenm(to_mut_ptr(**k), to_ptr(**pk), to_ptr(**sk));
+        crypto_box_curve25519xsalsa20poly1305_beforenm(to_mut_ptr(**k), 
+                                                       to_ptr(**pk), 
+                                                       to_ptr(**sk));
     }
     k
 }
@@ -175,7 +189,11 @@ pub fn precompute(pk: &PublicKey, sk: &SecretKey) -> ~PrecomputedKey {
 pub fn seal_precomputed(m: &[u8], n: &Nonce, k: &PrecomputedKey) -> ~[u8] {
     let (c, _) = do marshal(m, ZEROBYTES, BOXZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_box_afternm(dst, src, len, to_ptr(**n), to_ptr(**k));
+            crypto_box_curve25519xsalsa20poly1305_afternm(dst, 
+                                                          src, 
+                                                          len, 
+                                                          to_ptr(**n), 
+                                                          to_ptr(**k));
         }
     };
     c
@@ -193,7 +211,11 @@ pub fn open_precomputed(c: &[u8], n: &Nonce, k: &PrecomputedKey) -> Option<~[u8]
     }
     let (m, ret) = do marshal(c, BOXZEROBYTES, ZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_box_open_afternm(dst, src, len, to_ptr(**n), to_ptr(**k))
+            crypto_box_curve25519xsalsa20poly1305_open_afternm(dst, 
+                                                               src, 
+                                                               len, 
+                                                               to_ptr(**n), 
+                                                               to_ptr(**k))
         }
     };
     if ret == 0 {

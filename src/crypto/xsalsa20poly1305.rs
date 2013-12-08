@@ -14,16 +14,16 @@ use randombytes::randombytes_into;
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_secretbox(c: *mut u8,
-                        m: *u8,
-                        mlen: c_ulonglong,
-                        n: *u8,
-                        k: *u8) -> c_int;
-    fn crypto_secretbox_open(m: *mut u8,
-                             c: *u8,
-                             clen: c_ulonglong,
-                             n: *u8,
-                             k: *u8) -> c_int;
+    fn crypto_secretbox_xsalsa20poly1305(c: *mut u8,
+                                         m: *u8,
+                                         mlen: c_ulonglong,
+                                         n: *u8,
+                                         k: *u8) -> c_int;
+    fn crypto_secretbox_xsalsa20poly1305_open(m: *mut u8,
+                                              c: *u8,
+                                              clen: c_ulonglong,
+                                              n: *u8,
+                                              k: *u8) -> c_int;
 }
 
 pub static KEYBYTES: uint = 32;
@@ -84,7 +84,7 @@ pub fn gen_nonce() -> ~Nonce {
 pub fn seal(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
     let (c, _) = do marshal(m, ZEROBYTES, BOXZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_secretbox(dst, src, len, to_ptr(**n), to_ptr(**k))
+            crypto_secretbox_xsalsa20poly1305(dst, src, len, to_ptr(**n), to_ptr(**k))
         }
     };
     c
@@ -102,7 +102,11 @@ pub fn open(c: &[u8], n: &Nonce, k: &Key) -> Option<~[u8]> {
     }
     let (m, ret) = do marshal(c, BOXZEROBYTES, ZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_secretbox_open(dst, src, len, to_ptr(**n), to_ptr(**k))
+            crypto_secretbox_xsalsa20poly1305_open(dst, 
+                                                   src, 
+                                                   len, 
+                                                   to_ptr(**n), 
+                                                   to_ptr(**k))
         }
     };
     if ret == 0 {
