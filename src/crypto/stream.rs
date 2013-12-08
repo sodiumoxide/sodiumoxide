@@ -31,6 +31,32 @@ key-derivation functions.
 [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 7.
 This cipher is conjectured to meet the standard notion of
 unpredictability. 
+
+# Alternate primitives
+NaCl supports the following secret-key encryption functions:
+
+------------------------------------------------------------
+|crypto_stream           |primitive   |KEYBYTES |NONCEBYTES|
+|------------------------|------------|---------|----------|
+|crypto_stream_aes128ctr |AES-128-CTR |16       |16        |
+|crypto_stream_salsa208  |Salsa20/8   |32       |8         |
+|crypto_stream_salsa2012 |Salsa20/12  |32       |8         |
+|crypto_stream_salsa20   |Salsa20/20  |32       |8         |
+|crypto_stream_xsalsa20  |XSalsa20/20 |32       |24        |
+------------------------------------------------------------
+
+Beware that several of these primitives have 8-byte nonces. For those
+primitives it is no longer true that randomly generated nonces have negligible
+risk of collision. Callers who are unable to count 1, 2, 3..., and who insist
+on using these primitives, are advised to use a randomly derived key for each
+message.
+
+For that same reason, no `gen_nonce()`-function is exposed for those
+primitives.
 */
 pub use self::xsalsa20::*;
 pub mod xsalsa20;
+pub mod aes128ctr;
+pub mod salsa208;
+pub mod salsa2012;
+pub mod salsa20;
