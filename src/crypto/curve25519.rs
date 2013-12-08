@@ -12,11 +12,11 @@ use std::vec::raw::{to_ptr, to_mut_ptr};
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_scalarmult(q: *mut u8,
-                         n: *u8,
-                         p: *u8) -> c_int;
-    fn crypto_scalarmult_base(q: *mut u8,
-                              n: *u8) -> c_int;
+    fn crypto_scalarmult_curve25519(q: *mut u8,
+                                    n: *u8,
+                                    p: *u8) -> c_int;
+    fn crypto_scalarmult_curve25519_base(q: *mut u8,
+                                         n: *u8) -> c_int;
 }
 
 pub static BYTES: uint = 32;
@@ -41,7 +41,7 @@ pub fn scalarmult(n: &Scalar,
               p: &GroupElement) -> ~GroupElement {
     let mut q = ~GroupElement([0, ..BYTES]);
     unsafe {
-        crypto_scalarmult(to_mut_ptr(**q), to_ptr(**n), to_ptr(**p));
+        crypto_scalarmult_curve25519(to_mut_ptr(**q), to_ptr(**n), to_ptr(**p));
     }
     q
 }
@@ -55,7 +55,7 @@ pub fn scalarmult(n: &Scalar,
 pub fn scalarmult_base(n: &Scalar) -> ~GroupElement {
     let mut q = ~GroupElement([0, ..BYTES]);
     unsafe {
-        crypto_scalarmult_base(to_mut_ptr(**q), to_ptr(**n));
+        crypto_scalarmult_curve25519_base(to_mut_ptr(**q), to_ptr(**n));
     }
     q
 }

@@ -11,14 +11,14 @@ use crypto::verify::verify_32;
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_auth(a: *mut u8,
-                   m: *u8,
-                   mlen: c_ulonglong,
-                   k: *u8) -> c_int;
-    fn crypto_auth_verify(a: *u8,
-                          m: *u8,
-                          mlen: c_ulonglong,
-                          k: *u8) -> c_int;
+    fn crypto_auth_hmacsha512256(a: *mut u8,
+                                 m: *u8,
+                                 mlen: c_ulonglong,
+                                 k: *u8) -> c_int;
+    fn crypto_auth_hmacsha512256_verify(a: *u8,
+                                        m: *u8,
+                                        mlen: c_ulonglong,
+                                        k: *u8) -> c_int;
 }
 
 pub static KEYBYTES: uint = 32;
@@ -77,7 +77,10 @@ pub fn gen_key() -> ~Key {
 pub fn authenticate(m: &[u8], k: &Key) -> ~Tag {
     unsafe {
         let mut tag = ~Tag([0, ..TAGBYTES]);
-        crypto_auth(to_mut_ptr(**tag), to_ptr(m), m.len() as c_ulonglong, to_ptr(**k));
+        crypto_auth_hmacsha512256(to_mut_ptr(**tag), 
+                                  to_ptr(m), 
+                                  m.len() as c_ulonglong, 
+                                  to_ptr(**k));
         tag
     }
 }
@@ -89,10 +92,10 @@ pub fn authenticate(m: &[u8], k: &Key) -> ~Tag {
 #[fixed_stack_segment]
 pub fn verify(tag: &Tag, m: &[u8], k: &Key) -> bool {
     unsafe {
-        crypto_auth_verify(to_ptr(**tag), 
-                           to_ptr(m), 
-                           m.len() as c_ulonglong, 
-                           to_ptr(**k)) == 0
+        crypto_auth_hmacsha512256_verify(to_ptr(**tag), 
+                                         to_ptr(m), 
+                                         m.len() as c_ulonglong, 
+                                         to_ptr(**k)) == 0
     }
 }
 

@@ -13,9 +13,9 @@ use std::vec::raw::{to_mut_ptr, to_ptr};
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_hash(h: *mut u8,
-                   m: *u8,
-                   mlen: c_ulonglong) -> c_int;
+    fn crypto_hash_sha512(h: *mut u8,
+                          m: *u8,
+                          mlen: c_ulonglong) -> c_int;
 }
 
 pub static HASHBYTES: uint = 64;
@@ -33,7 +33,7 @@ pub struct Digest([u8, ..HASHBYTES]);
 pub fn hash(m: &[u8]) -> ~Digest {
     unsafe {
         let mut h = ~Digest([0, ..HASHBYTES]);
-        crypto_hash(to_mut_ptr(**h), to_ptr(m), m.len() as c_ulonglong);
+        crypto_hash_sha512(to_mut_ptr(**h), to_ptr(m), m.len() as c_ulonglong);
         h
     }
 }

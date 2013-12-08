@@ -12,14 +12,14 @@ use crypto::verify::verify_16;
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
 extern {
-    fn crypto_onetimeauth(a: *mut u8,
-                          m: *u8,
-                          mlen: c_ulonglong,
-                          k: *u8) -> c_int;
-    fn crypto_onetimeauth_verify(a: *u8,
-                                 m: *u8,
-                                 mlen: c_ulonglong,
-                                 k: *u8) -> c_int;
+    fn crypto_onetimeauth_poly1305(a: *mut u8,
+                                   m: *u8,
+                                   mlen: c_ulonglong,
+                                   k: *u8) -> c_int;
+    fn crypto_onetimeauth_poly1305_verify(a: *u8,
+                                          m: *u8,
+                                          mlen: c_ulonglong,
+                                          k: *u8) -> c_int;
 }
 
 /**
@@ -86,10 +86,10 @@ pub fn gen_key() -> ~Key {
 fn authenticate(m: &[u8], k: &Key) -> ~Tag {
     unsafe {
         let mut tag = ~Tag([0, ..TAGBYTES]);
-        crypto_onetimeauth(to_mut_ptr(**tag), 
-                           to_ptr(m), 
-                           m.len() as c_ulonglong, 
-                           to_ptr(**k));
+        crypto_onetimeauth_poly1305(to_mut_ptr(**tag), 
+                                    to_ptr(m), 
+                                    m.len() as c_ulonglong, 
+                                    to_ptr(**k));
         tag
     }
 }
@@ -101,10 +101,10 @@ fn authenticate(m: &[u8], k: &Key) -> ~Tag {
 #[fixed_stack_segment]
 fn verify(tag: &Tag, m: &[u8], k: &Key) -> bool {
     unsafe {
-        crypto_onetimeauth_verify(to_ptr(**tag), 
-                                  to_ptr(m), 
-                                  m.len() as c_ulonglong, 
-                                  to_ptr(**k)) == 0
+        crypto_onetimeauth_poly1305_verify(to_ptr(**tag), 
+                                           to_ptr(m), 
+                                           m.len() as c_ulonglong, 
+                                           to_ptr(**k)) == 0
     }
 }
 
