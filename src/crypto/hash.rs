@@ -22,3 +22,4 @@ SHA-3 competition will improve the situation.
 */
 pub use self::sha512::*;
 pub mod sha512;
+pub mod sha256;

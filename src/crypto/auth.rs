@@ -25,3 +25,4 @@ unforgeability.
 */
 pub use self::hmacsha512256::*;
 pub mod hmacsha512256;
+pub mod hmacsha256;
