@@ -31,7 +31,7 @@ pub fn verify_16(x: &[u8, ..16], y: &[u8, ..16]) -> bool {
 
 /**
  * `verify_32()` returns true if `x[0]`, `x[1]`, ..., `x[31]` are the
- * same as `y[0]`, `y[1]`, ..., `y[31]`. Otherwise it returns false.
+ * same as `y[0]`, `y[1]`, ..., `y[31]`. Otherwise it returns `false`.
  *
  * This functions is safe to use for secrets `x[0]`, `x[1]`, ..., `x[31]`,
  * `y[0]`, `y[1]`, ..., `y[31]`. The time taken by `verify_32` is independent
