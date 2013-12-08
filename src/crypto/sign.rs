@@ -14,3 +14,4 @@ chosen-message attacks.
 */
 pub use self::ed25519::*;
 pub mod ed25519;
+pub mod edwards25519sha512batch;
