@@ -19,6 +19,16 @@ security conjectures for many hash functions, including `SHA-512`.
 However, for the moment, there do not appear to be alternatives that
 inspire satisfactory levels of confidence. One can hope that NIST's
 SHA-3 competition will improve the situation.
+
+# Alternate primitives
+NaCl supports the following hash functions:
+
+------------------------------------
+|crypto_hash       |primitive|BYTES|
+|------------------|---------|-----|
+|crypto_hash_sha256|SHA-256  |32   |
+|crypto_hash_sha512|SHA-512  |64   |
+------------------------------------
 */
 pub use self::sha512::*;
 pub mod sha512;

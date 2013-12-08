@@ -22,6 +22,16 @@ regarding "truncated unforgeability."
 `HMAC-SHA-512-256`, i.e., the first 256 bits of `HMAC-SHA-512`.
 `HMAC-SHA-512-256` is conjectured to meet the standard notion of
 unforgeability.
+
+# Alternate primitives
+NaCl supports the following secret-key authentication functions:
+
+------------------------------------------------------------
+|crypto_auth              |primitive        |BYTES|KEYBYTES|
+|-------------------------|-----------------|-----|--------|
+|crypto_auth_hmacsha256   |HMAC_SHA-256     |32   |32      |
+|crypto_auth_hmacsha512256|HMAC_SHA-512-256 |32   |32      |
+------------------------------------------------------------
 */
 pub use self::hmacsha512256::*;
 pub mod hmacsha512256;
