@@ -4,6 +4,7 @@
 standard notion of unforgeability for a public-key signature scheme under
 chosen-message attacks.
 */
+extern mod extra;
 use std::libc::{c_ulonglong, c_int};
 use std::vec::{from_elem};
 use std::vec::raw::{to_mut_ptr, to_ptr};
@@ -13,6 +14,9 @@ use std::vec::raw::{to_mut_ptr, to_ptr};
 extern {
     fn crypto_sign_ed25519_keypair(pk: *mut u8,
                                    sk: *mut u8) -> c_int;
+    fn crypto_sign_ed25519_seed_keypair(pk: *mut u8,
+                                        sk: *mut u8,
+                                        seed: *u8) -> c_int;
     fn crypto_sign_ed25519(sm: *mut u8,
                            smlen: *mut c_ulonglong,
                            m: *u8,
@@ -25,9 +29,26 @@ extern {
                                 pk: *u8) -> c_int;
 }
 
+pub static SEEDBYTES: uint = 32;
 pub static SECRETKEYBYTES: uint = 64;
 pub static PUBLICKEYBYTES: uint = 32;
 pub static SIGNATUREBYTES: uint = 64;
+
+/**
+ * `Seed` that can be used for keypair generation
+ *
+ * The `Seed` is used by `keypair_from_seed()` to generate
+ * a secret and public signature key.
+ *
+ * When a `Seed` goes out of scope its contents
+ * will be zeroed out
+ */
+pub struct Seed([u8, ..SEEDBYTES]);
+impl Drop for Seed {
+    fn drop(&mut self) {
+        for e in self.mut_iter() { *e = 0 }
+    }
+}
 
 /**
  * `SecretKey` for signatures
@@ -60,6 +81,22 @@ pub fn gen_keypair() -> (~PublicKey, ~SecretKey) {
         let mut pk = ~PublicKey([0u8, ..PUBLICKEYBYTES]);
         let mut sk = ~SecretKey([0u8, ..SECRETKEYBYTES]);
         crypto_sign_ed25519_keypair(to_mut_ptr(**pk), to_mut_ptr(**sk));
+        (pk, sk)
+    }
+}
+
+/**
+ * `keypair_from_seed()` computes a secret key and a corresponding public key
+ * from a `Seed`.
+ */
+#[fixed_stack_segment]
+pub fn keypair_from_seed(seed: &Seed) -> (~PublicKey, ~SecretKey) {
+    unsafe {
+        let mut pk = ~PublicKey([0u8, ..PUBLICKEYBYTES]);
+        let mut sk = ~SecretKey([0u8, ..SECRETKEYBYTES]);
+        crypto_sign_ed25519_seed_keypair(to_mut_ptr(**pk), 
+                                         to_mut_ptr(**sk), 
+                                         to_ptr(**seed));
         (pk, sk)
     }
 }
@@ -130,5 +167,70 @@ fn test_sign_verify_tamper() {
             assert!(None == verify(sm, pk));
             sm[i] ^= 0x20;
         }
+    }
+}
+
+#[test]
+fn test_sign_verify_seed() {
+    use randombytes::{randombytes, randombytes_into};
+    for _ in range(0, 256) {
+        let mut seed = Seed([0, ..32]);
+        randombytes_into(*seed);
+        let (pk, sk) = keypair_from_seed(&seed);
+        let m = randombytes(1024);
+        let sm = sign(m, sk);
+        let m2 = verify(sm, pk);
+        assert!(Some(m) == m2);
+    }
+}
+
+#[test]
+fn test_sign_verify_tamper_seed() {
+    use randombytes::{randombytes, randombytes_into};
+    for _ in range(0, 256) {
+        let mut seed = Seed([0, ..32]);
+        randombytes_into(*seed);
+        let (pk, sk) = keypair_from_seed(&seed);
+        let m = randombytes(1024);
+        let mut sm = sign(m, sk);
+        for i in range(0, sm.len()) {
+            sm[i] ^= 0x20;
+            assert!(verify(sm, pk).is_none());
+            sm[i] ^= 0x20;
+        }
+    }
+}
+
+#[test]
+fn test_vectors() {
+    // test vectors from the Python implementation
+    // form the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
+    use self::extra::hex::{FromHex, ToHex};
+    use std::io::file_reader;
+
+    let p = &Path("testvectors/ed25519.input");
+    let r = file_reader(p).unwrap();
+    loop {
+        let line = r.read_line();
+        if r.eof() {
+            break;
+        }
+        let mut x = line.split_iter(':');
+        let x0 = x.next().unwrap();
+        let x1 = x.next().unwrap();
+        let x2 = x.next().unwrap();
+        let x3 = x.next().unwrap();
+        let seed_bytes = x0.slice(0, 64).from_hex().unwrap();
+        assert!(seed_bytes.len() == SEEDBYTES);
+        let mut seed = Seed([0, ..SEEDBYTES]);
+        for (s, b) in seed.mut_iter().zip(seed_bytes.iter()) {
+            *s = *b
+        }
+        let (pk, sk) = keypair_from_seed(&seed);
+        let m = x2.from_hex().unwrap();
+        let sm = sign(m, sk);
+        verify(sm, pk).unwrap();
+        assert!(x1 == (**pk).to_hex());
+        assert!(x3 == sm.to_hex());
     }
 }
