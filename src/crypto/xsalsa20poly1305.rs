@@ -119,9 +119,9 @@ pub fn open(c: &[u8], n: &Nonce, k: &Key) -> Option<~[u8]> {
 #[test]
 fn test_seal_open() {
     use randombytes::randombytes;
-    for _ in range(0, 256) {
+    for i in range(0, 256) {
         let k = gen_key();
-        let m = randombytes(1024);
+        let m = randombytes(i as uint);
         let n = gen_nonce();
         let c = seal(m, n, k);
         let opened = open(c, n, k);
@@ -132,15 +132,14 @@ fn test_seal_open() {
 #[test]
 fn test_seal_open_tamper() {
     use randombytes::randombytes;
-    for _ in range(0, 32) {
+    for i in range(0, 32) {
         let k = gen_key();
-        let m = randombytes(1024);
+        let m = randombytes(i as uint);
         let n = gen_nonce();
         let mut c = seal(m, n, k);
         for i in range(0, c.len()) {
             c[i] ^= 0x20;
-            let opened = open(c, n, k);
-            assert!(None == opened);
+            assert!(None == open(c, n, k));
             c[i] ^= 0x20;
         }
     }

@@ -107,9 +107,9 @@ pub fn verify(sm: &[u8], pk: &PublicKey) -> Option<~[u8]> {
 #[test]
 fn test_sign_verify() {
     use randombytes::randombytes;
-    for _ in range(0, 32) {
+    for i in range(0, 256) {
         let (pk, sk) = gen_keypair();
-        let m = randombytes(1024);
+        let m = randombytes(i as uint);
         let sm = sign(m, sk);
         let m2 = verify(sm, pk);
         assert!(Some(m) == m2);
@@ -119,14 +119,14 @@ fn test_sign_verify() {
 #[test]
 fn test_sign_verify_tamper() {
     use randombytes::randombytes;
-    for _ in range(0, 32) {
+    for i in range(0, 32) {
         let (pk, sk) = gen_keypair();
-        let m = randombytes(1024);
+        let m = randombytes(i as uint);
         let mut sm = sign(m, sk);
-        for i in range(0, sm.len()) {
-            sm[i] ^= 0x20;
+        for j in range(0, sm.len()) {
+            sm[j] ^= 0x20;
             assert!(None == verify(sm, pk));
-            sm[i] ^= 0x20;
+            sm[j] ^= 0x20;
         }
     }
 }
