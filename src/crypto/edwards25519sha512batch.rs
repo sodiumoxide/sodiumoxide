@@ -107,7 +107,7 @@ pub fn verify(sm: &[u8], pk: &PublicKey) -> Option<~[u8]> {
 #[test]
 fn test_sign_verify() {
     use randombytes::randombytes;
-    for _ in range(0, 256) {
+    for _ in range(0, 32) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(1024);
         let sm = sign(m, sk);
