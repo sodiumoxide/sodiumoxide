@@ -18,6 +18,11 @@ Building
 --------
     rustpkg build sodiumoxide -O
 
+Installation
+------------
+
+    rustpkg install sodiumoxide -O
+
 Testing
 -------
     rust test src/sodiumoxide/lib.rs
