@@ -83,7 +83,7 @@ pub fn gen_key() -> ~Key {
  * and returns an authenticator tag.
  */
 #[fixed_stack_segment]
-fn authenticate(m: &[u8], k: &Key) -> ~Tag {
+pub fn authenticate(m: &[u8], k: &Key) -> ~Tag {
     unsafe {
         let mut tag = ~Tag([0, ..TAGBYTES]);
         crypto_onetimeauth_poly1305(to_mut_ptr(**tag), 
@@ -99,7 +99,7 @@ fn authenticate(m: &[u8], k: &Key) -> ~Tag {
  * a message `m` under a secret key `k`. Otherwise `verify()` returns false.
  */
 #[fixed_stack_segment]
-fn verify(tag: &Tag, m: &[u8], k: &Key) -> bool {
+pub fn verify(tag: &Tag, m: &[u8], k: &Key) -> bool {
     unsafe {
         crypto_onetimeauth_poly1305_verify(to_ptr(**tag), 
                                            to_ptr(m), 
