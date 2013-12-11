@@ -7,6 +7,7 @@ However, for the moment, there do not appear to be alternatives that
 inspire satisfactory levels of confidence. One can hope that NIST's
 SHA-3 competition will improve the situation.
 */
+extern mod extra;
 use std::libc::{c_ulonglong, c_int};
 use std::vec::raw::{to_mut_ptr, to_ptr};
 
@@ -51,4 +52,38 @@ fn test_vector_1() {
                              ,0xf7, 0xbf, 0xd5, 0xec, 0x64, 0x6d, 0x6c, 0x28]);
     let h = hash(x);
     assert!((**h) == (**h_expected));
+}
+
+fn test_nist_vector(filename: &str) {
+    use self::extra::hex::{FromHex};
+    use std::io::file_reader;
+
+    let p = &Path(filename);
+    let r = file_reader(p).unwrap();
+    loop {
+        let line = r.read_line();
+        if r.eof() {
+            break;
+        }
+        if line.starts_with("Len = ") {
+            let s = line.slice_from(6);
+            let len = from_str::<uint>(s).unwrap();
+            let line2 = r.read_line();
+            let rawmsg = line2.slice_from(6).from_hex().unwrap();
+            let msg = rawmsg.slice_to(len/8);
+            let line3 = r.read_line();
+            let md = line3.slice_from(5).from_hex().unwrap();
+            assert!(**hash(msg) == md);
+        }
+    }
+}
+
+#[test]
+fn test_vectors_nist_short() {
+    test_nist_vector("testvectors/SHA512ShortMsg.rsp");
+}
+
+#[test]
+fn test_vectors_nist_long() {
+    test_nist_vector("testvectors/SHA512LongMsg.rsp");
 }
