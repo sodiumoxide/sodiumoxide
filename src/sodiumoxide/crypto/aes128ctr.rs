@@ -6,7 +6,6 @@ unpredictability.
 use std::libc::{c_ulonglong, c_int};
 use std::vec::{from_elem};
 use std::vec::raw::{to_mut_ptr, to_ptr};
-use utils::marshal;
 use randombytes::randombytes_into;
 
 #[link(name = "sodium")]
@@ -96,12 +95,15 @@ pub fn stream(len: uint, n: &Nonce, k: &Key) -> ~[u8] {
  */
 #[fixed_stack_segment]
 pub fn stream_xor(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
-    let (c, _) = do marshal(m, 0, 0) |dst, src, len| {
-        unsafe {
-            crypto_stream_aes128ctr_xor(dst, src, len, to_ptr(**n), to_ptr(**k))
-        }
-    };
-    c
+    unsafe {
+        let mut c = from_elem(m.len(), 0u8);
+        crypto_stream_aes128ctr_xor(to_mut_ptr(c),
+                                    to_ptr(m),
+                                    m.len() as c_ulonglong,
+                                    to_ptr(**n),
+                                    to_ptr(**k));
+        c
+    }
 }
 
 /**
@@ -122,3 +124,51 @@ pub fn stream_xor_inplace(m: &mut [u8], n: &Nonce, k: &Key) {
                                     to_ptr(**k));
     }
 }
+
+#[test]
+fn test_encrypt_decrypt() {
+    use randombytes::randombytes;
+    for i in range(0, 1024) {
+        let k = gen_key();
+        let n = gen_nonce();
+        let m = randombytes(i as uint);
+        let c = stream_xor(m, n, k);
+        let m2 = stream_xor(c, n, k);
+        assert!(m == m2);
+    }
+}
+
+#[test]
+fn test_stream_xor() {
+    use randombytes::randombytes;
+    for i in range(0, 1024) {
+        let k = gen_key();
+        let n = gen_nonce();
+        let m = randombytes(i as uint);
+        let mut c = m.clone();
+        let s = stream(c.len(), n, k);
+        for (e, v) in c.mut_iter().zip(s.iter()) {
+            *e ^= *v;
+        }
+        let c2 = stream_xor(m, n, k);
+        assert!(c == c2);
+    }
+}
+
+#[test]
+fn test_stream_xor_inplace() {
+    use randombytes::randombytes;
+    for i in range(0, 1024) {
+        let k = gen_key();
+        let n = gen_nonce();
+        let mut m = randombytes(i as uint);
+        let mut c = m.clone();
+        let s = stream(c.len(), n, k);
+        for (e, v) in c.mut_iter().zip(s.iter()) {
+            *e ^= *v;
+        }
+        stream_xor_inplace(m, n, k);
+        assert!(c == m);
+    }
+}
+
