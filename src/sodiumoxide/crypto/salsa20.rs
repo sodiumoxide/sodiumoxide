@@ -51,7 +51,7 @@ pub struct Nonce([u8, ..NONCEBYTES]);
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-fn gen_key() -> ~Key {
+pub fn gen_key() -> ~Key {
     let mut key = ~Key([0, ..KEYBYTES]);
     randombytes_into(**key);
     key
@@ -62,7 +62,7 @@ fn gen_key() -> ~Key {
  * secret key `k` and a nonce `n`.
  */
 #[fixed_stack_segment]
-fn stream(len: uint, n: &Nonce, k: &Key) -> ~[u8] {
+pub fn stream(len: uint, n: &Nonce, k: &Key) -> ~[u8] {
     unsafe {
         let mut c = from_elem(len, 0u8);
         crypto_stream_salsa20(to_mut_ptr(c), 
@@ -82,7 +82,7 @@ fn stream(len: uint, n: &Nonce, k: &Key) -> ~[u8] {
  * Consequently `stream_xor()` can also be used to decrypt.
  */
 #[fixed_stack_segment]
-fn stream_xor(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
+pub fn stream_xor(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
     let (c, _) = do marshal(m, 0, 0) |dst, src, len| {
         unsafe {
             crypto_stream_salsa20_xor(dst, src, len, to_ptr(**n), to_ptr(**k))
@@ -100,7 +100,7 @@ fn stream_xor(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
 * Consequently `stream_xor_inplace()` can also be used to decrypt.
 */
 #[fixed_stack_segment]
-fn stream_xor_inplace(m: &mut [u8], n: &Nonce, k: &Key) {
+pub fn stream_xor_inplace(m: &mut [u8], n: &Nonce, k: &Key) {
     unsafe {
         crypto_stream_salsa20_xor(to_mut_ptr(m), 
                                   to_ptr(m), 
