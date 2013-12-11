@@ -132,6 +132,7 @@ fn test_auth_verify_tamper() {
 
 #[test]
 fn test_vector_1() {
+    // corresponding to tests/auth.c from NaCl
     /* "Test Case 2" from RFC 4231 */
     let key = Key([74, 101, 102, 101, 0, 0, 0, 0
                   , 0, 0, 0, 0, 0, 0, 0, 0
