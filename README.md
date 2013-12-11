@@ -16,15 +16,15 @@ Dependencies
 
 Building
 --------
-    rust build src/lib.rs -O
+    rustpkg build sodiumoxide -O
 
 Testing
 -------
-    rust test src/lib.rs
+    rust test src/sodiumoxide/lib.rs
 
 Documentation
 -------------
-    rust doc html src/lib.rs
+    rust doc html src/sodiumoxide/lib.rs
 
 Documentation will be generated in doc/...
 
