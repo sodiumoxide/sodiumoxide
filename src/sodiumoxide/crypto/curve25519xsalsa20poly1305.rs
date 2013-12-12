@@ -7,7 +7,7 @@ This function is conjectured to meet the standard notions of privacy and
 third-party unforgeability.
 
 */
-use std::libc::{c_ulonglong, c_int, size_t};
+use std::libc::{c_ulonglong, c_int};
 use std::vec::raw::{to_mut_ptr, to_ptr};
 use utils::marshal;
 use randombytes::randombytes_into;
@@ -44,10 +44,10 @@ extern {
                                                           k: *u8) -> c_int;
 }
 
-pub static PUBLICKEYBYTES: size_t = 32;
-pub static SECRETKEYBYTES: size_t = 32;
-pub static NONCEBYTES: size_t = 24;
-pub static PRECOMPUTEDKEYBYTES: size_t = 32;
+pub static PUBLICKEYBYTES: uint = 32;
+pub static SECRETKEYBYTES: uint = 32;
+pub static NONCEBYTES: uint = 24;
+pub static PRECOMPUTEDKEYBYTES: uint = 32;
 static ZEROBYTES: uint = 32;
 static BOXZEROBYTES: uint = 16;
 
