@@ -50,9 +50,9 @@ pub struct Nonce([u8, ..NONCEBYTES]);
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn gen_key() -> ~Key {
-    let mut key = ~Key([0, ..KEYBYTES]);
-    randombytes_into(**key);
+pub fn gen_key() -> Key {
+    let mut key = Key([0, ..KEYBYTES]);
+    randombytes_into(*key);
     key
 }
 
@@ -66,9 +66,9 @@ pub fn gen_key() -> ~Key {
  * NOTE: `gen_nonce()` isn't public because random 8-byte nonces
  * have a large probability of collisions
  */
-fn gen_nonce() -> ~Nonce {
-    let mut nonce = ~Nonce([0, ..NONCEBYTES]);
-    randombytes_into(**nonce);
+fn gen_nonce() -> Nonce {
+    let mut nonce = Nonce([0, ..NONCEBYTES]);
+    randombytes_into(*nonce);
     nonce
 }
 
@@ -135,8 +135,8 @@ fn test_encrypt_decrypt() {
         let k = gen_key();
         let n = gen_nonce();
         let m = randombytes(i as uint);
-        let c = stream_xor(m, n, k);
-        let m2 = stream_xor(c, n, k);
+        let c = stream_xor(m, &n, &k);
+        let m2 = stream_xor(c, &n, &k);
         assert!(m == m2);
     }
 }
@@ -149,11 +149,11 @@ fn test_stream_xor() {
         let n = gen_nonce();
         let m = randombytes(i as uint);
         let mut c = m.clone();
-        let s = stream(c.len(), n, k);
+        let s = stream(c.len(), &n, &k);
         for (e, v) in c.mut_iter().zip(s.iter()) {
             *e ^= *v;
         }
-        let c2 = stream_xor(m, n, k);
+        let c2 = stream_xor(m, &n, &k);
         assert!(c == c2);
     }
 }
@@ -166,11 +166,11 @@ fn test_stream_xor_inplace() {
         let n = gen_nonce();
         let mut m = randombytes(i as uint);
         let mut c = m.clone();
-        let s = stream(c.len(), n, k);
+        let s = stream(c.len(), &n, &k);
         for (e, v) in c.mut_iter().zip(s.iter()) {
             *e ^= *v;
         }
-        stream_xor_inplace(m, n, k);
+        stream_xor_inplace(m, &n, &k);
         assert!(c == m);
     }
 }
@@ -190,5 +190,5 @@ fn test_vector_1() {
                                   0x98, 0xf7, 0xdf, 0xb2, 0xca, 0x03, 0x93, 0xc9, 
                                   0x6b, 0xbf, 0xc6, 0xb1, 0xfb, 0xd6, 0x30, 0xa2]);
     let digest = hash(output);
-    assert!(**digest == *digest_expected);
+    assert!(*digest == *digest_expected);
 }

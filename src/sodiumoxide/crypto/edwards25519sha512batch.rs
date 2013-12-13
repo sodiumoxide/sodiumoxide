@@ -53,11 +53,12 @@ pub struct PublicKey([u8, ..PUBLICKEYBYTES]);
  * from sodiumoxide.
  */
 #[fixed_stack_segment]
-pub fn gen_keypair() -> (~PublicKey, ~SecretKey) {
+pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = ~PublicKey([0u8, ..PUBLICKEYBYTES]);
-        let mut sk = ~SecretKey([0u8, ..SECRETKEYBYTES]);
-        crypto_sign_edwards25519sha512batch_keypair(to_mut_ptr(**pk), to_mut_ptr(**sk));
+        let mut pk = PublicKey([0u8, ..PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8, ..SECRETKEYBYTES]);
+        crypto_sign_edwards25519sha512batch_keypair(to_mut_ptr(*pk), 
+                                                    to_mut_ptr(*sk));
         (pk, sk)
     }
 }
@@ -110,8 +111,8 @@ fn test_sign_verify() {
     for i in range(0, 256) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i as uint);
-        let sm = sign(m, sk);
-        let m2 = verify(sm, pk);
+        let sm = sign(m, &sk);
+        let m2 = verify(sm, &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -122,10 +123,10 @@ fn test_sign_verify_tamper() {
     for i in range(0, 32) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i as uint);
-        let mut sm = sign(m, sk);
+        let mut sm = sign(m, &sk);
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
-            assert!(None == verify(sm, pk));
+            assert!(None == verify(sm, &pk));
             sm[j] ^= 0x20;
         }
     }

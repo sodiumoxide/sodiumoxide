@@ -76,11 +76,11 @@ pub struct PublicKey([u8, ..PUBLICKEYBYTES]);
  * from sodiumoxide.
  */
 #[fixed_stack_segment]
-pub fn gen_keypair() -> (~PublicKey, ~SecretKey) {
+pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = ~PublicKey([0u8, ..PUBLICKEYBYTES]);
-        let mut sk = ~SecretKey([0u8, ..SECRETKEYBYTES]);
-        crypto_sign_ed25519_keypair(to_mut_ptr(**pk), to_mut_ptr(**sk));
+        let mut pk = PublicKey([0u8, ..PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8, ..SECRETKEYBYTES]);
+        crypto_sign_ed25519_keypair(to_mut_ptr(*pk), to_mut_ptr(*sk));
         (pk, sk)
     }
 }
@@ -90,12 +90,12 @@ pub fn gen_keypair() -> (~PublicKey, ~SecretKey) {
  * from a `Seed`.
  */
 #[fixed_stack_segment]
-pub fn keypair_from_seed(seed: &Seed) -> (~PublicKey, ~SecretKey) {
+pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = ~PublicKey([0u8, ..PUBLICKEYBYTES]);
-        let mut sk = ~SecretKey([0u8, ..SECRETKEYBYTES]);
-        crypto_sign_ed25519_seed_keypair(to_mut_ptr(**pk), 
-                                         to_mut_ptr(**sk), 
+        let mut pk = PublicKey([0u8, ..PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8, ..SECRETKEYBYTES]);
+        crypto_sign_ed25519_seed_keypair(to_mut_ptr(*pk), 
+                                         to_mut_ptr(*sk), 
                                          to_ptr(**seed));
         (pk, sk)
     }
@@ -149,8 +149,8 @@ fn test_sign_verify() {
     for i in range(0, 256) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i as uint);
-        let sm = sign(m, sk);
-        let m2 = verify(sm, pk);
+        let sm = sign(m, &sk);
+        let m2 = verify(sm, &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -161,10 +161,10 @@ fn test_sign_verify_tamper() {
     for i in range(0, 32) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i as uint);
-        let mut sm = sign(m, sk);
+        let mut sm = sign(m, &sk);
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
-            assert!(None == verify(sm, pk));
+            assert!(None == verify(sm, &pk));
             sm[j] ^= 0x20;
         }
     }
@@ -178,8 +178,8 @@ fn test_sign_verify_seed() {
         randombytes_into(*seed);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i as uint);
-        let sm = sign(m, sk);
-        let m2 = verify(sm, pk);
+        let sm = sign(m, &sk);
+        let m2 = verify(sm, &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -192,10 +192,10 @@ fn test_sign_verify_tamper_seed() {
         randombytes_into(*seed);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i as uint);
-        let mut sm = sign(m, sk);
+        let mut sm = sign(m, &sk);
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
-            assert!(None == verify(sm, pk));
+            assert!(None == verify(sm, &pk));
             sm[j] ^= 0x20;
         }
     }
@@ -228,9 +228,9 @@ fn test_vectors() {
         }
         let (pk, sk) = keypair_from_seed(&seed);
         let m = x2.from_hex().unwrap();
-        let sm = sign(m, sk);
-        verify(sm, pk).unwrap();
-        assert!(x1 == (**pk).to_hex());
+        let sm = sign(m, &sk);
+        verify(sm, &pk).unwrap();
+        assert!(x1 == (*pk).to_hex());
         assert!(x3 == sm.to_hex());
     }
 }
