@@ -44,9 +44,9 @@ impl Drop for Key {
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn gen_key() -> ~Key {
-    let mut k = ~Key([0, ..KEYBYTES]);
-    randombytes_into(**k);
+pub fn gen_key() -> Key {
+    let mut k = Key([0, ..KEYBYTES]);
+    randombytes_into(*k);
     k
 }
 
@@ -55,10 +55,10 @@ pub fn gen_key() -> ~Key {
  * returns a hash `h`.
  */
 #[fixed_stack_segment]
-pub fn shorthash(m: &[u8], k: &Key) -> ~Digest {
+pub fn shorthash(m: &[u8], k: &Key) -> Digest {
     unsafe {
-        let mut h = ~Digest([0, ..HASHBYTES]);
-        crypto_shorthash_siphash24(to_mut_ptr(**h), 
+        let mut h = Digest([0, ..HASHBYTES]);
+        crypto_shorthash_siphash24(to_mut_ptr(*h), 
                                    to_ptr(m), m.len() as c_ulonglong,
                                    to_ptr(**k));
         h
@@ -139,6 +139,6 @@ fn test_vectors() {
     let k = Key([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     for i in range(0, maxlen) {
         let h = shorthash(m.slice(0, i as uint), &k);
-        assert!(**h == h_expecteds[i]);
+        assert!(*h == h_expecteds[i]);
     }
 }

@@ -38,10 +38,10 @@ pub struct GroupElement([u8, ..BYTES]);
  */
 #[fixed_stack_segment]
 pub fn scalarmult(n: &Scalar,
-              p: &GroupElement) -> ~GroupElement {
-    let mut q = ~GroupElement([0, ..BYTES]);
+                  p: &GroupElement) -> GroupElement {
+    let mut q = GroupElement([0, ..BYTES]);
     unsafe {
-        crypto_scalarmult_curve25519(to_mut_ptr(**q), to_ptr(**n), to_ptr(**p));
+        crypto_scalarmult_curve25519(to_mut_ptr(*q), to_ptr(**n), to_ptr(**p));
     }
     q
 }
@@ -52,10 +52,10 @@ pub fn scalarmult(n: &Scalar,
  * group element `q`/
  */
 #[fixed_stack_segment]
-pub fn scalarmult_base(n: &Scalar) -> ~GroupElement {
-    let mut q = ~GroupElement([0, ..BYTES]);
+pub fn scalarmult_base(n: &Scalar) -> GroupElement {
+    let mut q = GroupElement([0, ..BYTES]);
     unsafe {
-        crypto_scalarmult_curve25519_base(to_mut_ptr(**q), to_ptr(**n));
+        crypto_scalarmult_curve25519_base(to_mut_ptr(*q), to_ptr(**n));
     }
     q
 }
@@ -72,7 +72,7 @@ fn test_vector_1() {
                                         ,0x0d,0xbf,0x3a,0x0d,0x26,0x38,0x1a,0xf4
                                         ,0xeb,0xa4,0xa9,0x8e,0xaa,0x9b,0x4e,0x6a]);
     let alicepk = scalarmult_base(&alicesk);
-    assert!(**alicepk == *alicepk_expected);
+    assert!(*alicepk == *alicepk_expected);
 }
 
 #[test]
@@ -87,7 +87,7 @@ fn test_vector_2() {
                                       ,0x3f,0x83,0x43,0xc8,0x5b,0x78,0x67,0x4d
                                       ,0xad,0xfc,0x7e,0x14,0x6f,0x88,0x2b,0x4f]);
     let bobpk = scalarmult_base(&bobsk);
-    assert!(**bobpk == *bobpk_expected);
+    assert!(*bobpk == *bobpk_expected);
 }
 
 #[test]
@@ -106,7 +106,7 @@ fn test_vector_3() {
                                   ,0xe0,0x7e,0x21,0xc9,0x47,0xd1,0x9e,0x33
                                   ,0x76,0xf0,0x9b,0x3c,0x1e,0x16,0x17,0x42]);
     let k = scalarmult(&alicesk, &bobpk);
-    assert!(**k == *k_expected);
+    assert!(*k == *k_expected);
 }
 
 #[test]
@@ -125,5 +125,5 @@ fn test_vector_4() {
                                   ,0xe0,0x7e,0x21,0xc9,0x47,0xd1,0x9e,0x33
                                   ,0x76,0xf0,0x9b,0x3c,0x1e,0x16,0x17,0x42]);
     let k = scalarmult(&bobsk, &alicepk);
-    assert!(**k == *k_expected);
+    assert!(*k == *k_expected);
 }

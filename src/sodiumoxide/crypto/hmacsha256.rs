@@ -62,9 +62,9 @@ impl Eq for Tag {
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn gen_key() -> ~Key {
-    let mut key = ~Key([0, ..KEYBYTES]);
-    randombytes_into(**key);
+pub fn gen_key() -> Key {
+    let mut key = Key([0, ..KEYBYTES]);
+    randombytes_into(*key);
     key
 }
 
@@ -73,10 +73,10 @@ pub fn gen_key() -> ~Key {
  * The function returns an authenticator tag.
  */
 #[fixed_stack_segment]
-pub fn authenticate(m: &[u8], k: &Key) -> ~Tag {
+pub fn authenticate(m: &[u8], k: &Key) -> Tag {
     unsafe {
-        let mut tag = ~Tag([0, ..TAGBYTES]);
-        crypto_auth_hmacsha256(to_mut_ptr(**tag), 
+        let mut tag = Tag([0, ..TAGBYTES]);
+        crypto_auth_hmacsha256(to_mut_ptr(*tag), 
                                to_ptr(m), 
                                m.len() as c_ulonglong, 
                                to_ptr(**k));
@@ -104,8 +104,8 @@ fn test_auth_verify() {
     for i in range(0, 256) {
         let k = gen_key();
         let m = randombytes(i as uint);
-        let tag = authenticate(m, k);
-        assert!(verify(tag, m, k));
+        let tag = authenticate(m, &k);
+        assert!(verify(&tag, m, &k));
     }
 }
 
@@ -115,15 +115,15 @@ fn test_auth_verify_tamper() {
     for i in range(0, 32) {
         let k = gen_key();
         let mut m = randombytes(i as uint);
-        let mut tag = authenticate(m, k);
+        let mut tag = authenticate(m, &k);
         for j in range(0, m.len()) {
             m[j] ^= 0x20;
-            assert!(!verify(tag, m, k));
+            assert!(!verify(&tag, m, &k));
             m[j] ^= 0x20;
         }
         for j in range(0, tag.len()) {
             tag[j] ^= 0x20;
-            assert!(!verify(tag, m, k));
+            assert!(!verify(&tag, m, &k));
             tag[j] ^= 0x20;
         }
     }
@@ -149,5 +149,5 @@ fn test_vector_1() {
                          ,0x2f,0xce,0xd4,0x6f,0x08,0x46,0xe7,0x25
                          ,0x7b,0xb1,0x56,0xd3,0xd7,0xb3,0x0d,0x3f]);
     let a = authenticate(c, &key);
-    assert!(*a == a_expected);
+    assert!(a == a_expected);
 }

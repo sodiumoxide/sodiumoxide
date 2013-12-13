@@ -57,9 +57,9 @@ pub static BOXZEROBYTES: uint = 16;
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn gen_key() -> ~Key {
-    let mut key = ~Key([0, ..KEYBYTES]);
-    randombytes_into(**key);
+pub fn gen_key() -> Key {
+    let mut key = Key([0, ..KEYBYTES]);
+    randombytes_into(*key);
     key
 }
 
@@ -70,9 +70,9 @@ pub fn gen_key() -> ~Key {
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn gen_nonce() -> ~Nonce {
-    let mut nonce = ~Nonce([0, ..NONCEBYTES]);
-    randombytes_into(**nonce);
+pub fn gen_nonce() -> Nonce {
+    let mut nonce = Nonce([0, ..NONCEBYTES]);
+    randombytes_into(*nonce);
     nonce
 }
 
@@ -123,8 +123,8 @@ fn test_seal_open() {
         let k = gen_key();
         let m = randombytes(i as uint);
         let n = gen_nonce();
-        let c = seal(m, n, k);
-        let opened = open(c, n, k);
+        let c = seal(m, &n, &k);
+        let opened = open(c, &n, &k);
         assert!(Some(m) == opened);
     }
 }
@@ -136,10 +136,10 @@ fn test_seal_open_tamper() {
         let k = gen_key();
         let m = randombytes(i as uint);
         let n = gen_nonce();
-        let mut c = seal(m, n, k);
+        let mut c = seal(m, &n, &k);
         for i in range(0, c.len()) {
             c[i] ^= 0x20;
-            assert!(None == open(c, n, k));
+            assert!(None == open(c, &n, &k));
             c[i] ^= 0x20;
         }
     }

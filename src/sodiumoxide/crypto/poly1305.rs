@@ -72,9 +72,9 @@ impl Eq for Tag {
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn gen_key() -> ~Key {
-    let mut key = ~Key([0, ..KEYBYTES]);
-    randombytes_into(**key);
+pub fn gen_key() -> Key {
+    let mut key = Key([0, ..KEYBYTES]);
+    randombytes_into(*key);
     key
 }
 
@@ -83,10 +83,10 @@ pub fn gen_key() -> ~Key {
  * and returns an authenticator tag.
  */
 #[fixed_stack_segment]
-pub fn authenticate(m: &[u8], k: &Key) -> ~Tag {
+pub fn authenticate(m: &[u8], k: &Key) -> Tag {
     unsafe {
-        let mut tag = ~Tag([0, ..TAGBYTES]);
-        crypto_onetimeauth_poly1305(to_mut_ptr(**tag), 
+        let mut tag = Tag([0, ..TAGBYTES]);
+        crypto_onetimeauth_poly1305(to_mut_ptr(*tag), 
                                     to_ptr(m), 
                                     m.len() as c_ulonglong, 
                                     to_ptr(**k));
@@ -114,8 +114,8 @@ fn test_onetimeauth_verify() {
     for i in range(0, 256) {
         let k = gen_key();
         let m = randombytes(i as uint);
-        let tag = authenticate(m, k);
-        assert!(verify(tag, m, k));
+        let tag = authenticate(m, &k);
+        assert!(verify(&tag, m, &k));
     }
 }
 
@@ -125,17 +125,17 @@ fn test_onetimeauth_verify_tamper() {
     for i in range(0, 256) {
         let k = gen_key();
         let mut m = randombytes(i as uint);
-        let mut tag = authenticate(m, k);
+        let mut tag = authenticate(m, &k);
         for j in range(0, m.len()) {
             m[j] ^= 0x20;
-            assert!(!verify(tag, m, k));
-            assert!(tag != authenticate(m, k));
+            assert!(!verify(&tag, m, &k));
+            assert!(tag != authenticate(m, &k));
             m[j] ^= 0x20;
         }
         for j in range(0, tag.len()) {
             tag[j] ^= 0x20;
-            assert!(!verify(tag, m, k));
-            assert!(tag != authenticate(m, k));
+            assert!(!verify(&tag, m, &k));
+            assert!(tag != authenticate(m, &k));
             tag[j] ^= 0x20;
         }
     }
@@ -171,6 +171,6 @@ fn test_vector_1() {
     let a_expected = Tag([0xf3,0xff,0xc7,0x70,0x3f,0x94,0x00,0xe5
                          ,0x2a,0x7d,0xfb,0x4b,0x3d,0x33,0x05,0xd9]);
     let a = authenticate(c, &key);
-    assert!(*a == a_expected);
-    assert!(verify(a, c, &key));
+    assert!(a == a_expected);
+    assert!(verify(&a, c, &key));
 }

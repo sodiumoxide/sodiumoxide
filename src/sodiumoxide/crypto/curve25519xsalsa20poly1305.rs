@@ -81,13 +81,13 @@ pub struct Nonce([u8, ..NONCEBYTES]);
  * from sodiumoxide.
  */
 #[fixed_stack_segment]
-pub fn gen_keypair() -> (~PublicKey, ~SecretKey) {
+pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = ~PublicKey([0u8, ..PUBLICKEYBYTES]);
-        let mut sk = ~SecretKey([0u8, ..SECRETKEYBYTES]);
+        let mut pk = PublicKey([0u8, ..PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8, ..SECRETKEYBYTES]);
         crypto_box_curve25519xsalsa20poly1305_keypair(
-            to_mut_ptr(**pk), 
-            to_mut_ptr(**sk));
+            to_mut_ptr(*pk), 
+            to_mut_ptr(*sk));
         (pk, sk)
     }
 }
@@ -99,9 +99,9 @@ pub fn gen_keypair() -> (~PublicKey, ~SecretKey) {
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn gen_nonce() -> ~Nonce {
-    let mut nonce = ~Nonce([0, ..NONCEBYTES]);
-    randombytes_into(**nonce);
+pub fn gen_nonce() -> Nonce {
+    let mut nonce = Nonce([0, ..NONCEBYTES]);
+    randombytes_into(*nonce);
     nonce
 }
 
@@ -171,10 +171,10 @@ impl Drop for PrecomputedKey {
  * and `open_precomputed()`
  */
 #[fixed_stack_segment]
-pub fn precompute(pk: &PublicKey, sk: &SecretKey) -> ~PrecomputedKey {
-    let mut k = ~PrecomputedKey([0u8, ..PRECOMPUTEDKEYBYTES]);
+pub fn precompute(pk: &PublicKey, sk: &SecretKey) -> PrecomputedKey {
+    let mut k = PrecomputedKey([0u8, ..PRECOMPUTEDKEYBYTES]);
     unsafe {
-        crypto_box_curve25519xsalsa20poly1305_beforenm(to_mut_ptr(**k), 
+        crypto_box_curve25519xsalsa20poly1305_beforenm(to_mut_ptr(*k), 
                                                        to_ptr(**pk), 
                                                        to_ptr(**sk));
     }
@@ -233,8 +233,8 @@ fn test_seal_open() {
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i as uint);
         let n = gen_nonce();
-        let c = seal(m, n, pk1, sk2);
-        let opened = open(c, n, pk2, sk1);
+        let c = seal(m, &n, &pk1, &sk2);
+        let opened = open(c, &n, &pk2, &sk1);
         assert!(Some(m) == opened);
     }
 }
@@ -245,13 +245,13 @@ fn test_seal_open_precomputed() {
     for i in range(0, 256) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
-        let k1 = precompute(pk1, sk2);
-        let k2 = precompute(pk2, sk1);
-        assert!(**k1 == **k2);
+        let k1 = precompute(&pk1, &sk2);
+        let k2 = precompute(&pk2, &sk1);
+        assert!(*k1 == *k2);
         let m = randombytes(i as uint);
         let n = gen_nonce();
-        let c = seal_precomputed(m, n, k1);
-        let opened = open_precomputed(c, n, k2);
+        let c = seal_precomputed(m, &n, &k1);
+        let opened = open_precomputed(c, &n, &k2);
         assert!(Some(m) == opened);
     }
 }
@@ -264,10 +264,10 @@ fn test_seal_open_tamper() {
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i as uint);
         let n = gen_nonce();
-        let mut c = seal(m, n, pk1, sk2);
+        let mut c = seal(m, &n, &pk1, &sk2);
         for j in range(0, c.len()) {
             c[j] ^= 0x20;
-            assert!(None == open(c, n, pk2, sk1));
+            assert!(None == open(c, &n, &pk2, &sk1));
             c[j] ^= 0x20;
         }
     }
@@ -279,14 +279,14 @@ fn test_seal_open_precomputed_tamper() {
     for i in range(0, 32) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
-        let k1 = precompute(pk1, sk2);
-        let k2 = precompute(pk2, sk1);
+        let k1 = precompute(&pk1, &sk2);
+        let k2 = precompute(&pk2, &sk1);
         let m = randombytes(i as uint);
         let n = gen_nonce();
-        let mut c = seal_precomputed(m, n, k1);
+        let mut c = seal_precomputed(m, &n, &k1);
         for j in range(0, c.len()) {
             c[j] ^= 0x20;
-            assert!(None == open_precomputed(c, n, k2));
+            assert!(None == open_precomputed(c, &n, &k2));
             c[j] ^= 0x20;
         }
     }
@@ -325,7 +325,7 @@ fn test_vector_1() {
              0x5e,0x07,0x05];
     let c = seal(m, &nonce, &bobpk, &alicesk);
     let pk = precompute(&bobpk, &alicesk);
-    let cpre = seal_precomputed(m, &nonce, pk);
+    let cpre = seal_precomputed(m, &nonce, &pk);
     let cexp = ~[0xf3,0xff,0xc7,0x70,0x3f,0x94,0x00,0xe5,
                  0x2a,0x7d,0xfb,0x4b,0x3d,0x33,0x05,0xd9,
                  0x8e,0x99,0x3b,0x9f,0x48,0x68,0x12,0x73,
@@ -401,7 +401,7 @@ fn test_vector_2() {
                       0x5e,0x07,0x05]);
     let m = open(c, &nonce, &alicepk, &bobsk);
     let pk = precompute(&alicepk, &bobsk);
-    let m_pre = open_precomputed(c, &nonce, pk);
+    let m_pre = open_precomputed(c, &nonce, &pk);
     assert!(m == mexp);
     assert!(m_pre == mexp);
 }
