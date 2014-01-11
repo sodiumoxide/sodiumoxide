@@ -1,7 +1,7 @@
 /*!
 A lot of applications and programming language implementations have been
 recently found to be vulnerable to denial-of-service attacks when a hash
-function with weak security guarantees, like Murmurhash 3, was used to 
+function with weak security guarantees, like Murmurhash 3, was used to
 construct a hash table.
 
 In order to address this, Sodium provides the `shorthash()` function.

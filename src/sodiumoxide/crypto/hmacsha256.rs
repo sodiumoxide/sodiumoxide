@@ -3,7 +3,6 @@
 unforgeability.
 */
 use std::libc::{c_ulonglong, c_int};
-use std::vec::raw::{to_ptr, to_mut_ptr};
 use randombytes::randombytes_into;
 use crypto::verify::verify_32;
 
@@ -33,25 +32,28 @@ pub struct Key([u8, ..KEYBYTES]);
 
 impl Drop for Key {
     fn drop(&mut self) {
-        for e in self.mut_iter() { *e = 0 }
+        let &Key(ref mut k) = self;
+        for e in k.mut_iter() { *e = 0 }
     }
 }
 
 /**
   * Authentication `Tag`
-  * 
+  *
   * The tag implements the traits `TotalEq` and `Eq` using constant-time
   * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
   */
 pub struct Tag([u8, ..TAGBYTES]);
 impl TotalEq for Tag {
-    fn equals(&self, other: &Tag) -> bool {
-        verify_32(&**self, &**other)
+    fn equals(&self, &Tag(other): &Tag) -> bool {
+        let &Tag(ref tag) = self;
+        verify_32(tag, &other)
     }
 }
 impl Eq for Tag {
-    fn eq(&self, other: &Tag) -> bool {
-        verify_32(&**self, &**other)
+    fn eq(&self, &Tag(other): &Tag) -> bool {
+        let &Tag(ref tag) = self;
+        verify_32(tag, &other)
     }
 }
 
@@ -63,24 +65,24 @@ impl Eq for Tag {
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut key = Key([0, ..KEYBYTES]);
-    randombytes_into(*key);
-    key
+    let mut k = [0, ..KEYBYTES];
+    randombytes_into(k);
+    Key(k)
 }
 
 /**
  * `authenticate()` authenticates a message `m` using a secret key `k`.
  * The function returns an authenticator tag.
  */
-#[fixed_stack_segment]
-pub fn authenticate(m: &[u8], k: &Key) -> Tag {
+pub fn authenticate(m: &[u8],
+                    &Key(k): &Key) -> Tag {
     unsafe {
-        let mut tag = Tag([0, ..TAGBYTES]);
-        crypto_auth_hmacsha256(to_mut_ptr(*tag), 
-                               to_ptr(m), 
-                               m.len() as c_ulonglong, 
-                               to_ptr(**k));
-        tag
+        let mut tag = [0, ..TAGBYTES];
+        crypto_auth_hmacsha256(tag.as_mut_ptr(),
+                               m.as_ptr(),
+                               m.len() as c_ulonglong,
+                               k.as_ptr());
+        Tag(tag)
     }
 }
 
@@ -88,13 +90,13 @@ pub fn authenticate(m: &[u8], k: &Key) -> Tag {
  * `verify()` returns `true` if `tag` is a correct authenticator of message `m`
  * under a secret key `k`. Otherwise it returns false.
  */
-#[fixed_stack_segment]
-pub fn verify(tag: &Tag, m: &[u8], k: &Key) -> bool {
+pub fn verify(&Tag(tag): &Tag, m: &[u8],
+              &Key(k): &Key) -> bool {
     unsafe {
-        crypto_auth_hmacsha256_verify(to_ptr(**tag), 
-                                      to_ptr(m), 
-                                      m.len() as c_ulonglong, 
-                                      to_ptr(**k)) == 0
+        crypto_auth_hmacsha256_verify(tag.as_ptr(),
+                                      m.as_ptr(),
+                                      m.len() as c_ulonglong,
+                                      k.as_ptr()) == 0
     }
 }
 
@@ -115,16 +117,16 @@ fn test_auth_verify_tamper() {
     for i in range(0, 32) {
         let k = gen_key();
         let mut m = randombytes(i as uint);
-        let mut tag = authenticate(m, &k);
+        let Tag(mut tagbuf) = authenticate(m, &k);
         for j in range(0, m.len()) {
             m[j] ^= 0x20;
-            assert!(!verify(&tag, m, &k));
+            assert!(!verify(&Tag(tagbuf), m, &k));
             m[j] ^= 0x20;
         }
-        for j in range(0, tag.len()) {
-            tag[j] ^= 0x20;
-            assert!(!verify(&tag, m, &k));
-            tag[j] ^= 0x20;
+        for j in range(0, tagbuf.len()) {
+            tagbuf[j] ^= 0x20;
+            assert!(!verify(&Tag(tagbuf), m, &k));
+            tagbuf[j] ^= 0x20;
         }
     }
 }

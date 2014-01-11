@@ -1,11 +1,10 @@
 /*!
 `AES 128` in `CTR`-mode
 This cipher is conjectured to meet the standard notion of
-unpredictability. 
+unpredictability.
 */
 use std::libc::{c_ulonglong, c_int};
 use std::vec::{from_elem};
-use std::vec::raw::{to_mut_ptr, to_ptr};
 use randombytes::randombytes_into;
 
 #[link(name = "sodium")]
@@ -27,14 +26,15 @@ pub static NONCEBYTES: uint = 16;
 
 /**
  * `Key` for symmetric encryption
- * 
+ *
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
 pub struct Key([u8, ..KEYBYTES]);
 impl Drop for Key {
-    fn drop(&mut self) { 
-        for e in self.mut_iter() { *e = 0 }
+    fn drop(&mut self) {
+        let &Key(ref mut k) = self;
+        for e in k.mut_iter() { *e = 0 }
     }
 }
 
@@ -51,9 +51,9 @@ pub struct Nonce([u8, ..NONCEBYTES]);
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut key = Key([0, ..KEYBYTES]);
-    randombytes_into(*key);
-    key
+    let mut key = [0, ..KEYBYTES];
+    randombytes_into(key);
+    Key(key)
 }
 
 /**
@@ -64,23 +64,24 @@ pub fn gen_key() -> Key {
  * from sodiumoxide.
  */
 pub fn gen_nonce() -> Nonce {
-    let mut nonce = Nonce([0, ..NONCEBYTES]);
-    randombytes_into(*nonce);
-    nonce
+    let mut nonce = [0, ..NONCEBYTES];
+    randombytes_into(nonce);
+    Nonce(nonce)
 }
 
 /**
  * `stream()` produces a `len`-byte stream `c` as a function of a
  * secret key `k` and a nonce `n`.
  */
-#[fixed_stack_segment]
-pub fn stream(len: uint, n: &Nonce, k: &Key) -> ~[u8] {
+pub fn stream(len: uint,
+              &Nonce(n): &Nonce,
+              &Key(k): &Key) -> ~[u8] {
     unsafe {
         let mut c = from_elem(len, 0u8);
-        crypto_stream_aes128ctr(to_mut_ptr(c), 
-                                c.len() as c_ulonglong, 
-                                to_ptr(**n), 
-                                to_ptr(**k));
+        crypto_stream_aes128ctr(c.as_mut_ptr(),
+                                c.len() as c_ulonglong,
+                                n.as_ptr(),
+                                k.as_ptr());
         c
     }
 }
@@ -93,15 +94,16 @@ pub fn stream(len: uint, n: &Nonce, k: &Key) -> ~[u8] {
  * and is the plaintext xor the output of `stream()`.
  * Consequently `stream_xor()` can also be used to decrypt.
  */
-#[fixed_stack_segment]
-pub fn stream_xor(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
+pub fn stream_xor(m: &[u8],
+                  &Nonce(n): &Nonce,
+                  &Key(k): &Key) -> ~[u8] {
     unsafe {
         let mut c = from_elem(m.len(), 0u8);
-        crypto_stream_aes128ctr_xor(to_mut_ptr(c),
-                                    to_ptr(m),
+        crypto_stream_aes128ctr_xor(c.as_mut_ptr(),
+                                    m.as_ptr(),
                                     m.len() as c_ulonglong,
-                                    to_ptr(**n),
-                                    to_ptr(**k));
+                                    n.as_ptr(),
+                                    k.as_ptr());
         c
     }
 }
@@ -114,14 +116,15 @@ pub fn stream_xor(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
 * the plaintext, and is the plaintext xor the output of `stream_inplace()`.
 * Consequently `stream_xor_inplace()` can also be used to decrypt.
 */
-#[fixed_stack_segment]
-pub fn stream_xor_inplace(m: &mut [u8], n: &Nonce, k: &Key) {
+pub fn stream_xor_inplace(m: &mut [u8],
+                          &Nonce(n): &Nonce,
+                          &Key(k): &Key) {
     unsafe {
-        crypto_stream_aes128ctr_xor(to_mut_ptr(m), 
-                                    to_ptr(m), 
-                                    m.len() as c_ulonglong, 
-                                    to_ptr(**n), 
-                                    to_ptr(**k));
+        crypto_stream_aes128ctr_xor(m.as_mut_ptr(),
+                                    m.as_ptr(),
+                                    m.len() as c_ulonglong,
+                                    n.as_ptr(),
+                                    k.as_ptr());
     }
 }
 

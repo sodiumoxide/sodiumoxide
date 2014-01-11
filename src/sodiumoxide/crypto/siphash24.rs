@@ -3,7 +3,6 @@
 
 */
 use std::libc::{c_ulonglong, c_int};
-use std::vec::raw::{to_mut_ptr, to_ptr};
 use randombytes::randombytes_into;
 
 #[link(name = "sodium")]
@@ -33,7 +32,8 @@ pub struct Key([u8, ..KEYBYTES]);
 
 impl Drop for Key {
     fn drop(&mut self) {
-        for e in self.mut_iter() { *e = 0 }
+        let &Key(ref mut k) = self;
+        for e in k.mut_iter() { *e = 0 }
     }
 }
 
@@ -45,33 +45,34 @@ impl Drop for Key {
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut k = Key([0, ..KEYBYTES]);
-    randombytes_into(*k);
-    k
+    let mut k = [0, ..KEYBYTES];
+    randombytes_into(k);
+    Key(k)
 }
 
 /**
  * `shorthash` hashes a message `m` under a key `k`. It
  * returns a hash `h`.
  */
-#[fixed_stack_segment]
-pub fn shorthash(m: &[u8], k: &Key) -> Digest {
+pub fn shorthash(m: &[u8],
+                 &Key(k): &Key) -> Digest {
     unsafe {
-        let mut h = Digest([0, ..HASHBYTES]);
-        crypto_shorthash_siphash24(to_mut_ptr(*h), 
-                                   to_ptr(m), m.len() as c_ulonglong,
-                                   to_ptr(**k));
-        h
+        let mut h = [0, ..HASHBYTES];
+        crypto_shorthash_siphash24(h.as_mut_ptr(),
+                                   m.as_ptr(), m.len() as c_ulonglong,
+                                   k.as_ptr());
+        Digest(h)
     }
 }
 
 #[test]
 fn test_vectors() {
-    use std::vec::from_fn;
+    use std::vec::with_capacity;
     let maxlen = 64;
-    let m = do from_fn(64) |i| {
-        i as u8
-    };
+    let mut m = with_capacity(64);
+    for i in range(0, 64) {
+        m.push(i as u8);
+    }
     let h_expecteds = [[0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72]
                       ,[0xfd, 0x67, 0xdc, 0x93, 0xc5, 0x39, 0xf8, 0x74]
                       ,[0x5a, 0x4f, 0xa9, 0xd9, 0x09, 0x80, 0x6c, 0x0d]
@@ -138,7 +139,7 @@ fn test_vectors() {
                       ,[0x72, 0x45, 0x06, 0xeb, 0x4c, 0x32, 0x8a, 0x95]];
     let k = Key([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     for i in range(0, maxlen) {
-        let h = shorthash(m.slice(0, i as uint), &k);
-        assert!(*h == h_expecteds[i]);
+        let Digest(h) = shorthash(m.slice(0, i as uint), &k);
+        assert!(h == h_expecteds[i]);
     }
 }

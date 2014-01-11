@@ -4,7 +4,6 @@ WARNING: This signature software is a prototype. It has been replaced by the fin
 */
 use std::libc::{c_ulonglong, c_int};
 use std::vec::{from_elem};
-use std::vec::raw::{to_mut_ptr, to_ptr};
 
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
@@ -29,14 +28,15 @@ pub static SIGNATUREBYTES: uint = 64;
 
 /**
  * `SecretKey` for signatures
- * 
+ *
  * When a `SecretKey` goes out of scope its contents
  * will be zeroed out
  */
 pub struct SecretKey([u8, ..SECRETKEYBYTES]);
 impl Drop for SecretKey {
     fn drop(&mut self) {
-        for e in self.mut_iter() { *e = 0 }
+        let &SecretKey(ref mut buf) = self;
+        for e in buf.mut_iter() { *e = 0 }
     }
 }
 /**
@@ -52,14 +52,13 @@ pub struct PublicKey([u8, ..PUBLICKEYBYTES]);
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-#[fixed_stack_segment]
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = PublicKey([0u8, ..PUBLICKEYBYTES]);
-        let mut sk = SecretKey([0u8, ..SECRETKEYBYTES]);
-        crypto_sign_edwards25519sha512batch_keypair(to_mut_ptr(*pk), 
-                                                    to_mut_ptr(*sk));
-        (pk, sk)
+        let mut pk = [0u8, ..PUBLICKEYBYTES];
+        let mut sk = [0u8, ..SECRETKEYBYTES];
+        crypto_sign_edwards25519sha512batch_keypair(pk.as_mut_ptr(),
+                                                    sk.as_mut_ptr());
+        (PublicKey(pk), SecretKey(sk))
     }
 }
 
@@ -67,16 +66,16 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
  * `sign()` signs a message `m` using the signer's secret key `sk`.
  * `sign()` returns the resulting signed message `sm`.
  */
-#[fixed_stack_segment]
-pub fn sign(m: &[u8], sk: &SecretKey) -> ~[u8] {
+pub fn sign(m: &[u8],
+            &SecretKey(sk): &SecretKey) -> ~[u8] {
     unsafe {
         let mut sm = from_elem(m.len() + SIGNATUREBYTES, 0u8);
         let mut smlen = 0;
-        crypto_sign_edwards25519sha512batch(to_mut_ptr(sm), 
-                                            &mut smlen, 
-                                            to_ptr(m), 
-                                            m.len() as c_ulonglong, 
-                                            to_ptr(**sk));
+        crypto_sign_edwards25519sha512batch(sm.as_mut_ptr(),
+                                            &mut smlen,
+                                            m.as_ptr(),
+                                            m.len() as c_ulonglong,
+                                            sk.as_ptr());
         sm.truncate(smlen as uint);
         sm
     }
@@ -87,16 +86,16 @@ pub fn sign(m: &[u8], sk: &SecretKey) -> ~[u8] {
  * `verify()` returns the message `Some(m)`.
  * If the signature fails verification, `verify()` returns `None`.
  */
-#[fixed_stack_segment]
-pub fn verify(sm: &[u8], pk: &PublicKey) -> Option<~[u8]> {
+pub fn verify(sm: &[u8],
+              &PublicKey(pk): &PublicKey) -> Option<~[u8]> {
     unsafe {
         let mut m = from_elem(sm.len(), 0u8);
         let mut mlen = 0;
-        if crypto_sign_edwards25519sha512batch_open(to_mut_ptr(m), 
-                                                    &mut mlen, 
-                                                    to_ptr(sm), 
-                                                    sm.len() as c_ulonglong, 
-                                                    to_ptr(**pk)) == 0 {
+        if crypto_sign_edwards25519sha512batch_open(m.as_mut_ptr(),
+                                                    &mut mlen,
+                                                    sm.as_ptr(),
+                                                    sm.len() as c_ulonglong,
+                                                    pk.as_ptr()) == 0 {
             m.truncate(mlen as uint);
             Some(m)
         } else {

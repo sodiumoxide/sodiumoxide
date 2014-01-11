@@ -17,7 +17,7 @@ perhaps one valid authenticator can be converted into another valid
 authenticator for the same message. NaCl also does not make any promises
 regarding "truncated unforgeability."
 
-# Selected primitive 
+# Selected primitive
 `authenticate()` is currently an implementation of
 `HMAC-SHA-512-256`, i.e., the first 256 bits of `HMAC-SHA-512`.
 `HMAC-SHA-512-256` is conjectured to meet the standard notion of

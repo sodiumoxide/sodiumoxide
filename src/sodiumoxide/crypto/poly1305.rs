@@ -5,7 +5,6 @@ authenticator is proven to meet the standard notion of unforgeability after a
 single message.
 */
 use std::libc::{c_ulonglong, c_int};
-use std::vec::raw::{to_ptr, to_mut_ptr};
 use randombytes::randombytes_into;
 use crypto::verify::verify_16;
 
@@ -36,7 +35,8 @@ pub static KEYBYTES: uint = 32;
 pub struct Key([u8, ..KEYBYTES]);
 impl Drop for Key {
     fn drop(&mut self) {
-        for e in self.mut_iter() {
+        let &Key(ref mut k) = self;
+        for e in k.mut_iter() {
             *e = 0
         }
     }
@@ -55,13 +55,15 @@ pub static TAGBYTES: uint = 16;
  */
 pub struct Tag([u8, ..TAGBYTES]);
 impl TotalEq for Tag {
-    fn equals(&self, other: &Tag) -> bool {
-        verify_16(&**self, &**other)
+    fn equals(&self, &Tag(other): &Tag) -> bool {
+        let &Tag(ref tag) = self;
+        verify_16(tag, &other)
     }
 }
 impl Eq for Tag {
-    fn eq(&self, other: &Tag) -> bool {
-        verify_16(&**self, &**other)
+    fn eq(&self, &Tag(other): &Tag) -> bool {
+        let &Tag(ref tag) = self;
+        verify_16(tag, &other)
     }
 }
 
@@ -73,24 +75,24 @@ impl Eq for Tag {
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut key = Key([0, ..KEYBYTES]);
-    randombytes_into(*key);
-    key
+    let mut key = [0, ..KEYBYTES];
+    randombytes_into(key);
+    Key(key)
 }
 
 /**
  * `authenticate()` authenticates a message `m` using a secret key `k`
  * and returns an authenticator tag.
  */
-#[fixed_stack_segment]
-pub fn authenticate(m: &[u8], k: &Key) -> Tag {
+pub fn authenticate(m: &[u8],
+                    &Key(k): &Key) -> Tag {
     unsafe {
-        let mut tag = Tag([0, ..TAGBYTES]);
-        crypto_onetimeauth_poly1305(to_mut_ptr(*tag), 
-                                    to_ptr(m), 
-                                    m.len() as c_ulonglong, 
-                                    to_ptr(**k));
-        tag
+        let mut tag = [0, ..TAGBYTES];
+        crypto_onetimeauth_poly1305(tag.as_mut_ptr(),
+                                    m.as_ptr(),
+                                    m.len() as c_ulonglong,
+                                    k.as_ptr());
+        Tag(tag)
     }
 }
 
@@ -98,13 +100,14 @@ pub fn authenticate(m: &[u8], k: &Key) -> Tag {
  * `verify()` returns `true` if `tag` is a correct authenticator of
  * a message `m` under a secret key `k`. Otherwise `verify()` returns false.
  */
-#[fixed_stack_segment]
-pub fn verify(tag: &Tag, m: &[u8], k: &Key) -> bool {
+pub fn verify(&Tag(tag): &Tag,
+              m: &[u8],
+              &Key(k): &Key) -> bool {
     unsafe {
-        crypto_onetimeauth_poly1305_verify(to_ptr(**tag), 
-                                           to_ptr(m), 
-                                           m.len() as c_ulonglong, 
-                                           to_ptr(**k)) == 0
+        crypto_onetimeauth_poly1305_verify(tag.as_ptr(),
+                                           m.as_ptr(),
+                                           m.len() as c_ulonglong,
+                                           k.as_ptr()) == 0
     }
 }
 
@@ -125,18 +128,18 @@ fn test_onetimeauth_verify_tamper() {
     for i in range(0, 256) {
         let k = gen_key();
         let mut m = randombytes(i as uint);
-        let mut tag = authenticate(m, &k);
+        let Tag(mut tagbuf) = authenticate(m, &k);
         for j in range(0, m.len()) {
             m[j] ^= 0x20;
-            assert!(!verify(&tag, m, &k));
-            assert!(tag != authenticate(m, &k));
+            assert!(!verify(&Tag(tagbuf), m, &k));
+            assert!(Tag(tagbuf) != authenticate(m, &k));
             m[j] ^= 0x20;
         }
-        for j in range(0, tag.len()) {
-            tag[j] ^= 0x20;
-            assert!(!verify(&tag, m, &k));
-            assert!(tag != authenticate(m, &k));
-            tag[j] ^= 0x20;
+        for j in range(0, tagbuf.len()) {
+            tagbuf[j] ^= 0x20;
+            assert!(!verify(&Tag(tagbuf), m, &k));
+            assert!(Tag(tagbuf) != authenticate(m, &k));
+            tagbuf[j] ^= 0x20;
         }
     }
 }

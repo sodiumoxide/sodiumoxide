@@ -1,14 +1,13 @@
 /*!
 `crypto_box_curve25519xsalsa20poly1305` , a particular
 combination of Curve25519, Salsa20, and Poly1305 specified in
-[Cryptography in NaCl](http://nacl.cr.yp.to/valid.html). 
+[Cryptography in NaCl](http://nacl.cr.yp.to/valid.html).
 
 This function is conjectured to meet the standard notions of privacy and
 third-party unforgeability.
 
 */
 use std::libc::{c_ulonglong, c_int};
-use std::vec::raw::{to_mut_ptr, to_ptr};
 use utils::marshal;
 use randombytes::randombytes_into;
 
@@ -57,14 +56,15 @@ static BOXZEROBYTES: uint = 16;
 pub struct PublicKey([u8, ..PUBLICKEYBYTES]);
 /**
  * `SecretKey` for asymmetric authenticated encryption
- * 
+ *
  * When a `SecretKey` goes out of scope its contents
  * will be zeroed out
  */
 pub struct SecretKey([u8, ..SECRETKEYBYTES]);
 impl Drop for SecretKey {
     fn drop(&mut self) {
-        for e in self.mut_iter() { *e = 0 }
+        let &SecretKey(ref mut sk) = self;
+        for e in sk.mut_iter() { *e = 0 }
     }
 }
 
@@ -75,50 +75,51 @@ pub struct Nonce([u8, ..NONCEBYTES]);
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public key.
- * 
+ *
  * THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-#[fixed_stack_segment]
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = PublicKey([0u8, ..PUBLICKEYBYTES]);
-        let mut sk = SecretKey([0u8, ..SECRETKEYBYTES]);
+        let mut pk = [0u8, ..PUBLICKEYBYTES];
+        let mut sk = [0u8, ..SECRETKEYBYTES];
         crypto_box_curve25519xsalsa20poly1305_keypair(
-            to_mut_ptr(*pk), 
-            to_mut_ptr(*sk));
-        (pk, sk)
+            pk.as_mut_ptr(),
+            sk.as_mut_ptr());
+        (PublicKey(pk), SecretKey(sk))
     }
 }
 
 /**
  * `gen_nonce()` randomly generates a nonce
- * 
+ *
  * THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
 pub fn gen_nonce() -> Nonce {
-    let mut nonce = Nonce([0, ..NONCEBYTES]);
-    randombytes_into(*nonce);
-    nonce
+    let mut n = [0, ..NONCEBYTES];
+    randombytes_into(n);
+    Nonce(n)
 }
 
 /**
  * `seal()` encrypts and authenticates a message `m` using the senders secret key `sk`,
  * the receivers public key `pk` and a nonce `n`. It returns a ciphertext `c`.
  */
-#[fixed_stack_segment]
-pub fn seal(m: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> ~[u8] {
+pub fn seal(m: &[u8],
+            &Nonce(n): &Nonce,
+            &PublicKey(pk): &PublicKey,
+            &SecretKey(sk): &SecretKey) -> ~[u8] {
     let (c, _) = do marshal(m, ZEROBYTES, BOXZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_box_curve25519xsalsa20poly1305(dst, 
-                                                  src, 
-                                                  len, 
-                                                  to_ptr(**n), 
-                                                  to_ptr(**pk), 
-                                                  to_ptr(**sk));
+            crypto_box_curve25519xsalsa20poly1305(dst,
+                                                  src,
+                                                  len,
+                                                  n.as_ptr(),
+                                                  pk.as_ptr(),
+                                                  sk.as_ptr());
         }
     };
     c
@@ -129,19 +130,21 @@ pub fn seal(m: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> ~[u8] {
  * the senders public key `pk`, and a nonce `n`. It returns a plaintext `Some(m)`.
  * If the ciphertext fails verification, `open()` returns `None`.
  */
-#[fixed_stack_segment]
-pub fn open(c: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> Option<~[u8]> {
+pub fn open(c: &[u8],
+            &Nonce(n): &Nonce,
+            &PublicKey(pk): &PublicKey,
+            &SecretKey(sk): &SecretKey) -> Option<~[u8]> {
     if (c.len() < BOXZEROBYTES) {
         return None
     }
     let (m, ret) = do marshal(c, BOXZEROBYTES, ZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_box_curve25519xsalsa20poly1305_open(dst, 
-                                                       src, 
-                                                       len, 
-                                                       to_ptr(**n), 
-                                                       to_ptr(**pk), 
-                                                       to_ptr(**sk))
+            crypto_box_curve25519xsalsa20poly1305_open(dst,
+                                                       src,
+                                                       len,
+                                                       n.as_ptr(),
+                                                       pk.as_ptr(),
+                                                       sk.as_ptr())
         }
     };
     if ret == 0 {
@@ -162,7 +165,8 @@ pub fn open(c: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> Option<~[u8]
 pub struct PrecomputedKey([u8, ..PRECOMPUTEDKEYBYTES]);
 impl Drop for PrecomputedKey {
     fn drop(&mut self) {
-        for e in self.mut_iter() { *e = 0 }
+        let &PrecomputedKey(ref mut k) = self;
+        for e in k.mut_iter() { *e = 0 }
     }
 }
 
@@ -170,30 +174,31 @@ impl Drop for PrecomputedKey {
  * `precompute()` computes an intermediate key that can be used by `seal_precomputed()`
  * and `open_precomputed()`
  */
-#[fixed_stack_segment]
-pub fn precompute(pk: &PublicKey, sk: &SecretKey) -> PrecomputedKey {
-    let mut k = PrecomputedKey([0u8, ..PRECOMPUTEDKEYBYTES]);
+pub fn precompute(&PublicKey(pk): &PublicKey,
+                  &SecretKey(sk): &SecretKey) -> PrecomputedKey {
+    let mut k = [0u8, ..PRECOMPUTEDKEYBYTES];
     unsafe {
-        crypto_box_curve25519xsalsa20poly1305_beforenm(to_mut_ptr(*k), 
-                                                       to_ptr(**pk), 
-                                                       to_ptr(**sk));
+        crypto_box_curve25519xsalsa20poly1305_beforenm(k.as_mut_ptr(),
+                                                       pk.as_ptr(),
+                                                       sk.as_ptr());
     }
-    k
+    PrecomputedKey(k)
 }
 
 /**
  * `seal_precomputed()` encrypts and authenticates a message `m` using a precomputed key `k`,
  * and a nonce `n`. It returns a ciphertext `c`.
  */
-#[fixed_stack_segment]
-pub fn seal_precomputed(m: &[u8], n: &Nonce, k: &PrecomputedKey) -> ~[u8] {
+pub fn seal_precomputed(m: &[u8],
+                        &Nonce(n): &Nonce,
+                        &PrecomputedKey(k): &PrecomputedKey) -> ~[u8] {
     let (c, _) = do marshal(m, ZEROBYTES, BOXZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_box_curve25519xsalsa20poly1305_afternm(dst, 
-                                                          src, 
-                                                          len, 
-                                                          to_ptr(**n), 
-                                                          to_ptr(**k));
+            crypto_box_curve25519xsalsa20poly1305_afternm(dst,
+                                                          src,
+                                                          len,
+                                                          n.as_ptr(),
+                                                          k.as_ptr());
         }
     };
     c
@@ -204,18 +209,19 @@ pub fn seal_precomputed(m: &[u8], n: &Nonce, k: &PrecomputedKey) -> ~[u8] {
  * key `k` and a nonce `n`. It returns a plaintext `Some(m)`.
  * If the ciphertext fails verification, `open_precomputed()` returns `None`.
  */
-#[fixed_stack_segment]
-pub fn open_precomputed(c: &[u8], n: &Nonce, k: &PrecomputedKey) -> Option<~[u8]> {
+pub fn open_precomputed(c: &[u8],
+                        &Nonce(n): &Nonce,
+                        &PrecomputedKey(k): &PrecomputedKey) -> Option<~[u8]> {
     if (c.len() < BOXZEROBYTES) {
         return None
     }
     let (m, ret) = do marshal(c, BOXZEROBYTES, ZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_box_curve25519xsalsa20poly1305_open_afternm(dst, 
-                                                               src, 
-                                                               len, 
-                                                               to_ptr(**n), 
-                                                               to_ptr(**k))
+            crypto_box_curve25519xsalsa20poly1305_open_afternm(dst,
+                                                               src,
+                                                               len,
+                                                               n.as_ptr(),
+                                                               k.as_ptr())
         }
     };
     if ret == 0 {
@@ -246,8 +252,10 @@ fn test_seal_open_precomputed() {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
+        let PrecomputedKey(k1buf) = k1;
         let k2 = precompute(&pk2, &sk1);
-        assert!(*k1 == *k2);
+        let PrecomputedKey(k2buf) = k2;
+        assert!(k1buf == k2buf);
         let m = randombytes(i as uint);
         let n = gen_nonce();
         let c = seal_precomputed(m, &n, &k1);

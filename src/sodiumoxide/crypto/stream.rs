@@ -24,13 +24,13 @@ risk of collision.
 
 NaCl does not make any promises regarding the resistance of `stream()` to
 "related-key attacks." It is the caller's responsibility to use proper
-key-derivation functions. 
+key-derivation functions.
 
 # Selected primitive
 `stream()` is `crypto_stream_xsalsa20`, a particular cipher specified in
 [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 7.
 This cipher is conjectured to meet the standard notion of
-unpredictability. 
+unpredictability.
 
 # Alternate primitives
 NaCl supports the following secret-key encryption functions:

@@ -1,13 +1,12 @@
 /*!
 `crypto_secretbox_xsalsa20poly1305`, a particular
 combination of Salsa20 and Poly1305 specified in
-[Cryptography in NaCl](http://nacl.cr.yp.to/valid.html). 
+[Cryptography in NaCl](http://nacl.cr.yp.to/valid.html).
 
 This function is conjectured to meet the standard notions of privacy and
-authenticity. 
+authenticity.
 */
 use std::libc::{c_ulonglong, c_int};
-use std::vec::raw::{to_ptr};
 use utils::marshal;
 use randombytes::randombytes_into;
 
@@ -31,14 +30,15 @@ pub static NONCEBYTES: uint = 24;
 
 /**
  * `Key` for symmetric authenticated encryption
- * 
+ *
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
 pub struct Key([u8, ..KEYBYTES]);
 impl Drop for Key {
     fn drop(&mut self) {
-        for e in self.mut_iter() { *e = 0 }
+        let &Key(ref mut k) = self;
+        for e in k.mut_iter() { *e = 0 }
     }
 }
 
@@ -58,9 +58,9 @@ pub static BOXZEROBYTES: uint = 16;
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut key = Key([0, ..KEYBYTES]);
-    randombytes_into(*key);
-    key
+    let mut key = [0, ..KEYBYTES];
+    randombytes_into(key);
+    Key(key)
 }
 
 /**
@@ -71,20 +71,21 @@ pub fn gen_key() -> Key {
  * from sodiumoxide.
  */
 pub fn gen_nonce() -> Nonce {
-    let mut nonce = Nonce([0, ..NONCEBYTES]);
-    randombytes_into(*nonce);
-    nonce
+    let mut nonce = [0, ..NONCEBYTES];
+    randombytes_into(nonce);
+    Nonce(nonce)
 }
 
 /**
  * `seal()` encrypts and authenticates a message `m` using a secret key `k` and a
  * nonce `n`.  It returns a ciphertext `c`.
  */
-#[fixed_stack_segment]
-pub fn seal(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
+pub fn seal(m: &[u8],
+            &Nonce(n): &Nonce,
+            &Key(k): &Key) -> ~[u8] {
     let (c, _) = do marshal(m, ZEROBYTES, BOXZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_secretbox_xsalsa20poly1305(dst, src, len, to_ptr(**n), to_ptr(**k))
+            crypto_secretbox_xsalsa20poly1305(dst, src, len, n.as_ptr(), k.as_ptr())
         }
     };
     c
@@ -95,18 +96,19 @@ pub fn seal(m: &[u8], n: &Nonce, k: &Key) -> ~[u8] {
  * It returns a plaintext `Some(m)`.
  * If the ciphertext fails verification, `open()` returns `None`.
  */
-#[fixed_stack_segment]
-pub fn open(c: &[u8], n: &Nonce, k: &Key) -> Option<~[u8]> {
+pub fn open(c: &[u8],
+            &Nonce(n): &Nonce,
+            &Key(k): &Key) -> Option<~[u8]> {
     if (c.len() < BOXZEROBYTES) {
         return None
     }
     let (m, ret) = do marshal(c, BOXZEROBYTES, ZEROBYTES) |dst, src, len| {
         unsafe {
-            crypto_secretbox_xsalsa20poly1305_open(dst, 
-                                                   src, 
-                                                   len, 
-                                                   to_ptr(**n), 
-                                                   to_ptr(**k))
+            crypto_secretbox_xsalsa20poly1305_open(dst,
+                                                   src,
+                                                   len,
+                                                   n.as_ptr(),
+                                                   k.as_ptr())
         }
     };
     if ret == 0 {

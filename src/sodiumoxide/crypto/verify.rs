@@ -2,7 +2,6 @@
 Constant-time comparison of fixed-size vecs
 */
 use std::libc::c_int;
-use std::vec::raw::to_ptr;
 
 #[link(name = "sodium")]
 #[link_args = "-lsodium"]
@@ -22,10 +21,9 @@ extern {
  * that depends on the longest matching prefix of `x` and `y`, often allowing easy
  * timing attacks.
  */
-#[fixed_stack_segment]
 pub fn verify_16(x: &[u8, ..16], y: &[u8, ..16]) -> bool {
     unsafe {
-        crypto_verify_16(to_ptr(*x), to_ptr(*y)) == 0
+        crypto_verify_16(x.as_ptr(), y.as_ptr()) == 0
     }
 }
 
@@ -40,10 +38,9 @@ pub fn verify_16(x: &[u8, ..16], y: &[u8, ..16]) -> bool {
  * that depends on the longest matching prefix of `x` and `y`, often allowing easy
  * timing attacks.
  */
-#[fixed_stack_segment]
 pub fn verify_32(x: &[u8, ..32], y: &[u8, ..32]) -> bool {
     unsafe {
-        crypto_verify_32(to_ptr(*x), to_ptr(*y)) == 0
+        crypto_verify_32(x.as_ptr(), y.as_ptr()) == 0
     }
 }
 
@@ -57,7 +54,7 @@ fn test_verify_16() {
         assert!(verify_16(&x, &y));
         randombytes_into(x);
         randombytes_into(y);
-        if (x == y) { 
+        if (x == y) {
             assert!(verify_16(&x, &y))
         } else {
             assert!(!verify_16(&x, &y))
@@ -75,7 +72,7 @@ fn test_verify_32() {
         assert!(verify_32(&x, &y));
         randombytes_into(x);
         randombytes_into(y);
-        if (x == y) { 
+        if (x == y) {
             assert!(verify_32(&x, &y))
         } else {
             assert!(!verify_32(&x, &y))
