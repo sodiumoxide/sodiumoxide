@@ -11,7 +11,7 @@ for any other messages.
 The sender must not use `authenticate()` to authenticate more than one message
 under the same key. Authenticators for two messages under the same key should
 be expected to reveal enough information to allow forgeries of authenticators
-on other messages. 
+on other messages.
 
 # Selected primitive
 `authenticate()` is `crypto_onetimeauth_poly1305`, an authenticator specified
