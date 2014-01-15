@@ -34,5 +34,6 @@ NaCl supports the following secret-key authentication functions:
 ------------------------------------------------------------
 */
 pub use self::hmacsha512256::*;
+mod auth_macros;
 pub mod hmacsha512256;
 pub mod hmacsha256;

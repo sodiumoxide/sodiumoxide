@@ -51,10 +51,9 @@ risk of collision. Callers who are unable to count 1, 2, 3..., and who insist
 on using these primitives, are advised to use a randomly derived key for each
 message.
 
-For that same reason, no `gen_nonce()`-function is exposed for those
-primitives.
 */
 pub use self::xsalsa20::*;
+mod stream_macros;
 pub mod xsalsa20;
 pub mod aes128ctr;
 pub mod salsa208;

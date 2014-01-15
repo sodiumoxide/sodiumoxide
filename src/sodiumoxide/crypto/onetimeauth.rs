@@ -20,4 +20,5 @@ authenticator is proven to meet the standard notion of unforgeability after a
 single message.
 */
 pub use self::poly1305::*;
+mod auth_macros;
 pub mod poly1305;

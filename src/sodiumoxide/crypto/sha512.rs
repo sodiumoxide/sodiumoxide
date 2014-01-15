@@ -10,32 +10,7 @@ SHA-3 competition will improve the situation.
 extern mod extra;
 use std::libc::{c_ulonglong, c_int};
 
-#[link(name = "sodium")]
-#[link_args = "-lsodium"]
-extern {
-    fn crypto_hash_sha512(h: *mut u8,
-                          m: *u8,
-                          mlen: c_ulonglong) -> c_int;
-}
-
-pub static HASHBYTES: uint = 64;
-pub static BLOCKBYTES: uint = 128;
-
-/**
- * Digest-structure
- */
-pub struct Digest([u8, ..HASHBYTES]);
-
-/**
- * `hash` hashes a message `m`. It returns a hash `h`.
- */
-pub fn hash(m: &[u8]) -> Digest {
-    unsafe {
-        let mut h = [0, ..HASHBYTES];
-        crypto_hash_sha512(h.as_mut_ptr(), m.as_ptr(), m.len() as c_ulonglong);
-        Digest(h)
-    }
-}
+hash_module!(crypto_hash_sha512, 64, 128)
 
 #[test]
 fn test_vector_1() {
