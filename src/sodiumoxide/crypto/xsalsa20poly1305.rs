@@ -11,7 +11,6 @@ use utils::marshal;
 use randombytes::randombytes_into;
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn crypto_secretbox_xsalsa20poly1305(c: *mut u8,
                                          m: *u8,

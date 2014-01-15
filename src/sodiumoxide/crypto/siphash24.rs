@@ -6,7 +6,6 @@ use std::libc::{c_ulonglong, c_int};
 use randombytes::randombytes_into;
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn crypto_shorthash_siphash24(h: *mut u8,
                                   m: *u8,

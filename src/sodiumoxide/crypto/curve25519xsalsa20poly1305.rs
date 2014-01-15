@@ -12,7 +12,6 @@ use utils::marshal;
 use randombytes::randombytes_into;
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn crypto_box_curve25519xsalsa20poly1305_keypair(pk: *mut u8,
                                                      sk: *mut u8) -> c_int;

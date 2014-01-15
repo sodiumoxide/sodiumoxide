@@ -2,7 +2,6 @@
 macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn $hash_name(h: *mut u8,
                   m: *u8,

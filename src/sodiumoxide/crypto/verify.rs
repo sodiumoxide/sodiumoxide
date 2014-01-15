@@ -4,7 +4,6 @@ Constant-time comparison of fixed-size vecs
 use std::libc::c_int;
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn crypto_verify_16(x: *u8, y: *u8) -> c_int;
     fn crypto_verify_32(x: *u8, y: *u8) -> c_int;

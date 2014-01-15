@@ -2,7 +2,6 @@
 macro_rules! auth_module (($auth_name:ident, $verify_name:ident, $verify_fn:ident, $keybytes:expr, $tagbytes:expr) => (
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn $auth_name(a: *mut u8,
                   m: *u8,
