@@ -46,11 +46,10 @@ generation functions and the key-generation functions are thread-safe.
  `crypto::shorthash`
  */
 #[crate_id = "sodiumoxide#0.1"];
+#[comment = "Fast cryptographic library"];
+#[license = "MIT"];
 #[crate_type = "lib"];
-//#[warn(owned_heap_memory)];
-//#[warn(unstable)];
 #[warn(missing_doc)];
-//#[warn(heap_memory)];
 #[warn(non_uppercase_statics)];
 #[warn(non_camel_case_types)];
 #[warn(managed_heap_memory)];
