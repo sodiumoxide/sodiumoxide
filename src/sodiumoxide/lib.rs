@@ -55,13 +55,11 @@ generation functions and the key-generation functions are thread-safe.
 #[warn(non_camel_case_types)];
 #[warn(managed_heap_memory)];
 #[warn(unnecessary_qualification)];
-#[feature(link_args)];
 #[feature(globs)];
 #[feature(macro_rules)];
 use std::libc::c_int;
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn sodium_init() -> c_int;
 }

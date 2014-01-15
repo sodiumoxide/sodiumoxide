@@ -9,7 +9,6 @@ Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 use std::libc::c_int;
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn crypto_scalarmult_curve25519(q: *mut u8,
                                     n: *u8,

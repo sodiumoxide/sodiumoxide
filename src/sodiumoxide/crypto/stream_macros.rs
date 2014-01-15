@@ -2,7 +2,6 @@
 macro_rules! stream_module (($stream_name:ident, $xor_name:ident, $keybytes:expr, $noncebytes:expr) => (
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn $stream_name(c: *mut u8,
                     clen: c_ulonglong,

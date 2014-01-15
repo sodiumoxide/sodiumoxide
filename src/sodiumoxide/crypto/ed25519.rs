@@ -9,7 +9,6 @@ use std::libc::{c_ulonglong, c_int};
 use std::vec::{from_elem};
 
 #[link(name = "sodium")]
-#[link_args = "-lsodium"]
 extern {
     fn crypto_sign_ed25519_keypair(pk: *mut u8,
                                    sk: *mut u8) -> c_int;
