@@ -57,6 +57,7 @@ generation functions and the key-generation functions are thread-safe.
 #[warn(unnecessary_qualification)];
 #[feature(link_args)];
 #[feature(globs)];
+#[feature(macro_rules)];
 use std::libc::c_int;
 
 #[link(name = "sodium")]
