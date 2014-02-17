@@ -111,7 +111,7 @@ pub fn seal(m: &[u8],
             &Nonce(n): &Nonce,
             &PublicKey(pk): &PublicKey,
             &SecretKey(sk): &SecretKey) -> ~[u8] {
-    let (c, _) = do marshal(m, ZEROBYTES, BOXZEROBYTES) |dst, src, len| {
+    let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, proc(dst, src, len) {
         unsafe {
             crypto_box_curve25519xsalsa20poly1305(dst,
                                                   src,
@@ -120,7 +120,7 @@ pub fn seal(m: &[u8],
                                                   pk.as_ptr(),
                                                   sk.as_ptr());
         }
-    };
+    });
     c
 }
 
@@ -136,7 +136,7 @@ pub fn open(c: &[u8],
     if (c.len() < BOXZEROBYTES) {
         return None
     }
-    let (m, ret) = do marshal(c, BOXZEROBYTES, ZEROBYTES) |dst, src, len| {
+    let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, proc(dst, src, len) {
         unsafe {
             crypto_box_curve25519xsalsa20poly1305_open(dst,
                                                        src,
@@ -145,7 +145,7 @@ pub fn open(c: &[u8],
                                                        pk.as_ptr(),
                                                        sk.as_ptr())
         }
-    };
+    });
     if ret == 0 {
         Some(m)
     } else {
@@ -191,7 +191,7 @@ pub fn precompute(&PublicKey(pk): &PublicKey,
 pub fn seal_precomputed(m: &[u8],
                         &Nonce(n): &Nonce,
                         &PrecomputedKey(k): &PrecomputedKey) -> ~[u8] {
-    let (c, _) = do marshal(m, ZEROBYTES, BOXZEROBYTES) |dst, src, len| {
+    let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, proc(dst, src, len) {
         unsafe {
             crypto_box_curve25519xsalsa20poly1305_afternm(dst,
                                                           src,
@@ -199,7 +199,7 @@ pub fn seal_precomputed(m: &[u8],
                                                           n.as_ptr(),
                                                           k.as_ptr());
         }
-    };
+    });
     c
 }
 
@@ -214,7 +214,7 @@ pub fn open_precomputed(c: &[u8],
     if (c.len() < BOXZEROBYTES) {
         return None
     }
-    let (m, ret) = do marshal(c, BOXZEROBYTES, ZEROBYTES) |dst, src, len| {
+    let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, proc(dst, src, len) {
         unsafe {
             crypto_box_curve25519xsalsa20poly1305_open_afternm(dst,
                                                                src,
@@ -222,7 +222,7 @@ pub fn open_precomputed(c: &[u8],
                                                                n.as_ptr(),
                                                                k.as_ptr())
         }
-    };
+    });
     if ret == 0 {
         Some(m)
     } else {

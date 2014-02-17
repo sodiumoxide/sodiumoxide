@@ -4,7 +4,7 @@
 standard notion of unforgeability for a public-key signature scheme under
 chosen-message attacks.
 */
-extern mod extra;
+extern crate extra;
 use std::libc::{c_ulonglong, c_int};
 use std::vec::{from_elem};
 
@@ -205,7 +205,7 @@ fn test_sign_verify_tamper_seed() {
 fn test_vectors() {
     // test vectors from the Python implementation
     // form the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-    use self::extra::hex::{FromHex, ToHex};
+    use self::serialize::hex::{FromHex, ToHex};
     use std::io::buffered::BufferedReader;
     use std::io::File;
     use std::path::Path;
