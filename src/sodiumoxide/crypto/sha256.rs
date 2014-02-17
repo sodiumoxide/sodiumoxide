@@ -7,7 +7,7 @@ However, for the moment, there do not appear to be alternatives that
 inspire satisfactory levels of confidence. One can hope that NIST's
 SHA-3 competition will improve the situation.
 */
-extern mod extra;
+extern crate serialize;
 use std::libc::{c_ulonglong, c_int};
 
 hash_module!(crypto_hash_sha256, 32, 64)
@@ -42,17 +42,17 @@ fn test_vector_2() {
 }
 
 fn test_nist_vector(filename: &str) {
-    use self::extra::hex::{FromHex};
+    use self::serialize::hex::{FromHex};
     use std::path::Path;
-    use std::io::buffered::BufferedReader;
+    use std::io::BufferedReader;
     use std::io::File;
 
     let p = &Path::new(filename);
     let mut r = BufferedReader::new(File::open(p).unwrap());
     loop {
         let line = match r.read_line() {
-            None => break,
-            Some(line) => line
+            Err(_) => break,
+            Ok(line) => line
         };
         if line.starts_with("Len = ") {
             let s = line.slice_from(6);
