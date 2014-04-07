@@ -3,7 +3,7 @@ WARNING: This signature software is a prototype. It has been replaced by the fin
 [Ed25519](http://ed25519.cr.yp.to/). It is only kept here for compatibility reasons.
 */
 use std::libc::{c_ulonglong, c_int};
-use std::vec::{from_elem};
+use std::slice::{from_elem};
 
 #[link(name = "sodium")]
 extern {

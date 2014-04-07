@@ -1,7 +1,7 @@
 /*! Cryptographic random number generation
 */
 use std::libc::size_t;
-use std::vec::from_elem;
+use std::slice::from_elem;
 
 #[link(name = "sodium")]
 extern {
