@@ -1,5 +1,5 @@
 use std::libc::{c_ulonglong};
-use std::vec::{with_capacity, append};
+use std::slice::{with_capacity, append};
 
 #[doc(hidden)]
 pub fn marshal<T>(buf: &[u8],
