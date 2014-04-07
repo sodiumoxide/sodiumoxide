@@ -53,7 +53,7 @@ fn test_verify_16() {
         assert!(verify_16(&x, &y));
         randombytes_into(x);
         randombytes_into(y);
-        if (x == y) {
+        if x == y {
             assert!(verify_16(&x, &y))
         } else {
             assert!(!verify_16(&x, &y))
@@ -71,7 +71,7 @@ fn test_verify_32() {
         assert!(verify_32(&x, &y));
         randombytes_into(x);
         randombytes_into(y);
-        if (x == y) {
+        if x == y {
             assert!(verify_32(&x, &y))
         } else {
             assert!(!verify_32(&x, &y))

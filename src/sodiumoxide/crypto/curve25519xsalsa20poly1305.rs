@@ -133,7 +133,7 @@ pub fn open(c: &[u8],
             &Nonce(n): &Nonce,
             &PublicKey(pk): &PublicKey,
             &SecretKey(sk): &SecretKey) -> Option<~[u8]> {
-    if (c.len() < BOXZEROBYTES) {
+    if c.len() < BOXZEROBYTES {
         return None
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, proc(dst, src, len) {
@@ -211,7 +211,7 @@ pub fn seal_precomputed(m: &[u8],
 pub fn open_precomputed(c: &[u8],
                         &Nonce(n): &Nonce,
                         &PrecomputedKey(k): &PrecomputedKey) -> Option<~[u8]> {
-    if (c.len() < BOXZEROBYTES) {
+    if c.len() < BOXZEROBYTES {
         return None
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, proc(dst, src, len) {

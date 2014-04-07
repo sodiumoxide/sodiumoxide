@@ -98,7 +98,7 @@ pub fn seal(m: &[u8],
 pub fn open(c: &[u8],
             &Nonce(n): &Nonce,
             &Key(k): &Key) -> Option<~[u8]> {
-    if (c.len() < BOXZEROBYTES) {
+    if c.len() < BOXZEROBYTES {
         return None
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, proc(dst, src, len) {
