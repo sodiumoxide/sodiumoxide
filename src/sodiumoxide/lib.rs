@@ -45,17 +45,17 @@ generation functions and the key-generation functions are thread-safe.
 
  `crypto::shorthash`
  */
-#[crate_id = "sodiumoxide#0.1"];
-#[comment = "Fast cryptographic library"];
-#[license = "MIT"];
-#[crate_type = "lib"];
-#[warn(missing_doc)];
-#[warn(non_uppercase_statics)];
-#[warn(non_camel_case_types)];
-#[warn(managed_heap_memory)];
-#[warn(unnecessary_qualification)];
-#[feature(globs)];
-#[feature(macro_rules)];
+#![crate_id = "sodiumoxide#0.1"]
+#![comment = "Fast cryptographic library"]
+#![license = "MIT"]
+#![crate_type = "lib"]
+#![warn(missing_doc)]
+#![warn(non_uppercase_statics)]
+#![warn(non_camel_case_types)]
+#![warn(managed_heap_memory)]
+#![warn(unnecessary_qualification)]
+#![feature(globs)]
+#![feature(macro_rules)]
 use std::libc::c_int;
 
 #[link(name = "sodium")]
