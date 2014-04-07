@@ -214,8 +214,8 @@ fn test_vectors() {
     let mut r = BufferedReader::new(File::open(p).unwrap());
     loop {
         let line = match r.read_line() {
-            None => break,
-            Some(line) => line
+            Err(_) => break,
+            Ok(line) => line
         };
         let mut x = line.split(':');
         let x0 = x.next().unwrap();
