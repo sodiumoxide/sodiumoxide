@@ -16,20 +16,16 @@ Dependencies
 
 Building
 --------
-    rustpkg build sodiumoxide -O
-
-Installation
-------------
-
-    rustpkg install sodiumoxide -O
+    rustc -O src/sodiumoxide/lib.rs
 
 Testing
 -------
-    rust test src/sodiumoxide/lib.rs
+    rustc --test src/sodiumoxide/lib.rs
+    ./src/sodiumoxide/sodiumoxide
 
 Documentation
 -------------
-    rust doc html src/sodiumoxide/lib.rs
+    rustdoc src/sodiumoxide/lib.rs
 
 Documentation will be generated in doc/...
 
