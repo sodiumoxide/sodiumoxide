@@ -38,12 +38,7 @@ impl Drop for Key {
   * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
   */
 pub struct Tag([u8, ..TAGBYTES]);
-impl TotalEq for Tag {
-    fn equals(&self, &Tag(other): &Tag) -> bool {
-        let &Tag(ref tag) = self;
-        $verify_fn(tag, &other)
-    }
-}
+impl TotalEq for Tag { }
 impl Eq for Tag {
     fn eq(&self, &Tag(other): &Tag) -> bool {
         let &Tag(ref tag) = self;
