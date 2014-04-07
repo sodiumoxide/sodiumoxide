@@ -206,7 +206,7 @@ fn test_vectors() {
     // test vectors from the Python implementation
     // form the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
     use self::serialize::hex::{FromHex, ToHex};
-    use std::io::buffered::BufferedReader;
+    use std::io::BufferedReader;
     use std::io::File;
     use std::path::Path;
 
