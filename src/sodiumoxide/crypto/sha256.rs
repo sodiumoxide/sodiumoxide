@@ -41,6 +41,7 @@ fn test_vector_2() {
     assert!(h == h_expected);
 }
 
+#[cfg(test)]
 fn test_nist_vector(filename: &str) {
     use self::serialize::hex::{FromHex};
     use std::path::Path;
