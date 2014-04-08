@@ -1,5 +1,9 @@
 #![macro_escape]
-macro_rules! auth_module (($auth_name:ident, $verify_name:ident, $verify_fn:ident, $keybytes:expr, $tagbytes:expr) => (
+macro_rules! auth_module (($auth_name:ident, 
+                           $verify_name:ident, 
+                           $verify_fn:ident, 
+                           $keybytes:expr, 
+                           $tagbytes:expr) => (
 
 #[link(name = "sodium")]
 extern {
