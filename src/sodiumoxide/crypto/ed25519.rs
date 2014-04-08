@@ -4,6 +4,7 @@
 standard notion of unforgeability for a public-key signature scheme under
 chosen-message attacks.
 */
+#[cfg(test)]
 extern crate serialize;
 use std::libc::{c_ulonglong, c_int};
 use std::slice::from_elem;
