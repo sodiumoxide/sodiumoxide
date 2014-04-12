@@ -23,11 +23,11 @@ pub static SCALARBYTES: uint = 32;
 /**
  * `Scalar` value (integer in byte representation)
  */
-pub struct Scalar([u8, ..SCALARBYTES]);
+pub struct Scalar(pub [u8, ..SCALARBYTES]);
 /**
  * `GroupElement`
  */
-pub struct GroupElement([u8, ..BYTES]);
+pub struct GroupElement(pub [u8, ..BYTES]);
 
 /**
  * `scalarmult()` multiplies a group element `p`

@@ -31,7 +31,7 @@ pub static SIGNATUREBYTES: uint = 64;
  * When a `SecretKey` goes out of scope its contents
  * will be zeroed out
  */
-pub struct SecretKey([u8, ..SECRETKEYBYTES]);
+pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
 impl Drop for SecretKey {
     fn drop(&mut self) {
         let &SecretKey(ref mut buf) = self;
@@ -41,7 +41,7 @@ impl Drop for SecretKey {
 /**
  * `PublicKey` for signatures
  */
-pub struct PublicKey([u8, ..PUBLICKEYBYTES]);
+pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public
