@@ -26,7 +26,7 @@ pub static TAGBYTES: uint = $tagbytes;
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Key([u8, ..KEYBYTES]);
+pub struct Key(pub [u8, ..KEYBYTES]);
 
 impl Drop for Key {
     fn drop(&mut self) {
@@ -41,7 +41,7 @@ impl Drop for Key {
   * The tag implements the traits `TotalEq` and `Eq` using constant-time
   * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
   */
-pub struct Tag([u8, ..TAGBYTES]);
+pub struct Tag(pub [u8, ..TAGBYTES]);
 impl TotalEq for Tag { }
 impl Eq for Tag {
     fn eq(&self, &Tag(other): &Tag) -> bool {

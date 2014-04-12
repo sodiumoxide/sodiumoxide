@@ -33,7 +33,7 @@ pub static NONCEBYTES: uint = 24;
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Key([u8, ..KEYBYTES]);
+pub struct Key(pub [u8, ..KEYBYTES]);
 impl Drop for Key {
     fn drop(&mut self) {
         let &Key(ref mut k) = self;
@@ -44,7 +44,7 @@ impl Drop for Key {
 /**
  * `Nonce` for symmetric authenticated encryption
  */
-pub struct Nonce([u8, ..NONCEBYTES]);
+pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
 pub static ZEROBYTES: uint = 32;
 pub static BOXZEROBYTES: uint = 16;

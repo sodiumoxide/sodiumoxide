@@ -52,14 +52,14 @@ static BOXZEROBYTES: uint = 16;
 /**
  * `PublicKey` for asymmetric authenticated encryption
  */
-pub struct PublicKey([u8, ..PUBLICKEYBYTES]);
+pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
 /**
  * `SecretKey` for asymmetric authenticated encryption
  *
  * When a `SecretKey` goes out of scope its contents
  * will be zeroed out
  */
-pub struct SecretKey([u8, ..SECRETKEYBYTES]);
+pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
 impl Drop for SecretKey {
     fn drop(&mut self) {
         let &SecretKey(ref mut sk) = self;
@@ -70,7 +70,7 @@ impl Drop for SecretKey {
 /**
  * `Nonce` for asymmetric authenticated encryption
  */
-pub struct Nonce([u8, ..NONCEBYTES]);
+pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public key.
