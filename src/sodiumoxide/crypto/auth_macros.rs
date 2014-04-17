@@ -96,9 +96,9 @@ pub fn verify(&Tag(tag): &Tag, m: &[u8],
 #[test]
 fn test_auth_verify() {
     use randombytes::randombytes;
-    for i in range(0, 256) {
+    for i in range(0, 256u) {
         let k = gen_key();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let tag = authenticate(m, &k);
         assert!(verify(&tag, m, &k));
     }
@@ -107,9 +107,9 @@ fn test_auth_verify() {
 #[test]
 fn test_auth_verify_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32) {
+    for i in range(0, 32u) {
         let k = gen_key();
-        let mut m = randombytes(i as uint);
+        let mut m = randombytes(i);
         let Tag(mut tagbuf) = authenticate(m, &k);
         for j in range(0, m.len()) {
             m[j] ^= 0x20;

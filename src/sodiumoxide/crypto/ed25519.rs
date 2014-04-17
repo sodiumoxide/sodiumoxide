@@ -145,9 +145,9 @@ pub fn verify(sm: &[u8],
 #[test]
 fn test_sign_verify() {
     use randombytes::randombytes;
-    for i in range(0, 256) {
+    for i in range(0, 256u) {
         let (pk, sk) = gen_keypair();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let sm = sign(m, &sk);
         let m2 = verify(sm, &pk);
         assert!(Some(m) == m2);
@@ -157,9 +157,9 @@ fn test_sign_verify() {
 #[test]
 fn test_sign_verify_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32) {
+    for i in range(0, 32u) {
         let (pk, sk) = gen_keypair();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let mut sm = sign(m, &sk);
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
@@ -172,12 +172,12 @@ fn test_sign_verify_tamper() {
 #[test]
 fn test_sign_verify_seed() {
     use randombytes::{randombytes, randombytes_into};
-    for i in range(0, 256) {
+    for i in range(0, 256u) {
         let mut seedbuf = [0, ..32];
         randombytes_into(seedbuf);
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let sm = sign(m, &sk);
         let m2 = verify(sm, &pk);
         assert!(Some(m) == m2);
@@ -187,12 +187,12 @@ fn test_sign_verify_seed() {
 #[test]
 fn test_sign_verify_tamper_seed() {
     use randombytes::{randombytes, randombytes_into};
-    for i in range(0, 32) {
+    for i in range(0, 32u) {
         let mut seedbuf = [0, ..32];
         randombytes_into(seedbuf);
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let mut sm = sign(m, &sk);
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;

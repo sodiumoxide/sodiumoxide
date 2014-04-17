@@ -120,9 +120,9 @@ pub fn open(c: &[u8],
 #[test]
 fn test_seal_open() {
     use randombytes::randombytes;
-    for i in range(0, 256) {
+    for i in range(0, 256u) {
         let k = gen_key();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let n = gen_nonce();
         let c = seal(m, &n, &k);
         let opened = open(c, &n, &k);
@@ -133,9 +133,9 @@ fn test_seal_open() {
 #[test]
 fn test_seal_open_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32) {
+    for i in range(0, 32u) {
         let k = gen_key();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let n = gen_nonce();
         let mut c = seal(m, &n, &k);
         for i in range(0, c.len()) {

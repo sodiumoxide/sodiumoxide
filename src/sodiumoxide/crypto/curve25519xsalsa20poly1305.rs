@@ -233,10 +233,10 @@ pub fn open_precomputed(c: &[u8],
 #[test]
 fn test_seal_open() {
     use randombytes::randombytes;
-    for i in range(0, 256) {
+    for i in range(0, 256u) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let n = gen_nonce();
         let c = seal(m, &n, &pk1, &sk2);
         let opened = open(c, &n, &pk2, &sk1);
@@ -247,7 +247,7 @@ fn test_seal_open() {
 #[test]
 fn test_seal_open_precomputed() {
     use randombytes::randombytes;
-    for i in range(0, 256) {
+    for i in range(0, 256u) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
@@ -255,7 +255,7 @@ fn test_seal_open_precomputed() {
         let k2 = precompute(&pk2, &sk1);
         let PrecomputedKey(k2buf) = k2;
         assert!(k1buf == k2buf);
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let n = gen_nonce();
         let c = seal_precomputed(m, &n, &k1);
         let opened = open_precomputed(c, &n, &k2);
@@ -266,10 +266,10 @@ fn test_seal_open_precomputed() {
 #[test]
 fn test_seal_open_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32) {
+    for i in range(0, 32u) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let n = gen_nonce();
         let mut c = seal(m, &n, &pk1, &sk2);
         for j in range(0, c.len()) {
@@ -283,12 +283,12 @@ fn test_seal_open_tamper() {
 #[test]
 fn test_seal_open_precomputed_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32) {
+    for i in range(0, 32u) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
         let k2 = precompute(&pk2, &sk1);
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let n = gen_nonce();
         let mut c = seal_precomputed(m, &n, &k1);
         for j in range(0, c.len()) {
