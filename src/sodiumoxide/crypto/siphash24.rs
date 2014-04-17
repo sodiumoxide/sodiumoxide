@@ -2,7 +2,7 @@
 `SipHash-2-4`
 
 */
-use std::libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int};
 use randombytes::randombytes_into;
 
 #[link(name = "sodium")]

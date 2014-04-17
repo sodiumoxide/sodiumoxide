@@ -6,7 +6,7 @@ chosen-message attacks.
 */
 #[cfg(test)]
 extern crate serialize;
-use std::libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int};
 use std::slice::from_elem;
 
 #[link(name = "sodium")]

@@ -1,7 +1,7 @@
 /*!
 Constant-time comparison of fixed-size vecs
 */
-use std::libc::c_int;
+use libc::c_int;
 
 #[link(name = "sodium")]
 extern {

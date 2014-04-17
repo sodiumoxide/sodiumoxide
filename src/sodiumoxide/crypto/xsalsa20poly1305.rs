@@ -6,7 +6,7 @@ combination of Salsa20 and Poly1305 specified in
 This function is conjectured to meet the standard notions of privacy and
 authenticity.
 */
-use std::libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int};
 use utils::marshal;
 use randombytes::randombytes_into;
 

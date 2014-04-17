@@ -2,7 +2,7 @@
 `HMAC-SHA-256` `HMAC-SHA-256` is conjectured to meet the standard notion of
 unforgeability.
 */
-use std::libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int};
 use randombytes::randombytes_into;
 use crypto::verify::verify_32;
 
