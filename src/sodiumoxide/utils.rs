@@ -1,4 +1,4 @@
-use std::libc::c_ulonglong;
+use libc::c_ulonglong;
 use std::slice::{with_capacity, append};
 
 #[doc(hidden)]

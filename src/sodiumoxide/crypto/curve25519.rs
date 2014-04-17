@@ -6,7 +6,7 @@ This function is conjectured to be strong. For background see Bernstein,
 Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 */
 
-use std::libc::c_int;
+use libc::c_int;
 
 #[link(name = "sodium")]
 extern {

@@ -1,6 +1,6 @@
 /*! Cryptographic random number generation
 */
-use std::libc::size_t;
+use libc::size_t;
 use std::slice::from_elem;
 
 #[link(name = "sodium")]

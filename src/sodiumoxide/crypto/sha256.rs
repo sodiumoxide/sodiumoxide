@@ -9,7 +9,7 @@ SHA-3 competition will improve the situation.
 */
 #[cfg(test)]
 extern crate serialize;
-use std::libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int};
 
 hash_module!(crypto_hash_sha256, 32, 64)
 

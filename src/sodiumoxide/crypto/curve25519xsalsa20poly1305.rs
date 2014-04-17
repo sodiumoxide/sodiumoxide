@@ -7,7 +7,7 @@ This function is conjectured to meet the standard notions of privacy and
 third-party unforgeability.
 
 */
-use std::libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int};
 use utils::marshal;
 use randombytes::randombytes_into;
 

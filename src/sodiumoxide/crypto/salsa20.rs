@@ -3,7 +3,7 @@
 [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 7.  This
 cipher is conjectured to meet the standard notion of unpredictability.
 */
-use std::libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int};
 use std::slice::from_elem;
 use randombytes::randombytes_into;
 
