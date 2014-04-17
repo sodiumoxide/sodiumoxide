@@ -130,10 +130,10 @@ pub fn stream_xor_inplace(m: &mut [u8],
 #[test]
 fn test_encrypt_decrypt() {
     use randombytes::randombytes;
-    for i in range(0, 1024) {
+    for i in range(0, 1024u) {
         let k = gen_key();
         let n = gen_nonce();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let c = stream_xor(m, &n, &k);
         let m2 = stream_xor(c, &n, &k);
         assert!(m == m2);
@@ -143,10 +143,10 @@ fn test_encrypt_decrypt() {
 #[test]
 fn test_stream_xor() {
     use randombytes::randombytes;
-    for i in range(0, 1024) {
+    for i in range(0, 1024u) {
         let k = gen_key();
         let n = gen_nonce();
-        let m = randombytes(i as uint);
+        let m = randombytes(i);
         let mut c = m.clone();
         let s = stream(c.len(), &n, &k);
         for (e, v) in c.mut_iter().zip(s.iter()) {
@@ -160,10 +160,10 @@ fn test_stream_xor() {
 #[test]
 fn test_stream_xor_inplace() {
     use randombytes::randombytes;
-    for i in range(0, 1024) {
+    for i in range(0, 1024u) {
         let k = gen_key();
         let n = gen_nonce();
-        let mut m = randombytes(i as uint);
+        let mut m = randombytes(i);
         let mut c = m.clone();
         let s = stream(c.len(), &n, &k);
         for (e, v) in c.mut_iter().zip(s.iter()) {
