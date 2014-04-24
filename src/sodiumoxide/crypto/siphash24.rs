@@ -19,7 +19,7 @@ pub static KEYBYTES: uint = 16;
 /**
  * Digest-structure
  */
-pub struct Digest([u8, ..HASHBYTES]);
+pub struct Digest(pub [u8, ..HASHBYTES]);
 
 /**
  * Key
@@ -27,7 +27,7 @@ pub struct Digest([u8, ..HASHBYTES]);
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Key([u8, ..KEYBYTES]);
+pub struct Key(pub [u8, ..KEYBYTES]);
 
 impl Drop for Key {
     fn drop(&mut self) {

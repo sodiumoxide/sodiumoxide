@@ -26,7 +26,7 @@ pub static NONCEBYTES: uint = $noncebytes;
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Key([u8, ..KEYBYTES]);
+pub struct Key(pub [u8, ..KEYBYTES]);
 impl Drop for Key {
     fn drop(&mut self) {
         let &Key(ref mut k) = self;
@@ -37,7 +37,7 @@ impl Drop for Key {
 /**
  * `Nonce` for symmetric encryption
  */
-pub struct Nonce([u8, ..NONCEBYTES]);
+pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
 /**
  * `gen_key()` randomly generates a key for symmetric encryption
