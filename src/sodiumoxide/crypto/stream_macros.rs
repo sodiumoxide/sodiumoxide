@@ -74,9 +74,9 @@ pub fn gen_nonce() -> Nonce {
  */
 pub fn stream(len: uint,
               &Nonce(n): &Nonce,
-              &Key(k): &Key) -> ~[u8] {
+              &Key(k): &Key) -> Vec<u8> {
     unsafe {
-        let mut c = from_elem(len, 0u8);
+        let mut c = Vec::from_elem(len, 0u8);
         $stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
                      n.as_ptr(),
@@ -95,9 +95,9 @@ pub fn stream(len: uint,
  */
 pub fn stream_xor(m: &[u8],
                   &Nonce(n): &Nonce,
-                  &Key(k): &Key) -> ~[u8] {
+                  &Key(k): &Key) -> Vec<u8> {
     unsafe {
-        let mut c = from_elem(m.len(), 0u8);
+        let mut c = Vec::from_elem(m.len(), 0u8);
         $xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,

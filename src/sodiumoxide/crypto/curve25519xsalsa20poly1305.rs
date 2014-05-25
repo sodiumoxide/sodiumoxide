@@ -110,7 +110,7 @@ pub fn gen_nonce() -> Nonce {
 pub fn seal(m: &[u8],
             &Nonce(n): &Nonce,
             &PublicKey(pk): &PublicKey,
-            &SecretKey(sk): &SecretKey) -> ~[u8] {
+            &SecretKey(sk): &SecretKey) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
             crypto_box_curve25519xsalsa20poly1305(dst,
@@ -132,7 +132,7 @@ pub fn seal(m: &[u8],
 pub fn open(c: &[u8],
             &Nonce(n): &Nonce,
             &PublicKey(pk): &PublicKey,
-            &SecretKey(sk): &SecretKey) -> Option<~[u8]> {
+            &SecretKey(sk): &SecretKey) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
         return None
     }
@@ -190,7 +190,7 @@ pub fn precompute(&PublicKey(pk): &PublicKey,
  */
 pub fn seal_precomputed(m: &[u8],
                         &Nonce(n): &Nonce,
-                        &PrecomputedKey(k): &PrecomputedKey) -> ~[u8] {
+                        &PrecomputedKey(k): &PrecomputedKey) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
             crypto_box_curve25519xsalsa20poly1305_afternm(dst,
@@ -210,7 +210,7 @@ pub fn seal_precomputed(m: &[u8],
  */
 pub fn open_precomputed(c: &[u8],
                         &Nonce(n): &Nonce,
-                        &PrecomputedKey(k): &PrecomputedKey) -> Option<~[u8]> {
+                        &PrecomputedKey(k): &PrecomputedKey) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
         return None
     }

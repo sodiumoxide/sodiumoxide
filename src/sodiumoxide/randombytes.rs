@@ -1,7 +1,6 @@
 /*! Cryptographic random number generation
 */
 use libc::size_t;
-use std::slice::from_elem;
 
 #[link(name = "sodium")]
 extern {
@@ -16,9 +15,9 @@ extern {
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn randombytes(size: uint) -> ~[u8] {
+pub fn randombytes(size: uint) -> Vec<u8> {
     unsafe {
-        let mut buf = from_elem(size, 0u8);
+        let mut buf = Vec::from_elem(size, 0u8);
         let pbuf = buf.as_mut_ptr();
         randombytes_buf(pbuf, size as size_t);
         buf
