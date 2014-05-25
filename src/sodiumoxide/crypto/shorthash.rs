@@ -15,4 +15,5 @@ a hash table for a given key.
 
 */
 pub use self::siphash24::*;
+#[path="siphash24.rs"]
 pub mod siphash24;
