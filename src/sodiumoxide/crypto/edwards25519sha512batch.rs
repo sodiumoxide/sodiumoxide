@@ -108,8 +108,8 @@ fn test_sign_verify() {
     for i in range(0, 256u) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let sm = sign(m, &sk);
-        let m2 = verify(sm, &pk);
+        let sm = sign(m.as_slice(), &sk);
+        let m2 = verify(sm.as_slice(), &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -120,7 +120,8 @@ fn test_sign_verify_tamper() {
     for i in range(0, 32u) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let mut sm = sign(m, &sk);
+        let mut smv = sign(m.as_slice(), &sk);
+        let sm = smv.as_mut_slice();
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
             assert!(None == verify(sm, &pk));

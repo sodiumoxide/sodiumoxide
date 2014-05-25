@@ -44,16 +44,16 @@ fn test_nist_vector(filename: &str) {
             Err(_) => break,
             Ok(line) => line
         };
-        if line.starts_with("Len = ") {
-            let s = line.slice_from(6);
+        if line.as_slice().starts_with("Len = ") {
+            let s = line.as_slice().slice_from(6);
             let len:uint = from_str(s.trim()).unwrap();
             let line2 = r.read_line().unwrap();
-            let rawmsg = line2.slice_from(6).from_hex().unwrap();
+            let rawmsg = line2.as_slice().slice_from(6).from_hex().unwrap();
             let msg = rawmsg.slice_to(len/8);
             let line3 = r.read_line().unwrap();
-            let md = line3.slice_from(5).from_hex().unwrap();
+            let md = line3.as_slice().slice_from(5).from_hex().unwrap();
             let Digest(digest) = hash(msg);
-            assert!(digest == md);
+            assert!(digest == md.as_slice());
         }
     }
 }
