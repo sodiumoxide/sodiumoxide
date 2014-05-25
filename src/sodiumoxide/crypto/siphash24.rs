@@ -66,9 +66,8 @@ pub fn shorthash(m: &[u8],
 
 #[test]
 fn test_vectors() {
-    use std::slice::with_capacity;
     let maxlen = 64;
-    let mut m = with_capacity(64);
+    let mut m = Vec::with_capacity(64);
     for i in range(0, 64) {
         m.push(i as u8);
     }

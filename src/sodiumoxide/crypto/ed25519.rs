@@ -147,8 +147,8 @@ fn test_sign_verify() {
     for i in range(0, 256u) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let sm = sign(m, &sk);
-        let m2 = verify(sm, &pk);
+        let sm = sign(m.as_slice(), &sk);
+        let m2 = verify(sm.as_slice(), &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -159,7 +159,8 @@ fn test_sign_verify_tamper() {
     for i in range(0, 32u) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let mut sm = sign(m, &sk);
+        let mut smv = sign(m.as_slice(), &sk);
+        let sm = smv.as_mut_slice();
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
             assert!(None == verify(sm, &pk));
@@ -177,8 +178,8 @@ fn test_sign_verify_seed() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);
-        let sm = sign(m, &sk);
-        let m2 = verify(sm, &pk);
+        let sm = sign(m.as_slice(), &sk);
+        let m2 = verify(sm.as_slice(), &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -192,7 +193,8 @@ fn test_sign_verify_tamper_seed() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);
-        let mut sm = sign(m, &sk);
+        let mut smv = sign(m.as_slice(), &sk);
+        let sm = smv.as_mut_slice();
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
             assert!(None == verify(sm, &pk));
@@ -217,7 +219,7 @@ fn test_vectors() {
             Err(_) => break,
             Ok(line) => line
         };
-        let mut x = line.split(':');
+        let mut x = line.as_slice().split(':');
         let x0 = x.next().unwrap();
         let x1 = x.next().unwrap();
         let x2 = x.next().unwrap();
@@ -231,10 +233,10 @@ fn test_vectors() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = x2.from_hex().unwrap();
-        let sm = sign(m, &sk);
-        verify(sm, &pk).unwrap();
+        let sm = sign(m.as_slice(), &sk);
+        verify(sm.as_slice(), &pk).unwrap();
         let PublicKey(pkbuf) = pk;
-        assert!(x1 == pkbuf.to_hex());
-        assert!(x3 == sm.to_hex());
+        assert!(x1 == pkbuf.as_slice().to_hex().as_slice());
+        assert!(x3 == sm.as_slice().to_hex().as_slice());
     }
 }

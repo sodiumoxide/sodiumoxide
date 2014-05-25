@@ -238,8 +238,8 @@ fn test_seal_open() {
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
         let n = gen_nonce();
-        let c = seal(m, &n, &pk1, &sk2);
-        let opened = open(c, &n, &pk2, &sk1);
+        let c = seal(m.as_slice(), &n, &pk1, &sk2);
+        let opened = open(c.as_slice(), &n, &pk2, &sk1);
         assert!(Some(m) == opened);
     }
 }
@@ -257,8 +257,8 @@ fn test_seal_open_precomputed() {
         assert!(k1buf == k2buf);
         let m = randombytes(i);
         let n = gen_nonce();
-        let c = seal_precomputed(m, &n, &k1);
-        let opened = open_precomputed(c, &n, &k2);
+        let c = seal_precomputed(m.as_slice(), &n, &k1);
+        let opened = open_precomputed(c.as_slice(), &n, &k2);
         assert!(Some(m) == opened);
     }
 }
@@ -271,7 +271,8 @@ fn test_seal_open_tamper() {
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
         let n = gen_nonce();
-        let mut c = seal(m, &n, &pk1, &sk2);
+        let mut cv = seal(m.as_slice(), &n, &pk1, &sk2);
+        let c = cv.as_mut_slice();
         for j in range(0, c.len()) {
             c[j] ^= 0x20;
             assert!(None == open(c, &n, &pk2, &sk1));
@@ -290,7 +291,8 @@ fn test_seal_open_precomputed_tamper() {
         let k2 = precompute(&pk2, &sk1);
         let m = randombytes(i);
         let n = gen_nonce();
-        let mut c = seal_precomputed(m, &n, &k1);
+        let mut cv = seal_precomputed(m.as_slice(), &n, &k1);
+        let c = cv.as_mut_slice();
         for j in range(0, c.len()) {
             c[j] ^= 0x20;
             assert!(None == open_precomputed(c, &n, &k2));
@@ -333,7 +335,7 @@ fn test_vector_1() {
     let c = seal(m, &nonce, &bobpk, &alicesk);
     let pk = precompute(&bobpk, &alicesk);
     let cpre = seal_precomputed(m, &nonce, &pk);
-    let cexp = ~[0xf3,0xff,0xc7,0x70,0x3f,0x94,0x00,0xe5,
+    let cexp = vec![0xf3,0xff,0xc7,0x70,0x3f,0x94,0x00,0xe5,
                  0x2a,0x7d,0xfb,0x4b,0x3d,0x33,0x05,0xd9,
                  0x8e,0x99,0x3b,0x9f,0x48,0x68,0x12,0x73,
                  0xc2,0x96,0x50,0xba,0x32,0xfc,0x76,0xce,
@@ -389,7 +391,7 @@ fn test_vector_2() {
              0x79,0x73,0xf6,0x22,0xa4,0x3d,0x14,0xa6,
              0x59,0x9b,0x1f,0x65,0x4c,0xb4,0x5a,0x74,
              0xe3,0x55,0xa5];
-    let mexp = Some(~[0xbe,0x07,0x5f,0xc5,0x3c,0x81,0xf2,0xd5,
+    let mexp = Some(vec![0xbe,0x07,0x5f,0xc5,0x3c,0x81,0xf2,0xd5,
                       0xcf,0x14,0x13,0x16,0xeb,0xeb,0x0c,0x7b,
                       0x52,0x28,0xc5,0x2a,0x4c,0x62,0xcb,0xd4,
                       0x4b,0x66,0x84,0x9b,0x64,0x24,0x4f,0xfc,
