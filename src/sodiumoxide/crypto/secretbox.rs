@@ -24,4 +24,5 @@ This function is conjectured to meet the standard notions of privacy and
 authenticity.
 */
 pub use self::xsalsa20poly1305::*;
+#[path="xsalsa20poly1305.rs"]
 pub mod xsalsa20poly1305;
