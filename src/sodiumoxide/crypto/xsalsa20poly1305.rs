@@ -81,7 +81,7 @@ pub fn gen_nonce() -> Nonce {
  */
 pub fn seal(m: &[u8],
             &Nonce(n): &Nonce,
-            &Key(k): &Key) -> ~[u8] {
+            &Key(k): &Key) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
             crypto_secretbox_xsalsa20poly1305(dst, src, len, n.as_ptr(), k.as_ptr())
@@ -97,7 +97,7 @@ pub fn seal(m: &[u8],
  */
 pub fn open(c: &[u8],
             &Nonce(n): &Nonce,
-            &Key(k): &Key) -> Option<~[u8]> {
+            &Key(k): &Key) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
         return None
     }

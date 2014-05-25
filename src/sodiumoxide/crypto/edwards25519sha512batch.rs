@@ -3,7 +3,6 @@ WARNING: This signature software is a prototype. It has been replaced by the fin
 [Ed25519](http://ed25519.cr.yp.to/). It is only kept here for compatibility reasons.
 */
 use libc::{c_ulonglong, c_int};
-use std::slice::from_elem;
 
 #[link(name = "sodium")]
 extern {
@@ -66,9 +65,9 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
  * `sign()` returns the resulting signed message `sm`.
  */
 pub fn sign(m: &[u8],
-            &SecretKey(sk): &SecretKey) -> ~[u8] {
+            &SecretKey(sk): &SecretKey) -> Vec<u8> {
     unsafe {
-        let mut sm = from_elem(m.len() + SIGNATUREBYTES, 0u8);
+        let mut sm = Vec::from_elem(m.len() + SIGNATUREBYTES, 0u8);
         let mut smlen = 0;
         crypto_sign_edwards25519sha512batch(sm.as_mut_ptr(),
                                             &mut smlen,
@@ -86,9 +85,9 @@ pub fn sign(m: &[u8],
  * If the signature fails verification, `verify()` returns `None`.
  */
 pub fn verify(sm: &[u8],
-              &PublicKey(pk): &PublicKey) -> Option<~[u8]> {
+              &PublicKey(pk): &PublicKey) -> Option<Vec<u8>> {
     unsafe {
-        let mut m = from_elem(sm.len(), 0u8);
+        let mut m = Vec::from_elem(sm.len(), 0u8);
         let mut mlen = 0;
         if crypto_sign_edwards25519sha512batch_open(m.as_mut_ptr(),
                                                     &mut mlen,
