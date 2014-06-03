@@ -38,12 +38,12 @@ impl Drop for Key {
 /**
   * Authentication `Tag`
   *
-  * The tag implements the traits `TotalEq` and `Eq` using constant-time
+  * The tag implements the traits `PartialEq` and `Eq` using constant-time
   * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
   */
 pub struct Tag(pub [u8, ..TAGBYTES]);
-impl TotalEq for Tag { }
-impl Eq for Tag {
+impl Eq for Tag {}
+impl PartialEq for Tag {
     fn eq(&self, &Tag(other): &Tag) -> bool {
         let &Tag(ref tag) = self;
         $verify_fn(tag, &other)
