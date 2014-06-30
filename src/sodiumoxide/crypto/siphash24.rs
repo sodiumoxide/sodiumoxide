@@ -68,7 +68,7 @@ pub fn shorthash(m: &[u8],
 fn test_vectors() {
     let maxlen = 64;
     let mut m = Vec::with_capacity(64);
-    for i in range(0, 64) {
+    for i in range(0u, 64) {
         m.push(i as u8);
     }
     let h_expecteds = [[0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72]
