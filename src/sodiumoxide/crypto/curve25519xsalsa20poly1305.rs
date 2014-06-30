@@ -16,30 +16,30 @@ extern {
     fn crypto_box_curve25519xsalsa20poly1305_keypair(pk: *mut u8,
                                                      sk: *mut u8) -> c_int;
     fn crypto_box_curve25519xsalsa20poly1305(c: *mut u8,
-                                             m: *u8,
+                                             m: *const u8,
                                              mlen: c_ulonglong,
-                                             n: *u8,
-                                             pk: *u8,
-                                             sk: *u8) -> c_int;
+                                             n: *const u8,
+                                             pk: *const u8,
+                                             sk: *const u8) -> c_int;
     fn crypto_box_curve25519xsalsa20poly1305_open(m: *mut u8,
-                                                  c: *u8,
+                                                  c: *const u8,
                                                   clen: c_ulonglong,
-                                                  n: *u8,
-                                                  pk: *u8,
-                                                  sk: *u8) -> c_int;
+                                                  n: *const u8,
+                                                  pk: *const u8,
+                                                  sk: *const u8) -> c_int;
     fn crypto_box_curve25519xsalsa20poly1305_beforenm(k: *mut u8,
-                                                      pk: *u8,
-                                                      sk: *u8) -> c_int;
+                                                      pk: *const u8,
+                                                      sk: *const u8) -> c_int;
     fn crypto_box_curve25519xsalsa20poly1305_afternm(c: *mut u8,
-                                                     m: *u8,
+                                                     m: *const u8,
                                                      mlen: c_ulonglong,
-                                                     n: *u8,
-                                                     k: *u8) -> c_int;
+                                                     n: *const u8,
+                                                     k: *const u8) -> c_int;
     fn crypto_box_curve25519xsalsa20poly1305_open_afternm(m: *mut u8,
-                                                          c: *u8,
+                                                          c: *const u8,
                                                           clen: c_ulonglong,
-                                                          n: *u8,
-                                                          k: *u8) -> c_int;
+                                                          n: *const u8,
+                                                          k: *const u8) -> c_int;
 }
 
 pub static PUBLICKEYBYTES: uint = 32;

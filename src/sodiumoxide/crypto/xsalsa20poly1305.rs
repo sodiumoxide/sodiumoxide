@@ -13,15 +13,15 @@ use randombytes::randombytes_into;
 #[link(name = "sodium")]
 extern {
     fn crypto_secretbox_xsalsa20poly1305(c: *mut u8,
-                                         m: *u8,
+                                         m: *const u8,
                                          mlen: c_ulonglong,
-                                         n: *u8,
-                                         k: *u8) -> c_int;
+                                         n: *const u8,
+                                         k: *const u8) -> c_int;
     fn crypto_secretbox_xsalsa20poly1305_open(m: *mut u8,
-                                              c: *u8,
+                                              c: *const u8,
                                               clen: c_ulonglong,
-                                              n: *u8,
-                                              k: *u8) -> c_int;
+                                              n: *const u8,
+                                              k: *const u8) -> c_int;
 }
 
 pub static KEYBYTES: uint = 32;

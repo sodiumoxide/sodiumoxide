@@ -8,13 +8,13 @@ macro_rules! auth_module (($auth_name:ident,
 #[link(name = "sodium")]
 extern {
     fn $auth_name(a: *mut u8,
-                  m: *u8,
+                  m: *const u8,
                   mlen: c_ulonglong,
-                  k: *u8) -> c_int;
-    fn $verify_name(a: *u8,
-                    m: *u8,
+                  k: *const u8) -> c_int;
+    fn $verify_name(a: *const u8,
+                    m: *const u8,
                     mlen: c_ulonglong,
-                    k: *u8) -> c_int;
+                    k: *const u8) -> c_int;
 }
 
 pub static KEYBYTES: uint = $keybytes;

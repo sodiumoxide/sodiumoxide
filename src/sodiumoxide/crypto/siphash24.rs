@@ -8,9 +8,9 @@ use randombytes::randombytes_into;
 #[link(name = "sodium")]
 extern {
     fn crypto_shorthash_siphash24(h: *mut u8,
-                                  m: *u8,
+                                  m: *const u8,
                                   mlen: c_ulonglong,
-                                  k: *u8) -> c_int;
+                                  k: *const u8) -> c_int;
 }
 
 pub static HASHBYTES: uint = 8;
