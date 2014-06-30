@@ -5,8 +5,8 @@ use libc::c_int;
 
 #[link(name = "sodium")]
 extern {
-    fn crypto_verify_16(x: *u8, y: *u8) -> c_int;
-    fn crypto_verify_32(x: *u8, y: *u8) -> c_int;
+    fn crypto_verify_16(x: *const u8, y: *const u8) -> c_int;
+    fn crypto_verify_32(x: *const u8, y: *const u8) -> c_int;
 }
 
 /**

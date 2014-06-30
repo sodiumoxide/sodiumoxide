@@ -10,14 +10,14 @@ extern {
                                                    sk: *mut u8) -> c_int;
     fn crypto_sign_edwards25519sha512batch(sm: *mut u8,
                                            smlen: *mut c_ulonglong,
-                                           m: *u8,
+                                           m: *const u8,
                                            mlen: c_ulonglong,
-                                           sk: *u8) -> c_int;
+                                           sk: *const u8) -> c_int;
     fn crypto_sign_edwards25519sha512batch_open(m: *mut u8,
                                                 mlen: *mut c_ulonglong,
-                                                sm: *u8,
+                                                sm: *const u8,
                                                 smlen: c_ulonglong,
-                                                pk: *u8) -> c_int;
+                                                pk: *const u8) -> c_int;
 }
 
 pub static SECRETKEYBYTES: uint = 64;

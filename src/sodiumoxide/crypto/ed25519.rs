@@ -14,17 +14,17 @@ extern {
                                    sk: *mut u8) -> c_int;
     fn crypto_sign_ed25519_seed_keypair(pk: *mut u8,
                                         sk: *mut u8,
-                                        seed: *u8) -> c_int;
+                                        seed: *const u8) -> c_int;
     fn crypto_sign_ed25519(sm: *mut u8,
                            smlen: *mut c_ulonglong,
-                           m: *u8,
+                           m: *const u8,
                            mlen: c_ulonglong,
-                           sk: *u8) -> c_int;
+                           sk: *const u8) -> c_int;
     fn crypto_sign_ed25519_open(m: *mut u8,
                                 mlen: *mut c_ulonglong,
-                                sm: *u8,
+                                sm: *const u8,
                                 smlen: c_ulonglong,
-                                pk: *u8) -> c_int;
+                                pk: *const u8) -> c_int;
 }
 
 pub static SEEDBYTES: uint = 32;
