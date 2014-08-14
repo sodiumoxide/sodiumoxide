@@ -8,13 +8,13 @@ macro_rules! stream_module (($stream_name:ident,
 extern {
     fn $stream_name(c: *mut u8,
                     clen: c_ulonglong,
-                    n: *u8,
-                    k: *u8) -> c_int;
+                    n: *const u8,
+                    k: *const u8) -> c_int;
     fn $xor_name(c: *mut u8,
-                 m: *u8,
+                 m: *const u8,
                  mlen: c_ulonglong,
-                 n: *u8,
-                 k: *u8) -> c_int;
+                 n: *const u8,
+                 k: *const u8) -> c_int;
 }
 
 pub static KEYBYTES: uint = $keybytes;
@@ -74,9 +74,9 @@ pub fn gen_nonce() -> Nonce {
  */
 pub fn stream(len: uint,
               &Nonce(n): &Nonce,
-              &Key(k): &Key) -> ~[u8] {
+              &Key(k): &Key) -> Vec<u8> {
     unsafe {
-        let mut c = from_elem(len, 0u8);
+        let mut c = Vec::from_elem(len, 0u8);
         $stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
                      n.as_ptr(),
@@ -95,9 +95,9 @@ pub fn stream(len: uint,
  */
 pub fn stream_xor(m: &[u8],
                   &Nonce(n): &Nonce,
-                  &Key(k): &Key) -> ~[u8] {
+                  &Key(k): &Key) -> Vec<u8> {
     unsafe {
-        let mut c = from_elem(m.len(), 0u8);
+        let mut c = Vec::from_elem(m.len(), 0u8);
         $xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
@@ -134,8 +134,8 @@ fn test_encrypt_decrypt() {
         let k = gen_key();
         let n = gen_nonce();
         let m = randombytes(i);
-        let c = stream_xor(m, &n, &k);
-        let m2 = stream_xor(c, &n, &k);
+        let c = stream_xor(m.as_slice(), &n, &k);
+        let m2 = stream_xor(c.as_slice(), &n, &k);
         assert!(m == m2);
     }
 }
@@ -152,7 +152,7 @@ fn test_stream_xor() {
         for (e, v) in c.mut_iter().zip(s.iter()) {
             *e ^= *v;
         }
-        let c2 = stream_xor(m, &n, &k);
+        let c2 = stream_xor(m.as_slice(), &n, &k);
         assert!(c == c2);
     }
 }
@@ -169,7 +169,7 @@ fn test_stream_xor_inplace() {
         for (e, v) in c.mut_iter().zip(s.iter()) {
             *e ^= *v;
         }
-        stream_xor_inplace(m, &n, &k);
+        stream_xor_inplace(m.as_mut_slice(), &n, &k);
         assert!(c == m);
     }
 }
