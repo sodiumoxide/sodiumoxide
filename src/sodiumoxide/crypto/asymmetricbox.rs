@@ -47,4 +47,5 @@ third-party unforgeability.
 
 */
 pub use self::curve25519xsalsa20poly1305::*;
+#[path="curve25519xsalsa20poly1305.rs"]
 pub mod curve25519xsalsa20poly1305;

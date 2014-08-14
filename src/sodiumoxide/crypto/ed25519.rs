@@ -7,7 +7,6 @@ chosen-message attacks.
 #[cfg(test)]
 extern crate serialize;
 use libc::{c_ulonglong, c_int};
-use std::slice::from_elem;
 
 #[link(name = "sodium")]
 extern {
@@ -15,17 +14,17 @@ extern {
                                    sk: *mut u8) -> c_int;
     fn crypto_sign_ed25519_seed_keypair(pk: *mut u8,
                                         sk: *mut u8,
-                                        seed: *u8) -> c_int;
+                                        seed: *const u8) -> c_int;
     fn crypto_sign_ed25519(sm: *mut u8,
                            smlen: *mut c_ulonglong,
-                           m: *u8,
+                           m: *const u8,
                            mlen: c_ulonglong,
-                           sk: *u8) -> c_int;
+                           sk: *const u8) -> c_int;
     fn crypto_sign_ed25519_open(m: *mut u8,
                                 mlen: *mut c_ulonglong,
-                                sm: *u8,
+                                sm: *const u8,
                                 smlen: c_ulonglong,
-                                pk: *u8) -> c_int;
+                                pk: *const u8) -> c_int;
 }
 
 pub static SEEDBYTES: uint = 32;
@@ -105,9 +104,9 @@ pub fn keypair_from_seed(&Seed(seed): &Seed) -> (PublicKey, SecretKey) {
  * `sign()` returns the resulting signed message `sm`.
  */
 pub fn sign(m: &[u8],
-            &SecretKey(sk): &SecretKey) -> ~[u8] {
+            &SecretKey(sk): &SecretKey) -> Vec<u8> {
     unsafe {
-        let mut sm = from_elem(m.len() + SIGNATUREBYTES, 0u8);
+        let mut sm = Vec::from_elem(m.len() + SIGNATUREBYTES, 0u8);
         let mut smlen = 0;
         crypto_sign_ed25519(sm.as_mut_ptr(),
                             &mut smlen,
@@ -125,9 +124,9 @@ pub fn sign(m: &[u8],
  * If the signature fails verification, `verify()` returns `None`.
  */
 pub fn verify(sm: &[u8],
-              &PublicKey(pk): &PublicKey) -> Option<~[u8]> {
+              &PublicKey(pk): &PublicKey) -> Option<Vec<u8>> {
     unsafe {
-        let mut m = from_elem(sm.len(), 0u8);
+        let mut m = Vec::from_elem(sm.len(), 0u8);
         let mut mlen = 0;
         if crypto_sign_ed25519_open(m.as_mut_ptr(),
                                     &mut mlen,
@@ -148,8 +147,8 @@ fn test_sign_verify() {
     for i in range(0, 256u) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let sm = sign(m, &sk);
-        let m2 = verify(sm, &pk);
+        let sm = sign(m.as_slice(), &sk);
+        let m2 = verify(sm.as_slice(), &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -160,7 +159,8 @@ fn test_sign_verify_tamper() {
     for i in range(0, 32u) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let mut sm = sign(m, &sk);
+        let mut smv = sign(m.as_slice(), &sk);
+        let sm = smv.as_mut_slice();
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
             assert!(None == verify(sm, &pk));
@@ -178,8 +178,8 @@ fn test_sign_verify_seed() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);
-        let sm = sign(m, &sk);
-        let m2 = verify(sm, &pk);
+        let sm = sign(m.as_slice(), &sk);
+        let m2 = verify(sm.as_slice(), &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -193,7 +193,8 @@ fn test_sign_verify_tamper_seed() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);
-        let mut sm = sign(m, &sk);
+        let mut smv = sign(m.as_slice(), &sk);
+        let sm = smv.as_mut_slice();
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
             assert!(None == verify(sm, &pk));
@@ -218,7 +219,7 @@ fn test_vectors() {
             Err(_) => break,
             Ok(line) => line
         };
-        let mut x = line.split(':');
+        let mut x = line.as_slice().split(':');
         let x0 = x.next().unwrap();
         let x1 = x.next().unwrap();
         let x2 = x.next().unwrap();
@@ -232,10 +233,10 @@ fn test_vectors() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = x2.from_hex().unwrap();
-        let sm = sign(m, &sk);
-        verify(sm, &pk).unwrap();
+        let sm = sign(m.as_slice(), &sk);
+        verify(sm.as_slice(), &pk).unwrap();
         let PublicKey(pkbuf) = pk;
-        assert!(x1 == pkbuf.to_hex());
-        assert!(x3 == sm.to_hex());
+        assert!(x1 == pkbuf.as_slice().to_hex().as_slice());
+        assert!(x3 == sm.as_slice().to_hex().as_slice());
     }
 }

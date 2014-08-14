@@ -8,9 +8,9 @@ use randombytes::randombytes_into;
 #[link(name = "sodium")]
 extern {
     fn crypto_shorthash_siphash24(h: *mut u8,
-                                  m: *u8,
+                                  m: *const u8,
                                   mlen: c_ulonglong,
-                                  k: *u8) -> c_int;
+                                  k: *const u8) -> c_int;
 }
 
 pub static HASHBYTES: uint = 8;
@@ -66,10 +66,9 @@ pub fn shorthash(m: &[u8],
 
 #[test]
 fn test_vectors() {
-    use std::slice::with_capacity;
     let maxlen = 64;
-    let mut m = with_capacity(64);
-    for i in range(0, 64) {
+    let mut m = Vec::with_capacity(64);
+    for i in range(0u, 64) {
         m.push(i as u8);
     }
     let h_expecteds = [[0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72]

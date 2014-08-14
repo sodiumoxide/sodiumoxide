@@ -5,8 +5,8 @@ use libc::c_int;
 
 #[link(name = "sodium")]
 extern {
-    fn crypto_verify_16(x: *u8, y: *u8) -> c_int;
-    fn crypto_verify_32(x: *u8, y: *u8) -> c_int;
+    fn crypto_verify_16(x: *const u8, y: *const u8) -> c_int;
+    fn crypto_verify_32(x: *const u8, y: *const u8) -> c_int;
 }
 
 /**
@@ -47,7 +47,7 @@ pub fn verify_32(x: &[u8, ..32], y: &[u8, ..32]) -> bool {
 fn test_verify_16() {
     use randombytes::randombytes_into;
 
-    for _ in range(0, 256) {
+    for _ in range(0u, 256) {
         let mut x = [0, ..16];
         let mut y = [0, ..16];
         assert!(verify_16(&x, &y));
@@ -65,7 +65,7 @@ fn test_verify_16() {
 fn test_verify_32() {
     use randombytes::randombytes_into;
 
-    for _ in range(0, 256) {
+    for _ in range(0u, 256) {
         let mut x = [0, ..32];
         let mut y = [0, ..32];
         assert!(verify_32(&x, &y));

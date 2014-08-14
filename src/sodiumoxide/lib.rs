@@ -45,7 +45,7 @@ generation functions and the key-generation functions are thread-safe.
 
  `crypto::shorthash`
  */
-#![crate_id = "sodiumoxide#0.1"]
+#![crate_name = "sodiumoxide"]
 #![comment = "Fast cryptographic library"]
 #![license = "MIT"]
 #![crate_type = "lib"]

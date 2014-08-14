@@ -8,13 +8,13 @@ macro_rules! auth_module (($auth_name:ident,
 #[link(name = "sodium")]
 extern {
     fn $auth_name(a: *mut u8,
-                  m: *u8,
+                  m: *const u8,
                   mlen: c_ulonglong,
-                  k: *u8) -> c_int;
-    fn $verify_name(a: *u8,
-                    m: *u8,
+                  k: *const u8) -> c_int;
+    fn $verify_name(a: *const u8,
+                    m: *const u8,
                     mlen: c_ulonglong,
-                    k: *u8) -> c_int;
+                    k: *const u8) -> c_int;
 }
 
 pub static KEYBYTES: uint = $keybytes;
@@ -38,12 +38,12 @@ impl Drop for Key {
 /**
   * Authentication `Tag`
   *
-  * The tag implements the traits `TotalEq` and `Eq` using constant-time
+  * The tag implements the traits `PartialEq` and `Eq` using constant-time
   * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
   */
 pub struct Tag(pub [u8, ..TAGBYTES]);
-impl TotalEq for Tag { }
-impl Eq for Tag {
+impl Eq for Tag {}
+impl PartialEq for Tag {
     fn eq(&self, &Tag(other): &Tag) -> bool {
         let &Tag(ref tag) = self;
         $verify_fn(tag, &other)
@@ -99,8 +99,8 @@ fn test_auth_verify() {
     for i in range(0, 256u) {
         let k = gen_key();
         let m = randombytes(i);
-        let tag = authenticate(m, &k);
-        assert!(verify(&tag, m, &k));
+        let tag = authenticate(m.as_slice(), &k);
+        assert!(verify(&tag, m.as_slice(), &k));
     }
 }
 
@@ -109,11 +109,12 @@ fn test_auth_verify_tamper() {
     use randombytes::randombytes;
     for i in range(0, 32u) {
         let k = gen_key();
-        let mut m = randombytes(i);
-        let Tag(mut tagbuf) = authenticate(m, &k);
+        let mut mv = randombytes(i);
+        let m = mv.as_mut_slice();
+        let Tag(mut tagbuf) = authenticate(m.as_slice(), &k);
         for j in range(0, m.len()) {
             m[j] ^= 0x20;
-            assert!(!verify(&Tag(tagbuf), m, &k));
+            assert!(!verify(&Tag(tagbuf), m.as_slice(), &k));
             m[j] ^= 0x20;
         }
         for j in range(0, tagbuf.len()) {

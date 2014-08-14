@@ -3,7 +3,6 @@ WARNING: This signature software is a prototype. It has been replaced by the fin
 [Ed25519](http://ed25519.cr.yp.to/). It is only kept here for compatibility reasons.
 */
 use libc::{c_ulonglong, c_int};
-use std::slice::from_elem;
 
 #[link(name = "sodium")]
 extern {
@@ -11,14 +10,14 @@ extern {
                                                    sk: *mut u8) -> c_int;
     fn crypto_sign_edwards25519sha512batch(sm: *mut u8,
                                            smlen: *mut c_ulonglong,
-                                           m: *u8,
+                                           m: *const u8,
                                            mlen: c_ulonglong,
-                                           sk: *u8) -> c_int;
+                                           sk: *const u8) -> c_int;
     fn crypto_sign_edwards25519sha512batch_open(m: *mut u8,
                                                 mlen: *mut c_ulonglong,
-                                                sm: *u8,
+                                                sm: *const u8,
                                                 smlen: c_ulonglong,
-                                                pk: *u8) -> c_int;
+                                                pk: *const u8) -> c_int;
 }
 
 pub static SECRETKEYBYTES: uint = 64;
@@ -66,9 +65,9 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
  * `sign()` returns the resulting signed message `sm`.
  */
 pub fn sign(m: &[u8],
-            &SecretKey(sk): &SecretKey) -> ~[u8] {
+            &SecretKey(sk): &SecretKey) -> Vec<u8> {
     unsafe {
-        let mut sm = from_elem(m.len() + SIGNATUREBYTES, 0u8);
+        let mut sm = Vec::from_elem(m.len() + SIGNATUREBYTES, 0u8);
         let mut smlen = 0;
         crypto_sign_edwards25519sha512batch(sm.as_mut_ptr(),
                                             &mut smlen,
@@ -86,9 +85,9 @@ pub fn sign(m: &[u8],
  * If the signature fails verification, `verify()` returns `None`.
  */
 pub fn verify(sm: &[u8],
-              &PublicKey(pk): &PublicKey) -> Option<~[u8]> {
+              &PublicKey(pk): &PublicKey) -> Option<Vec<u8>> {
     unsafe {
-        let mut m = from_elem(sm.len(), 0u8);
+        let mut m = Vec::from_elem(sm.len(), 0u8);
         let mut mlen = 0;
         if crypto_sign_edwards25519sha512batch_open(m.as_mut_ptr(),
                                                     &mut mlen,
@@ -109,8 +108,8 @@ fn test_sign_verify() {
     for i in range(0, 256u) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let sm = sign(m, &sk);
-        let m2 = verify(sm, &pk);
+        let sm = sign(m.as_slice(), &sk);
+        let m2 = verify(sm.as_slice(), &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -121,7 +120,8 @@ fn test_sign_verify_tamper() {
     for i in range(0, 32u) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let mut sm = sign(m, &sk);
+        let mut smv = sign(m.as_slice(), &sk);
+        let sm = smv.as_mut_slice();
         for j in range(0, sm.len()) {
             sm[j] ^= 0x20;
             assert!(None == verify(sm, &pk));

@@ -11,10 +11,10 @@ use libc::c_int;
 #[link(name = "sodium")]
 extern {
     fn crypto_scalarmult_curve25519(q: *mut u8,
-                                    n: *u8,
-                                    p: *u8) -> c_int;
+                                    n: *const u8,
+                                    p: *const u8) -> c_int;
     fn crypto_scalarmult_curve25519_base(q: *mut u8,
-                                         n: *u8) -> c_int;
+                                         n: *const u8) -> c_int;
 }
 
 pub static BYTES: uint = 32;
