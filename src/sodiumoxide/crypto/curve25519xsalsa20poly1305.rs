@@ -11,6 +11,7 @@ use libc::{c_ulonglong, c_int};
 use utils::marshal;
 use randombytes::randombytes_into;
 use std::intrinsics::{transmute,copy_nonoverlapping_memory};
+use std::fmt;
 
 #[link(name = "sodium")]
 extern {
@@ -94,6 +95,20 @@ impl PublicKey {
 
 }
 
+impl PartialEq for PublicKey {
+    fn eq(&self, other: &PublicKey) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for PublicKey {}
+
+impl fmt::Show for PublicKey {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_slice().fmt(f)
+    }
+}
+
 /**
  * `SecretKey` for asymmetric authenticated encryption
  *
@@ -146,6 +161,14 @@ impl Drop for SecretKey {
     }
 }
 
+impl PartialEq for SecretKey {
+    fn eq(&self, other: &SecretKey) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for SecretKey { }
+
 /**
  * `Nonce` for asymmetric authenticated encryption
  */
@@ -186,6 +209,20 @@ impl Nonce {
     pub fn as_slice(&self) -> &[u8] {
         let &Nonce(ref data) = self;
         data.as_slice()
+    }
+}
+
+impl PartialEq for Nonce {
+    fn eq(&self, other: &Nonce) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for Nonce {}
+
+impl fmt::Show for Nonce {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_slice().fmt(f)
     }
 }
 
