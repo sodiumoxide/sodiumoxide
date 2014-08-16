@@ -10,6 +10,7 @@ third-party unforgeability.
 use libc::{c_ulonglong, c_int};
 use utils::marshal;
 use randombytes::randombytes_into;
+use std::intrinsics::{transmute,copy_nonoverlapping_memory};
 
 #[link(name = "sodium")]
 extern {
@@ -53,6 +54,46 @@ static BOXZEROBYTES: uint = 16;
  * `PublicKey` for asymmetric authenticated encryption
  */
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+
+
+impl PublicKey {
+    /// Create `PublicKey` from slice.
+    pub fn from_slice(data: &[u8]) -> Result<PublicKey, ()> {
+        match data.len() {
+            PUBLICKEYBYTES => {
+                let mut ret = [0, ..PUBLICKEYBYTES];
+
+                unsafe {
+                    copy_nonoverlapping_memory(ret.as_mut_ptr(),
+                                               data.as_ptr(),
+                                               data.len());
+                }
+                Ok(PublicKey(ret))
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Create `PublicKey` from slice without copying.
+    pub fn from_slice_by_ref<'a>(data: &'a [u8]) -> Result<&'a PublicKey, ()> {
+        match data.len() {
+            PUBLICKEYBYTES => {
+                Ok(unsafe {
+                    transmute(data.as_ptr())
+                })
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Borrow as a slice.
+    pub fn as_slice(&self) -> &[u8] {
+        let &PublicKey(ref data) = self;
+        data.as_slice()
+    }
+
+}
+
 /**
  * `SecretKey` for asymmetric authenticated encryption
  *
@@ -60,6 +101,44 @@ pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
  * will be zeroed out
  */
 pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
+
+impl SecretKey {
+    /// Create `SecretKey` from slice.
+    pub fn from_slice(data: &[u8]) -> Result<SecretKey, ()> {
+        match data.len() {
+            SECRETKEYBYTES => {
+                let mut ret = [0, ..SECRETKEYBYTES];
+
+                unsafe {
+                    copy_nonoverlapping_memory(ret.as_mut_ptr(),
+                                               data.as_ptr(),
+                                               data.len());
+                }
+                Ok(SecretKey(ret))
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Create `SecretKey` from slice without copying.
+    pub fn from_slice_by_ref<'a>(data: &'a [u8]) -> Result<&'a SecretKey, ()> {
+        match data.len() {
+            SECRETKEYBYTES => {
+                Ok(unsafe {
+                    transmute(data.as_ptr())
+                })
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Borrow as a slice.
+    pub fn as_slice(&self) -> &[u8] {
+        let &SecretKey(ref data) = self;
+        data.as_slice()
+    }
+}
+
 impl Drop for SecretKey {
     fn drop(&mut self) {
         let &SecretKey(ref mut sk) = self;
@@ -71,6 +150,44 @@ impl Drop for SecretKey {
  * `Nonce` for asymmetric authenticated encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
+
+impl Nonce {
+    /// Create `Nonce` from slice.
+    pub fn from_slice(data: &[u8]) -> Result<Nonce, ()> {
+        match data.len() {
+            NONCEBYTES => {
+                let mut ret = [0, ..NONCEBYTES];
+
+                unsafe {
+                    copy_nonoverlapping_memory(ret.as_mut_ptr(),
+                                               data.as_ptr(),
+                                               data.len());
+                }
+                Ok(Nonce(ret))
+            },
+            _ => Err(())
+        }
+    }
+
+
+    /// Create `Nonce` from slice without copying.
+    pub fn from_slice_by_ref<'a>(data: &'a [u8]) -> Result<&'a Nonce, ()> {
+        match data.len() {
+            NONCEBYTES => {
+                Ok(unsafe {
+                    transmute(data.as_ptr())
+                })
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Borrow as a slice.
+    pub fn as_slice(&self) -> &[u8] {
+        let &Nonce(ref data) = self;
+        data.as_slice()
+    }
+}
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public key.
