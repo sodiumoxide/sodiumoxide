@@ -568,3 +568,68 @@ fn test_vector_2() {
     assert!(m == mexp);
     assert!(m_pre == mexp);
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::rand::Rng;
+    use std::rand::task_rng;
+    use std::fmt;
+
+    impl fmt::Show for SecretKey {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            self.as_slice().fmt(f)
+        }
+    }
+
+    fn random_24_bytes<R:Rng>(rng: &mut R) -> [u8, ..24] {
+        let mut ret = [0u8, ..24];
+        rng.fill_bytes(ret);
+        ret
+    }
+
+    fn random_32_bytes<R:Rng>(rng: &mut R) -> [u8, ..32] {
+        let mut ret = [0u8, ..32];
+        rng.fill_bytes(ret);
+        ret
+    }
+
+    #[test]
+    fn nonce_slice() {
+        let mut rng = task_rng();
+        let nonce_raw = random_24_bytes(&mut rng);
+        let nonce = Nonce::from_slice(nonce_raw).unwrap();
+        let nonce_by_ref = Nonce::from_slice_by_ref(nonce_raw).unwrap();
+
+        assert_eq!(nonce_raw.as_slice(), nonce.as_slice());
+        assert_eq!(nonce_raw.as_slice(), nonce_by_ref.as_slice());
+        assert_eq!(nonce, *nonce_by_ref);
+        assert_eq!(nonce.as_slice(), nonce_by_ref.as_slice());
+    }
+
+    #[test]
+    fn publickey_slice() {
+        let mut rng = task_rng();
+        let publickey_raw = random_32_bytes(&mut rng);
+        let publickey = PublicKey::from_slice(publickey_raw).unwrap();
+        let publickey_by_ref = PublicKey::from_slice_by_ref(publickey_raw).unwrap();
+
+        assert_eq!(publickey_raw.as_slice(), publickey.as_slice());
+        assert_eq!(publickey_raw.as_slice(), publickey_by_ref.as_slice());
+        assert_eq!(publickey, *publickey_by_ref);
+        assert_eq!(publickey.as_slice(), publickey_by_ref.as_slice());
+    }
+
+    #[test]
+    fn secretkey_slice() {
+        let mut rng = task_rng();
+        let secretkey_raw = random_32_bytes(&mut rng);
+        let secretkey = PublicKey::from_slice(secretkey_raw).unwrap();
+        let secretkey_by_ref = PublicKey::from_slice_by_ref(secretkey_raw).unwrap();
+
+        assert_eq!(secretkey_raw.as_slice(), secretkey.as_slice());
+        assert_eq!(secretkey_raw.as_slice(), secretkey_by_ref.as_slice());
+        assert_eq!(secretkey, *secretkey_by_ref);
+        assert_eq!(secretkey.as_slice(), secretkey_by_ref.as_slice());
+    }
+}
