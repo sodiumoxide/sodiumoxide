@@ -4,6 +4,8 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr, 
                              $noncebytes:expr) => (
 
+mod byte_wrapper_macros;
+
 #[link(name = "sodium")]
 extern {
     fn $stream_name(c: *mut u8,
@@ -34,10 +36,14 @@ impl Drop for Key {
     }
 }
 
+byte_wrapper_helpers!(Key, KEYBYTES)
+
 /**
  * `Nonce` for symmetric encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
+
+byte_wrapper_helpers!(Nonce, NONCEBYTES)
 
 /**
  * `gen_key()` randomly generates a key for symmetric encryption

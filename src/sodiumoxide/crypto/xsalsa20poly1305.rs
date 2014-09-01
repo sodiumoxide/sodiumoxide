@@ -10,6 +10,8 @@ use libc::{c_ulonglong, c_int};
 use utils::marshal;
 use randombytes::randombytes_into;
 
+mod byte_wrapper_macros;
+
 #[link(name = "sodium")]
 extern {
     fn crypto_secretbox_xsalsa20poly1305(c: *mut u8,
@@ -41,10 +43,14 @@ impl Drop for Key {
     }
 }
 
+byte_wrapper_helpers!(Key, KEYBYTES)
+
 /**
  * `Nonce` for symmetric authenticated encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
+
+byte_wrapper_helpers!(Nonce, NONCEBYTES)
 
 pub static ZEROBYTES: uint = 32;
 pub static BOXZEROBYTES: uint = 16;

@@ -1,4 +1,5 @@
-use libc::c_ulonglong;
+use libc::{c_int, c_ulonglong, c_void};
+use libc::types::os::arch::c95::size_t;
 
 #[doc(hidden)]
 pub fn marshal<T>(buf: &[u8],
@@ -15,4 +16,25 @@ pub fn marshal<T>(buf: &[u8],
     let psrc = dst.as_ptr();
     let res = f(pdst, psrc, dst.len() as c_ulonglong);
     (dst.move_iter().skip(bytestodrop).collect(), res)
+}
+
+#[link(name = "sodium")]
+extern "C" {
+    fn sodium_memcmp(b1: *const c_void, b2: *const c_void, len: size_t) -> c_int;
+}
+
+pub fn secure_compare(one: &[u8], two: &[u8]) -> bool {
+    if one.len() != two.len() {
+        return false;
+    }
+
+    let r = unsafe {
+        sodium_memcmp(
+            one.as_ptr() as *const c_void,
+            two.as_ptr() as *const c_void,
+            one.len() as size_t
+        )
+    };
+
+    r == 0 as c_int
 }

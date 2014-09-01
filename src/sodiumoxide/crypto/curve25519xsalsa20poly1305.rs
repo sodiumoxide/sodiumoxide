@@ -11,6 +11,8 @@ use libc::{c_ulonglong, c_int};
 use utils::marshal;
 use randombytes::randombytes_into;
 
+mod byte_wrapper_macros;
+
 #[link(name = "sodium")]
 extern {
     fn crypto_box_curve25519xsalsa20poly1305_keypair(pk: *mut u8,
@@ -53,6 +55,9 @@ static BOXZEROBYTES: uint = 16;
  * `PublicKey` for asymmetric authenticated encryption
  */
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+
+byte_wrapper_helpers!(PublicKey, PUBLICKEYBYTES)
+
 /**
  * `SecretKey` for asymmetric authenticated encryption
  *
@@ -67,10 +72,14 @@ impl Drop for SecretKey {
     }
 }
 
+byte_wrapper_helpers!(SecretKey, SECRETKEYBYTES)
+
 /**
  * `Nonce` for asymmetric authenticated encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
+
+byte_wrapper_helpers!(Nonce, NONCEBYTES)
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public key.

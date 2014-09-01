@@ -5,6 +5,8 @@
 use libc::{c_ulonglong, c_int};
 use randombytes::randombytes_into;
 
+mod byte_wrapper_macros;
+
 #[link(name = "sodium")]
 extern {
     fn crypto_shorthash_siphash24(h: *mut u8,
@@ -21,6 +23,8 @@ pub static KEYBYTES: uint = 16;
  */
 pub struct Digest(pub [u8, ..HASHBYTES]);
 
+byte_wrapper_helpers!(Digest, HASHBYTES)
+
 /**
  * Key
  *
@@ -35,6 +39,8 @@ impl Drop for Key {
         for e in k.mut_iter() { *e = 0 }
     }
 }
+
+byte_wrapper_helpers!(Key, KEYBYTES)
 
 /**
  * `gen_key()` randomly generates a key for shorthash

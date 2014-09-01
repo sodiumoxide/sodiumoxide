@@ -4,6 +4,8 @@ WARNING: This signature software is a prototype. It has been replaced by the fin
 */
 use libc::{c_ulonglong, c_int};
 
+mod byte_wrapper_macros;
+
 #[link(name = "sodium")]
 extern {
     fn crypto_sign_edwards25519sha512batch_keypair(pk: *mut u8,
@@ -37,10 +39,15 @@ impl Drop for SecretKey {
         for e in buf.mut_iter() { *e = 0 }
     }
 }
+
+byte_wrapper_helpers!(SecretKey, SECRETKEYBYTES)
+
 /**
  * `PublicKey` for signatures
  */
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+
+byte_wrapper_helpers!(PublicKey, PUBLICKEYBYTES)
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public

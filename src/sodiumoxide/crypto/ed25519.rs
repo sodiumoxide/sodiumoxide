@@ -8,6 +8,8 @@ chosen-message attacks.
 extern crate serialize;
 use libc::{c_ulonglong, c_int};
 
+mod byte_wrapper_macros;
+
 #[link(name = "sodium")]
 extern {
     fn crypto_sign_ed25519_keypair(pk: *mut u8,
@@ -49,6 +51,8 @@ impl Drop for Seed {
     }
 }
 
+byte_wrapper_helpers!(Seed, SEEDBYTES)
+
 /**
  * `SecretKey` for signatures
  *
@@ -62,10 +66,15 @@ impl Drop for SecretKey {
         for e in sk.mut_iter() { *e = 0 }
     }
 }
+
+byte_wrapper_helpers!(SecretKey, SECRETKEYBYTES)
+
 /**
  * `PublicKey` for signatures
  */
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+
+byte_wrapper_helpers!(PublicKey, PUBLICKEYBYTES)
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public

@@ -5,6 +5,8 @@ macro_rules! auth_module (($auth_name:ident,
                            $keybytes:expr, 
                            $tagbytes:expr) => (
 
+mod byte_wrapper_macros;
+
 #[link(name = "sodium")]
 extern {
     fn $auth_name(a: *mut u8,
@@ -35,6 +37,8 @@ impl Drop for Key {
     }
 }
 
+byte_wrapper_helpers!(Key, KEYBYTES)
+
 /**
   * Authentication `Tag`
   *
@@ -49,6 +53,8 @@ impl PartialEq for Tag {
         $verify_fn(tag, &other)
     }
 }
+
+// TODO: byte_wrapper_helpers without Eq/PartialEq
 
 /**
  * `gen_key()` randomly generates a key for authentication
