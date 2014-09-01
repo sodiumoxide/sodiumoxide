@@ -3,7 +3,7 @@
 macro_rules! byte_wrapper_helpers(($name:ident, $size:ident) => (
     impl $name {
         /**
-         * Create a $name from a slice of bytes.  Returns None if the input
+         * Create an instance from a slice of bytes.  Returns None if the input
          * slice is of the incorrect size.
          */
         pub fn from_slice(data: &[u8]) -> Option<$name> {
@@ -25,9 +25,11 @@ macro_rules! byte_wrapper_helpers(($name:ident, $size:ident) => (
             Some($name(ret))
         }
 
-        /// Create a $name from a byte slice, without copying any data.
-        /// Returns an instance with the same lifetime as the input slice, or
-        /// None if the input slice is the wrong size.
+        /**
+         * Create an instance from a byte slice, without copying any data.
+         * Returns an instance with the same lifetime as the input slice, or
+         * None if the input slice is the wrong size.
+         */
         pub fn from_slice_by_ref<'a>(data: &'a [u8]) -> Option<&'a $name> {
             use std::intrinsics::transmute;
 
@@ -40,7 +42,9 @@ macro_rules! byte_wrapper_helpers(($name:ident, $size:ident) => (
             })
         }
 
-        /// Borrow this instance as a slice.
+        /**
+         * Borrow this instance as a slice.
+         */
         pub fn as_slice(&self) -> &[u8] {
             let &$name(ref data) = self;
             data.as_slice()
