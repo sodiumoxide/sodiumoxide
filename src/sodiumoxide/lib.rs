@@ -91,6 +91,9 @@ pub mod crypto {
     pub mod shorthash;
 
     pub mod verify;
+
+    #[cfg(test)]
+    mod macro_tests;
 }
 
 pub mod randombytes;
