@@ -54,7 +54,17 @@ impl PartialEq for Tag {
     }
 }
 
-// TODO: byte_wrapper_helpers without Eq/PartialEq
+// Note: since Tag already implements Eq/PartialEq, we can't use the
+// byte_wrapper_helpers!() macro.  We just pull in the impl{} macro,
+// and implement Show ourselves.
+
+byte_wrapper_impl!(Tag, TAGBYTES)
+
+impl ::std::fmt::Show for Tag {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        self.as_slice().fmt(f)
+    }
+}
 
 /**
  * `gen_key()` randomly generates a key for authentication

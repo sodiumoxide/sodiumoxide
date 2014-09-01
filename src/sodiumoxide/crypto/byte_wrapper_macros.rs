@@ -1,6 +1,6 @@
 #![macro_escape]
 
-macro_rules! byte_wrapper_helpers(($name:ident, $size:ident) => (
+macro_rules! byte_wrapper_impl(($name:ident, $size:ident) => (
     impl $name {
         /**
          * Create an instance from a slice of bytes.  Returns None if the input
@@ -51,6 +51,9 @@ macro_rules! byte_wrapper_helpers(($name:ident, $size:ident) => (
         }
     }
 
+))
+
+macro_rules! byte_wrapper_traits(($name:ident, $size:ident) => (
     impl PartialEq for $name {
         fn eq(&self, other: &$name) -> bool {
             use utils::secure_compare;
@@ -66,4 +69,9 @@ macro_rules! byte_wrapper_helpers(($name:ident, $size:ident) => (
             self.as_slice().fmt(f)
         }
     }
+))
+
+macro_rules! byte_wrapper_helpers(($name:ident, $size:ident) => (
+    byte_wrapper_impl!($name, $size)
+    byte_wrapper_traits!($name, $size)
 ))
