@@ -4,6 +4,7 @@
 of unforgeability.
 */
 use libc::{c_ulonglong, c_int};
+use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 use crypto::verify::verify_32;
 

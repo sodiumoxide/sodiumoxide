@@ -3,6 +3,7 @@ WARNING: This signature software is a prototype. It has been replaced by the fin
 [Ed25519](http://ed25519.cr.yp.to/). It is only kept here for compatibility reasons.
 */
 use libc::{c_ulonglong, c_int};
+use std::intrinsics::volatile_set_memory;
 
 #[link(name = "sodium")]
 extern {
@@ -33,8 +34,10 @@ pub static SIGNATUREBYTES: uint = 64;
 pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
 impl Drop for SecretKey {
     fn drop(&mut self) {
-        let &SecretKey(ref mut buf) = self;
-        for e in buf.mut_iter() { *e = 0 }
+        let &SecretKey(ref mut k) = self;
+        unsafe {
+            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
+        }
     }
 }
 /**
