@@ -15,6 +15,7 @@ extern {
                  mlen: c_ulonglong,
                  n: *const u8,
                  k: *const u8) -> c_int;
+    fn sodium_memzero(pnt: *const c_void, size: size_t);
 }
 
 pub static KEYBYTES: uint = $keybytes;
@@ -30,7 +31,10 @@ pub struct Key(pub [u8, ..KEYBYTES]);
 impl Drop for Key {
     fn drop(&mut self) {
         let &Key(ref mut k) = self;
-        for e in k.mut_iter() { *e = 0 }
+        unsafe {
+            sodium_memzero(k.as_ptr() as *const c_void,
+                           k.len() as size_t);
+        }
     }
 }
 

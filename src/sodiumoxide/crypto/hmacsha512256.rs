@@ -3,7 +3,8 @@
 `HMAC-SHA-512`.  `HMAC-SHA-512-256` is conjectured to meet the standard notion
 of unforgeability.
 */
-use libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int, c_void};
+use libc::types::os::arch::c95::size_t;
 use randombytes::randombytes_into;
 use crypto::verify::verify_32;
 
