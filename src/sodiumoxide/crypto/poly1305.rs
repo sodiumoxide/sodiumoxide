@@ -5,6 +5,7 @@ authenticator is proven to meet the standard notion of unforgeability after a
 single message.
 */
 use libc::{c_ulonglong, c_int};
+use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 use crypto::verify::verify_16;
 

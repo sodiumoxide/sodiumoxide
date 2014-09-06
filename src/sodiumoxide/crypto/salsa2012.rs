@@ -4,6 +4,7 @@
 cipher is conjectured to meet the standard notion of unpredictability.
 */
 use libc::{c_ulonglong, c_int};
+use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 
 stream_module!(crypto_stream_salsa2012, crypto_stream_salsa2012_xor, 32, 8)

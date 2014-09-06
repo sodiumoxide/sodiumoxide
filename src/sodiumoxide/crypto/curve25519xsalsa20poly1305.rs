@@ -8,6 +8,7 @@ third-party unforgeability.
 
 */
 use libc::{c_ulonglong, c_int};
+use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
 
@@ -63,7 +64,9 @@ pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
 impl Drop for SecretKey {
     fn drop(&mut self) {
         let &SecretKey(ref mut sk) = self;
-        for e in sk.mut_iter() { *e = 0 }
+        unsafe {
+            volatile_set_memory(sk.as_mut_ptr(), 0, sk.len())
+        }
     }
 }
 
@@ -165,7 +168,9 @@ pub struct PrecomputedKey([u8, ..PRECOMPUTEDKEYBYTES]);
 impl Drop for PrecomputedKey {
     fn drop(&mut self) {
         let &PrecomputedKey(ref mut k) = self;
-        for e in k.mut_iter() { *e = 0 }
+        unsafe {
+            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
+        }
     }
 }
 

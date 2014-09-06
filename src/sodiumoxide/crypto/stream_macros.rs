@@ -30,7 +30,9 @@ pub struct Key(pub [u8, ..KEYBYTES]);
 impl Drop for Key {
     fn drop(&mut self) {
         let &Key(ref mut k) = self;
-        for e in k.mut_iter() { *e = 0 }
+        unsafe {
+            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
+        }
     }
 }
 
