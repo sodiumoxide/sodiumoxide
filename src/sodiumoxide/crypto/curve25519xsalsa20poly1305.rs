@@ -7,7 +7,8 @@ This function is conjectured to meet the standard notions of privacy and
 third-party unforgeability.
 
 */
-use libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int, c_void};
+use libc::types::os::arch::c95::size_t;
 use utils::marshal;
 use randombytes::randombytes_into;
 
@@ -40,6 +41,7 @@ extern {
                                                           clen: c_ulonglong,
                                                           n: *const u8,
                                                           k: *const u8) -> c_int;
+    fn sodium_memzero(pnt: *const c_void, size: size_t);
 }
 
 pub static PUBLICKEYBYTES: uint = 32;
@@ -63,7 +65,10 @@ pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
 impl Drop for SecretKey {
     fn drop(&mut self) {
         let &SecretKey(ref mut sk) = self;
-        for e in sk.mut_iter() { *e = 0 }
+        unsafe {
+            sodium_memzero(sk.as_ptr() as *const c_void,
+                           sk.len() as size_t);
+        }
     }
 }
 
@@ -165,7 +170,10 @@ pub struct PrecomputedKey([u8, ..PRECOMPUTEDKEYBYTES]);
 impl Drop for PrecomputedKey {
     fn drop(&mut self) {
         let &PrecomputedKey(ref mut k) = self;
-        for e in k.mut_iter() { *e = 0 }
+        unsafe {
+            sodium_memzero(k.as_ptr() as *const c_void,
+                           k.len() as size_t);
+        }
     }
 }
 

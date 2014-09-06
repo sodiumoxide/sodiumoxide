@@ -2,7 +2,8 @@
 WARNING: This signature software is a prototype. It has been replaced by the final system
 [Ed25519](http://ed25519.cr.yp.to/). It is only kept here for compatibility reasons.
 */
-use libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int, c_void};
+use libc::types::os::arch::c95::size_t;
 
 #[link(name = "sodium")]
 extern {
@@ -18,6 +19,7 @@ extern {
                                                 sm: *const u8,
                                                 smlen: c_ulonglong,
                                                 pk: *const u8) -> c_int;
+    fn sodium_memzero(pnt: *const c_void, size: size_t);
 }
 
 pub static SECRETKEYBYTES: uint = 64;
@@ -34,7 +36,10 @@ pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
 impl Drop for SecretKey {
     fn drop(&mut self) {
         let &SecretKey(ref mut buf) = self;
-        for e in buf.mut_iter() { *e = 0 }
+        unsafe {
+            sodium_memzero(buf.as_ptr() as *const c_void,
+                           buf.len() as size_t);
+        }
     }
 }
 /**

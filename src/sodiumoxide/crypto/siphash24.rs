@@ -2,7 +2,8 @@
 `SipHash-2-4`
 
 */
-use libc::{c_ulonglong, c_int};
+use libc::{c_ulonglong, c_int, c_void};
+use libc::types::os::arch::c95::size_t;
 use randombytes::randombytes_into;
 
 #[link(name = "sodium")]
@@ -11,6 +12,7 @@ extern {
                                   m: *const u8,
                                   mlen: c_ulonglong,
                                   k: *const u8) -> c_int;
+    fn sodium_memzero(pnt: *const c_void, size: size_t);
 }
 
 pub static HASHBYTES: uint = 8;
@@ -32,7 +34,10 @@ pub struct Key(pub [u8, ..KEYBYTES]);
 impl Drop for Key {
     fn drop(&mut self) {
         let &Key(ref mut k) = self;
-        for e in k.mut_iter() { *e = 0 }
+        unsafe {
+            sodium_memzero(k.as_ptr() as *const c_void,
+                           k.len() as size_t);
+        }
     }
 }
 
