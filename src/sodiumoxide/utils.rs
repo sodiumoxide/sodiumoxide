@@ -14,5 +14,5 @@ pub fn marshal<T>(buf: &[u8],
     let pdst = dst.as_mut_ptr();
     let psrc = dst.as_ptr();
     let res = f(pdst, psrc, dst.len() as c_ulonglong);
-    (dst.move_iter().skip(bytestodrop).collect(), res)
+    (dst.into_iter().skip(bytestodrop).collect(), res)
 }
