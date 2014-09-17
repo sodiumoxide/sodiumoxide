@@ -232,7 +232,7 @@ fn test_vectors() {
         let seed_bytes = x0.slice(0, 64).from_hex().unwrap();
         assert!(seed_bytes.len() == SEEDBYTES);
         let mut seedbuf = [0u8, ..SEEDBYTES];
-        for (s, b) in seedbuf.mut_iter().zip(seed_bytes.iter()) {
+        for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
             *s = *b
         }
         let seed = Seed(seedbuf);
