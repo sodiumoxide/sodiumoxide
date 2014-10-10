@@ -28,10 +28,10 @@ extern {
                                 pk: *const u8) -> c_int;
 }
 
-pub static SEEDBYTES: uint = 32;
-pub static SECRETKEYBYTES: uint = 64;
-pub static PUBLICKEYBYTES: uint = 32;
-pub static SIGNATUREBYTES: uint = 64;
+pub const SEEDBYTES: uint = 32;
+pub const SECRETKEYBYTES: uint = 64;
+pub const PUBLICKEYBYTES: uint = 32;
+pub const SIGNATUREBYTES: uint = 64;
 
 /**
  * `Seed` that can be used for keypair generation
