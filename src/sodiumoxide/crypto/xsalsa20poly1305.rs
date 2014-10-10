@@ -25,8 +25,8 @@ extern {
                                               k: *const u8) -> c_int;
 }
 
-pub static KEYBYTES: uint = 32;
-pub static NONCEBYTES: uint = 24;
+pub const KEYBYTES: uint = 32;
+pub const NONCEBYTES: uint = 24;
 
 /**
  * `Key` for symmetric authenticated encryption

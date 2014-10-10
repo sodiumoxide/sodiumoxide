@@ -8,8 +8,8 @@ extern {
                   mlen: c_ulonglong) -> c_int;
 }
 
-pub static HASHBYTES: uint = $hashbytes;
-pub static BLOCKBYTES: uint = $blockbytes;
+pub const HASHBYTES: uint = $hashbytes;
+pub const BLOCKBYTES: uint = $blockbytes;
 
 /**
  * Digest-structure
