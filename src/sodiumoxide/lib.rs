@@ -52,7 +52,6 @@ generation functions and the key-generation functions are thread-safe.
 #![warn(missing_doc)]
 #![warn(non_uppercase_statics)]
 #![warn(non_camel_case_types)]
-#![warn(managed_heap_memory)]
 #![warn(unnecessary_qualification)]
 #![feature(globs)]
 #![feature(macro_rules)]
