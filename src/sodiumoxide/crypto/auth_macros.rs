@@ -17,8 +17,8 @@ extern {
                     k: *const u8) -> c_int;
 }
 
-pub static KEYBYTES: uint = $keybytes;
-pub static TAGBYTES: uint = $tagbytes;
+pub const KEYBYTES: uint = $keybytes;
+pub const TAGBYTES: uint = $tagbytes;
 
 /**
  * Authentication `Key`

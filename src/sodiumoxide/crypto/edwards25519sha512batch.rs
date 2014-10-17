@@ -21,9 +21,9 @@ extern {
                                                 pk: *const u8) -> c_int;
 }
 
-pub static SECRETKEYBYTES: uint = 64;
-pub static PUBLICKEYBYTES: uint = 32;
-pub static SIGNATUREBYTES: uint = 64;
+pub const SECRETKEYBYTES: uint = 64;
+pub const PUBLICKEYBYTES: uint = 32;
+pub const SIGNATUREBYTES: uint = 64;
 
 /**
  * `SecretKey` for signatures

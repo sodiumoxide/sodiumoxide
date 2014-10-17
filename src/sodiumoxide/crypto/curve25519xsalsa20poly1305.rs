@@ -43,12 +43,12 @@ extern {
                                                           k: *const u8) -> c_int;
 }
 
-pub static PUBLICKEYBYTES: uint = 32;
-pub static SECRETKEYBYTES: uint = 32;
-pub static NONCEBYTES: uint = 24;
-pub static PRECOMPUTEDKEYBYTES: uint = 32;
-static ZEROBYTES: uint = 32;
-static BOXZEROBYTES: uint = 16;
+pub const PUBLICKEYBYTES: uint = 32;
+pub const SECRETKEYBYTES: uint = 32;
+pub const NONCEBYTES: uint = 24;
+pub const PRECOMPUTEDKEYBYTES: uint = 32;
+const ZEROBYTES: uint = 32;
+const BOXZEROBYTES: uint = 16;
 
 /**
  * `PublicKey` for asymmetric authenticated encryption

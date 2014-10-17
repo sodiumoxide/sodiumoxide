@@ -17,8 +17,8 @@ extern {
                                          n: *const u8) -> c_int;
 }
 
-pub static BYTES: uint = 32;
-pub static SCALARBYTES: uint = 32;
+pub const BYTES: uint = 32;
+pub const SCALARBYTES: uint = 32;
 
 /**
  * `Scalar` value (integer in byte representation)
