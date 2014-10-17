@@ -28,10 +28,10 @@ extern {
                                 pk: *const u8) -> c_int;
 }
 
-pub static SEEDBYTES: uint = 32;
-pub static SECRETKEYBYTES: uint = 64;
-pub static PUBLICKEYBYTES: uint = 32;
-pub static SIGNATUREBYTES: uint = 64;
+pub const SEEDBYTES: uint = 32;
+pub const SECRETKEYBYTES: uint = 64;
+pub const PUBLICKEYBYTES: uint = 32;
+pub const SIGNATUREBYTES: uint = 64;
 
 /**
  * `Seed` that can be used for keypair generation
@@ -232,7 +232,7 @@ fn test_vectors() {
         let seed_bytes = x0.slice(0, 64).from_hex().unwrap();
         assert!(seed_bytes.len() == SEEDBYTES);
         let mut seedbuf = [0u8, ..SEEDBYTES];
-        for (s, b) in seedbuf.mut_iter().zip(seed_bytes.iter()) {
+        for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
             *s = *b
         }
         let seed = Seed(seedbuf);

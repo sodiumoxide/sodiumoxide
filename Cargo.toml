@@ -3,7 +3,7 @@ name = "sodiumoxide"
 version = "0.0.0"
 authors = []
 
-[[lib]]
+[lib]
 name = "sodiumoxide"
 path = "src/sodiumoxide/lib.rs"
 

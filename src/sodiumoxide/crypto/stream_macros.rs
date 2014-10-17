@@ -17,8 +17,8 @@ extern {
                  k: *const u8) -> c_int;
 }
 
-pub static KEYBYTES: uint = $keybytes;
-pub static NONCEBYTES: uint = $noncebytes;
+pub const KEYBYTES: uint = $keybytes;
+pub const NONCEBYTES: uint = $noncebytes;
 
 /**
  * `Key` for symmetric encryption

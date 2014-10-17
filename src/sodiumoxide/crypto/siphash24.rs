@@ -14,8 +14,8 @@ extern {
                                   k: *const u8) -> c_int;
 }
 
-pub static HASHBYTES: uint = 8;
-pub static KEYBYTES: uint = 16;
+pub const HASHBYTES: uint = 8;
+pub const KEYBYTES: uint = 16;
 
 /**
  * Digest-structure
