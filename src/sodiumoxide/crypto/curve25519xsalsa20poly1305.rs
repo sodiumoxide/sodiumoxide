@@ -11,6 +11,8 @@ use libc::{c_ulonglong, c_int};
 use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
+use std::intrinsics::{transmute,copy_nonoverlapping_memory};
+use std::fmt;
 
 #[link(name = "sodium")]
 extern {
@@ -54,6 +56,60 @@ const BOXZEROBYTES: uint = 16;
  * `PublicKey` for asymmetric authenticated encryption
  */
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+
+
+impl PublicKey {
+    /// Create `PublicKey` from slice.
+    pub fn from_slice(data: &[u8]) -> Result<PublicKey, ()> {
+        match data.len() {
+            PUBLICKEYBYTES => {
+                let mut ret = [0, ..PUBLICKEYBYTES];
+
+                unsafe {
+                    copy_nonoverlapping_memory(ret.as_mut_ptr(),
+                                               data.as_ptr(),
+                                               data.len());
+                }
+                Ok(PublicKey(ret))
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Create `PublicKey` from slice without copying.
+    pub fn from_slice_by_ref<'a>(data: &'a [u8]) -> Result<&'a PublicKey, ()> {
+        match data.len() {
+            PUBLICKEYBYTES => {
+                Ok(unsafe {
+                    transmute(data.as_ptr())
+                })
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Borrow as a slice.
+    pub fn as_slice(&self) -> &[u8] {
+        let &PublicKey(ref data) = self;
+        data.as_slice()
+    }
+
+}
+
+impl PartialEq for PublicKey {
+    fn eq(&self, other: &PublicKey) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for PublicKey {}
+
+impl fmt::Show for PublicKey {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_slice().fmt(f)
+    }
+}
+
 /**
  * `SecretKey` for asymmetric authenticated encryption
  *
@@ -61,6 +117,44 @@ pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
  * will be zeroed out
  */
 pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
+
+impl SecretKey {
+    /// Create `SecretKey` from slice.
+    pub fn from_slice(data: &[u8]) -> Result<SecretKey, ()> {
+        match data.len() {
+            SECRETKEYBYTES => {
+                let mut ret = [0, ..SECRETKEYBYTES];
+
+                unsafe {
+                    copy_nonoverlapping_memory(ret.as_mut_ptr(),
+                                               data.as_ptr(),
+                                               data.len());
+                }
+                Ok(SecretKey(ret))
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Create `SecretKey` from slice without copying.
+    pub fn from_slice_by_ref<'a>(data: &'a [u8]) -> Result<&'a SecretKey, ()> {
+        match data.len() {
+            SECRETKEYBYTES => {
+                Ok(unsafe {
+                    transmute(data.as_ptr())
+                })
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Borrow as a slice.
+    pub fn as_slice(&self) -> &[u8] {
+        let &SecretKey(ref data) = self;
+        data.as_slice()
+    }
+}
+
 impl Drop for SecretKey {
     fn drop(&mut self) {
         let &SecretKey(ref mut sk) = self;
@@ -70,10 +164,70 @@ impl Drop for SecretKey {
     }
 }
 
+impl PartialEq for SecretKey {
+    fn eq(&self, other: &SecretKey) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for SecretKey { }
+
 /**
  * `Nonce` for asymmetric authenticated encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
+
+impl Nonce {
+    /// Create `Nonce` from slice.
+    pub fn from_slice(data: &[u8]) -> Result<Nonce, ()> {
+        match data.len() {
+            NONCEBYTES => {
+                let mut ret = [0, ..NONCEBYTES];
+
+                unsafe {
+                    copy_nonoverlapping_memory(ret.as_mut_ptr(),
+                                               data.as_ptr(),
+                                               data.len());
+                }
+                Ok(Nonce(ret))
+            },
+            _ => Err(())
+        }
+    }
+
+
+    /// Create `Nonce` from slice without copying.
+    pub fn from_slice_by_ref<'a>(data: &'a [u8]) -> Result<&'a Nonce, ()> {
+        match data.len() {
+            NONCEBYTES => {
+                Ok(unsafe {
+                    transmute(data.as_ptr())
+                })
+            },
+            _ => Err(())
+        }
+    }
+
+    /// Borrow as a slice.
+    pub fn as_slice(&self) -> &[u8] {
+        let &Nonce(ref data) = self;
+        data.as_slice()
+    }
+}
+
+impl PartialEq for Nonce {
+    fn eq(&self, other: &Nonce) -> bool {
+        self.as_slice() == other.as_slice()
+    }
+}
+
+impl Eq for Nonce {}
+
+impl fmt::Show for Nonce {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.as_slice().fmt(f)
+    }
+}
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public key.
@@ -418,4 +572,69 @@ fn test_vector_2() {
     let m_pre = open_precomputed(c, &nonce, &pk);
     assert!(m == mexp);
     assert!(m_pre == mexp);
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use std::rand::Rng;
+    use std::rand::task_rng;
+    use std::fmt;
+
+    impl fmt::Show for SecretKey {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            self.as_slice().fmt(f)
+        }
+    }
+
+    fn random_24_bytes<R:Rng>(rng: &mut R) -> [u8, ..24] {
+        let mut ret = [0u8, ..24];
+        rng.fill_bytes(ret);
+        ret
+    }
+
+    fn random_32_bytes<R:Rng>(rng: &mut R) -> [u8, ..32] {
+        let mut ret = [0u8, ..32];
+        rng.fill_bytes(ret);
+        ret
+    }
+
+    #[test]
+    fn nonce_slice() {
+        let mut rng = task_rng();
+        let nonce_raw = random_24_bytes(&mut rng);
+        let nonce = Nonce::from_slice(nonce_raw).unwrap();
+        let nonce_by_ref = Nonce::from_slice_by_ref(nonce_raw).unwrap();
+
+        assert_eq!(nonce_raw.as_slice(), nonce.as_slice());
+        assert_eq!(nonce_raw.as_slice(), nonce_by_ref.as_slice());
+        assert_eq!(nonce, *nonce_by_ref);
+        assert_eq!(nonce.as_slice(), nonce_by_ref.as_slice());
+    }
+
+    #[test]
+    fn publickey_slice() {
+        let mut rng = task_rng();
+        let publickey_raw = random_32_bytes(&mut rng);
+        let publickey = PublicKey::from_slice(publickey_raw).unwrap();
+        let publickey_by_ref = PublicKey::from_slice_by_ref(publickey_raw).unwrap();
+
+        assert_eq!(publickey_raw.as_slice(), publickey.as_slice());
+        assert_eq!(publickey_raw.as_slice(), publickey_by_ref.as_slice());
+        assert_eq!(publickey, *publickey_by_ref);
+        assert_eq!(publickey.as_slice(), publickey_by_ref.as_slice());
+    }
+
+    #[test]
+    fn secretkey_slice() {
+        let mut rng = task_rng();
+        let secretkey_raw = random_32_bytes(&mut rng);
+        let secretkey = PublicKey::from_slice(secretkey_raw).unwrap();
+        let secretkey_by_ref = PublicKey::from_slice_by_ref(secretkey_raw).unwrap();
+
+        assert_eq!(secretkey_raw.as_slice(), secretkey.as_slice());
+        assert_eq!(secretkey_raw.as_slice(), secretkey_by_ref.as_slice());
+        assert_eq!(secretkey, *secretkey_by_ref);
+        assert_eq!(secretkey.as_slice(), secretkey_by_ref.as_slice());
+    }
 }
