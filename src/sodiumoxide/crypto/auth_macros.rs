@@ -5,6 +5,8 @@ macro_rules! auth_module (($auth_name:ident,
                            $keybytes:expr, 
                            $tagbytes:expr) => (
 
+mod byte_wrapper_macros;
+
 #[link(name = "sodium")]
 extern {
     fn $auth_name(a: *mut u8,
@@ -37,6 +39,8 @@ impl Drop for Key {
     }
 }
 
+byte_wrapper_helpers!(Key, KEYBYTES)
+
 /**
   * Authentication `Tag`
   *
@@ -49,6 +53,18 @@ impl PartialEq for Tag {
     fn eq(&self, &Tag(other): &Tag) -> bool {
         let &Tag(ref tag) = self;
         $verify_fn(tag, &other)
+    }
+}
+
+// Note: since Tag already implements Eq/PartialEq, we can't use the
+// byte_wrapper_helpers!() macro.  We just pull in the impl{} macro,
+// and implement Show ourselves.
+
+byte_wrapper_impl!(Tag, TAGBYTES)
+
+impl ::std::fmt::Show for Tag {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        self.as_slice().fmt(f)
     }
 }
 
