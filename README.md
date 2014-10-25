@@ -16,18 +16,17 @@ Dependencies
 
 Building
 --------
-    rustc -O src/sodiumoxide/lib.rs
+    cargo build
 
 Testing
 -------
-    rustc --test src/sodiumoxide/lib.rs
-    ./src/sodiumoxide/sodiumoxide
+    cargo test
 
 Documentation
 -------------
-    rustdoc src/sodiumoxide/lib.rs
+    cargo doc
 
-Documentation will be generated in doc/...
+Documentation will be generated in target/doc/...
 
 Most documentation is taken from NaCl, with minor modification where the API
 differs between the C and Rust versions.
