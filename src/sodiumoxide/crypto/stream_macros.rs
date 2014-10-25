@@ -151,7 +151,7 @@ fn test_stream_xor() {
         let m = randombytes(i);
         let mut c = m.clone();
         let s = stream(c.len(), &n, &k);
-        for (e, v) in c.mut_iter().zip(s.iter()) {
+        for (e, v) in c.iter_mut().zip(s.iter()) {
             *e ^= *v;
         }
         let c2 = stream_xor(m.as_slice(), &n, &k);
@@ -168,7 +168,7 @@ fn test_stream_xor_inplace() {
         let mut m = randombytes(i);
         let mut c = m.clone();
         let s = stream(c.len(), &n, &k);
-        for (e, v) in c.mut_iter().zip(s.iter()) {
+        for (e, v) in c.iter_mut().zip(s.iter()) {
             *e ^= *v;
         }
         stream_xor_inplace(m.as_mut_slice(), &n, &k);
