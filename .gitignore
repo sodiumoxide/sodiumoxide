@@ -4,3 +4,7 @@
 *.so
 /doc
 .rust
+
+# Cargo files
+Cargo.lock
+/target
