@@ -27,4 +27,14 @@ pub fn hash(m: &[u8]) -> Digest {
     }
 }
 
+impl Digest {
+    /**
+     * Returns a slice of the contents of this Digest.
+     */
+    pub fn as_slice(&self) -> &[u8] {
+        let &Digest(ref data) = self;
+        data.as_slice()
+    }
+}
+
 ))
