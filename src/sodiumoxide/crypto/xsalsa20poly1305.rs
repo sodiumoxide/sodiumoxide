@@ -36,33 +36,15 @@ pub const NONCEBYTES: uint = 24;
  */
 pub struct Key(pub [u8, ..KEYBYTES]);
 
-impl Drop for Key {
-    fn drop(&mut self) {
-        let &Key(ref mut k) = self;
-        unsafe {
-            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
-        }
-    }
-}
-
-impl Clone for Key {
-    fn clone(&self) -> Key {
-        let &Key(k) = self;
-        Key(k)
-    }
-}
+newtype_drop!(Key)
+newtype_clone!(Key)
 
 /**
  * `Nonce` for symmetric authenticated encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
-impl Clone for Nonce {
-    fn clone(&self) -> Nonce {
-        let &Nonce(n) = self;
-        Nonce(n)
-    }
-}
+newtype_clone!(Nonce)
 
 pub static ZEROBYTES: uint = 32;
 pub static BOXZEROBYTES: uint = 16;
