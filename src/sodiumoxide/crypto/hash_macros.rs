@@ -16,6 +16,13 @@ pub const BLOCKBYTES: uint = $blockbytes;
  */
 pub struct Digest(pub [u8, ..HASHBYTES]);
 
+impl Clone for Digest {
+    fn clone(&self) -> Digest {
+        let &Digest(d) = self;
+        Digest(d)
+    }
+}
+
 /**
  * `hash` hashes a message `m`. It returns a hash `h`.
  */

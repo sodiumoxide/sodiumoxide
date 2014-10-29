@@ -27,6 +27,7 @@ pub const NONCEBYTES: uint = $noncebytes;
  * will be zeroed out
  */
 pub struct Key(pub [u8, ..KEYBYTES]);
+
 impl Drop for Key {
     fn drop(&mut self) {
         let &Key(ref mut k) = self;
@@ -36,10 +37,24 @@ impl Drop for Key {
     }
 }
 
+impl Clone for Key {
+    fn clone(&self) -> Key {
+        let &Key(k) = self;
+        Key(k)
+    }
+}
+
 /**
  * `Nonce` for symmetric encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
+
+impl Clone for Nonce {
+    fn clone(&self) -> Nonce {
+        let &Nonce(n) = self;
+        Nonce(n)
+    }
+}
 
 /**
  * `gen_key()` randomly generates a key for symmetric encryption

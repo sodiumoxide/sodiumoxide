@@ -24,10 +24,25 @@ pub const SCALARBYTES: uint = 32;
  * `Scalar` value (integer in byte representation)
  */
 pub struct Scalar(pub [u8, ..SCALARBYTES]);
+
+impl Clone for Scalar {
+    fn clone(&self) -> Scalar {
+        let &Scalar(s) = self;
+        Scalar(s)
+    }
+}
+
 /**
  * `GroupElement`
  */
 pub struct GroupElement(pub [u8, ..BYTES]);
+
+impl Clone for GroupElement {
+    fn clone(&self) -> GroupElement {
+        let &GroupElement(g) = self;
+        GroupElement(g)
+    }
+}
 
 /**
  * `scalarmult()` multiplies a group element `p`
