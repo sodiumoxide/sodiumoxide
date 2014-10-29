@@ -28,21 +28,8 @@ pub const TAGBYTES: uint = $tagbytes;
  */
 pub struct Key(pub [u8, ..KEYBYTES]);
 
-impl Drop for Key {
-    fn drop(&mut self) {
-        let &Key(ref mut k) = self;
-        unsafe {
-            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
-        }
-    }
-}
-
-impl Clone for Key {
-    fn clone(&self) -> Key {
-        let &Key(k) = self;
-        Key(k)
-    }
-}
+newtype_drop!(Key)
+newtype_clone!(Key)
 
 /**
   * Authentication `Tag`
@@ -61,12 +48,7 @@ impl PartialEq for Tag {
     }
 }
 
-impl Clone for Tag {
-    fn clone(&self) -> Tag {
-        let &Tag(tag) = self;
-        Tag(tag)
-    }
-}
+newtype_clone!(Tag)
 
 /**
  * `gen_key()` randomly generates a key for authentication

@@ -22,12 +22,7 @@ pub const KEYBYTES: uint = 16;
  */
 pub struct Digest(pub [u8, ..HASHBYTES]);
 
-impl Clone for Digest {
-    fn clone(&self) -> Digest {
-        let &Digest(d) = self;
-        Digest(d)
-    }
-}
+newtype_clone!(Digest)
 
 /**
  * Key
@@ -37,21 +32,8 @@ impl Clone for Digest {
  */
 pub struct Key(pub [u8, ..KEYBYTES]);
 
-impl Drop for Key {
-    fn drop(&mut self) {
-        let &Key(ref mut k) = self;
-        unsafe {
-            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
-        }
-    }
-}
-
-impl Clone for Key {
-    fn clone(&self) -> Key {
-        let &Key(k) = self;
-        Key(k)
-    }
-}
+newtype_drop!(Key)
+newtype_clone!(Key)
 
 /**
  * `gen_key()` randomly generates a key for shorthash

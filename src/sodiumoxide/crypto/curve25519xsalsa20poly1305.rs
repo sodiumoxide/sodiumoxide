@@ -55,12 +55,7 @@ const BOXZEROBYTES: uint = 16;
  */
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
 
-impl Clone for PublicKey {
-    fn clone(&self) -> PublicKey {
-        let &PublicKey(pk) = self;
-        PublicKey(pk)
-    }
-}
+newtype_clone!(PublicKey)
 
 /**
  * `SecretKey` for asymmetric authenticated encryption
@@ -70,33 +65,15 @@ impl Clone for PublicKey {
  */
 pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
 
-impl Drop for SecretKey {
-    fn drop(&mut self) {
-        let &SecretKey(ref mut sk) = self;
-        unsafe {
-            volatile_set_memory(sk.as_mut_ptr(), 0, sk.len())
-        }
-    }
-}
-
-impl Clone for SecretKey {
-    fn clone(&self) -> SecretKey {
-        let &SecretKey(sk) = self;
-        SecretKey(sk)
-    }
-}
+newtype_drop!(SecretKey)
+newtype_clone!(SecretKey)
 
 /**
  * `Nonce` for asymmetric authenticated encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
-impl Clone for Nonce {
-    fn clone(&self) -> Nonce {
-        let &Nonce(n) = self;
-        Nonce(n)
-    }
-}
+newtype_clone!(Nonce)
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public key.
@@ -189,21 +166,8 @@ pub fn open(c: &[u8],
  */
 pub struct PrecomputedKey([u8, ..PRECOMPUTEDKEYBYTES]);
 
-impl Drop for PrecomputedKey {
-    fn drop(&mut self) {
-        let &PrecomputedKey(ref mut k) = self;
-        unsafe {
-            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
-        }
-    }
-}
-
-impl Clone for PrecomputedKey {
-    fn clone(&self) -> PrecomputedKey {
-        let &PrecomputedKey(nm) = self;
-        PrecomputedKey(nm)
-    }
-}
+newtype_drop!(PrecomputedKey)
+newtype_clone!(PrecomputedKey)
 
 /**
  * `precompute()` computes an intermediate key that can be used by `seal_precomputed()`

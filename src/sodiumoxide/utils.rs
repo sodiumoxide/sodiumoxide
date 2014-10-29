@@ -1,3 +1,5 @@
+#![macro_escape]
+
 use libc::c_ulonglong;
 
 #[doc(hidden)]
@@ -16,3 +18,25 @@ pub fn marshal<T>(buf: &[u8],
     let res = f(pdst, psrc, dst.len() as c_ulonglong);
     (dst.into_iter().skip(bytestodrop).collect(), res)
 }
+
+macro_rules! newtype_clone (($newtype:ident) => (
+
+        impl Clone for $newtype {
+            fn clone(&self) -> $newtype {
+                let &$newtype(v) = self;
+                $newtype(v)
+            }
+        }
+
+        ))
+
+macro_rules! newtype_drop (($newtype:ident) => (
+        impl Drop for $newtype {
+            fn drop(&mut self) {
+                let &$newtype(ref mut v) = self;
+                unsafe {
+                    volatile_set_memory(v.as_mut_ptr(), 0, v.len());
+                }
+            }
+        }
+        ))

@@ -28,33 +28,15 @@ pub const NONCEBYTES: uint = $noncebytes;
  */
 pub struct Key(pub [u8, ..KEYBYTES]);
 
-impl Drop for Key {
-    fn drop(&mut self) {
-        let &Key(ref mut k) = self;
-        unsafe {
-            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
-        }
-    }
-}
-
-impl Clone for Key {
-    fn clone(&self) -> Key {
-        let &Key(k) = self;
-        Key(k)
-    }
-}
+newtype_drop!(Key)
+newtype_clone!(Key)
 
 /**
  * `Nonce` for symmetric encryption
  */
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
-impl Clone for Nonce {
-    fn clone(&self) -> Nonce {
-        let &Nonce(n) = self;
-        Nonce(n)
-    }
-}
+newtype_clone!(Nonce)
 
 /**
  * `gen_key()` randomly generates a key for symmetric encryption

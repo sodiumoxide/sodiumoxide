@@ -75,6 +75,13 @@ pub fn init() -> bool {
     }
 }
 
+mod utils;
+
+/**
+ * Random number generation
+ */
+pub mod randombytes;
+
 /**
  * Cryptographic functions
  */
@@ -88,9 +95,6 @@ pub mod crypto {
     pub mod onetimeauth;
     pub mod stream;
     pub mod shorthash;
-
     pub mod verify;
 }
 
-pub mod randombytes;
-mod utils;
