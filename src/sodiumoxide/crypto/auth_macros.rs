@@ -37,6 +37,13 @@ impl Drop for Key {
     }
 }
 
+impl Clone for Key {
+    fn clone(&self) -> Key {
+        let &Key(k) = self;
+        Key(k)
+    }
+}
+
 /**
   * Authentication `Tag`
   *
@@ -44,11 +51,20 @@ impl Drop for Key {
   * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
   */
 pub struct Tag(pub [u8, ..TAGBYTES]);
+
 impl Eq for Tag {}
+
 impl PartialEq for Tag {
     fn eq(&self, &Tag(other): &Tag) -> bool {
         let &Tag(ref tag) = self;
         $verify_fn(tag, &other)
+    }
+}
+
+impl Clone for Tag {
+    fn clone(&self) -> Tag {
+        let &Tag(tag) = self;
+        Tag(tag)
     }
 }
 

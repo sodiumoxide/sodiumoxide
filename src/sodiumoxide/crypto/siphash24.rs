@@ -22,6 +22,13 @@ pub const KEYBYTES: uint = 16;
  */
 pub struct Digest(pub [u8, ..HASHBYTES]);
 
+impl Clone for Digest {
+    fn clone(&self) -> Digest {
+        let &Digest(d) = self;
+        Digest(d)
+    }
+}
+
 /**
  * Key
  *
@@ -36,6 +43,13 @@ impl Drop for Key {
         unsafe {
             volatile_set_memory(k.as_mut_ptr(), 0, k.len())
         }
+    }
+}
+
+impl Clone for Key {
+    fn clone(&self) -> Key {
+        let &Key(k) = self;
+        Key(k)
     }
 }
 

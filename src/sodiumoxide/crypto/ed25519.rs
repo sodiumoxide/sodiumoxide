@@ -43,12 +43,20 @@ pub const SIGNATUREBYTES: uint = 64;
  * will be zeroed out
  */
 pub struct Seed(pub [u8, ..SEEDBYTES]);
+
 impl Drop for Seed {
     fn drop(&mut self) {
         let &Seed(ref mut s) = self;
         unsafe {
             volatile_set_memory(s.as_mut_ptr(), 0, s.len())
         }
+    }
+}
+
+impl Clone for Seed {
+    fn clone(&self) -> Seed {
+        let &Seed(s) = self;
+        Seed(s)
     }
 }
 
@@ -59,6 +67,7 @@ impl Drop for Seed {
  * will be zeroed out
  */
 pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
+
 impl Drop for SecretKey {
     fn drop(&mut self) {
         let &SecretKey(ref mut sk) = self;
@@ -67,10 +76,25 @@ impl Drop for SecretKey {
         }
     }
 }
+
+impl Clone for SecretKey {
+    fn clone(&self) -> SecretKey {
+        let &SecretKey(sk) = self;
+        SecretKey(sk)
+    }
+}
+
 /**
  * `PublicKey` for signatures
  */
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+
+impl Clone for PublicKey {
+    fn clone(&self) -> PublicKey {
+        let &PublicKey(pk) = self;
+        PublicKey(pk)
+    }
+}
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public

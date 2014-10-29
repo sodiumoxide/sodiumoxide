@@ -32,18 +32,34 @@ pub const SIGNATUREBYTES: uint = 64;
  * will be zeroed out
  */
 pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
+
 impl Drop for SecretKey {
     fn drop(&mut self) {
-        let &SecretKey(ref mut k) = self;
+        let &SecretKey(ref mut sk) = self;
         unsafe {
-            volatile_set_memory(k.as_mut_ptr(), 0, k.len())
+            volatile_set_memory(sk.as_mut_ptr(), 0, sk.len())
         }
     }
 }
+
+impl Clone for SecretKey {
+    fn clone(&self) -> SecretKey {
+        let &SecretKey(sk) = self;
+        SecretKey(sk)
+    }
+}
+
 /**
  * `PublicKey` for signatures
  */
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+
+impl Clone for PublicKey {
+    fn clone(&self) -> PublicKey {
+        let &PublicKey(pk) = self;
+        PublicKey(pk)
+    }
+}
 
 /**
  * `gen_keypair()` randomly generates a secret key and a corresponding public
