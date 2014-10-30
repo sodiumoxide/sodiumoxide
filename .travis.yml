@@ -1,21 +1,16 @@
 env:
     global:
         - secure: RVFYihimdtv0UqBioZp8pEhyYLLQ/md6DOg6h3F7IZP2XhXZvjxevVmLMTITuXKMIls5o0jjaQZfSNYg29ItD5y0/fEaNI0A6zZi6SDtdVQyO5opJP9oh0x/gmRrPMaJPVgmdTztJcIgtGapYVImkkX6A+UhET7Rw+VrGLEXbdY=
-before_install:
-    - sudo add-apt-repository --yes ppa:hansjorg/rust
-    - sudo add-apt-repository --yes ppa:cmrx64/cargo
-    - sudo apt-get update -qq
+language: rust
 install:
-    - sudo apt-get install -qq rust-nightly cargo
     - wget https://github.com/jedisct1/libsodium/releases/download/1.0.0/libsodium-1.0.0.tar.gz
     - tar xvfz libsodium-1.0.0.tar.gz
-    - cd libsodium-1.0.0 && ./configure --prefix=/usr && make && sudo make install
-    - cd ..
+    - cd libsodium-1.0.0 && ./configure --prefix=/usr && make && sudo make install && cd ..
 script:
-    - cargo build
-    - cargo test
-    # - cargo doc #cargo doc not in the ppa-version
+    - cargo build --verbose
+    - cargo test --verbose
+    - cargo doc
 after_script:
     # the doc directory needs to be in the root for rust-ci
-    # - mv target/doc doc
-    # - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
+    - mv target/doc doc
+    - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
