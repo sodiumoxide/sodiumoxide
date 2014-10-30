@@ -77,9 +77,6 @@ pub fn init() -> bool {
 
 mod utils;
 
-/**
- * Random number generation
- */
 pub mod randombytes;
 
 /**
