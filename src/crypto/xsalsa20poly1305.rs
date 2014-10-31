@@ -46,8 +46,8 @@ pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
 newtype_clone!(Nonce)
 
-pub static ZEROBYTES: uint = 32;
-pub static BOXZEROBYTES: uint = 16;
+const ZEROBYTES: uint = 32;
+const BOXZEROBYTES: uint = 16;
 
 /**
  * `gen_key()` randomly generates a secret key
