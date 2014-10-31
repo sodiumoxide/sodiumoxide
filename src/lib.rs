@@ -49,10 +49,10 @@ generation functions and the key-generation functions are thread-safe.
 #![comment = "Fast cryptographic library"]
 #![license = "MIT"]
 #![crate_type = "lib"]
-#![warn(missing_doc)]
-#![warn(non_uppercase_statics)]
+#![warn(missing_docs)]
+#![warn(non_upper_case_globals)]
 #![warn(non_camel_case_types)]
-#![warn(unnecessary_qualification)]
+#![warn(unused_qualifications)]
 #![feature(globs)]
 #![feature(macro_rules)]
 extern crate libc;
