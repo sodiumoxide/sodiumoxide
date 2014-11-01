@@ -2,6 +2,8 @@
 `HMAC-SHA-256` `HMAC-SHA-256` is conjectured to meet the standard notion of
 unforgeability.
 */
+#[cfg(test)]
+extern crate test;
 use libc::{c_ulonglong, c_int};
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
