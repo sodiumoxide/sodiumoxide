@@ -204,7 +204,7 @@ fn test_sign_verify_tamper_seed() {
 #[test]
 fn test_vectors() {
     // test vectors from the Python implementation
-    // form the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
+    // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
     use self::serialize::hex::{FromHex, ToHex};
     use std::io::BufferedReader;
     use std::io::File;
