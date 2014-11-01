@@ -2,6 +2,8 @@
 `SipHash-2-4`
 
 */
+#[cfg(test)]
+extern crate test;
 use libc::{c_ulonglong, c_int};
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
@@ -139,4 +141,22 @@ fn test_vectors() {
         let Digest(h) = shorthash(m.slice(0, i), &k);
         assert!(h == h_expecteds[i]);
     }
+}
+
+#[cfg(test)]
+const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                   128, 256, 512, 1024, 2048, 4096];
+
+#[bench]
+fn bench_shorthash(b: &mut test::Bencher) {
+    use randombytes::randombytes;
+    let k = gen_key();
+    let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
+        randombytes(*s)
+    }).collect();
+    b.iter(|| {
+        for m in ms.iter() {
+            shorthash(m.as_slice(), &k);
+        }
+    });
 }

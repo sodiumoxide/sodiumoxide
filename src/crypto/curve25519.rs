@@ -6,6 +6,8 @@ This function is conjectured to be strong. For background see Bernstein,
 Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 */
 
+#[cfg(test)]
+extern crate test;
 use libc::c_int;
 
 #[link(name = "sodium")]
@@ -127,4 +129,29 @@ fn test_vector_4() {
                      ,0x76,0xf0,0x9b,0x3c,0x1e,0x16,0x17,0x42];
     let GroupElement(k) = scalarmult(&bobsk, &alicepk);
     assert!(k == k_expected);
+}
+
+#[bench]
+fn bench_scalarmult(b: &mut test::Bencher) {
+    use randombytes::randombytes_into;
+    let mut gbs = [0u8, ..BYTES];
+    let mut sbs = [0u8, ..SCALARBYTES];
+    randombytes_into(gbs);
+    randombytes_into(sbs);
+    let g = GroupElement(gbs);
+    let s = Scalar(sbs);
+    b.iter(|| {
+        scalarmult(&s, &g);
+    });
+}
+
+#[bench]
+fn bench_scalarmult_base(b: &mut test::Bencher) {
+    use randombytes::randombytes_into;
+    let mut sbs = [0u8, ..SCALARBYTES];
+    randombytes_into(sbs);
+    let s = Scalar(sbs);
+    b.iter(|| {
+        scalarmult_base(&s);
+    });
 }
