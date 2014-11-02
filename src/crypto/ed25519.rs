@@ -5,8 +5,6 @@ standard notion of unforgeability for a public-key signature scheme under
 chosen-message attacks.
 */
 #[cfg(test)]
-extern crate test;
-#[cfg(test)]
 extern crate serialize;
 use libc::{c_ulonglong, c_int};
 use std::intrinsics::volatile_set_memory;
@@ -242,34 +240,38 @@ fn test_vectors() {
 }
 
 #[cfg(test)]
-const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                   128, 256, 512, 1024, 2048, 4096];
-
-#[bench]
-fn bench_sign(b: &mut test::Bencher) {
+mod bench {
+    extern crate test;
     use randombytes::randombytes;
-    let (_, sk) = gen_keypair();
-    let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
-        randombytes(*s)
-    }).collect();
-    b.iter(|| {
-        for m in ms.iter() {
-            sign(m.as_slice(), &sk);
-        }
-    });
-}
+    use super::*;
 
-#[bench]
-fn bench_verify(b: &mut test::Bencher) {
-    use randombytes::randombytes;
-    let (pk, sk) = gen_keypair();
-    let sms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
-        let m = randombytes(*s);
-        sign(m.as_slice(), &sk)
-    }).collect();
-    b.iter(|| {
-        for sm in sms.iter() {
-            verify(sm.as_slice(), &pk);
-        }
-    });
+    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                       128, 256, 512, 1024, 2048, 4096];
+
+    #[bench]
+    fn bench_sign(b: &mut test::Bencher) {
+        let (_, sk) = gen_keypair();
+        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
+            randombytes(*s)
+        }).collect();
+        b.iter(|| {
+            for m in ms.iter() {
+                sign(m.as_slice(), &sk);
+            }
+        });
+    }
+
+    #[bench]
+    fn bench_verify(b: &mut test::Bencher) {
+        let (pk, sk) = gen_keypair();
+        let sms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
+            let m = randombytes(*s);
+            sign(m.as_slice(), &sk)
+        }).collect();
+        b.iter(|| {
+            for sm in sms.iter() {
+                verify(sm.as_slice(), &pk);
+            }
+        });
+    }
 }

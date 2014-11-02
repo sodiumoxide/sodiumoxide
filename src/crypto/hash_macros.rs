@@ -30,20 +30,25 @@ pub fn hash(m: &[u8]) -> Digest {
 }
 
 #[cfg(test)]
-const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                   128, 256, 512, 1024, 2048, 4096];
-
-#[bench]
-fn bench_hash(b: &mut test::Bencher) {
+mod bench {
+    extern crate test;
     use randombytes::randombytes;
-    let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
-        randombytes(*s)
-    }).collect();
-    b.iter(|| {
-        for m in ms.iter() {
-            hash(m.as_slice());
-        }
-    });
+    use super::*;
+
+    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                       128, 256, 512, 1024, 2048, 4096];
+
+    #[bench]
+    fn bench_hash(b: &mut test::Bencher) {
+        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
+            randombytes(*s)
+        }).collect();
+        b.iter(|| {
+            for m in ms.iter() {
+                hash(m.as_slice());
+            }
+        });
+    }
 }
 
 ))

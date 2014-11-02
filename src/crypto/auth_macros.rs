@@ -126,38 +126,42 @@ fn test_auth_verify_tamper() {
 }
 
 #[cfg(test)]
-const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
-                                   128, 256, 512, 1024, 2048, 4096];
-
-#[bench]
-fn bench_auth(b: &mut test::Bencher) {
+mod bench {
+    extern crate test;
     use randombytes::randombytes;
-    let k = gen_key();
-    let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
-        randombytes(*s)
-    }).collect();
-    b.iter(|| {
-        for m in ms.iter() {
-            authenticate(m.as_slice(), &k);
-        }
-    });
-}
+    use super::*;
 
-#[bench]
-fn bench_verify(b: &mut test::Bencher) {
-    use randombytes::randombytes;
-    let k = gen_key();
-    let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
-        randombytes(*s)
-    }).collect();
-    let tags: Vec<Tag> = ms.iter().map(|m| {
-        authenticate(m.as_slice(), &k)
-    }).collect();
-    b.iter(|| {
-        for (m, t) in ms.iter().zip(tags.iter()) {
-            verify(t, m.as_slice(), &k);
-        }
-    });
+    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
+                                       128, 256, 512, 1024, 2048, 4096];
+
+    #[bench]
+    fn bench_auth(b: &mut test::Bencher) {
+        let k = gen_key();
+        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
+            randombytes(*s)
+        }).collect();
+        b.iter(|| {
+            for m in ms.iter() {
+                authenticate(m.as_slice(), &k);
+            }
+        });
+    }
+
+    #[bench]
+    fn bench_verify(b: &mut test::Bencher) {
+        let k = gen_key();
+        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
+            randombytes(*s)
+        }).collect();
+        let tags: Vec<Tag> = ms.iter().map(|m| {
+            authenticate(m.as_slice(), &k)
+        }).collect();
+        b.iter(|| {
+            for (m, t) in ms.iter().zip(tags.iter()) {
+                verify(t, m.as_slice(), &k);
+            }
+        });
+    }
 }
 
 ))

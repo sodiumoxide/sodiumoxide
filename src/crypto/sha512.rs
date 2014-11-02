@@ -8,8 +8,6 @@ inspire satisfactory levels of confidence. One can hope that NIST's
 SHA-3 competition will improve the situation.
 */
 #[cfg(test)]
-extern crate test;
-#[cfg(test)]
 extern crate serialize;
 use libc::{c_ulonglong, c_int};
 
