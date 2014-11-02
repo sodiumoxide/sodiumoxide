@@ -6,8 +6,6 @@ combination of Salsa20 and Poly1305 specified in
 This function is conjectured to meet the standard notions of privacy and
 authenticity.
 */
-#[cfg(test)]
-extern crate test;
 use libc::{c_ulonglong, c_int};
 use std::intrinsics::volatile_set_memory;
 use utils::marshal;
@@ -202,33 +200,37 @@ fn test_vector_1() {
 }
 
 #[cfg(test)]
-const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
-                                   128, 256, 512, 1024, 2048, 4096];
-#[bench]
-fn bench_seal(b: &mut test::Bencher) {
+mod bench {
+    extern crate test;
     use randombytes::randombytes;
-    let k = gen_key();
-    let n = gen_nonce();
-    let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| { 
-        randombytes(*s) }).collect();
-    b.iter(|| {
-        for m in ms.iter() {
-            seal(m.as_slice(), &n, &k);
-        }
-    });
-}
+    use super::*;
 
-#[bench]
-fn bench_open(b: &mut test::Bencher) {
-    use randombytes::randombytes;
-    let k = gen_key();
-    let n = gen_nonce();
-    let cs: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| { 
-        seal(randombytes(*s).as_slice(), &n, &k)
-    }).collect();
-    b.iter(|| {
-        for c in cs.iter() {
-            open(c.as_slice(), &n, &k);
-        }
-    });
+    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
+                                       128, 256, 512, 1024, 2048, 4096];
+    #[bench]
+    fn bench_seal(b: &mut test::Bencher) {
+        let k = gen_key();
+        let n = gen_nonce();
+        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| { 
+            randombytes(*s) }).collect();
+        b.iter(|| {
+            for m in ms.iter() {
+                seal(m.as_slice(), &n, &k);
+            }
+        });
+    }
+
+    #[bench]
+    fn bench_open(b: &mut test::Bencher) {
+        let k = gen_key();
+        let n = gen_nonce();
+        let cs: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| { 
+            seal(randombytes(*s).as_slice(), &n, &k)
+        }).collect();
+        b.iter(|| {
+            for c in cs.iter() {
+                open(c.as_slice(), &n, &k);
+            }
+        });
+    }
 }

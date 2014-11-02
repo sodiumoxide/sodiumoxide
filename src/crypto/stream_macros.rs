@@ -174,18 +174,23 @@ fn test_stream_xor_inplace() {
 }
 
 #[cfg(test)]
-const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
-                                   128, 256, 512, 1024, 2048, 4096];
+mod bench {
+    extern crate test;
+    use super::*;
 
-#[bench]
-fn bench_stream(b: &mut test::Bencher) {
-    let k = gen_key();
-    let n = gen_nonce();
-    b.iter(|| {
-        for size in BENCH_SIZES.iter() {
-            stream(*size, &n, &k);
-        }
-    });
+    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
+                                       128, 256, 512, 1024, 2048, 4096];
+
+    #[bench]
+    fn bench_stream(b: &mut test::Bencher) {
+        let k = gen_key();
+        let n = gen_nonce();
+        b.iter(|| {
+            for size in BENCH_SIZES.iter() {
+                stream(*size, &n, &k);
+            }
+        });
+    }
 }
 
 ))

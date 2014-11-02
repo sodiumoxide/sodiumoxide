@@ -6,8 +6,6 @@ This function is conjectured to be strong. For background see Bernstein,
 Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 */
 
-#[cfg(test)]
-extern crate test;
 use libc::c_int;
 
 #[link(name = "sodium")]
@@ -131,27 +129,32 @@ fn test_vector_4() {
     assert!(k == k_expected);
 }
 
-#[bench]
-fn bench_scalarmult(b: &mut test::Bencher) {
+#[cfg(test)]
+mod bench {
+    extern crate test;
     use randombytes::randombytes_into;
-    let mut gbs = [0u8, ..BYTES];
-    let mut sbs = [0u8, ..SCALARBYTES];
-    randombytes_into(gbs);
-    randombytes_into(sbs);
-    let g = GroupElement(gbs);
-    let s = Scalar(sbs);
-    b.iter(|| {
-        scalarmult(&s, &g);
-    });
-}
+    use super::*;
 
-#[bench]
-fn bench_scalarmult_base(b: &mut test::Bencher) {
-    use randombytes::randombytes_into;
-    let mut sbs = [0u8, ..SCALARBYTES];
-    randombytes_into(sbs);
-    let s = Scalar(sbs);
-    b.iter(|| {
-        scalarmult_base(&s);
-    });
+    #[bench]
+    fn bench_scalarmult(b: &mut test::Bencher) {
+        let mut gbs = [0u8, ..BYTES];
+        let mut sbs = [0u8, ..SCALARBYTES];
+        randombytes_into(gbs);
+        randombytes_into(sbs);
+        let g = GroupElement(gbs);
+        let s = Scalar(sbs);
+        b.iter(|| {
+            scalarmult(&s, &g);
+        });
+    }
+
+    #[bench]
+    fn bench_scalarmult_base(b: &mut test::Bencher) {
+        let mut sbs = [0u8, ..SCALARBYTES];
+        randombytes_into(sbs);
+        let s = Scalar(sbs);
+        b.iter(|| {
+            scalarmult_base(&s);
+        });
+    }
 }
