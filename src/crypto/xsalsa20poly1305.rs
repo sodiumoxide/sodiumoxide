@@ -207,29 +207,17 @@ mod bench {
 
     const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
                                        128, 256, 512, 1024, 2048, 4096];
-    #[bench]
-    fn bench_seal(b: &mut test::Bencher) {
-        let k = gen_key();
-        let n = gen_nonce();
-        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| { 
-            randombytes(*s) }).collect();
-        b.iter(|| {
-            for m in ms.iter() {
-                seal(m.as_slice(), &n, &k);
-            }
-        });
-    }
 
     #[bench]
-    fn bench_open(b: &mut test::Bencher) {
+    fn bench_seal_open(b: &mut test::Bencher) {
         let k = gen_key();
         let n = gen_nonce();
-        let cs: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| { 
-            seal(randombytes(*s).as_slice(), &n, &k)
+        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
+            randombytes(*s)
         }).collect();
         b.iter(|| {
-            for c in cs.iter() {
-                open(c.as_slice(), &n, &k);
+            for m in ms.iter() {
+                open(seal(m.as_slice(), &n, &k).as_slice(), &n, &k).unwrap();
             }
         });
     }
