@@ -425,28 +425,15 @@ mod bench {
                                        128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
-    fn bench_seal(b: &mut test::Bencher) {
+    fn bench_seal_open(b: &mut test::Bencher) {
         let (pk, sk) = gen_keypair();
         let n = gen_nonce();
-        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| { 
-            randombytes(*s) }).collect();
-        b.iter(|| {
-            for m in ms.iter() {
-                seal(m.as_slice(), &n, &pk, &sk);
-            }
-        });
-    }
-
-    #[bench]
-    fn bench_open(b: &mut test::Bencher) {
-        let (pk, sk) = gen_keypair();
-        let n = gen_nonce();
-        let cs: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| { 
-            seal(randombytes(*s).as_slice(), &n, &pk, &sk)
+        let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
+            randombytes(*s)
         }).collect();
         b.iter(|| {
-            for c in cs.iter() {
-                open(c.as_slice(), &n, &pk, &sk);
+            for m in ms.iter() {
+                open(seal(m.as_slice(), &n, &pk, &sk).as_slice(), &n, &pk, &sk).unwrap();
             }
         });
     }
@@ -458,6 +445,7 @@ mod bench {
             /* we do this benchmark as many times as the other benchmarks
             so that we can compare the times */
             for _ in BENCH_SIZES.iter() {
+                precompute(&pk, &sk);
                 precompute(&pk, &sk);
             }
         });
