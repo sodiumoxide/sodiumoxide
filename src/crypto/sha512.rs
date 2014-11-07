@@ -27,7 +27,7 @@ fn test_vector_1() {
                      ,0x1d, 0x13, 0x8b, 0xc7, 0xaa, 0xd1, 0xaf, 0x3e
                      ,0xf7, 0xbf, 0xd5, 0xec, 0x64, 0x6d, 0x6c, 0x28];
     let Digest(h) = hash(x);
-    assert!(h == h_expected);
+    assert!(h.as_slice() == h_expected.as_slice());
 }
 
 #[cfg(test)]
@@ -53,7 +53,7 @@ fn test_nist_vector(filename: &str) {
             let line3 = r.read_line().unwrap();
             let md = line3.as_slice().slice_from(5).from_hex().unwrap();
             let Digest(digest) = hash(msg);
-            assert!(digest == md.as_slice());
+            assert!(digest.as_slice() == md.as_slice());
         }
     }
 }
