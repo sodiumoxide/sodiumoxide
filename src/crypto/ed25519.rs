@@ -172,7 +172,7 @@ fn test_sign_verify_seed() {
     use randombytes::{randombytes, randombytes_into};
     for i in range(0, 256u) {
         let mut seedbuf = [0, ..32];
-        randombytes_into(seedbuf);
+        randombytes_into(&mut seedbuf);
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);
@@ -187,7 +187,7 @@ fn test_sign_verify_tamper_seed() {
     use randombytes::{randombytes, randombytes_into};
     for i in range(0, 32u) {
         let mut seedbuf = [0, ..32];
-        randombytes_into(seedbuf);
+        randombytes_into(&mut seedbuf);
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);

@@ -102,7 +102,7 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
  */
 pub fn gen_nonce() -> Nonce {
     let mut n = [0, ..NONCEBYTES];
-    randombytes_into(n);
+    randombytes_into(&mut n);
     Nonce(n)
 }
 
@@ -332,9 +332,9 @@ fn test_vector_1() {
              0xf0,0xa0,0x89,0xbc,0x76,0x89,0x70,0x40,
              0xe0,0x82,0xf9,0x37,0x76,0x38,0x48,0x64,
              0x5e,0x07,0x05];
-    let c = seal(m, &nonce, &bobpk, &alicesk);
+    let c = seal(&m, &nonce, &bobpk, &alicesk);
     let pk = precompute(&bobpk, &alicesk);
-    let cpre = seal_precomputed(m, &nonce, &pk);
+    let cpre = seal_precomputed(&m, &nonce, &pk);
     let cexp = vec![0xf3,0xff,0xc7,0x70,0x3f,0x94,0x00,0xe5,
                  0x2a,0x7d,0xfb,0x4b,0x3d,0x33,0x05,0xd9,
                  0x8e,0x99,0x3b,0x9f,0x48,0x68,0x12,0x73,
@@ -408,9 +408,9 @@ fn test_vector_2() {
                       0xf0,0xa0,0x89,0xbc,0x76,0x89,0x70,0x40,
                       0xe0,0x82,0xf9,0x37,0x76,0x38,0x48,0x64,
                       0x5e,0x07,0x05]);
-    let m = open(c, &nonce, &alicepk, &bobsk);
+    let m = open(&c, &nonce, &alicepk, &bobsk);
     let pk = precompute(&alicepk, &bobsk);
-    let m_pre = open_precomputed(c, &nonce, &pk);
+    let m_pre = open_precomputed(&c, &nonce, &pk);
     assert!(m == mexp);
     assert!(m_pre == mexp);
 }
