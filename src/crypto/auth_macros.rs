@@ -59,7 +59,7 @@ newtype_clone!(Tag)
  */
 pub fn gen_key() -> Key {
     let mut k = [0, ..KEYBYTES];
-    randombytes_into(k);
+    randombytes_into(&mut k);
     Key(k)
 }
 

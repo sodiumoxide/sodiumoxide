@@ -139,8 +139,8 @@ mod bench {
     fn bench_scalarmult(b: &mut test::Bencher) {
         let mut gbs = [0u8, ..BYTES];
         let mut sbs = [0u8, ..SCALARBYTES];
-        randombytes_into(gbs);
-        randombytes_into(sbs);
+        randombytes_into(&mut gbs);
+        randombytes_into(&mut sbs);
         let g = GroupElement(gbs);
         let s = Scalar(sbs);
         b.iter(|| {
@@ -151,7 +151,7 @@ mod bench {
     #[bench]
     fn bench_scalarmult_base(b: &mut test::Bencher) {
         let mut sbs = [0u8, ..SCALARBYTES];
-        randombytes_into(sbs);
+        randombytes_into(&mut sbs);
         let s = Scalar(sbs);
         b.iter(|| {
             scalarmult_base(&s);
