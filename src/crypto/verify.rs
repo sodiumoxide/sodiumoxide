@@ -51,8 +51,8 @@ fn test_verify_16() {
         let mut x = [0, ..16];
         let mut y = [0, ..16];
         assert!(verify_16(&x, &y));
-        randombytes_into(x);
-        randombytes_into(y);
+        randombytes_into(&mut x);
+        randombytes_into(&mut y);
         if x == y {
             assert!(verify_16(&x, &y))
         } else {
@@ -69,8 +69,8 @@ fn test_verify_32() {
         let mut x = [0, ..32];
         let mut y = [0, ..32];
         assert!(verify_32(&x, &y));
-        randombytes_into(x);
-        randombytes_into(y);
+        randombytes_into(&mut x);
+        randombytes_into(&mut y);
         if x == y {
             assert!(verify_32(&x, &y))
         } else {
