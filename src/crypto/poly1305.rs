@@ -43,7 +43,7 @@ fn test_vector_1() {
 
     let a_expected = Tag([0xf3,0xff,0xc7,0x70,0x3f,0x94,0x00,0xe5
                          ,0x2a,0x7d,0xfb,0x4b,0x3d,0x33,0x05,0xd9]);
-    let a = authenticate(c, &key);
+    let a = authenticate(&c, &key);
     assert!(a == a_expected);
-    assert!(verify(&a, c, &key));
+    assert!(verify(&a, &c, &key));
 }

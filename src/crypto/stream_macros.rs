@@ -47,7 +47,7 @@ newtype_clone!(Nonce)
  */
 pub fn gen_key() -> Key {
     let mut key = [0, ..KEYBYTES];
-    randombytes_into(key);
+    randombytes_into(&mut key);
     Key(key)
 }
 
@@ -63,7 +63,7 @@ pub fn gen_key() -> Key {
  */
 pub fn gen_nonce() -> Nonce {
     let mut nonce = [0, ..NONCEBYTES];
-    randombytes_into(nonce);
+    randombytes_into(&mut nonce);
     Nonce(nonce)
 }
 
