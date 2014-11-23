@@ -4,7 +4,8 @@ in [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 9. This
 authenticator is proven to meet the standard notion of unforgeability after a
 single message.
 */
-use libc::{c_ulonglong, c_int};
+use ffi;
+use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 use crypto::verify::verify_16;

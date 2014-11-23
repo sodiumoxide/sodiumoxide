@@ -2,7 +2,7 @@
 
 name = "libsodium-sys"
 version = "0.0.1"
-authors = ["???"]
+authors = []
 links = "sodium"
 build = "build.rs"
 

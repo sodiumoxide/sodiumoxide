@@ -5,18 +5,6 @@ macro_rules! auth_module (($auth_name:ident,
                            $keybytes:expr, 
                            $tagbytes:expr) => (
 
-#[link(name = "sodium")]
-extern {
-    fn $auth_name(a: *mut u8,
-                  m: *const u8,
-                  mlen: c_ulonglong,
-                  k: *const u8) -> c_int;
-    fn $verify_name(a: *const u8,
-                    m: *const u8,
-                    mlen: c_ulonglong,
-                    k: *const u8) -> c_int;
-}
-
 pub const KEYBYTES: uint = $keybytes;
 pub const TAGBYTES: uint = $tagbytes;
 
@@ -71,7 +59,7 @@ pub fn authenticate(m: &[u8],
                     &Key(k): &Key) -> Tag {
     unsafe {
         let mut tag = [0, ..TAGBYTES];
-        $auth_name(tag.as_mut_ptr(),
+        ffi::$auth_name(tag.as_mut_ptr(),
                    m.as_ptr(),
                    m.len() as c_ulonglong,
                    k.as_ptr());
@@ -86,7 +74,7 @@ pub fn authenticate(m: &[u8],
 pub fn verify(&Tag(tag): &Tag, m: &[u8],
               &Key(k): &Key) -> bool {
     unsafe {
-        $verify_name(tag.as_ptr(),
+        ffi::$verify_name(tag.as_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
                      k.as_ptr()) == 0
