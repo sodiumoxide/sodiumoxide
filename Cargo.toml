@@ -2,3 +2,7 @@
 name = "sodiumoxide"
 version = "0.0.1"
 authors = []
+
+[dependencies.libsodium-sys]
+version = "*"
+path = "libsodium-sys"

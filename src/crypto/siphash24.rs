@@ -2,17 +2,10 @@
 `SipHash-2-4`
 
 */
-use libc::{c_ulonglong, c_int};
+use ffi;
+use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
-
-#[link(name = "sodium")]
-extern {
-    fn crypto_shorthash_siphash24(h: *mut u8,
-                                  m: *const u8,
-                                  mlen: c_ulonglong,
-                                  k: *const u8) -> c_int;
-}
 
 pub const HASHBYTES: uint = 8;
 pub const KEYBYTES: uint = 16;
@@ -56,7 +49,7 @@ pub fn shorthash(m: &[u8],
                  &Key(k): &Key) -> Digest {
     unsafe {
         let mut h = [0, ..HASHBYTES];
-        crypto_shorthash_siphash24(h.as_mut_ptr(),
+        ffi::crypto_shorthash_siphash24(h.as_mut_ptr(),
                                    m.as_ptr(), m.len() as c_ulonglong,
                                    k.as_ptr());
         Digest(h)

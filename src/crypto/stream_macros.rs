@@ -4,19 +4,6 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr, 
                              $noncebytes:expr) => (
 
-#[link(name = "sodium")]
-extern {
-    fn $stream_name(c: *mut u8,
-                    clen: c_ulonglong,
-                    n: *const u8,
-                    k: *const u8) -> c_int;
-    fn $xor_name(c: *mut u8,
-                 m: *const u8,
-                 mlen: c_ulonglong,
-                 n: *const u8,
-                 k: *const u8) -> c_int;
-}
-
 pub const KEYBYTES: uint = $keybytes;
 pub const NONCEBYTES: uint = $noncebytes;
 
@@ -76,7 +63,7 @@ pub fn stream(len: uint,
               &Key(k): &Key) -> Vec<u8> {
     unsafe {
         let mut c = Vec::from_elem(len, 0u8);
-        $stream_name(c.as_mut_ptr(),
+        ffi::$stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
                      n.as_ptr(),
                      k.as_ptr());
@@ -97,7 +84,7 @@ pub fn stream_xor(m: &[u8],
                   &Key(k): &Key) -> Vec<u8> {
     unsafe {
         let mut c = Vec::from_elem(m.len(), 0u8);
-        $xor_name(c.as_mut_ptr(),
+        ffi::$xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
                   n.as_ptr(),
@@ -118,7 +105,7 @@ pub fn stream_xor_inplace(m: &mut [u8],
                           &Nonce(n): &Nonce,
                           &Key(k): &Key) {
     unsafe {
-        $xor_name(m.as_mut_ptr(),
+        ffi::$xor_name(m.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
                   n.as_ptr(),
