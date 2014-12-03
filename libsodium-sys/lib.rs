@@ -1,5 +1,31 @@
+#![allow(non_upper_case_globals)]
+
 extern crate libc;
-use libc::{c_int, c_ulonglong, size_t};
+use libc::{c_int, c_ulonglong, c_char, size_t};
+
+pub const crypto_stream_KEYBYTES : size_t = crypto_stream_xsalsa20_KEYBYTES;
+pub const crypto_stream_NONCEBYTES : size_t = crypto_stream_xsalsa20_NONCEBYTES;
+pub const crypto_stream_PRIMITIVE : &'static str = "xsalsa20";
+
+pub const crypto_stream_aes128ctr_KEYBYTES : size_t = 16;
+pub const crypto_stream_aes128ctr_NONCEBYTES : size_t = 16;
+pub const crypto_stream_aes128ctr_BEFORENMBYTES : size_t = 1408;
+
+pub const crypto_stream_chacha20_KEYBYTES : size_t = 32;
+pub const crypto_stream_chacha20_NONCEBYTES : size_t = 8;
+
+pub const crypto_stream_salsa20_KEYBYTES : size_t = 32;
+pub const crypto_stream_salsa20_NONCEBYTES : size_t = 8;
+
+pub const crypto_stream_salsa2012_KEYBYTES : size_t = 32;
+pub const crypto_stream_salsa2012_NONCEBYTES : size_t = 8;
+
+pub const crypto_stream_salsa208_KEYBYTES : size_t = 32;
+pub const crypto_stream_salsa208_NONCEBYTES : size_t = 8;
+
+pub const crypto_stream_xsalsa20_KEYBYTES : size_t = 32;
+pub const crypto_stream_xsalsa20_NONCEBYTES : size_t = 24;
+
 
 extern {
   pub fn sodium_init() -> c_int;
@@ -32,6 +58,10 @@ extern {
                                             mlen: c_ulonglong,
                                             k: *const u8) -> c_int;
 
+  pub fn crypto_stream_keybytes() -> size_t;
+  pub fn crypto_stream_noncebytes() -> size_t;
+  pub fn crypto_stream_primitive() -> *const c_char;                                           
+
   pub fn crypto_stream_aes128ctr(c: *mut u8,
                                  clen: c_ulonglong,
                                  n: *const u8,
@@ -41,6 +71,13 @@ extern {
                                      mlen: c_ulonglong,
                                      n: *const u8,
                                      k: *const u8) -> c_int;
+  pub fn crypto_stream_aes128ctr_keybytes() -> size_t;
+  pub fn crypto_stream_aes128ctr_noncebytes() -> size_t;
+  pub fn crypto_stream_aes128ctr_beforenmbytes() -> size_t;
+  
+  pub fn crypto_stream_chacha20_keybytes() -> size_t;
+  pub fn crypto_stream_chacha20_noncebytes() -> size_t;
+
   pub fn crypto_stream_salsa20(c: *mut u8,
                                clen: c_ulonglong,
                                n: *const u8,
@@ -49,7 +86,10 @@ extern {
                                    m: *const u8,
                                    mlen: c_ulonglong,
                                    n: *const u8,
-                                   k: *const u8) -> c_int;                              
+                                   k: *const u8) -> c_int;   
+  pub fn crypto_stream_salsa20_keybytes() -> size_t;
+  pub fn crypto_stream_salsa20_noncebytes() -> size_t;
+
   pub fn crypto_stream_salsa208(c: *mut u8,
                                 clen: c_ulonglong,
                                 n: *const u8,
@@ -59,6 +99,9 @@ extern {
                                     mlen: c_ulonglong,
                                     n: *const u8,
                                     k: *const u8) -> c_int;
+  pub fn crypto_stream_salsa208_keybytes() -> size_t;
+  pub fn crypto_stream_salsa208_noncebytes() -> size_t;
+
   pub fn crypto_stream_salsa2012(c: *mut u8,
                                  clen: c_ulonglong,
                                  n: *const u8,
@@ -68,6 +111,9 @@ extern {
                                      mlen: c_ulonglong,
                                      n: *const u8,
                                      k: *const u8) -> c_int;
+  pub fn crypto_stream_salsa2012_keybytes() -> size_t;
+  pub fn crypto_stream_salsa2012_noncebytes() -> size_t;
+
   pub fn crypto_stream_xsalsa20(c: *mut u8,
                                 clen: c_ulonglong,
                                 n: *const u8,
@@ -77,6 +123,8 @@ extern {
                                     mlen: c_ulonglong,
                                     n: *const u8,
                                     k: *const u8) -> c_int;
+  pub fn crypto_stream_xsalsa20_keybytes() -> size_t;
+  pub fn crypto_stream_xsalsa20_noncebytes() -> size_t;
 
   pub fn crypto_hash_sha256(h: *mut u8,
                             m: *const u8,
@@ -166,4 +214,79 @@ extern {
                                                 clen: c_ulonglong,
                                                 n: *const u8,
                                                 k: *const u8) -> c_int;
+}
+
+
+#[test]
+fn test_crypto_stream_keybytes() {
+    assert!(unsafe { crypto_stream_keybytes() } == crypto_stream_KEYBYTES)
+}
+#[test]
+fn test_crypto_stream_noncebytes() {
+    assert!(unsafe { crypto_stream_noncebytes() } == crypto_stream_NONCEBYTES)
+}
+#[test]
+fn test_crypto_stream_primitive() {
+    let s = unsafe {
+        std::c_str::CString::new(crypto_stream_primitive(), false)
+    };
+    assert!(s.as_bytes_no_nul() == crypto_stream_PRIMITIVE.as_bytes());
+}
+
+#[test]
+fn test_crypto_stream_aes128ctr_keybytes() {
+    assert!(unsafe { crypto_stream_aes128ctr_keybytes() } == crypto_stream_aes128ctr_KEYBYTES)
+}
+#[test]
+fn test_crypto_stream_aes128ctr_noncebytes() {
+    assert!(unsafe { crypto_stream_aes128ctr_noncebytes() } == crypto_stream_aes128ctr_NONCEBYTES)
+}
+#[test]
+fn test_crypto_stream_aes128ctr_beforenmbytes() {
+    assert!(unsafe { crypto_stream_aes128ctr_beforenmbytes() } == crypto_stream_aes128ctr_BEFORENMBYTES)
+}
+
+#[test]
+fn test_crypto_stream_chacha20_keybytes() {
+    assert!(unsafe { crypto_stream_chacha20_keybytes() } == crypto_stream_chacha20_KEYBYTES)
+}
+#[test]
+fn test_crypto_stream_chacha20_noncebytes() {
+    assert!(unsafe { crypto_stream_chacha20_noncebytes() } == crypto_stream_chacha20_NONCEBYTES)
+}
+
+#[test]
+fn test_crypto_stream_salsa20_keybytes() {
+    assert!(unsafe { crypto_stream_salsa20_keybytes() } == crypto_stream_salsa20_KEYBYTES)
+}
+#[test]
+fn test_crypto_stream_salsa20_noncebytes() {
+    assert!(unsafe { crypto_stream_salsa20_noncebytes() } == crypto_stream_salsa20_NONCEBYTES)
+}
+
+#[test]
+fn test_crypto_stream_salsa208_keybytes() {
+    assert!(unsafe { crypto_stream_salsa208_keybytes() } == crypto_stream_salsa208_KEYBYTES)
+}
+#[test]
+fn test_crypto_stream_salsa208_noncebytes() {
+    assert!(unsafe { crypto_stream_salsa208_noncebytes() } == crypto_stream_salsa208_NONCEBYTES)
+}
+
+#[test]
+fn test_crypto_stream_salsa2012_keybytes() {
+    assert!(unsafe { crypto_stream_salsa2012_keybytes() } == crypto_stream_salsa2012_KEYBYTES)
+}
+#[test]
+fn test_crypto_stream_salsa2012_noncebytes() {
+    assert!(unsafe { crypto_stream_salsa2012_noncebytes() } == crypto_stream_salsa2012_NONCEBYTES)
+}
+
+#[test]
+fn test_crypto_stream_xsalsa20_keybytes() {
+    assert!(unsafe { crypto_stream_xsalsa20_keybytes() } == crypto_stream_xsalsa20_KEYBYTES)
+}
+#[test]
+fn test_crypto_stream_xsalsa20_noncebytes() {
+    assert!(unsafe { crypto_stream_xsalsa20_noncebytes() } == crypto_stream_xsalsa20_NONCEBYTES)
 }
