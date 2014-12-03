@@ -8,7 +8,10 @@ use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 
-stream_module!(crypto_stream_salsa20, crypto_stream_salsa20_xor, 32, 8)
+pub const KEYBYTES: uint = ffi::crypto_stream_salsa20_KEYBYTES as uint;
+pub const NONCEBYTES: uint = ffi::crypto_stream_salsa20_NONCEBYTES as uint;
+
+stream_module!(crypto_stream_salsa20, crypto_stream_salsa20_xor)
 
 #[test]
 fn test_vector_1() {

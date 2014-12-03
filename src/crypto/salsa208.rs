@@ -8,4 +8,7 @@ use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 
-stream_module!(crypto_stream_salsa208, crypto_stream_salsa208_xor, 32, 8)
+pub const KEYBYTES: uint = ffi::crypto_stream_salsa208_KEYBYTES as uint;
+pub const NONCEBYTES: uint = ffi::crypto_stream_salsa208_NONCEBYTES as uint;
+
+stream_module!(crypto_stream_salsa208, crypto_stream_salsa208_xor)
