@@ -8,4 +8,7 @@ use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 
-stream_module!(crypto_stream_aes128ctr, crypto_stream_aes128ctr_xor, 16, 16)
+pub const KEYBYTES: uint = ffi::crypto_stream_aes128ctr_KEYBYTES as uint;
+pub const NONCEBYTES: uint = ffi::crypto_stream_aes128ctr_NONCEBYTES as uint;
+
+stream_module!(crypto_stream_aes128ctr, crypto_stream_aes128ctr_xor)
