@@ -10,10 +10,12 @@ use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 use crypto::verify::verify_16;
 
+pub const KEYBYTES: uint = ffi::crypto_onetimeauth_poly1305_KEYBYTES as uint;
+pub const TAGBYTES: uint = ffi::crypto_onetimeauth_poly1305_BYTES as uint;
+
 auth_module!(crypto_onetimeauth_poly1305,
              crypto_onetimeauth_poly1305_verify,
-             verify_16,
-             32, 16)
+             verify_16)
 
 #[test]
 fn test_vector_1() {

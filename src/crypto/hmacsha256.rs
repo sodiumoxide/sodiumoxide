@@ -8,7 +8,10 @@ use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 use crypto::verify::verify_32;
 
-auth_module!(crypto_auth_hmacsha256, crypto_auth_hmacsha256_verify, verify_32, 32, 32)
+pub const KEYBYTES: uint = ffi::crypto_auth_hmacsha256_KEYBYTES as uint;
+pub const TAGBYTES: uint = ffi::crypto_auth_hmacsha256_BYTES as uint;
+
+auth_module!(crypto_auth_hmacsha256, crypto_auth_hmacsha256_verify, verify_32)
 
 #[test]
 fn test_vector_1() {

@@ -1,12 +1,7 @@
 #![macro_escape]
 macro_rules! auth_module (($auth_name:ident, 
                            $verify_name:ident, 
-                           $verify_fn:ident, 
-                           $keybytes:expr, 
-                           $tagbytes:expr) => (
-
-pub const KEYBYTES: uint = $keybytes;
-pub const TAGBYTES: uint = $tagbytes;
+                           $verify_fn:ident) => (
 
 /**
  * Authentication `Key`

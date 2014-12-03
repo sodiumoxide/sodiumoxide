@@ -27,11 +27,61 @@ pub const crypto_stream_xsalsa20_KEYBYTES : size_t = 32;
 pub const crypto_stream_xsalsa20_NONCEBYTES : size_t = 24;
 
 
+pub const crypto_auth_BYTES : size_t = crypto_auth_hmacsha512256_BYTES;
+pub const crypto_auth_KEYBYTES : size_t = crypto_auth_hmacsha512256_KEYBYTES;
+pub const crypto_auth_PRIMITIVE : &'static str = "hmacsha512256";
+
+pub const crypto_auth_hmacsha256_BYTES : size_t = 32;
+pub const crypto_auth_hmacsha256_KEYBYTES : size_t = 32;
+
+pub const crypto_auth_hmacsha512_BYTES : size_t = 64;
+pub const crypto_auth_hmacsha512_KEYBYTES : size_t = 32;
+
+pub const crypto_auth_hmacsha512256_BYTES : size_t = 32;
+pub const crypto_auth_hmacsha512256_KEYBYTES : size_t = 32;
+
+
+pub const crypto_onetimeauth_BYTES : size_t = crypto_onetimeauth_poly1305_BYTES;
+pub const crypto_onetimeauth_KEYBYTES : size_t = crypto_onetimeauth_poly1305_KEYBYTES;
+pub const crypto_onetimeauth_PRIMITIVE : &'static str =  "poly1305";
+
+pub const crypto_onetimeauth_poly1305_BYTES : size_t = 16;
+pub const crypto_onetimeauth_poly1305_KEYBYTES : size_t = 32;
+
+
 extern {
   pub fn sodium_init() -> c_int;
   
   pub fn randombytes_buf(buf: *mut u8,
                          size: size_t);
+
+
+  // auth
+  pub fn crypto_auth_bytes() -> size_t;
+  pub fn crypto_auth_keybytes() -> size_t;
+  pub fn crypto_auth_primitive() -> *const c_char;
+
+  pub fn crypto_auth_hmacsha256(a: *mut u8,
+                                m: *const u8,
+                                mlen: c_ulonglong,
+                                k: *const u8) -> c_int;
+  pub fn crypto_auth_hmacsha256_verify(a: *const u8,
+                                       m: *const u8,
+                                       mlen: c_ulonglong,
+                                       k: *const u8) -> c_int;
+  pub fn crypto_auth_hmacsha256_bytes() -> size_t;
+  pub fn crypto_auth_hmacsha256_keybytes() -> size_t;
+
+  pub fn crypto_auth_hmacsha512(a: *mut u8,
+                                m: *const u8,
+                                mlen: c_ulonglong,
+                                k: *const u8) -> c_int;
+  pub fn crypto_auth_hmacsha512_verify(a: *const u8,
+                                       m: *const u8,
+                                       mlen: c_ulonglong,
+                                       k: *const u8) -> c_int;
+  pub fn crypto_auth_hmacsha512_bytes() -> size_t;
+  pub fn crypto_auth_hmacsha512_keybytes() -> size_t;
 
   pub fn crypto_auth_hmacsha512256(a: *mut u8,
                                    m: *const u8,
@@ -41,14 +91,15 @@ extern {
                                           m: *const u8,
                                           mlen: c_ulonglong,
                                           k: *const u8) -> c_int;
-  pub fn crypto_auth_hmacsha256(a: *mut u8,
-                                m: *const u8,
-                                mlen: c_ulonglong,
-                                k: *const u8) -> c_int;
-  pub fn crypto_auth_hmacsha256_verify(a: *const u8,
-                                       m: *const u8,
-                                       mlen: c_ulonglong,
-                                       k: *const u8) -> c_int;
+  pub fn crypto_auth_hmacsha512256_bytes() -> size_t;
+  pub fn crypto_auth_hmacsha512256_keybytes() -> size_t;
+
+
+  // onetimeauth
+  pub fn crypto_onetimeauth_bytes() -> size_t;
+  pub fn crypto_onetimeauth_keybytes() -> size_t;
+  pub fn crypto_onetimeauth_primitive() -> *const c_char;
+
   pub fn crypto_onetimeauth_poly1305(a: *mut u8,
                                      m: *const u8,
                                      mlen: c_ulonglong,
@@ -57,10 +108,14 @@ extern {
                                             m: *const u8,
                                             mlen: c_ulonglong,
                                             k: *const u8) -> c_int;
+  pub fn crypto_onetimeauth_poly1305_bytes() -> size_t;
+  pub fn crypto_onetimeauth_poly1305_keybytes() -> size_t;
 
+
+  // stream
   pub fn crypto_stream_keybytes() -> size_t;
   pub fn crypto_stream_noncebytes() -> size_t;
-  pub fn crypto_stream_primitive() -> *const c_char;                                           
+  pub fn crypto_stream_primitive() -> *const c_char;
 
   pub fn crypto_stream_aes128ctr(c: *mut u8,
                                  clen: c_ulonglong,
@@ -217,6 +272,78 @@ extern {
 }
 
 
+// auth
+#[test]
+fn test_crypto_auth_bytes() {
+    assert!(unsafe { crypto_auth_bytes() } == crypto_auth_BYTES)
+}
+#[test]
+fn test_crypto_auth_keybytes() {
+    assert!(unsafe { crypto_auth_keybytes() } == crypto_auth_KEYBYTES)
+}
+#[test]
+fn test_crypto_auth_primitive() {
+    let s = unsafe {
+        std::c_str::CString::new(crypto_auth_primitive(), false)
+    };
+    assert!(s.as_bytes_no_nul() == crypto_auth_PRIMITIVE.as_bytes());
+}
+
+#[test]
+fn test_crypto_auth_hmacsha256_bytes() {
+    assert!(unsafe { crypto_auth_hmacsha256_bytes() } == crypto_auth_hmacsha256_BYTES)
+}
+#[test]
+fn test_crypto_auth_hmacsha256_keybytes() {
+    assert!(unsafe { crypto_auth_hmacsha256_keybytes() } == crypto_auth_hmacsha256_KEYBYTES)
+}
+
+#[test]
+fn test_crypto_auth_hmacsha512_bytes() {
+    assert!(unsafe { crypto_auth_hmacsha512_bytes() } == crypto_auth_hmacsha512_BYTES)
+}
+#[test]
+fn test_crypto_auth_hmacsha512_keybytes() {
+    assert!(unsafe { crypto_auth_hmacsha512_keybytes() } == crypto_auth_hmacsha512_KEYBYTES)
+}
+
+#[test]
+fn test_crypto_auth_hmacsha512256_bytes() {
+    assert!(unsafe { crypto_auth_hmacsha512256_bytes() } == crypto_auth_hmacsha512256_BYTES)
+}
+#[test]
+fn test_crypto_auth_hmacsha512256_keybytes() {
+    assert!(unsafe { crypto_auth_hmacsha512256_keybytes() } == crypto_auth_hmacsha512256_KEYBYTES)
+}
+
+
+// onetimeauth
+#[test]
+fn test_crypto_onetimeauth_bytes() {
+    assert!(unsafe { crypto_onetimeauth_bytes() } == crypto_onetimeauth_BYTES)
+}
+#[test]
+fn test_crypto_onetimeauth_keybytes() {
+    assert!(unsafe { crypto_onetimeauth_keybytes() } == crypto_onetimeauth_KEYBYTES)
+}
+#[test]
+fn test_crypto_onetimeauth_primitive() {
+    let s = unsafe {
+        std::c_str::CString::new(crypto_onetimeauth_primitive(), false)
+    };
+    assert!(s.as_bytes_no_nul() == crypto_onetimeauth_PRIMITIVE.as_bytes());
+}
+#[test]
+fn test_crypto_onetimeauth_poly1305_bytes() {
+    assert!(unsafe { crypto_onetimeauth_poly1305_bytes() } == crypto_onetimeauth_poly1305_BYTES)
+}
+#[test]
+fn test_crypto_onetimeauth_poly1305_keybytes() {
+    assert!(unsafe { crypto_onetimeauth_poly1305_keybytes() } == crypto_onetimeauth_poly1305_KEYBYTES)
+}
+
+
+// stream
 #[test]
 fn test_crypto_stream_keybytes() {
     assert!(unsafe { crypto_stream_keybytes() } == crypto_stream_KEYBYTES)
