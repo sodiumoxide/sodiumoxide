@@ -3,6 +3,8 @@
 extern crate libc;
 use libc::{c_int, c_ulonglong, c_char, size_t};
 
+
+// stream
 pub const crypto_stream_KEYBYTES : size_t = crypto_stream_xsalsa20_KEYBYTES;
 pub const crypto_stream_NONCEBYTES : size_t = crypto_stream_xsalsa20_NONCEBYTES;
 pub const crypto_stream_PRIMITIVE : &'static str = "xsalsa20";
@@ -27,6 +29,7 @@ pub const crypto_stream_xsalsa20_KEYBYTES : size_t = 32;
 pub const crypto_stream_xsalsa20_NONCEBYTES : size_t = 24;
 
 
+// auth
 pub const crypto_auth_BYTES : size_t = crypto_auth_hmacsha512256_BYTES;
 pub const crypto_auth_KEYBYTES : size_t = crypto_auth_hmacsha512256_KEYBYTES;
 pub const crypto_auth_PRIMITIVE : &'static str = "hmacsha512256";
@@ -41,12 +44,22 @@ pub const crypto_auth_hmacsha512256_BYTES : size_t = 32;
 pub const crypto_auth_hmacsha512256_KEYBYTES : size_t = 32;
 
 
+// onetimeauth
 pub const crypto_onetimeauth_BYTES : size_t = crypto_onetimeauth_poly1305_BYTES;
 pub const crypto_onetimeauth_KEYBYTES : size_t = crypto_onetimeauth_poly1305_KEYBYTES;
 pub const crypto_onetimeauth_PRIMITIVE : &'static str =  "poly1305";
 
 pub const crypto_onetimeauth_poly1305_BYTES : size_t = 16;
 pub const crypto_onetimeauth_poly1305_KEYBYTES : size_t = 32;
+
+
+// hash
+pub const crypto_hash_BYTES: size_t = crypto_hash_sha512_BYTES;
+pub const crypto_hash_PRIMITIVE: &'static str = "sha512";
+
+pub const crypto_hash_sha256_BYTES: size_t =  32;
+
+pub const crypto_hash_sha512_BYTES: size_t = 64;
 
 
 extern {
@@ -181,13 +194,26 @@ extern {
   pub fn crypto_stream_xsalsa20_keybytes() -> size_t;
   pub fn crypto_stream_xsalsa20_noncebytes() -> size_t;
 
+
+  // hash
+  pub fn crypto_hash_bytes() -> size_t;
+  pub fn crypto_hash(h: *mut u8,
+                     m: *const u8,
+                     mlen: c_ulonglong) -> c_int;
+  pub fn crypto_hash_primitive() -> *const c_char;
+  
   pub fn crypto_hash_sha256(h: *mut u8,
                             m: *const u8,
                             mlen: c_ulonglong) -> c_int;
+  pub fn crypto_hash_sha256_bytes() -> size_t;
+
   pub fn crypto_hash_sha512(h: *mut u8,
                             m: *const u8,
                             mlen: c_ulonglong) -> c_int;
+  pub fn crypto_hash_sha512_bytes() -> size_t;
 
+
+  // ...
   pub fn crypto_scalarmult_curve25519(q: *mut u8,
                                       n: *const u8,
                                       p: *const u8) -> c_int;
@@ -340,6 +366,30 @@ fn test_crypto_onetimeauth_poly1305_bytes() {
 #[test]
 fn test_crypto_onetimeauth_poly1305_keybytes() {
     assert!(unsafe { crypto_onetimeauth_poly1305_keybytes() } == crypto_onetimeauth_poly1305_KEYBYTES)
+}
+
+
+// hash
+#[test]
+fn test_crypto_hash_bytes() {
+    assert!(unsafe { crypto_hash_bytes() } == crypto_hash_BYTES)
+}
+#[test]
+fn test_crypto_hash_primitive() {
+    let s = unsafe {
+        std::c_str::CString::new(crypto_hash_primitive(), false)
+    };
+    assert!(s.as_bytes_no_nul() == crypto_hash_PRIMITIVE.as_bytes());
+}
+
+#[test]
+fn test_crypto_hash_sha256_bytes() {
+    assert!(unsafe { crypto_hash_sha256_bytes() } == crypto_hash_sha256_BYTES)
+}
+
+#[test]
+fn test_crypto_hash_sha512_bytes() {
+    assert!(unsafe { crypto_hash_sha512_bytes() } == crypto_hash_sha512_BYTES)
 }
 
 

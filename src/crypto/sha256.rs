@@ -12,7 +12,9 @@ extern crate serialize;
 use ffi;
 use libc::c_ulonglong;
 
-hash_module!(crypto_hash_sha256, 32, 64)
+pub const HASHBYTES: uint = ffi::crypto_hash_sha256_BYTES as uint;
+pub const BLOCKBYTES: uint = 64;
+hash_module!(crypto_hash_sha256)
 
 #[test]
 fn test_vector_1() {
