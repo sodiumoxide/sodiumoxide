@@ -1,7 +1,13 @@
 [package]
 name = "sodiumoxide"
+description = "Fast cryptographic library for Rust"
+documentation = "http://rust-ci.org/dnaq/sodiumoxide"
+repository = "https://github.com/dnaq/sodiumoxide"
+readme = "README.md"
+keywords = ["crypto", "NaCl", "libsodium"]
 version = "0.0.1"
 authors = []
+license = "MIT"
 
 [dependencies.libsodium-sys]
 version = "*"
