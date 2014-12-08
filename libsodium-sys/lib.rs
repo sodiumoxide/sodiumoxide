@@ -75,6 +75,11 @@ pub const crypto_box_curve25519xsalsa20poly1305_MACBYTES: size_t =
     crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
 
+// scalarmult
+pub const crypto_scalarmult_curve25519_BYTES: size_t =  32;
+pub const crypto_scalarmult_curve25519_SCALARBYTES: size_t =  32;
+
+
 extern {
   pub fn sodium_init() -> c_int;
   
@@ -226,12 +231,15 @@ extern {
   pub fn crypto_hash_sha512_bytes() -> size_t;
 
 
-  // ...
+  // scalarmult
   pub fn crypto_scalarmult_curve25519(q: *mut u8,
                                       n: *const u8,
                                       p: *const u8) -> c_int;
   pub fn crypto_scalarmult_curve25519_base(q: *mut u8,
                                            n: *const u8) -> c_int;
+  pub fn crypto_scalarmult_curve25519_bytes() -> size_t;
+  pub fn crypto_scalarmult_curve25519_scalarbytes() -> size_t;
+
 
   // box
   pub fn crypto_box_curve25519xsalsa20poly1305_keypair(pk: *mut u8,
@@ -525,4 +533,15 @@ fn test_crypto_box_curve25519xsalsa20poly1305_boxzerobytes() {
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_macbytes() {
     assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_macbytes() } == crypto_box_curve25519xsalsa20poly1305_MACBYTES)
+}
+
+
+// scalarmult
+#[test]
+fn test_crypto_scalarmult_curve25519_bytes() {
+    assert!(unsafe { crypto_scalarmult_curve25519_bytes() } == crypto_scalarmult_curve25519_BYTES)
+}
+#[test]
+fn test_crypto_scalarmult_curve25519_scalarbytes() {
+    assert!(unsafe { crypto_scalarmult_curve25519_scalarbytes() } == crypto_scalarmult_curve25519_SCALARBYTES)
 }
