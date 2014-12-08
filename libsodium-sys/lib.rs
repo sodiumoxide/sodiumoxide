@@ -62,6 +62,19 @@ pub const crypto_hash_sha256_BYTES: size_t =  32;
 pub const crypto_hash_sha512_BYTES: size_t = 64;
 
 
+// box
+pub const crypto_box_curve25519xsalsa20poly1305_SEEDBYTES: size_t = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES: size_t = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES: size_t = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES: size_t = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_NONCEBYTES: size_t = 24;
+pub const crypto_box_curve25519xsalsa20poly1305_ZEROBYTES: size_t = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES: size_t = 16;
+pub const crypto_box_curve25519xsalsa20poly1305_MACBYTES: size_t =
+    crypto_box_curve25519xsalsa20poly1305_ZEROBYTES -
+    crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
+
+
 extern {
   pub fn sodium_init() -> c_int;
   
@@ -220,6 +233,7 @@ extern {
   pub fn crypto_scalarmult_curve25519_base(q: *mut u8,
                                            n: *const u8) -> c_int;
 
+  // box
   pub fn crypto_box_curve25519xsalsa20poly1305_keypair(pk: *mut u8,
                                                        sk: *mut u8) -> c_int;
   pub fn crypto_box_curve25519xsalsa20poly1305(c: *mut u8,
@@ -247,7 +261,17 @@ extern {
                                                             clen: c_ulonglong,
                                                             n: *const u8,
                                                             k: *const u8) -> c_int;
+  pub fn crypto_box_curve25519xsalsa20poly1305_seedbytes() -> size_t;
+  pub fn crypto_box_curve25519xsalsa20poly1305_publickeybytes() -> size_t;
+  pub fn crypto_box_curve25519xsalsa20poly1305_secretkeybytes() -> size_t;
+  pub fn crypto_box_curve25519xsalsa20poly1305_beforenmbytes() -> size_t;
+  pub fn crypto_box_curve25519xsalsa20poly1305_noncebytes() -> size_t;
+  pub fn crypto_box_curve25519xsalsa20poly1305_zerobytes() -> size_t;
+  pub fn crypto_box_curve25519xsalsa20poly1305_boxzerobytes() -> size_t;
+  pub fn crypto_box_curve25519xsalsa20poly1305_macbytes() -> size_t;
 
+
+  // sign
   pub fn crypto_sign_ed25519_keypair(pk: *mut u8,
                                      sk: *mut u8) -> c_int;
   pub fn crypto_sign_ed25519_seed_keypair(pk: *mut u8,
@@ -466,4 +490,39 @@ fn test_crypto_stream_xsalsa20_keybytes() {
 #[test]
 fn test_crypto_stream_xsalsa20_noncebytes() {
     assert!(unsafe { crypto_stream_xsalsa20_noncebytes() } == crypto_stream_xsalsa20_NONCEBYTES)
+}
+
+
+// box
+#[test]
+fn test_crypto_box_curve25519xsalsa20poly1305_seedbytes() {
+    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_seedbytes() } == crypto_box_curve25519xsalsa20poly1305_SEEDBYTES)
+}
+#[test]
+fn test_crypto_box_curve25519xsalsa20poly1305_publickeybytes() {
+    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_publickeybytes() } == crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES)
+}
+#[test]
+fn test_crypto_box_curve25519xsalsa20poly1305_secretkeybytes() {
+    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_secretkeybytes() } == crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES)
+}
+#[test]
+fn test_crypto_box_curve25519xsalsa20poly1305_beforenmbytes() {
+    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_beforenmbytes() } == crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES)
+}
+#[test]
+fn test_crypto_box_curve25519xsalsa20poly1305_noncebytes() {
+    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_noncebytes() } == crypto_box_curve25519xsalsa20poly1305_NONCEBYTES)
+}
+#[test]
+fn test_crypto_box_curve25519xsalsa20poly1305_zerobytes() {
+    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_zerobytes() } == crypto_box_curve25519xsalsa20poly1305_ZEROBYTES)
+}
+#[test]
+fn test_crypto_box_curve25519xsalsa20poly1305_boxzerobytes() {
+    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_boxzerobytes() } == crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES)
+}
+#[test]
+fn test_crypto_box_curve25519xsalsa20poly1305_macbytes() {
+    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_macbytes() } == crypto_box_curve25519xsalsa20poly1305_MACBYTES)
 }

@@ -12,12 +12,12 @@ use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
 
-pub const PUBLICKEYBYTES: uint = 32;
-pub const SECRETKEYBYTES: uint = 32;
-pub const NONCEBYTES: uint = 24;
-pub const PRECOMPUTEDKEYBYTES: uint = 32;
-const ZEROBYTES: uint = 32;
-const BOXZEROBYTES: uint = 16;
+pub const PUBLICKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES as uint;
+pub const SECRETKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES as uint;
+pub const NONCEBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_NONCEBYTES as uint;
+pub const PRECOMPUTEDKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES as uint;
+const ZEROBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES as uint;
+const BOXZEROBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES as uint;
 
 /**
  * `PublicKey` for asymmetric authenticated encryption
