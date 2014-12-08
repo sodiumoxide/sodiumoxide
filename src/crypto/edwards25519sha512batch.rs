@@ -6,9 +6,9 @@ use ffi;
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 
-pub const SECRETKEYBYTES: uint = 64;
-pub const PUBLICKEYBYTES: uint = 32;
-pub const SIGNATUREBYTES: uint = 64;
+pub const SECRETKEYBYTES: uint = ffi::crypto_sign_edwards25519sha512batch_SECRETKEYBYTES as uint;
+pub const PUBLICKEYBYTES: uint = ffi::crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES as uint;
+pub const SIGNATUREBYTES: uint = ffi::crypto_sign_edwards25519sha512batch_BYTES as uint;
 
 /**
  * `SecretKey` for signatures
