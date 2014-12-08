@@ -11,8 +11,8 @@ use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
 
-pub const KEYBYTES: uint = 32;
-pub const NONCEBYTES: uint = 24;
+pub const KEYBYTES: uint = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES as uint;
+pub const NONCEBYTES: uint = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES as uint;
 
 /**
  * `Key` for symmetric authenticated encryption

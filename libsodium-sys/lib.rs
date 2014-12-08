@@ -96,6 +96,16 @@ pub const crypto_shorthash_siphash24_BYTES: size_t = 8;
 pub const crypto_shorthash_siphash24_KEYBYTES: size_t = 16;
 
 
+// secretbox
+pub const crypto_secretbox_xsalsa20poly1305_KEYBYTES: size_t = 32;
+pub const crypto_secretbox_xsalsa20poly1305_NONCEBYTES: size_t = 24;
+pub const crypto_secretbox_xsalsa20poly1305_ZEROBYTES: size_t = 32;
+pub const crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES: size_t = 16;
+pub const crypto_secretbox_xsalsa20poly1305_MACBYTES: size_t =
+    crypto_secretbox_xsalsa20poly1305_ZEROBYTES -
+    crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES;
+
+
 extern {
   pub fn sodium_init() -> c_int;
   
@@ -341,10 +351,13 @@ extern {
   pub fn crypto_shorthash_siphash24_bytes() -> size_t;
   pub fn crypto_shorthash_siphash24_keybytes() -> size_t;
 
-                                    
+
+  // verify
   pub fn crypto_verify_16(x: *const u8, y: *const u8) -> c_int;
   pub fn crypto_verify_32(x: *const u8, y: *const u8) -> c_int;
 
+
+  // secretbox
   pub fn crypto_secretbox_xsalsa20poly1305(c: *mut u8,
                                            m: *const u8,
                                            mlen: c_ulonglong,
@@ -355,6 +368,11 @@ extern {
                                                 clen: c_ulonglong,
                                                 n: *const u8,
                                                 k: *const u8) -> c_int;
+  pub fn crypto_secretbox_xsalsa20poly1305_keybytes() -> size_t;
+  pub fn crypto_secretbox_xsalsa20poly1305_noncebytes() -> size_t;
+  pub fn crypto_secretbox_xsalsa20poly1305_zerobytes() -> size_t;
+  pub fn crypto_secretbox_xsalsa20poly1305_boxzerobytes() -> size_t;
+  pub fn crypto_secretbox_xsalsa20poly1305_macbytes() -> size_t;
 }
 
 
@@ -615,4 +633,27 @@ fn test_crypto_shorthash_siphash24_bytes() {
 #[test]
 fn test_crypto_shorthash_siphash24_keybytes() {
     assert!(unsafe { crypto_shorthash_siphash24_keybytes() } == crypto_shorthash_siphash24_KEYBYTES)
+}
+
+
+// secretbox
+#[test]
+fn test_crypto_secretbox_xsalsa20poly1305_keybytes() {
+    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_keybytes() } == crypto_secretbox_xsalsa20poly1305_KEYBYTES)
+}
+#[test]
+fn test_crypto_secretbox_xsalsa20poly1305_noncebytes() {
+    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_noncebytes() } == crypto_secretbox_xsalsa20poly1305_NONCEBYTES)
+}
+#[test]
+fn test_crypto_secretbox_xsalsa20poly1305_zerobytes() {
+    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_zerobytes() } == crypto_secretbox_xsalsa20poly1305_ZEROBYTES)
+}
+#[test]
+fn test_crypto_secretbox_xsalsa20poly1305_boxzerobytes() {
+    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_boxzerobytes() } == crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES)
+}
+#[test]
+fn test_crypto_secretbox_xsalsa20poly1305_macbytes() {
+    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_macbytes() } == crypto_secretbox_xsalsa20poly1305_MACBYTES)
 }
