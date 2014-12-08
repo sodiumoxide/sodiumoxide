@@ -91,6 +91,11 @@ pub const crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES: size_t = 32;
 pub const crypto_sign_edwards25519sha512batch_SECRETKEYBYTES: size_t = 64;
 
 
+// shorthash
+pub const crypto_shorthash_siphash24_BYTES: size_t = 8;
+pub const crypto_shorthash_siphash24_KEYBYTES: size_t = 16;
+
+
 extern {
   pub fn sodium_init() -> c_int;
   
@@ -333,6 +338,9 @@ extern {
                                     m: *const u8,
                                     mlen: c_ulonglong,
                                     k: *const u8) -> c_int;
+  pub fn crypto_shorthash_siphash24_bytes() -> size_t;
+  pub fn crypto_shorthash_siphash24_keybytes() -> size_t;
+
                                     
   pub fn crypto_verify_16(x: *const u8, y: *const u8) -> c_int;
   pub fn crypto_verify_32(x: *const u8, y: *const u8) -> c_int;
@@ -596,4 +604,15 @@ fn test_crypto_sign_edwards25519sha512batch_publickeybytes() {
 #[test]
 fn test_crypto_sign_edwards25519sha512batch_secretkeybytes() {
     assert!(unsafe { crypto_sign_edwards25519sha512batch_secretkeybytes() } == crypto_sign_edwards25519sha512batch_SECRETKEYBYTES)
+}
+
+
+// shorthash
+#[test]
+fn test_crypto_shorthash_siphash24_bytes() {
+    assert!(unsafe { crypto_shorthash_siphash24_bytes() } == crypto_shorthash_siphash24_BYTES)
+}
+#[test]
+fn test_crypto_shorthash_siphash24_keybytes() {
+    assert!(unsafe { crypto_shorthash_siphash24_keybytes() } == crypto_shorthash_siphash24_KEYBYTES)
 }
