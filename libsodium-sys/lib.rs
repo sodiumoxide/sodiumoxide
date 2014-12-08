@@ -76,8 +76,15 @@ pub const crypto_box_curve25519xsalsa20poly1305_MACBYTES: size_t =
 
 
 // scalarmult
-pub const crypto_scalarmult_curve25519_BYTES: size_t =  32;
-pub const crypto_scalarmult_curve25519_SCALARBYTES: size_t =  32;
+pub const crypto_scalarmult_curve25519_BYTES: size_t = 32;
+pub const crypto_scalarmult_curve25519_SCALARBYTES: size_t = 32;
+
+
+// sign
+pub const crypto_sign_ed25519_BYTES: size_t = 64;
+pub const crypto_sign_ed25519_SEEDBYTES: size_t = 32;
+pub const crypto_sign_ed25519_PUBLICKEYBYTES: size_t = 32;
+pub const crypto_sign_ed25519_SECRETKEYBYTES: size_t = 64;
 
 
 extern {
@@ -295,6 +302,10 @@ extern {
                                   sm: *const u8,
                                   smlen: c_ulonglong,
                                   pk: *const u8) -> c_int;
+  pub fn crypto_sign_ed25519_bytes() -> size_t;
+  pub fn crypto_sign_ed25519_seedbytes() -> size_t;
+  pub fn crypto_sign_ed25519_publickeybytes() -> size_t;
+  pub fn crypto_sign_ed25519_secretkeybytes() -> size_t;
 
   pub fn crypto_sign_edwards25519sha512batch_keypair(pk: *mut u8,
                                                      sk: *mut u8) -> c_int;
@@ -544,4 +555,23 @@ fn test_crypto_scalarmult_curve25519_bytes() {
 #[test]
 fn test_crypto_scalarmult_curve25519_scalarbytes() {
     assert!(unsafe { crypto_scalarmult_curve25519_scalarbytes() } == crypto_scalarmult_curve25519_SCALARBYTES)
+}
+
+
+// sign
+#[test]
+fn test_crypto_sign_ed25519_bytes() {
+    assert!(unsafe { crypto_sign_ed25519_bytes() } == crypto_sign_ed25519_BYTES)
+}
+#[test]
+fn test_crypto_sign_ed25519_seedbytes() {
+    assert!(unsafe { crypto_sign_ed25519_seedbytes() } == crypto_sign_ed25519_SEEDBYTES)
+}
+#[test]
+fn test_crypto_sign_ed25519_publickeybytes() {
+    assert!(unsafe { crypto_sign_ed25519_publickeybytes() } == crypto_sign_ed25519_PUBLICKEYBYTES)
+}
+#[test]
+fn test_crypto_sign_ed25519_secretkeybytes() {
+    assert!(unsafe { crypto_sign_ed25519_secretkeybytes() } == crypto_sign_ed25519_SECRETKEYBYTES)
 }
