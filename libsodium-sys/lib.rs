@@ -86,6 +86,10 @@ pub const crypto_sign_ed25519_SEEDBYTES: size_t = 32;
 pub const crypto_sign_ed25519_PUBLICKEYBYTES: size_t = 32;
 pub const crypto_sign_ed25519_SECRETKEYBYTES: size_t = 64;
 
+pub const crypto_sign_edwards25519sha512batch_BYTES: size_t = 64;
+pub const crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES: size_t = 32;
+pub const crypto_sign_edwards25519sha512batch_SECRETKEYBYTES: size_t = 64;
+
 
 extern {
   pub fn sodium_init() -> c_int;
@@ -319,7 +323,12 @@ extern {
                                                   sm: *const u8,
                                                   smlen: c_ulonglong,
                                                   pk: *const u8) -> c_int;
+  pub fn crypto_sign_edwards25519sha512batch_bytes() -> size_t;
+  pub fn crypto_sign_edwards25519sha512batch_publickeybytes() -> size_t;
+  pub fn crypto_sign_edwards25519sha512batch_secretkeybytes() -> size_t;
                      
+
+  // shorthash
   pub fn crypto_shorthash_siphash24(h: *mut u8,
                                     m: *const u8,
                                     mlen: c_ulonglong,
@@ -574,4 +583,17 @@ fn test_crypto_sign_ed25519_publickeybytes() {
 #[test]
 fn test_crypto_sign_ed25519_secretkeybytes() {
     assert!(unsafe { crypto_sign_ed25519_secretkeybytes() } == crypto_sign_ed25519_SECRETKEYBYTES)
+}
+
+#[test]
+fn test_crypto_sign_edwards25519sha512batch_bytes() {
+    assert!(unsafe { crypto_sign_edwards25519sha512batch_bytes() } == crypto_sign_edwards25519sha512batch_BYTES)
+}
+#[test]
+fn test_crypto_sign_edwards25519sha512batch_publickeybytes() {
+    assert!(unsafe { crypto_sign_edwards25519sha512batch_publickeybytes() } == crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES)
+}
+#[test]
+fn test_crypto_sign_edwards25519sha512batch_secretkeybytes() {
+    assert!(unsafe { crypto_sign_edwards25519sha512batch_secretkeybytes() } == crypto_sign_edwards25519sha512batch_SECRETKEYBYTES)
 }
