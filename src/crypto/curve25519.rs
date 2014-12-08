@@ -8,8 +8,8 @@ Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 
 use ffi;
 
-pub const BYTES: uint = 32;
-pub const SCALARBYTES: uint = 32;
+pub const BYTES: uint = ffi::crypto_scalarmult_curve25519_BYTES as uint;
+pub const SCALARBYTES: uint = ffi::crypto_scalarmult_curve25519_SCALARBYTES as uint;
 
 /**
  * `Scalar` value (integer in byte representation)
