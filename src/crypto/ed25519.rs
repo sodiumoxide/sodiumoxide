@@ -10,10 +10,11 @@ use ffi;
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 
-pub const SEEDBYTES: uint = 32;
-pub const SECRETKEYBYTES: uint = 64;
-pub const PUBLICKEYBYTES: uint = 32;
-pub const SIGNATUREBYTES: uint = 64;
+pub const SEEDBYTES: uint = ffi::crypto_sign_ed25519_SEEDBYTES as uint;
+pub const SECRETKEYBYTES: uint = ffi::crypto_sign_ed25519_SECRETKEYBYTES as uint;
+pub const PUBLICKEYBYTES: uint = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as uint;
+pub const SIGNATUREBYTES: uint = ffi::crypto_sign_ed25519_BYTES as uint;
+
 
 /**
  * `Seed` that can be used for keypair generation
