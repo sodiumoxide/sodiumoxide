@@ -8,3 +8,4 @@
 # Cargo files
 Cargo.lock
 /target
+libsodium-sys/target

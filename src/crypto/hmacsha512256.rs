@@ -3,12 +3,20 @@
 `HMAC-SHA-512`.  `HMAC-SHA-512-256` is conjectured to meet the standard notion
 of unforgeability.
 */
-use libc::{c_ulonglong, c_int};
+use ffi::{crypto_auth_hmacsha512256,
+          crypto_auth_hmacsha512256_verify,
+          crypto_auth_hmacsha512256_KEYBYTES,
+          crypto_auth_hmacsha512256_BYTES};
+use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 use crypto::verify::verify_32;
 
-auth_module!(crypto_auth_hmacsha512256, crypto_auth_hmacsha512256_verify, verify_32, 32, 32)
+auth_module!(crypto_auth_hmacsha512256,
+             crypto_auth_hmacsha512256_verify,
+             verify_32,
+             crypto_auth_hmacsha512256_KEYBYTES as uint,
+             crypto_auth_hmacsha512256_BYTES as uint)
 
 #[test]
 fn test_vector_1() {

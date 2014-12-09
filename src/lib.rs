@@ -53,13 +53,9 @@ generation functions and the key-generation functions are thread-safe.
 #![warn(unused_qualifications)]
 #![feature(globs)]
 #![feature(macro_rules)]
-extern crate libc;
-use libc::c_int;
 
-#[link(name = "sodium")]
-extern {
-    fn sodium_init() -> c_int;
-}
+extern crate "libsodium-sys" as ffi;
+extern crate libc;
 
 /**
  * `init()` initializes the sodium library and chooses faster versions of
@@ -69,7 +65,7 @@ extern {
  */
 pub fn init() -> bool {
     unsafe {
-        sodium_init() == 0
+        ffi::sodium_init() == 0
     }
 }
 

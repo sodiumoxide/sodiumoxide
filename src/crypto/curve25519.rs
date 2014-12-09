@@ -6,19 +6,10 @@ This function is conjectured to be strong. For background see Bernstein,
 Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 */
 
-use libc::c_int;
+use ffi;
 
-#[link(name = "sodium")]
-extern {
-    fn crypto_scalarmult_curve25519(q: *mut u8,
-                                    n: *const u8,
-                                    p: *const u8) -> c_int;
-    fn crypto_scalarmult_curve25519_base(q: *mut u8,
-                                         n: *const u8) -> c_int;
-}
-
-pub const BYTES: uint = 32;
-pub const SCALARBYTES: uint = 32;
+pub const BYTES: uint = ffi::crypto_scalarmult_curve25519_BYTES as uint;
+pub const SCALARBYTES: uint = ffi::crypto_scalarmult_curve25519_SCALARBYTES as uint;
 
 /**
  * `Scalar` value (integer in byte representation)
@@ -43,7 +34,7 @@ pub fn scalarmult(&Scalar(n): &Scalar,
                   &GroupElement(p): &GroupElement) -> GroupElement {
     let mut q = [0, ..BYTES];
     unsafe {
-        crypto_scalarmult_curve25519(q.as_mut_ptr(), n.as_ptr(), p.as_ptr());
+        ffi::crypto_scalarmult_curve25519(q.as_mut_ptr(), n.as_ptr(), p.as_ptr());
     }
     GroupElement(q)
 }
@@ -56,7 +47,7 @@ pub fn scalarmult(&Scalar(n): &Scalar,
 pub fn scalarmult_base(&Scalar(n): &Scalar) -> GroupElement {
     let mut q = [0, ..BYTES];
     unsafe {
-        crypto_scalarmult_curve25519_base(q.as_mut_ptr(), n.as_ptr());
+        ffi::crypto_scalarmult_curve25519_base(q.as_mut_ptr(), n.as_ptr());
     }
     GroupElement(q)
 }

@@ -3,11 +3,18 @@
 [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 7.  This
 cipher is conjectured to meet the standard notion of unpredictability.
 */
-use libc::{c_ulonglong, c_int};
+use ffi::{crypto_stream_salsa20,
+          crypto_stream_salsa20_xor,
+          crypto_stream_salsa20_KEYBYTES,
+          crypto_stream_salsa20_NONCEBYTES};
+use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 
-stream_module!(crypto_stream_salsa20, crypto_stream_salsa20_xor, 32, 8)
+stream_module!(crypto_stream_salsa20,
+               crypto_stream_salsa20_xor,
+               crypto_stream_salsa20_KEYBYTES as uint,
+               crypto_stream_salsa20_NONCEBYTES as uint)
 
 #[test]
 fn test_vector_1() {

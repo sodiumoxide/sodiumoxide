@@ -1,0 +1,11 @@
+[package]
+
+name = "libsodium-sys"
+version = "0.0.1"
+authors = []
+links = "sodium"
+build = "build.rs"
+
+[lib]
+  name = "libsodium-sys"
+  path = "lib.rs"
