@@ -5,18 +5,6 @@ macro_rules! auth_module (($auth_name:ident,
                            $keybytes:expr, 
                            $tagbytes:expr) => (
 
-#[link(name = "sodium")]
-extern {
-    fn $auth_name(a: *mut u8,
-                  m: *const u8,
-                  mlen: c_ulonglong,
-                  k: *const u8) -> c_int;
-    fn $verify_name(a: *const u8,
-                    m: *const u8,
-                    mlen: c_ulonglong,
-                    k: *const u8) -> c_int;
-}
-
 pub const KEYBYTES: uint = $keybytes;
 pub const TAGBYTES: uint = $tagbytes;
 

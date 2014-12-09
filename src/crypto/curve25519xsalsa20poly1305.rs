@@ -7,48 +7,17 @@ This function is conjectured to meet the standard notions of privacy and
 third-party unforgeability.
 
 */
-use libc::{c_ulonglong, c_int};
+use ffi;
 use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
 
-#[link(name = "sodium")]
-extern {
-    fn crypto_box_curve25519xsalsa20poly1305_keypair(pk: *mut u8,
-                                                     sk: *mut u8) -> c_int;
-    fn crypto_box_curve25519xsalsa20poly1305(c: *mut u8,
-                                             m: *const u8,
-                                             mlen: c_ulonglong,
-                                             n: *const u8,
-                                             pk: *const u8,
-                                             sk: *const u8) -> c_int;
-    fn crypto_box_curve25519xsalsa20poly1305_open(m: *mut u8,
-                                                  c: *const u8,
-                                                  clen: c_ulonglong,
-                                                  n: *const u8,
-                                                  pk: *const u8,
-                                                  sk: *const u8) -> c_int;
-    fn crypto_box_curve25519xsalsa20poly1305_beforenm(k: *mut u8,
-                                                      pk: *const u8,
-                                                      sk: *const u8) -> c_int;
-    fn crypto_box_curve25519xsalsa20poly1305_afternm(c: *mut u8,
-                                                     m: *const u8,
-                                                     mlen: c_ulonglong,
-                                                     n: *const u8,
-                                                     k: *const u8) -> c_int;
-    fn crypto_box_curve25519xsalsa20poly1305_open_afternm(m: *mut u8,
-                                                          c: *const u8,
-                                                          clen: c_ulonglong,
-                                                          n: *const u8,
-                                                          k: *const u8) -> c_int;
-}
-
-pub const PUBLICKEYBYTES: uint = 32;
-pub const SECRETKEYBYTES: uint = 32;
-pub const NONCEBYTES: uint = 24;
-pub const PRECOMPUTEDKEYBYTES: uint = 32;
-const ZEROBYTES: uint = 32;
-const BOXZEROBYTES: uint = 16;
+pub const PUBLICKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES as uint;
+pub const SECRETKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES as uint;
+pub const NONCEBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_NONCEBYTES as uint;
+pub const PRECOMPUTEDKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES as uint;
+const ZEROBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES as uint;
+const BOXZEROBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES as uint;
 
 /**
  * `PublicKey` for asymmetric authenticated encryption
@@ -86,7 +55,7 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8, ..PUBLICKEYBYTES];
         let mut sk = [0u8, ..SECRETKEYBYTES];
-        crypto_box_curve25519xsalsa20poly1305_keypair(
+        ffi::crypto_box_curve25519xsalsa20poly1305_keypair(
             pk.as_mut_ptr(),
             sk.as_mut_ptr());
         (PublicKey(pk), SecretKey(sk))
@@ -116,7 +85,7 @@ pub fn seal(m: &[u8],
             &SecretKey(sk): &SecretKey) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
-            crypto_box_curve25519xsalsa20poly1305(dst,
+            ffi::crypto_box_curve25519xsalsa20poly1305(dst,
                                                   src,
                                                   len,
                                                   n.as_ptr(),
@@ -141,7 +110,7 @@ pub fn open(c: &[u8],
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
-            crypto_box_curve25519xsalsa20poly1305_open(dst,
+            ffi::crypto_box_curve25519xsalsa20poly1305_open(dst,
                                                        src,
                                                        len,
                                                        n.as_ptr(),
@@ -177,7 +146,7 @@ pub fn precompute(&PublicKey(pk): &PublicKey,
                   &SecretKey(sk): &SecretKey) -> PrecomputedKey {
     let mut k = [0u8, ..PRECOMPUTEDKEYBYTES];
     unsafe {
-        crypto_box_curve25519xsalsa20poly1305_beforenm(k.as_mut_ptr(),
+        ffi::crypto_box_curve25519xsalsa20poly1305_beforenm(k.as_mut_ptr(),
                                                        pk.as_ptr(),
                                                        sk.as_ptr());
     }
@@ -193,7 +162,7 @@ pub fn seal_precomputed(m: &[u8],
                         &PrecomputedKey(k): &PrecomputedKey) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
-            crypto_box_curve25519xsalsa20poly1305_afternm(dst,
+            ffi::crypto_box_curve25519xsalsa20poly1305_afternm(dst,
                                                           src,
                                                           len,
                                                           n.as_ptr(),
@@ -216,7 +185,7 @@ pub fn open_precomputed(c: &[u8],
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
-            crypto_box_curve25519xsalsa20poly1305_open_afternm(dst,
+            ffi::crypto_box_curve25519xsalsa20poly1305_open_afternm(dst,
                                                                src,
                                                                len,
                                                                n.as_ptr(),

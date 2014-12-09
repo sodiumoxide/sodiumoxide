@@ -4,7 +4,11 @@ in [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 9. This
 authenticator is proven to meet the standard notion of unforgeability after a
 single message.
 */
-use libc::{c_ulonglong, c_int};
+use ffi::{crypto_onetimeauth_poly1305,
+          crypto_onetimeauth_poly1305_verify,
+          crypto_onetimeauth_poly1305_KEYBYTES,
+           crypto_onetimeauth_poly1305_BYTES};
+use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 use crypto::verify::verify_16;
@@ -12,7 +16,8 @@ use crypto::verify::verify_16;
 auth_module!(crypto_onetimeauth_poly1305,
              crypto_onetimeauth_poly1305_verify,
              verify_16,
-             32, 16)
+             crypto_onetimeauth_poly1305_KEYBYTES as uint,
+             crypto_onetimeauth_poly1305_BYTES as uint)
 
 #[test]
 fn test_vector_1() {

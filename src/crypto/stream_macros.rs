@@ -4,19 +4,6 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr, 
                              $noncebytes:expr) => (
 
-#[link(name = "sodium")]
-extern {
-    fn $stream_name(c: *mut u8,
-                    clen: c_ulonglong,
-                    n: *const u8,
-                    k: *const u8) -> c_int;
-    fn $xor_name(c: *mut u8,
-                 m: *const u8,
-                 mlen: c_ulonglong,
-                 n: *const u8,
-                 k: *const u8) -> c_int;
-}
-
 pub const KEYBYTES: uint = $keybytes;
 pub const NONCEBYTES: uint = $noncebytes;
 

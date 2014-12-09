@@ -6,32 +6,15 @@ chosen-message attacks.
 */
 #[cfg(test)]
 extern crate serialize;
-use libc::{c_ulonglong, c_int};
+use ffi;
+use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 
-#[link(name = "sodium")]
-extern {
-    fn crypto_sign_ed25519_keypair(pk: *mut u8,
-                                   sk: *mut u8) -> c_int;
-    fn crypto_sign_ed25519_seed_keypair(pk: *mut u8,
-                                        sk: *mut u8,
-                                        seed: *const u8) -> c_int;
-    fn crypto_sign_ed25519(sm: *mut u8,
-                           smlen: *mut c_ulonglong,
-                           m: *const u8,
-                           mlen: c_ulonglong,
-                           sk: *const u8) -> c_int;
-    fn crypto_sign_ed25519_open(m: *mut u8,
-                                mlen: *mut c_ulonglong,
-                                sm: *const u8,
-                                smlen: c_ulonglong,
-                                pk: *const u8) -> c_int;
-}
+pub const SEEDBYTES: uint = ffi::crypto_sign_ed25519_SEEDBYTES as uint;
+pub const SECRETKEYBYTES: uint = ffi::crypto_sign_ed25519_SECRETKEYBYTES as uint;
+pub const PUBLICKEYBYTES: uint = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as uint;
+pub const SIGNATUREBYTES: uint = ffi::crypto_sign_ed25519_BYTES as uint;
 
-pub const SEEDBYTES: uint = 32;
-pub const SECRETKEYBYTES: uint = 64;
-pub const PUBLICKEYBYTES: uint = 32;
-pub const SIGNATUREBYTES: uint = 64;
 
 /**
  * `Seed` that can be used for keypair generation
@@ -77,7 +60,7 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8, ..PUBLICKEYBYTES];
         let mut sk = [0u8, ..SECRETKEYBYTES];
-        crypto_sign_ed25519_keypair(pk.as_mut_ptr(), sk.as_mut_ptr());
+        ffi::crypto_sign_ed25519_keypair(pk.as_mut_ptr(), sk.as_mut_ptr());
         (PublicKey(pk), SecretKey(sk))
     }
 }
@@ -90,7 +73,7 @@ pub fn keypair_from_seed(&Seed(seed): &Seed) -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8, ..PUBLICKEYBYTES];
         let mut sk = [0u8, ..SECRETKEYBYTES];
-        crypto_sign_ed25519_seed_keypair(pk.as_mut_ptr(),
+        ffi::crypto_sign_ed25519_seed_keypair(pk.as_mut_ptr(),
                                          sk.as_mut_ptr(),
                                          seed.as_ptr());
         (PublicKey(pk), SecretKey(sk))
@@ -106,7 +89,7 @@ pub fn sign(m: &[u8],
     unsafe {
         let mut sm = Vec::from_elem(m.len() + SIGNATUREBYTES, 0u8);
         let mut smlen = 0;
-        crypto_sign_ed25519(sm.as_mut_ptr(),
+        ffi::crypto_sign_ed25519(sm.as_mut_ptr(),
                             &mut smlen,
                             m.as_ptr(),
                             m.len() as c_ulonglong,
@@ -126,7 +109,7 @@ pub fn verify(sm: &[u8],
     unsafe {
         let mut m = Vec::from_elem(sm.len(), 0u8);
         let mut mlen = 0;
-        if crypto_sign_ed25519_open(m.as_mut_ptr(),
+        if ffi::crypto_sign_ed25519_open(m.as_mut_ptr(),
                                     &mut mlen,
                                     sm.as_ptr(),
                                     sm.len() as c_ulonglong,

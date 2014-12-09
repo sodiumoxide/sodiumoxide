@@ -6,27 +6,13 @@ combination of Salsa20 and Poly1305 specified in
 This function is conjectured to meet the standard notions of privacy and
 authenticity.
 */
-use libc::{c_ulonglong, c_int};
+use ffi;
 use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
 
-#[link(name = "sodium")]
-extern {
-    fn crypto_secretbox_xsalsa20poly1305(c: *mut u8,
-                                         m: *const u8,
-                                         mlen: c_ulonglong,
-                                         n: *const u8,
-                                         k: *const u8) -> c_int;
-    fn crypto_secretbox_xsalsa20poly1305_open(m: *mut u8,
-                                              c: *const u8,
-                                              clen: c_ulonglong,
-                                              n: *const u8,
-                                              k: *const u8) -> c_int;
-}
-
-pub const KEYBYTES: uint = 32;
-pub const NONCEBYTES: uint = 24;
+pub const KEYBYTES: uint = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES as uint;
+pub const NONCEBYTES: uint = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES as uint;
 
 /**
  * `Key` for symmetric authenticated encryption
@@ -84,7 +70,7 @@ pub fn seal(m: &[u8],
             &Key(k): &Key) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
-            crypto_secretbox_xsalsa20poly1305(dst, src, len, n.as_ptr(), k.as_ptr())
+            ffi::crypto_secretbox_xsalsa20poly1305(dst, src, len, n.as_ptr(), k.as_ptr())
         }
     });
     c
@@ -103,7 +89,7 @@ pub fn open(c: &[u8],
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
-            crypto_secretbox_xsalsa20poly1305_open(dst,
+            ffi::crypto_secretbox_xsalsa20poly1305_open(dst,
                                                    src,
                                                    len,
                                                    n.as_ptr(),

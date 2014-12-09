@@ -9,9 +9,12 @@ SHA-3 competition will improve the situation.
 */
 #[cfg(test)]
 extern crate serialize;
-use libc::{c_ulonglong, c_int};
+use ffi::{crypto_hash_sha256, crypto_hash_sha256_BYTES};
+use libc::c_ulonglong;
 
-hash_module!(crypto_hash_sha256, 32, 64)
+hash_module!(crypto_hash_sha256,
+             crypto_hash_sha256_BYTES as uint,
+             64)
 
 #[test]
 fn test_vector_1() {

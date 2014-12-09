@@ -1,13 +1,6 @@
 #![macro_escape]
 macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
 
-#[link(name = "sodium")]
-extern {
-    fn $hash_name(h: *mut u8,
-                  m: *const u8,
-                  mlen: c_ulonglong) -> c_int;
-}
-
 pub const HASHBYTES: uint = $hashbytes;
 pub const BLOCKBYTES: uint = $blockbytes;
 
