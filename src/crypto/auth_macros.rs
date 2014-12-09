@@ -1,7 +1,12 @@
 #![macro_escape]
 macro_rules! auth_module (($auth_name:ident, 
                            $verify_name:ident, 
-                           $verify_fn:ident) => (
+                           $verify_fn:ident, 
+                           $keybytes:expr, 
+                           $tagbytes:expr) => (
+
+pub const KEYBYTES: uint = $keybytes;
+pub const TAGBYTES: uint = $tagbytes;
 
 /**
  * Authentication `Key`
@@ -54,7 +59,7 @@ pub fn authenticate(m: &[u8],
                     &Key(k): &Key) -> Tag {
     unsafe {
         let mut tag = [0, ..TAGBYTES];
-        ffi::$auth_name(tag.as_mut_ptr(),
+        $auth_name(tag.as_mut_ptr(),
                    m.as_ptr(),
                    m.len() as c_ulonglong,
                    k.as_ptr());
@@ -69,7 +74,7 @@ pub fn authenticate(m: &[u8],
 pub fn verify(&Tag(tag): &Tag, m: &[u8],
               &Key(k): &Key) -> bool {
     unsafe {
-        ffi::$verify_name(tag.as_ptr(),
+        $verify_name(tag.as_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
                      k.as_ptr()) == 0
