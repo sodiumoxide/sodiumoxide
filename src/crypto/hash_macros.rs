@@ -1,5 +1,8 @@
 #![macro_escape]
-macro_rules! hash_module (($hash_name:ident) => (
+macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
+
+pub const HASHBYTES: uint = $hashbytes;
+pub const BLOCKBYTES: uint = $blockbytes;
 
 /**
  * Digest-structure
@@ -14,7 +17,7 @@ newtype_clone!(Digest)
 pub fn hash(m: &[u8]) -> Digest {
     unsafe {
         let mut h = [0, ..HASHBYTES];
-        ffi::$hash_name(h.as_mut_ptr(), m.as_ptr(), m.len() as c_ulonglong);
+        $hash_name(h.as_mut_ptr(), m.as_ptr(), m.len() as c_ulonglong);
         Digest(h)
     }
 }

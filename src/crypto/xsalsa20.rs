@@ -4,15 +4,19 @@
 This cipher is conjectured to meet the standard notion of
 unpredictability.
 */
-use ffi;
+use ffi::{crypto_stream_xsalsa20,
+          crypto_stream_xsalsa20_xor,
+          crypto_stream_xsalsa20_KEYBYTES,
+          crypto_stream_xsalsa20_NONCEBYTES};
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 
-pub const KEYBYTES: uint = ffi::crypto_stream_xsalsa20_KEYBYTES as uint;
-pub const NONCEBYTES: uint = ffi::crypto_stream_xsalsa20_NONCEBYTES as uint;
+stream_module!(crypto_stream_xsalsa20,
+               crypto_stream_xsalsa20_xor,
+               crypto_stream_xsalsa20_KEYBYTES as uint,
+               crypto_stream_xsalsa20_NONCEBYTES as uint)
 
-stream_module!(crypto_stream_xsalsa20, crypto_stream_xsalsa20_xor)
 #[test]
 fn test_vector_1() {
     // corresponding to tests/stream.c and tests/stream5.cpp from NaCl

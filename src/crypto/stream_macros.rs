@@ -1,6 +1,11 @@
 #![macro_escape]
 macro_rules! stream_module (($stream_name:ident, 
-                             $xor_name:ident) => (
+                             $xor_name:ident, 
+                             $keybytes:expr, 
+                             $noncebytes:expr) => (
+
+pub const KEYBYTES: uint = $keybytes;
+pub const NONCEBYTES: uint = $noncebytes;
 
 /**
  * `Key` for symmetric encryption
@@ -58,7 +63,7 @@ pub fn stream(len: uint,
               &Key(k): &Key) -> Vec<u8> {
     unsafe {
         let mut c = Vec::from_elem(len, 0u8);
-        ffi::$stream_name(c.as_mut_ptr(),
+        $stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
                      n.as_ptr(),
                      k.as_ptr());
@@ -79,7 +84,7 @@ pub fn stream_xor(m: &[u8],
                   &Key(k): &Key) -> Vec<u8> {
     unsafe {
         let mut c = Vec::from_elem(m.len(), 0u8);
-        ffi::$xor_name(c.as_mut_ptr(),
+        $xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
                   n.as_ptr(),
@@ -100,7 +105,7 @@ pub fn stream_xor_inplace(m: &mut [u8],
                           &Nonce(n): &Nonce,
                           &Key(k): &Key) {
     unsafe {
-        ffi::$xor_name(m.as_mut_ptr(),
+        $xor_name(m.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
                   n.as_ptr(),
