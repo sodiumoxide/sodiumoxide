@@ -61,11 +61,26 @@ pub const crypto_onetimeauth_poly1305_KEYBYTES : size_t = 32;
 
 
 // hash
+// crypto_hash.h
 pub const crypto_hash_BYTES: size_t = crypto_hash_sha512_BYTES;
 pub const crypto_hash_PRIMITIVE: &'static str = "sha512";
 
+// crypto_hash_sha256.h
+#[repr(C)]
+pub struct crypto_hash_sha256_state {
+    state: [u32, ..8],
+    count: [u32, ..2],
+    buf: [u8, ..64],
+}
 pub const crypto_hash_sha256_BYTES: size_t =  32;
 
+// crypto_hash_sha512.h
+#[repr(C)]
+pub struct crypto_hash_sha512_state {
+    state: [u64, ..8],
+    count: [u64, ..2],
+    buf: [u8, ..128],
+}
 pub const crypto_hash_sha512_BYTES: size_t = 64;
 
 
@@ -281,21 +296,36 @@ extern {
 
 
   // hash
+  // crypto_hash.h
   pub fn crypto_hash_bytes() -> size_t;
   pub fn crypto_hash(h: *mut u8,
                      m: *const u8,
                      mlen: c_ulonglong) -> c_int;
   pub fn crypto_hash_primitive() -> *const c_char;
-  
+
+  // crypto_hash_sha256.h
+  pub fn crypto_hash_sha256_bytes() -> size_t;
   pub fn crypto_hash_sha256(h: *mut u8,
                             m: *const u8,
                             mlen: c_ulonglong) -> c_int;
-  pub fn crypto_hash_sha256_bytes() -> size_t;
+  pub fn crypto_hash_sha256_init(state: *mut crypto_hash_sha256_state) -> c_int;
+  pub fn crypto_hash_sha256_update(state: *mut crypto_hash_sha256_state,
+                                   m: *const u8,
+                                   mlen: c_ulonglong) -> c_int;
+  pub fn crypto_hash_sha256_final(state: *mut crypto_hash_sha256_state,
+                                  h: *mut u8) -> c_int;
 
+  // crypto_hash_sha512.h
+  pub fn crypto_hash_sha512_bytes() -> size_t;
   pub fn crypto_hash_sha512(h: *mut u8,
                             m: *const u8,
                             mlen: c_ulonglong) -> c_int;
-  pub fn crypto_hash_sha512_bytes() -> size_t;
+  pub fn crypto_hash_sha512_init(state: *mut crypto_hash_sha512_state) -> c_int;
+  pub fn crypto_hash_sha512_update(state: *mut crypto_hash_sha512_state,
+                                   m: *const u8,
+                                   mlen: c_ulonglong) -> c_int;
+  pub fn crypto_hash_sha512_final(state: *mut crypto_hash_sha512_state,
+                                  h: *mut u8) -> c_int;
 
 
   // scalarmult
