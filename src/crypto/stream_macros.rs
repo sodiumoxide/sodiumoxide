@@ -17,6 +17,7 @@ pub struct Key(pub [u8, ..KEYBYTES]);
 
 newtype_drop!(Key)
 newtype_clone!(Key)
+newtype_impl!(Key, KEYBYTES)
 
 /**
  * `Nonce` for symmetric encryption
@@ -24,6 +25,7 @@ newtype_clone!(Key)
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
 newtype_clone!(Nonce)
+newtype_impl!(Nonce, NONCEBYTES)
 
 /**
  * `gen_key()` randomly generates a key for symmetric encryption
