@@ -13,6 +13,7 @@ pub const KEYBYTES: uint = ffi::crypto_shorthash_siphash24_KEYBYTES as uint;
 /**
  * Digest-structure
  */
+#[deriving(Copy)]
 pub struct Digest(pub [u8, ..HASHBYTES]);
 
 newtype_clone!(Digest)

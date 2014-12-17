@@ -22,6 +22,7 @@ const BOXZEROBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYT
 /**
  * `PublicKey` for asymmetric authenticated encryption
  */
+#[deriving(Copy)]
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey)
@@ -42,6 +43,7 @@ newtype_impl!(SecretKey, SECRETKEYBYTES)
 /**
  * `Nonce` for asymmetric authenticated encryption
  */
+#[deriving(Copy)]
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
 newtype_clone!(Nonce)

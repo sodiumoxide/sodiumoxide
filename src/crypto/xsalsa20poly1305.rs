@@ -29,6 +29,7 @@ newtype_impl!(Key, KEYBYTES)
 /**
  * `Nonce` for symmetric authenticated encryption
  */
+#[deriving(Copy)]
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
 newtype_clone!(Nonce)

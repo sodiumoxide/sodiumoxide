@@ -7,6 +7,7 @@ pub const BLOCKBYTES: uint = $blockbytes;
 /**
  * Digest-structure
  */
+#[deriving(Copy)]
 pub struct Digest(pub [u8, ..HASHBYTES]);
 
 newtype_clone!(Digest)
