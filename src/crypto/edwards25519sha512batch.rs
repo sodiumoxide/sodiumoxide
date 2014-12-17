@@ -25,6 +25,7 @@ newtype_impl!(SecretKey, SECRETKEYBYTES)
 /**
  * `PublicKey` for signatures
  */
+#[deriving(Copy)]
 pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey)
