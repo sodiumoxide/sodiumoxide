@@ -15,17 +15,18 @@ pub const NONCEBYTES: uint = $noncebytes;
  */
 pub struct Key(pub [u8, ..KEYBYTES]);
 
-newtype_drop!(Key)
-newtype_clone!(Key)
-newtype_impl!(Key, KEYBYTES)
+newtype_drop!(Key);
+newtype_clone!(Key);
+newtype_impl!(Key, KEYBYTES);
 
 /**
  * `Nonce` for symmetric encryption
  */
+#[deriving(Copy)]
 pub struct Nonce(pub [u8, ..NONCEBYTES]);
 
-newtype_clone!(Nonce)
-newtype_impl!(Nonce, NONCEBYTES)
+newtype_clone!(Nonce);
+newtype_impl!(Nonce, NONCEBYTES);
 
 /**
  * `gen_key()` randomly generates a key for symmetric encryption
@@ -182,4 +183,4 @@ mod bench {
     }
 }
 
-))
+));

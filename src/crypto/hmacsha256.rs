@@ -16,7 +16,7 @@ auth_module!(crypto_auth_hmacsha256,
              crypto_auth_hmacsha256_verify,
              verify_32,
              crypto_auth_hmacsha256_KEYBYTES as uint,
-             crypto_auth_hmacsha256_BYTES as uint)
+             crypto_auth_hmacsha256_BYTES as uint);
 
 #[test]
 fn test_vector_1() {

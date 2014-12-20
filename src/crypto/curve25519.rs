@@ -14,18 +14,20 @@ pub const SCALARBYTES: uint = ffi::crypto_scalarmult_curve25519_SCALARBYTES as u
 /**
  * `Scalar` value (integer in byte representation)
  */
+#[deriving(Copy)]
 pub struct Scalar(pub [u8, ..SCALARBYTES]);
 
-newtype_clone!(Scalar)
-newtype_impl!(Scalar, SCALARBYTES)
+newtype_clone!(Scalar);
+newtype_impl!(Scalar, SCALARBYTES);
 
 /**
  * `GroupElement`
  */
+#[deriving(Copy)]
 pub struct GroupElement(pub [u8, ..BYTES]);
 
-newtype_clone!(GroupElement)
-newtype_impl!(GroupElement, BYTES)
+newtype_clone!(GroupElement);
+newtype_impl!(GroupElement, BYTES);
 
 /**
  * `scalarmult()` multiplies a group element `p`
