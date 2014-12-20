@@ -14,7 +14,7 @@ use libc::c_ulonglong;
 
 hash_module!(crypto_hash_sha512,
              crypto_hash_sha512_BYTES as uint,
-             128)
+             128);
 
 #[test]
 fn test_vector_1() {

@@ -10,8 +10,8 @@ pub const BLOCKBYTES: uint = $blockbytes;
 #[deriving(Copy)]
 pub struct Digest(pub [u8, ..HASHBYTES]);
 
-newtype_clone!(Digest)
-newtype_impl!(Digest, HASHBYTES)
+newtype_clone!(Digest);
+newtype_impl!(Digest, HASHBYTES);
 
 /**
  * `hash` hashes a message `m`. It returns a hash `h`.
@@ -46,4 +46,4 @@ mod bench {
     }
 }
 
-))
+));
