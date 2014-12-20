@@ -16,9 +16,9 @@ pub const TAGBYTES: uint = $tagbytes;
  */
 pub struct Key(pub [u8, ..KEYBYTES]);
 
-newtype_drop!(Key)
-newtype_clone!(Key)
-newtype_impl!(Key, KEYBYTES)
+newtype_drop!(Key);
+newtype_clone!(Key);
+newtype_impl!(Key, KEYBYTES);
 
 /**
   * Authentication `Tag`
@@ -38,8 +38,8 @@ impl PartialEq for Tag {
     }
 }
 
-newtype_clone!(Tag)
-newtype_impl!(Tag, TAGBYTES)
+newtype_clone!(Tag);
+newtype_impl!(Tag, TAGBYTES);
 
 /**
  * `gen_key()` randomly generates a key for authentication
@@ -155,4 +155,4 @@ mod bench {
     }
 }
 
-))
+));

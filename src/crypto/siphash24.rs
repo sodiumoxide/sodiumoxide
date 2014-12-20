@@ -16,8 +16,8 @@ pub const KEYBYTES: uint = ffi::crypto_shorthash_siphash24_KEYBYTES as uint;
 #[deriving(Copy)]
 pub struct Digest(pub [u8, ..HASHBYTES]);
 
-newtype_clone!(Digest)
-newtype_impl!(Digest, HASHBYTES)
+newtype_clone!(Digest);
+newtype_impl!(Digest, HASHBYTES);
 
 /**
  * Key
@@ -27,9 +27,9 @@ newtype_impl!(Digest, HASHBYTES)
  */
 pub struct Key(pub [u8, ..KEYBYTES]);
 
-newtype_drop!(Key)
-newtype_clone!(Key)
-newtype_impl!(Key, KEYBYTES)
+newtype_drop!(Key);
+newtype_clone!(Key);
+newtype_impl!(Key, KEYBYTES);
 
 /**
  * `gen_key()` randomly generates a key for shorthash

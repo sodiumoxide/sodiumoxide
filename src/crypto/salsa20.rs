@@ -14,7 +14,7 @@ use randombytes::randombytes_into;
 stream_module!(crypto_stream_salsa20,
                crypto_stream_salsa20_xor,
                crypto_stream_salsa20_KEYBYTES as uint,
-               crypto_stream_salsa20_NONCEBYTES as uint)
+               crypto_stream_salsa20_NONCEBYTES as uint);
 
 #[test]
 fn test_vector_1() {
