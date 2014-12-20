@@ -67,6 +67,7 @@ pub const crypto_hash_PRIMITIVE: &'static str = "sha512";
 
 // crypto_hash_sha256.h
 #[repr(C)]
+#[deriving(Copy)]
 pub struct crypto_hash_sha256_state {
     state: [u32, ..8],
     count: [u32, ..2],
@@ -76,6 +77,7 @@ pub const crypto_hash_sha256_BYTES: size_t =  32;
 
 // crypto_hash_sha512.h
 #[repr(C)]
+#[deriving(Copy)]
 pub struct crypto_hash_sha512_state {
     state: [u64, ..8],
     count: [u64, ..2],
