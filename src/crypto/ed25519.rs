@@ -25,7 +25,7 @@ pub const SIGNATUREBYTES: uint = ffi::crypto_sign_ed25519_BYTES as uint;
  * When a `Seed` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Seed(pub [u8, ..SEEDBYTES]);
+pub struct Seed(pub [u8; SEEDBYTES]);
 
 newtype_drop!(Seed);
 newtype_clone!(Seed);
@@ -37,7 +37,7 @@ newtype_impl!(Seed, SEEDBYTES);
  * When a `SecretKey` goes out of scope its contents
  * will be zeroed out
  */
-pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
+pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
 newtype_clone!(SecretKey);
@@ -47,7 +47,7 @@ newtype_impl!(SecretKey, SECRETKEYBYTES);
  * `PublicKey` for signatures
  */
 #[deriving(Copy)]
-pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
@@ -62,8 +62,8 @@ newtype_impl!(PublicKey, PUBLICKEYBYTES);
  */
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8, ..PUBLICKEYBYTES];
-        let mut sk = [0u8, ..SECRETKEYBYTES];
+        let mut pk = [0u8; PUBLICKEYBYTES];
+        let mut sk = [0u8; SECRETKEYBYTES];
         ffi::crypto_sign_ed25519_keypair(pk.as_mut_ptr(), sk.as_mut_ptr());
         (PublicKey(pk), SecretKey(sk))
     }
@@ -75,8 +75,8 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
  */
 pub fn keypair_from_seed(&Seed(seed): &Seed) -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8, ..PUBLICKEYBYTES];
-        let mut sk = [0u8, ..SECRETKEYBYTES];
+        let mut pk = [0u8; PUBLICKEYBYTES];
+        let mut sk = [0u8; SECRETKEYBYTES];
         ffi::crypto_sign_ed25519_seed_keypair(pk.as_mut_ptr(),
                                          sk.as_mut_ptr(),
                                          seed.as_ptr());
@@ -158,7 +158,7 @@ fn test_sign_verify_tamper() {
 fn test_sign_verify_seed() {
     use randombytes::{randombytes, randombytes_into};
     for i in range(0, 256u) {
-        let mut seedbuf = [0, ..32];
+        let mut seedbuf = [0; 32];
         randombytes_into(&mut seedbuf);
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
@@ -173,7 +173,7 @@ fn test_sign_verify_seed() {
 fn test_sign_verify_tamper_seed() {
     use randombytes::{randombytes, randombytes_into};
     for i in range(0, 32u) {
-        let mut seedbuf = [0, ..32];
+        let mut seedbuf = [0; 32];
         randombytes_into(&mut seedbuf);
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
@@ -211,7 +211,7 @@ fn test_vectors() {
         let x3 = x.next().unwrap();
         let seed_bytes = x0.slice(0, 64).from_hex().unwrap();
         assert!(seed_bytes.len() == SEEDBYTES);
-        let mut seedbuf = [0u8, ..SEEDBYTES];
+        let mut seedbuf = [0u8; SEEDBYTES];
         for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
             *s = *b
         }
@@ -232,7 +232,7 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64,
+    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
                                        128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
