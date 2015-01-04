@@ -15,7 +15,7 @@ pub const SCALARBYTES: uint = ffi::crypto_scalarmult_curve25519_SCALARBYTES as u
  * `Scalar` value (integer in byte representation)
  */
 #[deriving(Copy)]
-pub struct Scalar(pub [u8, ..SCALARBYTES]);
+pub struct Scalar(pub [u8; SCALARBYTES]);
 
 newtype_clone!(Scalar);
 newtype_impl!(Scalar, SCALARBYTES);
@@ -24,7 +24,7 @@ newtype_impl!(Scalar, SCALARBYTES);
  * `GroupElement`
  */
 #[deriving(Copy)]
-pub struct GroupElement(pub [u8, ..BYTES]);
+pub struct GroupElement(pub [u8; BYTES]);
 
 newtype_clone!(GroupElement);
 newtype_impl!(GroupElement, BYTES);
@@ -36,7 +36,7 @@ newtype_impl!(GroupElement, BYTES);
  */
 pub fn scalarmult(&Scalar(n): &Scalar,
                   &GroupElement(p): &GroupElement) -> GroupElement {
-    let mut q = [0, ..BYTES];
+    let mut q = [0; BYTES];
     unsafe {
         ffi::crypto_scalarmult_curve25519(q.as_mut_ptr(), n.as_ptr(), p.as_ptr());
     }
@@ -49,7 +49,7 @@ pub fn scalarmult(&Scalar(n): &Scalar,
  * group element `q`/
  */
 pub fn scalarmult_base(&Scalar(n): &Scalar) -> GroupElement {
-    let mut q = [0, ..BYTES];
+    let mut q = [0; BYTES];
     unsafe {
         ffi::crypto_scalarmult_curve25519_base(q.as_mut_ptr(), n.as_ptr());
     }
@@ -132,8 +132,8 @@ mod bench {
 
     #[bench]
     fn bench_scalarmult(b: &mut test::Bencher) {
-        let mut gbs = [0u8, ..BYTES];
-        let mut sbs = [0u8, ..SCALARBYTES];
+        let mut gbs = [0u8; BYTES];
+        let mut sbs = [0u8; SCALARBYTES];
         randombytes_into(&mut gbs);
         randombytes_into(&mut sbs);
         let g = GroupElement(gbs);
@@ -145,7 +145,7 @@ mod bench {
 
     #[bench]
     fn bench_scalarmult_base(b: &mut test::Bencher) {
-        let mut sbs = [0u8, ..SCALARBYTES];
+        let mut sbs = [0u8; SCALARBYTES];
         randombytes_into(&mut sbs);
         let s = Scalar(sbs);
         b.iter(|| {
