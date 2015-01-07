@@ -16,7 +16,7 @@ pub const SIGNATUREBYTES: uint = ffi::crypto_sign_edwards25519sha512batch_BYTES 
  * When a `SecretKey` goes out of scope its contents
  * will be zeroed out
  */
-pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
+pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
 newtype_clone!(SecretKey);
@@ -26,7 +26,7 @@ newtype_impl!(SecretKey, SECRETKEYBYTES);
  * `PublicKey` for signatures
  */
 #[deriving(Copy)]
-pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
@@ -41,8 +41,8 @@ newtype_impl!(PublicKey, PUBLICKEYBYTES);
  */
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8, ..PUBLICKEYBYTES];
-        let mut sk = [0u8, ..SECRETKEYBYTES];
+        let mut pk = [0u8; PUBLICKEYBYTES];
+        let mut sk = [0u8; SECRETKEYBYTES];
         ffi::crypto_sign_edwards25519sha512batch_keypair(pk.as_mut_ptr(),
                                                     sk.as_mut_ptr());
         (PublicKey(pk), SecretKey(sk))
@@ -125,7 +125,7 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64,
+    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
                                        128, 256, 512, 1024, 2048, 4096];
 
     #[bench]

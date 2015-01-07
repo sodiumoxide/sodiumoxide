@@ -52,7 +52,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
             if bs.len() != $len {
                 return None
             }
-            let mut n = $newtype([0, ..$len]);
+            let mut n = $newtype([0; $len]);
             {
                 let $newtype(ref mut b) = n;
                 for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
