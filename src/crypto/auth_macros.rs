@@ -26,7 +26,7 @@ newtype_impl!(Key, KEYBYTES);
   * The tag implements the traits `PartialEq` and `Eq` using constant-time
   * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
   */
-#[deriving(Copy)]
+#[derive(Copy)]
 pub struct Tag(pub [u8; TAGBYTES]);
 
 impl Eq for Tag {}
