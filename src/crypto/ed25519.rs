@@ -9,6 +9,7 @@ extern crate serialize;
 use ffi;
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
+use std::iter::repeat;
 
 pub const SEEDBYTES: uint = ffi::crypto_sign_ed25519_SEEDBYTES as uint;
 pub const SECRETKEYBYTES: uint = ffi::crypto_sign_ed25519_SECRETKEYBYTES as uint;
@@ -91,13 +92,13 @@ pub fn keypair_from_seed(&Seed(seed): &Seed) -> (PublicKey, SecretKey) {
 pub fn sign(m: &[u8],
             &SecretKey(sk): &SecretKey) -> Vec<u8> {
     unsafe {
-        let mut sm = Vec::from_elem(m.len() + SIGNATUREBYTES, 0u8);
+        let mut sm: Vec<u8> = repeat(0u8).take(m.len() + SIGNATUREBYTES).collect();
         let mut smlen = 0;
         ffi::crypto_sign_ed25519(sm.as_mut_ptr(),
-                            &mut smlen,
-                            m.as_ptr(),
-                            m.len() as c_ulonglong,
-                            sk.as_ptr());
+                                 &mut smlen,
+                                 m.as_ptr(),
+                                 m.len() as c_ulonglong,
+                                 sk.as_ptr());
         sm.truncate(smlen as uint);
         sm
     }
@@ -111,13 +112,13 @@ pub fn sign(m: &[u8],
 pub fn verify(sm: &[u8],
               &PublicKey(pk): &PublicKey) -> Option<Vec<u8>> {
     unsafe {
-        let mut m = Vec::from_elem(sm.len(), 0u8);
+        let mut m: Vec<u8> = repeat(0u8).take(sm.len()).collect();
         let mut mlen = 0;
         if ffi::crypto_sign_ed25519_open(m.as_mut_ptr(),
-                                    &mut mlen,
-                                    sm.as_ptr(),
-                                    sm.len() as c_ulonglong,
-                                    pk.as_ptr()) == 0 {
+                                         &mut mlen,
+                                         sm.as_ptr(),
+                                         sm.len() as c_ulonglong,
+                                         pk.as_ptr()) == 0 {
             m.truncate(mlen as uint);
             Some(m)
         } else {
