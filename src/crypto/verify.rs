@@ -15,7 +15,7 @@ use ffi;
  * that depends on the longest matching prefix of `x` and `y`, often allowing easy
  * timing attacks.
  */
-pub fn verify_16(x: &[u8, ..16], y: &[u8, ..16]) -> bool {
+pub fn verify_16(x: &[u8; 16], y: &[u8; 16]) -> bool {
     unsafe {
         ffi::crypto_verify_16(x.as_ptr(), y.as_ptr()) == 0
     }
@@ -32,7 +32,7 @@ pub fn verify_16(x: &[u8, ..16], y: &[u8, ..16]) -> bool {
  * that depends on the longest matching prefix of `x` and `y`, often allowing easy
  * timing attacks.
  */
-pub fn verify_32(x: &[u8, ..32], y: &[u8, ..32]) -> bool {
+pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
     unsafe {
         ffi::crypto_verify_32(x.as_ptr(), y.as_ptr()) == 0
     }
@@ -43,8 +43,8 @@ fn test_verify_16() {
     use randombytes::randombytes_into;
 
     for _ in range(0u, 256) {
-        let mut x = [0, ..16];
-        let mut y = [0, ..16];
+        let mut x = [0; 16];
+        let mut y = [0; 16];
         assert!(verify_16(&x, &y));
         randombytes_into(&mut x);
         randombytes_into(&mut y);
@@ -61,8 +61,8 @@ fn test_verify_32() {
     use randombytes::randombytes_into;
 
     for _ in range(0u, 256) {
-        let mut x = [0, ..32];
-        let mut y = [0, ..32];
+        let mut x = [0; 32];
+        let mut y = [0; 32];
         assert!(verify_32(&x, &y));
         randombytes_into(&mut x);
         randombytes_into(&mut y);
