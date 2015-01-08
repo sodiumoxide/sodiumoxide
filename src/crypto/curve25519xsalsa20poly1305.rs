@@ -22,8 +22,8 @@ const BOXZEROBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYT
 /**
  * `PublicKey` for asymmetric authenticated encryption
  */
-#[deriving(Copy)]
-pub struct PublicKey(pub [u8, ..PUBLICKEYBYTES]);
+#[derive(Copy)]
+pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
@@ -34,7 +34,7 @@ newtype_impl!(PublicKey, PUBLICKEYBYTES);
  * When a `SecretKey` goes out of scope its contents
  * will be zeroed out
  */
-pub struct SecretKey(pub [u8, ..SECRETKEYBYTES]);
+pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
 newtype_clone!(SecretKey);
@@ -43,8 +43,8 @@ newtype_impl!(SecretKey, SECRETKEYBYTES);
 /**
  * `Nonce` for asymmetric authenticated encryption
  */
-#[deriving(Copy)]
-pub struct Nonce(pub [u8, ..NONCEBYTES]);
+#[derive(Copy)]
+pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);
 newtype_impl!(Nonce, NONCEBYTES);
@@ -58,8 +58,8 @@ newtype_impl!(Nonce, NONCEBYTES);
  */
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8, ..PUBLICKEYBYTES];
-        let mut sk = [0u8, ..SECRETKEYBYTES];
+        let mut pk = [0u8; PUBLICKEYBYTES];
+        let mut sk = [0u8; SECRETKEYBYTES];
         ffi::crypto_box_curve25519xsalsa20poly1305_keypair(
             pk.as_mut_ptr(),
             sk.as_mut_ptr());
@@ -75,7 +75,7 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
  * from sodiumoxide.
  */
 pub fn gen_nonce() -> Nonce {
-    let mut n = [0, ..NONCEBYTES];
+    let mut n = [0; NONCEBYTES];
     randombytes_into(&mut n);
     Nonce(n)
 }
@@ -138,7 +138,7 @@ pub fn open(c: &[u8],
  *
  * When a `PrecomputedKey` goes out of scope its contents will be zeroed out
  */
-pub struct PrecomputedKey([u8, ..PRECOMPUTEDKEYBYTES]);
+pub struct PrecomputedKey([u8; PRECOMPUTEDKEYBYTES]);
 
 newtype_drop!(PrecomputedKey);
 newtype_clone!(PrecomputedKey);
@@ -150,7 +150,7 @@ newtype_impl!(PrecomputedKey, PRECOMPUTEDKEYBYTES);
  */
 pub fn precompute(&PublicKey(pk): &PublicKey,
                   &SecretKey(sk): &SecretKey) -> PrecomputedKey {
-    let mut k = [0u8, ..PRECOMPUTEDKEYBYTES];
+    let mut k = [0u8; PRECOMPUTEDKEYBYTES];
     unsafe {
         ffi::crypto_box_curve25519xsalsa20poly1305_beforenm(k.as_mut_ptr(),
                                                        pk.as_ptr(),
@@ -396,7 +396,7 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
+    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
                                        128, 256, 512, 1024, 2048, 4096];
 
     #[bench]

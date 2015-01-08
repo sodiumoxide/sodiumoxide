@@ -3,11 +3,12 @@
 use libc::c_ulonglong;
 
 #[doc(hidden)]
-pub fn marshal<T>(buf: &[u8],
-                  padbefore: uint,
-                  bytestodrop: uint,
-                  f: |*mut u8, *const u8, c_ulonglong| -> T
-                 ) -> (Vec<u8>, T) {
+pub fn marshal<T, F>(buf: &[u8],
+                     padbefore: uint,
+                     bytestodrop: uint,
+                     f: F
+                     ) -> (Vec<u8>, T) 
+    where F: Fn(*mut u8, *const u8, c_ulonglong) -> T {
     let mut dst = Vec::with_capacity(buf.len() + padbefore);
     for _ in range(0, padbefore) {
         dst.push(0);
@@ -52,7 +53,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
             if bs.len() != $len {
                 return None
             }
-            let mut n = $newtype([0, ..$len]);
+            let mut n = $newtype([0; $len]);
             {
                 let $newtype(ref mut b) = n;
                 for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {

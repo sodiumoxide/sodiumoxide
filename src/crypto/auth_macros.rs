@@ -14,7 +14,7 @@ pub const TAGBYTES: uint = $tagbytes;
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Key(pub [u8, ..KEYBYTES]);
+pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
 newtype_clone!(Key);
@@ -26,8 +26,8 @@ newtype_impl!(Key, KEYBYTES);
   * The tag implements the traits `PartialEq` and `Eq` using constant-time
   * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
   */
-#[deriving(Copy)]
-pub struct Tag(pub [u8, ..TAGBYTES]);
+#[derive(Copy)]
+pub struct Tag(pub [u8; TAGBYTES]);
 
 impl Eq for Tag {}
 
@@ -49,7 +49,7 @@ newtype_impl!(Tag, TAGBYTES);
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut k = [0, ..KEYBYTES];
+    let mut k = [0; KEYBYTES];
     randombytes_into(&mut k);
     Key(k)
 }
@@ -61,7 +61,7 @@ pub fn gen_key() -> Key {
 pub fn authenticate(m: &[u8],
                     &Key(k): &Key) -> Tag {
     unsafe {
-        let mut tag = [0, ..TAGBYTES];
+        let mut tag = [0; TAGBYTES];
         $auth_name(tag.as_mut_ptr(),
                    m.as_ptr(),
                    m.len() as c_ulonglong,
@@ -122,7 +122,7 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
+    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
                                        128, 256, 512, 1024, 2048, 4096];
 
     #[bench]

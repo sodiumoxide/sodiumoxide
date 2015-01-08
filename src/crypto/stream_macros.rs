@@ -1,7 +1,7 @@
 #![macro_escape]
-macro_rules! stream_module (($stream_name:ident, 
-                             $xor_name:ident, 
-                             $keybytes:expr, 
+macro_rules! stream_module (($stream_name:ident,
+                             $xor_name:ident,
+                             $keybytes:expr,
                              $noncebytes:expr) => (
 
 pub const KEYBYTES: uint = $keybytes;
@@ -13,7 +13,7 @@ pub const NONCEBYTES: uint = $noncebytes;
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Key(pub [u8, ..KEYBYTES]);
+pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
 newtype_clone!(Key);
@@ -22,8 +22,8 @@ newtype_impl!(Key, KEYBYTES);
 /**
  * `Nonce` for symmetric encryption
  */
-#[deriving(Copy)]
-pub struct Nonce(pub [u8, ..NONCEBYTES]);
+#[derive(Copy)]
+pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);
 newtype_impl!(Nonce, NONCEBYTES);
@@ -36,7 +36,7 @@ newtype_impl!(Nonce, NONCEBYTES);
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut key = [0, ..KEYBYTES];
+    let mut key = [0; KEYBYTES];
     randombytes_into(&mut key);
     Key(key)
 }
@@ -52,7 +52,7 @@ pub fn gen_key() -> Key {
  * do not use random nonces since the probability of nonce-collision is not negligible
  */
 pub fn gen_nonce() -> Nonce {
-    let mut nonce = [0, ..NONCEBYTES];
+    let mut nonce = [0; NONCEBYTES];
     randombytes_into(&mut nonce);
     Nonce(nonce)
 }
@@ -65,7 +65,7 @@ pub fn stream(len: uint,
               &Nonce(n): &Nonce,
               &Key(k): &Key) -> Vec<u8> {
     unsafe {
-        let mut c = Vec::from_elem(len, 0u8);
+        let mut c: Vec<u8> = repeat(0u8).take(len).collect();
         $stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
                      n.as_ptr(),
@@ -86,7 +86,7 @@ pub fn stream_xor(m: &[u8],
                   &Nonce(n): &Nonce,
                   &Key(k): &Key) -> Vec<u8> {
     unsafe {
-        let mut c = Vec::from_elem(m.len(), 0u8);
+        let mut c: Vec<u8> = repeat(0u8).take(m.len()).collect();
         $xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
@@ -168,7 +168,7 @@ mod bench {
     extern crate test;
     use super::*;
 
-    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
+    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
                                        128, 256, 512, 1024, 2048, 4096];
 
     #[bench]

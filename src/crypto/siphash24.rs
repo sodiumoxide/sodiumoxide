@@ -13,8 +13,8 @@ pub const KEYBYTES: uint = ffi::crypto_shorthash_siphash24_KEYBYTES as uint;
 /**
  * Digest-structure
  */
-#[deriving(Copy)]
-pub struct Digest(pub [u8, ..HASHBYTES]);
+#[derive(Copy)]
+pub struct Digest(pub [u8; HASHBYTES]);
 
 newtype_clone!(Digest);
 newtype_impl!(Digest, HASHBYTES);
@@ -25,7 +25,7 @@ newtype_impl!(Digest, HASHBYTES);
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Key(pub [u8, ..KEYBYTES]);
+pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
 newtype_clone!(Key);
@@ -39,7 +39,7 @@ newtype_impl!(Key, KEYBYTES);
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut k = [0, ..KEYBYTES];
+    let mut k = [0; KEYBYTES];
     randombytes_into(&mut k);
     Key(k)
 }
@@ -51,7 +51,7 @@ pub fn gen_key() -> Key {
 pub fn shorthash(m: &[u8],
                  &Key(k): &Key) -> Digest {
     unsafe {
-        let mut h = [0, ..HASHBYTES];
+        let mut h = [0; HASHBYTES];
         ffi::crypto_shorthash_siphash24(h.as_mut_ptr(),
                                    m.as_ptr(), m.len() as c_ulonglong,
                                    k.as_ptr());
@@ -143,7 +143,7 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64,
+    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
                                        128, 256, 512, 1024, 2048, 4096];
 
     #[bench]

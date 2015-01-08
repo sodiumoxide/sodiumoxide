@@ -20,7 +20,7 @@ pub const NONCEBYTES: uint = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES a
  * When a `Key` goes out of scope its contents
  * will be zeroed out
  */
-pub struct Key(pub [u8, ..KEYBYTES]);
+pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
 newtype_clone!(Key);
@@ -29,8 +29,8 @@ newtype_impl!(Key, KEYBYTES);
 /**
  * `Nonce` for symmetric authenticated encryption
  */
-#[deriving(Copy)]
-pub struct Nonce(pub [u8, ..NONCEBYTES]);
+#[derive(Copy)]
+pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);
 newtype_impl!(Nonce, NONCEBYTES);
@@ -46,7 +46,7 @@ const BOXZEROBYTES: uint = 16;
  * from sodiumoxide.
  */
 pub fn gen_key() -> Key {
-    let mut key = [0, ..KEYBYTES];
+    let mut key = [0; KEYBYTES];
     randombytes_into(&mut key);
     Key(key)
 }
@@ -59,7 +59,7 @@ pub fn gen_key() -> Key {
  * from sodiumoxide.
  */
 pub fn gen_nonce() -> Nonce {
-    let mut nonce = [0, ..NONCEBYTES];
+    let mut nonce = [0; NONCEBYTES];
     randombytes_into(&mut nonce);
     Nonce(nonce)
 }
@@ -194,7 +194,7 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint, ..14] = [0, 1, 2, 4, 8, 16, 32, 64, 
+    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
                                        128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
