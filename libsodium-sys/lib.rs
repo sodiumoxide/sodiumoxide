@@ -388,10 +388,11 @@ fn test_crypto_auth_keybytes() {
 }
 #[test]
 fn test_crypto_auth_primitive() {
-    let s = unsafe {
-        std::c_str::CString::new(crypto_auth_primitive(), false)
-    };
-    assert!(s.as_bytes_no_nul() == crypto_auth_PRIMITIVE.as_bytes());
+    unsafe {
+         let s = crypto_auth_primitive();
+         let s = std::ffi::c_str_to_bytes(&s);
+         assert!(s == crypto_auth_PRIMITIVE.as_bytes());
+    }
 }
 
 #[test]
@@ -433,10 +434,11 @@ fn test_crypto_onetimeauth_keybytes() {
 }
 #[test]
 fn test_crypto_onetimeauth_primitive() {
-    let s = unsafe {
-        std::c_str::CString::new(crypto_onetimeauth_primitive(), false)
-    };
-    assert!(s.as_bytes_no_nul() == crypto_onetimeauth_PRIMITIVE.as_bytes());
+    unsafe {
+         let s = crypto_onetimeauth_primitive();
+         let s = std::ffi::c_str_to_bytes(&s);
+         assert!(s == crypto_onetimeauth_PRIMITIVE.as_bytes());
+    }
 }
 #[test]
 fn test_crypto_onetimeauth_poly1305_bytes() {
@@ -455,10 +457,11 @@ fn test_crypto_hash_bytes() {
 }
 #[test]
 fn test_crypto_hash_primitive() {
-    let s = unsafe {
-        std::c_str::CString::new(crypto_hash_primitive(), false)
-    };
-    assert!(s.as_bytes_no_nul() == crypto_hash_PRIMITIVE.as_bytes());
+    unsafe {
+         let s = crypto_hash_primitive();
+         let s = std::ffi::c_str_to_bytes(&s);
+         assert!(s == crypto_hash_PRIMITIVE.as_bytes());
+    }
 }
 
 #[test]
@@ -483,10 +486,11 @@ fn test_crypto_stream_noncebytes() {
 }
 #[test]
 fn test_crypto_stream_primitive() {
-    let s = unsafe {
-        std::c_str::CString::new(crypto_stream_primitive(), false)
-    };
-    assert!(s.as_bytes_no_nul() == crypto_stream_PRIMITIVE.as_bytes());
+    unsafe {
+         let s = crypto_stream_primitive();
+         let s = std::ffi::c_str_to_bytes(&s);
+         assert!(s == crypto_stream_PRIMITIVE.as_bytes());
+    }
 }
 
 #[test]
