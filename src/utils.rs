@@ -1,16 +1,14 @@
-#![macro_escape]
-
 use libc::c_ulonglong;
 
 #[doc(hidden)]
 pub fn marshal<T, F>(buf: &[u8],
-                     padbefore: uint,
-                     bytestodrop: uint,
+                     padbefore: usize,
+                     bytestodrop: usize,
                      f: F
                      ) -> (Vec<u8>, T) 
     where F: Fn(*mut u8, *const u8, c_ulonglong) -> T {
     let mut dst = Vec::with_capacity(buf.len() + padbefore);
-    for _ in range(0, padbefore) {
+    for _ in (0..padbefore) {
         dst.push(0);
     }
     dst.push_all(buf);
@@ -33,7 +31,7 @@ macro_rules! newtype_clone (($newtype:ident) => (
 macro_rules! newtype_drop (($newtype:ident) => (
         impl Drop for $newtype {
             fn drop(&mut self) {
-                let &$newtype(ref mut v) = self;
+                let &mut $newtype(ref mut v) = self;
                 unsafe {
                     volatile_set_memory(v.as_mut_ptr(), 0, v.len());
                 }
@@ -86,7 +84,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
          * functions exposed by the sodiumoxide API.
          */
         pub fn as_mut_slice(&mut self) -> &mut [u8] {
-            let &$newtype(ref mut bs) = self;
+            let &mut $newtype(ref mut bs) = self;
             bs.as_mut_slice()
         }
     }

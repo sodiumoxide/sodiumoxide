@@ -12,12 +12,12 @@ use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
 
-pub const PUBLICKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES as uint;
-pub const SECRETKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES as uint;
-pub const NONCEBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_NONCEBYTES as uint;
-pub const PRECOMPUTEDKEYBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES as uint;
-const ZEROBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES as uint;
-const BOXZEROBYTES: uint = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES as uint;
+pub const PUBLICKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES as usize;
+pub const SECRETKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES as usize;
+pub const NONCEBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_NONCEBYTES as usize;
+pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES as usize;
+const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES as usize;
+const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES as usize;
 
 /**
  * `PublicKey` for asymmetric authenticated encryption
@@ -208,7 +208,7 @@ pub fn open_precomputed(c: &[u8],
 #[test]
 fn test_seal_open() {
     use randombytes::randombytes;
-    for i in range(0, 256u) {
+    for i in (0..256us) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
@@ -222,7 +222,7 @@ fn test_seal_open() {
 #[test]
 fn test_seal_open_precomputed() {
     use randombytes::randombytes;
-    for i in range(0, 256u) {
+    for i in (0..256us) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
@@ -241,14 +241,14 @@ fn test_seal_open_precomputed() {
 #[test]
 fn test_seal_open_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32u) {
+    for i in (0..32us) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
         let n = gen_nonce();
         let mut cv = seal(m.as_slice(), &n, &pk1, &sk2);
         let c = cv.as_mut_slice();
-        for j in range(0, c.len()) {
+        for j in (0..c.len()) {
             c[j] ^= 0x20;
             assert!(None == open(c, &n, &pk2, &sk1));
             c[j] ^= 0x20;
@@ -259,7 +259,7 @@ fn test_seal_open_tamper() {
 #[test]
 fn test_seal_open_precomputed_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32u) {
+    for i in (0..32us) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
@@ -268,7 +268,7 @@ fn test_seal_open_precomputed_tamper() {
         let n = gen_nonce();
         let mut cv = seal_precomputed(m.as_slice(), &n, &k1);
         let c = cv.as_mut_slice();
-        for j in range(0, c.len()) {
+        for j in (0..c.len()) {
             c[j] ^= 0x20;
             assert!(None == open_precomputed(c, &n, &k2));
             c[j] ^= 0x20;
@@ -396,8 +396,8 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                       128, 256, 512, 1024, 2048, 4096];
+    const BENCH_SIZES: [usize; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                      128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
     fn bench_seal_open(b: &mut test::Bencher) {
