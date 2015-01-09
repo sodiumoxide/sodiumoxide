@@ -1,4 +1,4 @@
-#![macro_escape]
+#[macro_export]
 macro_rules! auth_module (($auth_name:ident, 
                            $verify_name:ident, 
                            $verify_fn:ident, 
