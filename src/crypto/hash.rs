@@ -32,6 +32,7 @@ NaCl supports the following hash functions:
 */
 pub use self::sha512::*;
 #[path="hash_macros.rs"]
+#[macro_use]
 mod hash_macros;
 #[path="sha512.rs"]
 pub mod sha512;
