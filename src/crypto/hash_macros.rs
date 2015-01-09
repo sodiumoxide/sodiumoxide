@@ -1,7 +1,7 @@
 macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
 
-pub const HASHBYTES: uint = $hashbytes;
-pub const BLOCKBYTES: uint = $blockbytes;
+pub const HASHBYTES: usize = $hashbytes;
+pub const BLOCKBYTES: usize = $blockbytes;
 
 /**
  * Digest-structure
@@ -29,8 +29,8 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                       128, 256, 512, 1024, 2048, 4096];
+    const BENCH_SIZES: [usize; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                      128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
     fn bench_hash(b: &mut test::Bencher) {

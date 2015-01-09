@@ -11,10 +11,10 @@ use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use std::iter::repeat;
 
-pub const SEEDBYTES: uint = ffi::crypto_sign_ed25519_SEEDBYTES as uint;
-pub const SECRETKEYBYTES: uint = ffi::crypto_sign_ed25519_SECRETKEYBYTES as uint;
-pub const PUBLICKEYBYTES: uint = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as uint;
-pub const SIGNATUREBYTES: uint = ffi::crypto_sign_ed25519_BYTES as uint;
+pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
+pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES as usize;
+pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as usize;
+pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES as usize;
 
 
 /**
@@ -99,7 +99,7 @@ pub fn sign(m: &[u8],
                                  m.as_ptr(),
                                  m.len() as c_ulonglong,
                                  sk.as_ptr());
-        sm.truncate(smlen as uint);
+        sm.truncate(smlen as usize);
         sm
     }
 }
@@ -119,7 +119,7 @@ pub fn verify(sm: &[u8],
                                          sm.as_ptr(),
                                          sm.len() as c_ulonglong,
                                          pk.as_ptr()) == 0 {
-            m.truncate(mlen as uint);
+            m.truncate(mlen as usize);
             Some(m)
         } else {
             None
@@ -130,7 +130,7 @@ pub fn verify(sm: &[u8],
 #[test]
 fn test_sign_verify() {
     use randombytes::randombytes;
-    for i in range(0, 256u) {
+    for i in range(0, 256us) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
         let sm = sign(m.as_slice(), &sk);
@@ -142,7 +142,7 @@ fn test_sign_verify() {
 #[test]
 fn test_sign_verify_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32u) {
+    for i in range(0, 32us) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
         let mut smv = sign(m.as_slice(), &sk);
@@ -158,7 +158,7 @@ fn test_sign_verify_tamper() {
 #[test]
 fn test_sign_verify_seed() {
     use randombytes::{randombytes, randombytes_into};
-    for i in range(0, 256u) {
+    for i in range(0, 256us) {
         let mut seedbuf = [0; 32];
         randombytes_into(&mut seedbuf);
         let seed = Seed(seedbuf);
@@ -173,7 +173,7 @@ fn test_sign_verify_seed() {
 #[test]
 fn test_sign_verify_tamper_seed() {
     use randombytes::{randombytes, randombytes_into};
-    for i in range(0, 32u) {
+    for i in range(0, 32us) {
         let mut seedbuf = [0; 32];
         randombytes_into(&mut seedbuf);
         let seed = Seed(seedbuf);
@@ -233,8 +233,8 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                       128, 256, 512, 1024, 2048, 4096];
+    const BENCH_SIZES: [usize; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                      128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
     fn bench_sign(b: &mut test::Bencher) {
