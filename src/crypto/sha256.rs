@@ -13,7 +13,7 @@ use ffi::{crypto_hash_sha256, crypto_hash_sha256_BYTES};
 use libc::c_ulonglong;
 
 hash_module!(crypto_hash_sha256,
-             crypto_hash_sha256_BYTES as uint,
+             crypto_hash_sha256_BYTES as usize,
              64);
 
 #[test]
@@ -61,7 +61,7 @@ fn test_nist_vector(filename: &str) {
         };
         if line.as_slice().starts_with("Len = ") {
             let s = line.as_slice().slice_from(6);
-            let len: uint = s.trim().parse().unwrap();
+            let len: usize = s.trim().parse().unwrap();
             let line2 = r.read_line().unwrap();
             let rawmsg = line2.as_slice().slice_from(6).from_hex().unwrap();
             let msg = rawmsg.slice_to(len/8);

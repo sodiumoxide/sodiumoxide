@@ -11,7 +11,7 @@ use std::iter::repeat;
  * called `sodiumoxide::init()` once before using any other function
  * from sodiumoxide.
  */
-pub fn randombytes(size: uint) -> Vec<u8> {
+pub fn randombytes(size: usize) -> Vec<u8> {
     unsafe {
         let mut buf: Vec<u8> = repeat(0u8).take(size).collect();
         let pbuf = buf.as_mut_ptr();

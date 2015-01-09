@@ -4,8 +4,8 @@ macro_rules! auth_module (($auth_name:ident,
                            $keybytes:expr, 
                            $tagbytes:expr) => (
 
-pub const KEYBYTES: uint = $keybytes;
-pub const TAGBYTES: uint = $tagbytes;
+pub const KEYBYTES: usize = $keybytes;
+pub const TAGBYTES: usize = $tagbytes;
 
 /**
  * Authentication `Key`
@@ -86,7 +86,7 @@ pub fn verify(&Tag(tag): &Tag, m: &[u8],
 #[test]
 fn test_auth_verify() {
     use randombytes::randombytes;
-    for i in range(0, 256u) {
+    for i in range(0, 256us) {
         let k = gen_key();
         let m = randombytes(i);
         let tag = authenticate(m.as_slice(), &k);
@@ -97,7 +97,7 @@ fn test_auth_verify() {
 #[test]
 fn test_auth_verify_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32u) {
+    for i in range(0, 32us) {
         let k = gen_key();
         let mut mv = randombytes(i);
         let m = mv.as_mut_slice();
@@ -121,8 +121,8 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                       128, 256, 512, 1024, 2048, 4096];
+    const BENCH_SIZES: [usize; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                      128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
     fn bench_auth(b: &mut test::Bencher) {

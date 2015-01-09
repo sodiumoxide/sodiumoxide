@@ -15,8 +15,8 @@ use crypto::verify::verify_32;
 auth_module!(crypto_auth_hmacsha512256,
              crypto_auth_hmacsha512256_verify,
              verify_32,
-             crypto_auth_hmacsha512256_KEYBYTES as uint,
-             crypto_auth_hmacsha512256_BYTES as uint);
+             crypto_auth_hmacsha512256_KEYBYTES as usize,
+             crypto_auth_hmacsha512256_BYTES as usize);
 
 #[test]
 fn test_vector_1() {

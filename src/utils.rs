@@ -2,8 +2,8 @@ use libc::c_ulonglong;
 
 #[doc(hidden)]
 pub fn marshal<T, F>(buf: &[u8],
-                     padbefore: uint,
-                     bytestodrop: uint,
+                     padbefore: usize,
+                     bytestodrop: usize,
                      f: F
                      ) -> (Vec<u8>, T) 
     where F: Fn(*mut u8, *const u8, c_ulonglong) -> T {
