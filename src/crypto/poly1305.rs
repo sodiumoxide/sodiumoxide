@@ -16,8 +16,8 @@ use crypto::verify::verify_16;
 auth_module!(crypto_onetimeauth_poly1305,
              crypto_onetimeauth_poly1305_verify,
              verify_16,
-             crypto_onetimeauth_poly1305_KEYBYTES as uint,
-             crypto_onetimeauth_poly1305_BYTES as uint);
+             crypto_onetimeauth_poly1305_KEYBYTES as usize,
+             crypto_onetimeauth_poly1305_BYTES as usize);
 
 #[test]
 fn test_vector_1() {

@@ -11,8 +11,8 @@ use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
 
-pub const KEYBYTES: uint = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES as uint;
-pub const NONCEBYTES: uint = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES as uint;
+pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES as usize;
+pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES as usize;
 
 /**
  * `Key` for symmetric authenticated encryption
@@ -35,8 +35,8 @@ pub struct Nonce(pub [u8; NONCEBYTES]);
 newtype_clone!(Nonce);
 newtype_impl!(Nonce, NONCEBYTES);
 
-const ZEROBYTES: uint = 32;
-const BOXZEROBYTES: uint = 16;
+const ZEROBYTES: usize = 32;
+const BOXZEROBYTES: usize = 16;
 
 /**
  * `gen_key()` randomly generates a secret key
@@ -109,7 +109,7 @@ pub fn open(c: &[u8],
 #[test]
 fn test_seal_open() {
     use randombytes::randombytes;
-    for i in range(0, 256u) {
+    for i in (0..256us) {
         let k = gen_key();
         let m = randombytes(i);
         let n = gen_nonce();
@@ -122,13 +122,13 @@ fn test_seal_open() {
 #[test]
 fn test_seal_open_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32u) {
+    for i in (0..32us) {
         let k = gen_key();
         let m = randombytes(i);
         let n = gen_nonce();
         let mut cv = seal(m.as_slice(), &n, &k);
         let c = cv.as_mut_slice();
-        for i in range(0, c.len()) {
+        for i in (0..c.len()) {
             c[i] ^= 0x20;
             assert!(None == open(c, &n, &k));
             c[i] ^= 0x20;
@@ -194,8 +194,8 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                       128, 256, 512, 1024, 2048, 4096];
+    const BENCH_SIZES: [usize; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                      128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
     fn bench_seal_open(b: &mut test::Bencher) {

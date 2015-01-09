@@ -1,11 +1,10 @@
-#![macro_escape]
 macro_rules! stream_module (($stream_name:ident,
                              $xor_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
-pub const KEYBYTES: uint = $keybytes;
-pub const NONCEBYTES: uint = $noncebytes;
+pub const KEYBYTES: usize = $keybytes;
+pub const NONCEBYTES: usize = $noncebytes;
 
 /**
  * `Key` for symmetric encryption
@@ -61,7 +60,7 @@ pub fn gen_nonce() -> Nonce {
  * `stream()` produces a `len`-byte stream `c` as a function of a
  * secret key `k` and a nonce `n`.
  */
-pub fn stream(len: uint,
+pub fn stream(len: usize,
               &Nonce(n): &Nonce,
               &Key(k): &Key) -> Vec<u8> {
     unsafe {
@@ -119,7 +118,7 @@ pub fn stream_xor_inplace(m: &mut [u8],
 #[test]
 fn test_encrypt_decrypt() {
     use randombytes::randombytes;
-    for i in range(0, 1024u) {
+    for i in (0..1024us) {
         let k = gen_key();
         let n = gen_nonce();
         let m = randombytes(i);
@@ -132,7 +131,7 @@ fn test_encrypt_decrypt() {
 #[test]
 fn test_stream_xor() {
     use randombytes::randombytes;
-    for i in range(0, 1024u) {
+    for i in (0..1024us) {
         let k = gen_key();
         let n = gen_nonce();
         let m = randombytes(i);
@@ -149,7 +148,7 @@ fn test_stream_xor() {
 #[test]
 fn test_stream_xor_inplace() {
     use randombytes::randombytes;
-    for i in range(0, 1024u) {
+    for i in (0..1024us) {
         let k = gen_key();
         let n = gen_nonce();
         let mut m = randombytes(i);
@@ -168,8 +167,8 @@ mod bench {
     extern crate test;
     use super::*;
 
-    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                       128, 256, 512, 1024, 2048, 4096];
+    const BENCH_SIZES: [usize; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                      128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
     fn bench_stream(b: &mut test::Bencher) {

@@ -7,8 +7,8 @@ use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 
-pub const HASHBYTES: uint = ffi::crypto_shorthash_siphash24_BYTES as uint;
-pub const KEYBYTES: uint = ffi::crypto_shorthash_siphash24_KEYBYTES as uint;
+pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES as usize;
+pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES as usize;
 
 /**
  * Digest-structure
@@ -63,7 +63,7 @@ pub fn shorthash(m: &[u8],
 fn test_vectors() {
     let maxlen = 64;
     let mut m = Vec::with_capacity(64);
-    for i in range(0u, 64) {
+    for i in (0us..64) {
         m.push(i as u8);
     }
     let h_expecteds = [[0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72]
@@ -131,7 +131,7 @@ fn test_vectors() {
                       ,[0x57, 0x5f, 0xf2, 0x8e, 0x60, 0x38, 0x1b, 0xe5]
                       ,[0x72, 0x45, 0x06, 0xeb, 0x4c, 0x32, 0x8a, 0x95]];
     let k = Key([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-    for i in range(0u, maxlen) {
+    for i in (0us..maxlen) {
         let Digest(h) = shorthash(m.slice(0, i), &k);
         assert!(h == h_expecteds[i]);
     }
@@ -143,8 +143,8 @@ mod bench {
     use randombytes::randombytes;
     use super::*;
 
-    const BENCH_SIZES: [uint; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
-                                       128, 256, 512, 1024, 2048, 4096];
+    const BENCH_SIZES: [usize; 14] = [0, 1, 2, 4, 8, 16, 32, 64,
+                                      128, 256, 512, 1024, 2048, 4096];
 
     #[bench]
     fn bench_shorthash(b: &mut test::Bencher) {
