@@ -1,5 +1,3 @@
-#![macro_escape]
-
 use libc::c_ulonglong;
 
 #[doc(hidden)]
@@ -20,6 +18,7 @@ pub fn marshal<T, F>(buf: &[u8],
     (dst.into_iter().skip(bytestodrop).collect(), res)
 }
 
+#[macro_export]
 macro_rules! newtype_clone (($newtype:ident) => (
         impl Clone for $newtype {
             fn clone(&self) -> $newtype {
@@ -30,10 +29,11 @@ macro_rules! newtype_clone (($newtype:ident) => (
 
         ));
 
+#[macro_export]
 macro_rules! newtype_drop (($newtype:ident) => (
         impl Drop for $newtype {
             fn drop(&mut self) {
-                let &$newtype(ref mut v) = self;
+                let &mut $newtype(ref mut v) = self;
                 unsafe {
                     volatile_set_memory(v.as_mut_ptr(), 0, v.len());
                 }
@@ -41,6 +41,7 @@ macro_rules! newtype_drop (($newtype:ident) => (
         }
         ));
 
+#[macro_export]
 macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
     impl $newtype {
         /**
@@ -86,7 +87,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
          * functions exposed by the sodiumoxide API.
          */
         pub fn as_mut_slice(&mut self) -> &mut [u8] {
-            let &$newtype(ref mut bs) = self;
+            let &mut $newtype(ref mut bs) = self;
             bs.as_mut_slice()
         }
     }

@@ -53,6 +53,7 @@ message.
 
 */
 pub use self::xsalsa20::*;
+#[macro_use]
 #[path="stream_macros.rs"]
 mod stream_macros;
 #[path="xsalsa20.rs"]

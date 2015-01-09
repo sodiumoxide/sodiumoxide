@@ -1,5 +1,7 @@
 #![allow(non_upper_case_globals)]
 
+#![allow(unstable)]
+
 extern crate libc;
 use libc::{c_int, c_ulonglong, c_char, size_t};
 
