@@ -67,6 +67,7 @@ pub fn init() -> bool {
     }
 }
 
+#[macro_use]
 mod utils;
 
 pub mod randombytes;

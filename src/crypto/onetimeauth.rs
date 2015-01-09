@@ -21,6 +21,7 @@ single message.
 */
 pub use self::poly1305::*;
 #[path="auth_macros.rs"]
+#[macro_use]
 mod auth_macros;
 #[path="poly1305.rs"]
 pub mod poly1305;

@@ -1,5 +1,3 @@
-#![macro_escape]
-
 use libc::c_ulonglong;
 
 #[doc(hidden)]

@@ -1,4 +1,3 @@
-#![macro_escape]
 macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
 
 pub const HASHBYTES: uint = $hashbytes;

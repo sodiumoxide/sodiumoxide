@@ -1,4 +1,3 @@
-#![macro_escape]
 macro_rules! stream_module (($stream_name:ident,
                              $xor_name:ident,
                              $keybytes:expr,
