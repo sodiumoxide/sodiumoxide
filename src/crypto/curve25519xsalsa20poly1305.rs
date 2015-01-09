@@ -208,7 +208,7 @@ pub fn open_precomputed(c: &[u8],
 #[test]
 fn test_seal_open() {
     use randombytes::randombytes;
-    for i in range(0, 256us) {
+    for i in (0..256us) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
@@ -222,7 +222,7 @@ fn test_seal_open() {
 #[test]
 fn test_seal_open_precomputed() {
     use randombytes::randombytes;
-    for i in range(0, 256us) {
+    for i in (0..256us) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
@@ -241,14 +241,14 @@ fn test_seal_open_precomputed() {
 #[test]
 fn test_seal_open_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32us) {
+    for i in (0..32us) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
         let n = gen_nonce();
         let mut cv = seal(m.as_slice(), &n, &pk1, &sk2);
         let c = cv.as_mut_slice();
-        for j in range(0, c.len()) {
+        for j in (0..c.len()) {
             c[j] ^= 0x20;
             assert!(None == open(c, &n, &pk2, &sk1));
             c[j] ^= 0x20;
@@ -259,7 +259,7 @@ fn test_seal_open_tamper() {
 #[test]
 fn test_seal_open_precomputed_tamper() {
     use randombytes::randombytes;
-    for i in range(0, 32us) {
+    for i in (0..32us) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
@@ -268,7 +268,7 @@ fn test_seal_open_precomputed_tamper() {
         let n = gen_nonce();
         let mut cv = seal_precomputed(m.as_slice(), &n, &k1);
         let c = cv.as_mut_slice();
-        for j in range(0, c.len()) {
+        for j in (0..c.len()) {
             c[j] ^= 0x20;
             assert!(None == open_precomputed(c, &n, &k2));
             c[j] ^= 0x20;
