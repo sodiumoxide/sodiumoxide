@@ -54,6 +54,15 @@ newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
 /**
+ * Detached signature
+ */
+#[derive(Copy)]
+pub struct Signature(pub [u8; SIGNATUREBYTES]);
+
+newtype_clone!(Signature);
+newtype_impl!(Signature, SIGNATUREBYTES);
+
+/**
  * `gen_keypair()` randomly generates a secret key and a corresponding public
  * key.
  *
@@ -127,6 +136,41 @@ pub fn verify(sm: &[u8],
     }
 }
 
+/**
+ * `sign_detached()` signs a message `m` using the signer's secret key `sk`.
+ * `sign_detached()` returns the resulting signature `sig`.
+ */
+pub fn sign_detached(m: &[u8],
+                     &SecretKey(sk): &SecretKey) -> Signature {
+    unsafe {
+        let mut sig = [0u8; SIGNATUREBYTES];
+        let mut siglen: c_ulonglong = 0;
+        ffi::crypto_sign_ed25519_detached(sig.as_mut_ptr(),
+                                          &mut siglen,
+                                          m.as_ptr(),
+                                          m.len() as c_ulonglong,
+                                          sk.as_ptr());
+        assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
+        Signature(sig)
+    }
+}
+
+/**
+ * `verify_detached()` verifies the signature in `sig` against the message `m`
+ * and the signer's public key `pk`.
+ * `verify_detached()` returns true if the signature is valid, false otherwise.
+ */
+pub fn verify_detached(&Signature(sig): &Signature,
+                       m: &[u8],
+                       &PublicKey(pk): &PublicKey) -> bool {
+    unsafe {
+        0 == ffi::crypto_sign_ed25519_verify_detached(sig.as_ptr(),
+                                                      m.as_ptr(),
+                                                      m.len() as c_ulonglong,
+                                                      pk.as_ptr())
+    }
+}
+
 #[test]
 fn test_sign_verify() {
     use randombytes::randombytes;
@@ -151,6 +195,32 @@ fn test_sign_verify_tamper() {
             sm[j] ^= 0x20;
             assert!(None == verify(sm, &pk));
             sm[j] ^= 0x20;
+        }
+    }
+}
+
+#[test]
+fn test_sign_verify_detached() {
+    use randombytes::randombytes;
+    for i in (0..256us) {
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let sig = sign_detached(m.as_slice(), &sk);
+        assert!(verify_detached(&sig, m.as_slice(), &pk));
+    }
+}
+
+#[test]
+fn test_sign_verify_detached_tamper() {
+    use randombytes::randombytes;
+    for i in (0..32us) {
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let Signature(mut sig) = sign_detached(m.as_slice(), &sk);
+        for j in (0..SIGNATUREBYTES) {
+            sig[j] ^= 0x20;
+            assert!(!verify_detached(&Signature(sig), m.as_slice(), &pk));
+            sig[j] ^= 0x20;
         }
     }
 }
