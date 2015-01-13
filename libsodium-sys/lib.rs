@@ -322,6 +322,15 @@ extern {
                                   sm: *const u8,
                                   smlen: c_ulonglong,
                                   pk: *const u8) -> c_int;
+  pub fn crypto_sign_ed25519_detached(sig: *mut u8,
+                                      siglen: *mut c_ulonglong,
+                                      m: *const u8,
+                                      mlen: c_ulonglong,
+                                      sk: *const u8) -> c_int;
+  pub fn crypto_sign_ed25519_verify_detached(sig: *const u8,
+                                             m: *const u8,
+                                             mlen: c_ulonglong,
+                                             pk: *const u8) -> c_int;
   pub fn crypto_sign_ed25519_bytes() -> size_t;
   pub fn crypto_sign_ed25519_seedbytes() -> size_t;
   pub fn crypto_sign_ed25519_publickeybytes() -> size_t;
