@@ -54,6 +54,15 @@ newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
 /**
+ * Detached signature
+ */
+#[derive(Copy)]
+pub struct Signature(pub [u8; SIGNATUREBYTES]);
+
+newtype_clone!(Signature);
+newtype_impl!(Signature, SIGNATUREBYTES);
+
+/**
  * `gen_keypair()` randomly generates a secret key and a corresponding public
  * key.
  *
@@ -127,6 +136,41 @@ pub fn verify(sm: &[u8],
     }
 }
 
+/**
+ * `sign_detached()` signs a message `m` using the signer's secret key `sk`.
+ * `sign_detached()` returns the resulting signature `sig`.
+ */
+pub fn sign_detached(m: &[u8],
+                     &SecretKey(sk): &SecretKey) -> Signature {
+    unsafe {
+        let mut sig = [0u8; SIGNATUREBYTES];
+        let mut siglen: c_ulonglong = 0;
+        ffi::crypto_sign_ed25519_detached(sig.as_mut_ptr(),
+                                          &mut siglen,
+                                          m.as_ptr(),
+                                          m.len() as c_ulonglong,
+                                          sk.as_ptr());
+        assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
+        Signature(sig)
+    }
+}
+
+/**
+ * `verify_detached()` verifies the signature in `sig` against the message `m`
+ * and the signer's public key `pk`.
+ * `verify_detached()` returns true if the signature is valid, false otherwise.
+ */
+pub fn verify_detached(&Signature(sig): &Signature,
+                       m: &[u8],
+                       &PublicKey(pk): &PublicKey) -> bool {
+    unsafe {
+        0 == ffi::crypto_sign_ed25519_verify_detached(sig.as_ptr(),
+                                                      m.as_ptr(),
+                                                      m.len() as c_ulonglong,
+                                                      pk.as_ptr())
+    }
+}
+
 #[test]
 fn test_sign_verify() {
     use randombytes::randombytes;
@@ -151,6 +195,32 @@ fn test_sign_verify_tamper() {
             sm[j] ^= 0x20;
             assert!(None == verify(sm, &pk));
             sm[j] ^= 0x20;
+        }
+    }
+}
+
+#[test]
+fn test_sign_verify_detached() {
+    use randombytes::randombytes;
+    for i in (0..256us) {
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let sig = sign_detached(m.as_slice(), &sk);
+        assert!(verify_detached(&sig, m.as_slice(), &pk));
+    }
+}
+
+#[test]
+fn test_sign_verify_detached_tamper() {
+    use randombytes::randombytes;
+    for i in (0..32us) {
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let Signature(mut sig) = sign_detached(m.as_slice(), &sk);
+        for j in (0..SIGNATUREBYTES) {
+            sig[j] ^= 0x20;
+            assert!(!verify_detached(&Signature(sig), m.as_slice(), &pk));
+            sig[j] ^= 0x20;
         }
     }
 }
@@ -221,9 +291,46 @@ fn test_vectors() {
         let m = x2.from_hex().unwrap();
         let sm = sign(m.as_slice(), &sk);
         verify(sm.as_slice(), &pk).unwrap();
-        let PublicKey(pkbuf) = pk;
-        assert!(x1 == pkbuf.as_slice().to_hex().as_slice());
+        assert!(x1 == pk.as_slice().to_hex().as_slice());
         assert!(x3 == sm.as_slice().to_hex().as_slice());
+    }
+}
+
+#[test]
+fn test_vectors_detached() {
+    // test vectors from the Python implementation
+    // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
+    use self::serialize::hex::{FromHex, ToHex};
+    use std::io::BufferedReader;
+    use std::io::File;
+    use std::path::Path;
+
+    let p = &Path::new("testvectors/ed25519.input");
+    let mut r = BufferedReader::new(File::open(p).unwrap());
+    loop {
+        let line = match r.read_line() {
+            Err(_) => break,
+            Ok(line) => line
+        };
+        let mut x = line.as_slice().split(':');
+        let x0 = x.next().unwrap();
+        let x1 = x.next().unwrap();
+        let x2 = x.next().unwrap();
+        let x3 = x.next().unwrap();
+        let seed_bytes = x0.slice(0, 64).from_hex().unwrap();
+        assert!(seed_bytes.len() == SEEDBYTES);
+        let mut seedbuf = [0u8; SEEDBYTES];
+        for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
+            *s = *b
+        }
+        let seed = Seed(seedbuf);
+        let (pk, sk) = keypair_from_seed(&seed);
+        let m = x2.from_hex().unwrap();
+        let sig = sign_detached(m.as_slice(), &sk);
+        assert!(verify_detached(&sig, m.as_slice(), &pk));
+        assert!(x1 == pk.as_slice().to_hex().as_slice());
+        let sm = sig.as_slice().to_hex() + x2; // x2 is m hex encoded
+        assert!(x3 == sm);
     }
 }
 
