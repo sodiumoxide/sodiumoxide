@@ -291,8 +291,7 @@ fn test_vectors() {
         let m = x2.from_hex().unwrap();
         let sm = sign(m.as_slice(), &sk);
         verify(sm.as_slice(), &pk).unwrap();
-        let PublicKey(pkbuf) = pk;
-        assert!(x1 == pkbuf.as_slice().to_hex().as_slice());
+        assert!(x1 == pk.as_slice().to_hex().as_slice());
         assert!(x3 == sm.as_slice().to_hex().as_slice());
     }
 }
@@ -329,8 +328,7 @@ fn test_vectors_detached() {
         let m = x2.from_hex().unwrap();
         let sig = sign_detached(m.as_slice(), &sk);
         assert!(verify_detached(&sig, m.as_slice(), &pk));
-        let PublicKey(pkbuf) = pk;
-        assert!(x1 == pkbuf.as_slice().to_hex().as_slice());
+        assert!(x1 == pk.as_slice().to_hex().as_slice());
         let sm = sig.as_slice().to_hex() + x2; // x2 is m hex encoded
         assert!(x3 == sm);
     }
