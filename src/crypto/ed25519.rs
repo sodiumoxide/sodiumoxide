@@ -297,6 +297,45 @@ fn test_vectors() {
     }
 }
 
+#[test]
+fn test_vectors_detached() {
+    // test vectors from the Python implementation
+    // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
+    use self::serialize::hex::{FromHex, ToHex};
+    use std::io::BufferedReader;
+    use std::io::File;
+    use std::path::Path;
+
+    let p = &Path::new("testvectors/ed25519.input");
+    let mut r = BufferedReader::new(File::open(p).unwrap());
+    loop {
+        let line = match r.read_line() {
+            Err(_) => break,
+            Ok(line) => line
+        };
+        let mut x = line.as_slice().split(':');
+        let x0 = x.next().unwrap();
+        let x1 = x.next().unwrap();
+        let x2 = x.next().unwrap();
+        let x3 = x.next().unwrap();
+        let seed_bytes = x0.slice(0, 64).from_hex().unwrap();
+        assert!(seed_bytes.len() == SEEDBYTES);
+        let mut seedbuf = [0u8; SEEDBYTES];
+        for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
+            *s = *b
+        }
+        let seed = Seed(seedbuf);
+        let (pk, sk) = keypair_from_seed(&seed);
+        let m = x2.from_hex().unwrap();
+        let sig = sign_detached(m.as_slice(), &sk);
+        assert!(verify_detached(&sig, m.as_slice(), &pk));
+        let PublicKey(pkbuf) = pk;
+        assert!(x1 == pkbuf.as_slice().to_hex().as_slice());
+        let sm = sig.as_slice().to_hex() + x2; // x2 is m hex encoded
+        assert!(x3 == sm);
+    }
+}
+
 #[cfg(test)]
 mod bench {
     extern crate test;
