@@ -146,10 +146,22 @@ extern {
 
 
   // auth
+  // crypto_auth.h
   pub fn crypto_auth_bytes() -> size_t;
   pub fn crypto_auth_keybytes() -> size_t;
   pub fn crypto_auth_primitive() -> *const c_char;
+  pub fn crypto_auth(a: *mut u8,
+                     m: *const u8,
+                     mlen: c_ulonglong,
+                     k: *const u8) -> c_int;
+  pub fn crypto_auth_verify(a: *const u8,
+                            m: *const u8,
+                            mlen: c_ulonglong,
+                            k: *const u8) -> c_int;
 
+  // crypto_auth_hmacsha256.h
+  pub fn crypto_auth_hmacsha256_bytes() -> size_t;
+  pub fn crypto_auth_hmacsha256_keybytes() -> size_t;
   pub fn crypto_auth_hmacsha256(a: *mut u8,
                                 m: *const u8,
                                 mlen: c_ulonglong,
@@ -158,8 +170,6 @@ extern {
                                        m: *const u8,
                                        mlen: c_ulonglong,
                                        k: *const u8) -> c_int;
-  pub fn crypto_auth_hmacsha256_bytes() -> size_t;
-  pub fn crypto_auth_hmacsha256_keybytes() -> size_t;
 
   pub fn crypto_auth_hmacsha512(a: *mut u8,
                                 m: *const u8,
@@ -442,6 +452,7 @@ fn test_crypto_aead_chacha20poly1305_abytes() {
 
 
 // auth
+// crypto_auth.h
 #[test]
 fn test_crypto_auth_bytes() {
     assert!(unsafe { crypto_auth_bytes() } == crypto_auth_BYTES)
@@ -459,6 +470,7 @@ fn test_crypto_auth_primitive() {
     }
 }
 
+// crypto_auth_hmacsha256.h
 #[test]
 fn test_crypto_auth_hmacsha256_bytes() {
     assert!(unsafe { crypto_auth_hmacsha256_bytes() } == crypto_auth_hmacsha256_BYTES)
