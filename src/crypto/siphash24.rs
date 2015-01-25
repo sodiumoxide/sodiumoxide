@@ -132,7 +132,7 @@ fn test_vectors() {
                       ,[0x72, 0x45, 0x06, 0xeb, 0x4c, 0x32, 0x8a, 0x95]];
     let k = Key([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     for i in (0us..maxlen) {
-        let Digest(h) = shorthash(m.slice(0, i), &k);
+        let Digest(h) = shorthash(&m[..i], &k);
         assert!(h == h_expecteds[i]);
     }
 }

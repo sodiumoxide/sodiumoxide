@@ -60,13 +60,13 @@ fn test_nist_vector(filename: &str) {
             Ok(line) => line
         };
         if line.as_slice().starts_with("Len = ") {
-            let s = line.as_slice().slice_from(6);
+            let s = &line[6..];
             let len: usize = s.trim().parse().unwrap();
             let line2 = r.read_line().unwrap();
-            let rawmsg = line2.as_slice().slice_from(6).from_hex().unwrap();
-            let msg = rawmsg.slice_to(len/8);
+            let rawmsg = line2[6..].from_hex().unwrap();
+            let msg = &rawmsg[..len/8];
             let line3 = r.read_line().unwrap();
-            let md = line3.as_slice().slice_from(5).from_hex().unwrap();
+            let md = line3[5..].from_hex().unwrap();
             let Digest(digest) = hash(msg);
             assert!(digest.as_slice() == md.as_slice());
         }
