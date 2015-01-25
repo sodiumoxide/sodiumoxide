@@ -280,7 +280,7 @@ fn test_vectors() {
         let x1 = x.next().unwrap();
         let x2 = x.next().unwrap();
         let x3 = x.next().unwrap();
-        let seed_bytes = x0.slice(0, 64).from_hex().unwrap();
+        let seed_bytes = x0[..64].from_hex().unwrap();
         assert!(seed_bytes.len() == SEEDBYTES);
         let mut seedbuf = [0u8; SEEDBYTES];
         for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
@@ -317,7 +317,7 @@ fn test_vectors_detached() {
         let x1 = x.next().unwrap();
         let x2 = x.next().unwrap();
         let x3 = x.next().unwrap();
-        let seed_bytes = x0.slice(0, 64).from_hex().unwrap();
+        let seed_bytes = x0[..64].from_hex().unwrap();
         assert!(seed_bytes.len() == SEEDBYTES);
         let mut seedbuf = [0u8; SEEDBYTES];
         for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
