@@ -2,7 +2,7 @@
 #![allow(unstable)]
 
 extern crate libc;
-use libc::{c_int, c_ulonglong, c_char, c_uchar, size_t, uint8_t, uint32_t, uint64_t};
+use libc::{c_int, c_ulonglong, c_char, c_uchar, size_t};
 
 
 // aead
@@ -64,7 +64,7 @@ pub const crypto_onetimeauth_poly1305_KEYBYTES : size_t = 32;
 // pwhash
 // crypto_pwhash_scryptsalsa208sha256.h
 pub const crypto_pwhash_scryptsalsa208sha256_SALTBYTES: size_t = 32;
-pub const crypto_pwhash_scryptsalsa208sha256_STRBYTES: usize = 102;
+pub const crypto_pwhash_scryptsalsa208sha256_STRBYTES: size_t = 102;
 pub const crypto_pwhash_scryptsalsa208sha256_STRPREFIX: &'static str = "$7$";
 pub const crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE: c_ulonglong = 524288;
 pub const crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE: c_ulonglong =  16777216;
@@ -238,22 +238,22 @@ extern {
                                             salt: *const c_uchar,
                                             opslimit: c_ulonglong,
                                             memlimit: size_t) -> c_int;
-  pub fn crypto_pwhash_scryptsalsa208sha256_str(out: *mut [c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES],
+  pub fn crypto_pwhash_scryptsalsa208sha256_str(out: *mut c_char,
                                                 passwd: *const c_char,
                                                 passwdlen: c_ulonglong,
                                                 opslimit: c_ulonglong,
                                                 memlimit: size_t) -> c_int;
-  pub fn crypto_pwhash_scryptsalsa208sha256_str_verify(str_: *const [c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES],
+  pub fn crypto_pwhash_scryptsalsa208sha256_str_verify(str_: *const c_char,
                                                        passwd: *const c_char,
                                                        passwdlen: c_ulonglong) -> c_int;
-  pub fn crypto_pwhash_scryptsalsa208sha256_ll(passwd: *const uint8_t,
+  pub fn crypto_pwhash_scryptsalsa208sha256_ll(passwd: *const u8,
                                                passwdlen: size_t,
-                                               salt: *const uint8_t,
+                                               salt: *const u8,
                                                saltlen: size_t,
-                                               N: uint64_t,
-                                               r: uint32_t,
-                                               p: uint32_t,
-                                               buf: *mut uint8_t,
+                                               N: u64,
+                                               r: u32,
+                                               p: u32,
+                                               buf: *mut u8,
                                                buflen: size_t) -> c_int;
 
 
@@ -609,14 +609,14 @@ fn test_crypto_pwhash_scryptsalsa208sha256_strprefix() {
 fn test_crypto_pwhash_scryptsalsa208sha256_str() {
     let password = "Correct Horse Battery Staple";
     let mut hashed_password = [0 as c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES as usize];
-    let ret_hash = unsafe { crypto_pwhash_scryptsalsa208sha256_str(&mut hashed_password,
+    let ret_hash = unsafe { crypto_pwhash_scryptsalsa208sha256_str(hashed_password.as_mut_ptr(),
                                                                    password.as_ptr() as *const c_char,
                                                                    password.len() as c_ulonglong,
                                                                    crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE,
                                                                    crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE)
     };
     assert!(ret_hash == 0);
-    let ret_verify = unsafe { crypto_pwhash_scryptsalsa208sha256_str_verify(&hashed_password,
+    let ret_verify = unsafe { crypto_pwhash_scryptsalsa208sha256_str_verify(hashed_password.as_ptr(),
                                                                             password.as_ptr() as *const c_char,
                                                                             password.len() as c_ulonglong)
     };
@@ -630,7 +630,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_ll_1() {
     let n = 16;
     let r = 1;
     let p = 1;
-    let mut buf = [0 as uint8_t; 64];
+    let mut buf = [0 as u8; 64];
     let expected = [0x77, 0xd6, 0x57, 0x62, 0x38, 0x65, 0x7b, 0x20, 0x3b, 0x19, 0xca, 0x42, 0xc1, 0x8a, 0x04, 0x97,
                     0xf1, 0x6b, 0x48, 0x44, 0xe3, 0x07, 0x4a, 0xe8, 0xdf, 0xdf, 0xfa, 0x3f, 0xed, 0xe2, 0x14, 0x42,
                     0xfc, 0xd0, 0x06, 0x9d, 0xed, 0x09, 0x48, 0xf8, 0x32, 0x6a, 0x75, 0x3a, 0x0f, 0xc8, 0x1f, 0x17,
@@ -655,7 +655,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_ll_2() {
     let n = 1024;
     let r = 8;
     let p = 16;
-    let mut buf = [0 as uint8_t; 64];
+    let mut buf = [0 as u8; 64];
     let expected = [0xfd, 0xba, 0xbe, 0x1c, 0x9d, 0x34, 0x72, 0x00, 0x78, 0x56, 0xe7, 0x19, 0x0d, 0x01, 0xe9, 0xfe,
                     0x7c, 0x6a, 0xd7, 0xcb, 0xc8, 0x23, 0x78, 0x30, 0xe7, 0x73, 0x76, 0x63, 0x4b, 0x37, 0x31, 0x62,
                     0x2e, 0xaf, 0x30, 0xd9, 0x2e, 0x22, 0xa3, 0x88, 0x6f, 0xf1, 0x09, 0x27, 0x9d, 0x98, 0x30, 0xda,
@@ -680,7 +680,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_ll_3() {
     let n = 16384;
     let r = 8;
     let p = 1;
-    let mut buf = [0 as uint8_t; 64];
+    let mut buf = [0 as u8; 64];
     let expected = [0x70, 0x23, 0xbd, 0xcb, 0x3a, 0xfd, 0x73, 0x48, 0x46, 0x1c, 0x06, 0xcd, 0x81, 0xfd, 0x38, 0xeb,
                     0xfd, 0xa8, 0xfb, 0xba, 0x90, 0x4f, 0x8e, 0x3e, 0xa9, 0xb5, 0x43, 0xf6, 0x54, 0x5d, 0xa1, 0xf2,
                     0xd5, 0x43, 0x29, 0x55, 0x61, 0x3f, 0x0f, 0xcf, 0x62, 0xd4, 0x97, 0x05, 0x24, 0x2a, 0x9a, 0xf9,
@@ -705,7 +705,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_ll_4() {
     let n = 1048576;
     let r = 8;
     let p = 1;
-    let mut buf = [0 as uint8_t; 64];
+    let mut buf = [0 as u8; 64];
     let expected = [0x21, 0x01, 0xcb, 0x9b, 0x6a, 0x51, 0x1a, 0xae, 0xad, 0xdb, 0xbe, 0x09, 0xcf, 0x70, 0xf8, 0x81,
                     0xec, 0x56, 0x8d, 0x57, 0x4a, 0x2f, 0xfd, 0x4d, 0xab, 0xe5, 0xee, 0x98, 0x20, 0xad, 0xaa, 0x47,
                     0x8e, 0x56, 0xfd, 0x8f, 0x4b, 0xa5, 0xd0, 0x9f, 0xfa, 0x1c, 0x6d, 0x92, 0x7c, 0x40, 0xf4, 0xc3,
