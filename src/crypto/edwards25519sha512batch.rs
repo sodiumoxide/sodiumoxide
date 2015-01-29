@@ -7,9 +7,9 @@ use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use std::iter::repeat;
 
-pub const SECRETKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_SECRETKEYBYTES as usize;
-pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES as usize;
-pub const SIGNATUREBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_BYTES as usize;
+pub const SECRETKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_SECRETKEYBYTES;
+pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES;
+pub const SIGNATUREBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_BYTES;
 
 /**
  * `SecretKey` for signatures

@@ -6,110 +6,110 @@ use libc::{c_int, c_ulonglong, c_char, size_t};
 
 
 // aead
-pub const crypto_aead_chacha20poly1305_KEYBYTES: size_t = 32;
-pub const crypto_aead_chacha20poly1305_NSECBYTES: size_t = 0;
-pub const crypto_aead_chacha20poly1305_NPUBBYTES: size_t = 8;
-pub const crypto_aead_chacha20poly1305_ABYTES: size_t = 16;
+pub const crypto_aead_chacha20poly1305_KEYBYTES: usize = 32;
+pub const crypto_aead_chacha20poly1305_NSECBYTES: usize = 0;
+pub const crypto_aead_chacha20poly1305_NPUBBYTES: usize = 8;
+pub const crypto_aead_chacha20poly1305_ABYTES: usize = 16;
 
 
 // stream
-pub const crypto_stream_KEYBYTES: size_t = crypto_stream_xsalsa20_KEYBYTES;
-pub const crypto_stream_NONCEBYTES: size_t = crypto_stream_xsalsa20_NONCEBYTES;
+pub const crypto_stream_KEYBYTES: usize = crypto_stream_xsalsa20_KEYBYTES;
+pub const crypto_stream_NONCEBYTES: usize = crypto_stream_xsalsa20_NONCEBYTES;
 pub const crypto_stream_PRIMITIVE: &'static str = "xsalsa20";
 
-pub const crypto_stream_aes128ctr_KEYBYTES: size_t = 16;
-pub const crypto_stream_aes128ctr_NONCEBYTES: size_t = 16;
-pub const crypto_stream_aes128ctr_BEFORENMBYTES: size_t = 1408;
+pub const crypto_stream_aes128ctr_KEYBYTES: usize = 16;
+pub const crypto_stream_aes128ctr_NONCEBYTES: usize = 16;
+pub const crypto_stream_aes128ctr_BEFORENMBYTES: usize = 1408;
 
-pub const crypto_stream_chacha20_KEYBYTES: size_t = 32;
-pub const crypto_stream_chacha20_NONCEBYTES: size_t = 8;
+pub const crypto_stream_chacha20_KEYBYTES: usize = 32;
+pub const crypto_stream_chacha20_NONCEBYTES: usize = 8;
 
-pub const crypto_stream_salsa20_KEYBYTES: size_t = 32;
-pub const crypto_stream_salsa20_NONCEBYTES: size_t = 8;
+pub const crypto_stream_salsa20_KEYBYTES: usize = 32;
+pub const crypto_stream_salsa20_NONCEBYTES: usize = 8;
 
-pub const crypto_stream_salsa2012_KEYBYTES: size_t = 32;
-pub const crypto_stream_salsa2012_NONCEBYTES: size_t = 8;
+pub const crypto_stream_salsa2012_KEYBYTES: usize = 32;
+pub const crypto_stream_salsa2012_NONCEBYTES: usize = 8;
 
-pub const crypto_stream_salsa208_KEYBYTES: size_t = 32;
-pub const crypto_stream_salsa208_NONCEBYTES: size_t = 8;
+pub const crypto_stream_salsa208_KEYBYTES: usize = 32;
+pub const crypto_stream_salsa208_NONCEBYTES: usize = 8;
 
-pub const crypto_stream_xsalsa20_KEYBYTES: size_t = 32;
-pub const crypto_stream_xsalsa20_NONCEBYTES: size_t = 24;
+pub const crypto_stream_xsalsa20_KEYBYTES: usize = 32;
+pub const crypto_stream_xsalsa20_NONCEBYTES: usize = 24;
 
 
 // auth
-pub const crypto_auth_BYTES: size_t = crypto_auth_hmacsha512256_BYTES;
-pub const crypto_auth_KEYBYTES: size_t = crypto_auth_hmacsha512256_KEYBYTES;
+pub const crypto_auth_BYTES: usize = crypto_auth_hmacsha512256_BYTES;
+pub const crypto_auth_KEYBYTES: usize = crypto_auth_hmacsha512256_KEYBYTES;
 pub const crypto_auth_PRIMITIVE: &'static str = "hmacsha512256";
 
-pub const crypto_auth_hmacsha256_BYTES: size_t = 32;
-pub const crypto_auth_hmacsha256_KEYBYTES: size_t = 32;
+pub const crypto_auth_hmacsha256_BYTES: usize = 32;
+pub const crypto_auth_hmacsha256_KEYBYTES: usize = 32;
 
-pub const crypto_auth_hmacsha512_BYTES: size_t = 64;
-pub const crypto_auth_hmacsha512_KEYBYTES: size_t = 32;
+pub const crypto_auth_hmacsha512_BYTES: usize = 64;
+pub const crypto_auth_hmacsha512_KEYBYTES: usize = 32;
 
-pub const crypto_auth_hmacsha512256_BYTES: size_t = 32;
-pub const crypto_auth_hmacsha512256_KEYBYTES: size_t = 32;
+pub const crypto_auth_hmacsha512256_BYTES: usize = 32;
+pub const crypto_auth_hmacsha512256_KEYBYTES: usize = 32;
 
 
 // onetimeauth
-pub const crypto_onetimeauth_BYTES: size_t = crypto_onetimeauth_poly1305_BYTES;
-pub const crypto_onetimeauth_KEYBYTES: size_t = crypto_onetimeauth_poly1305_KEYBYTES;
+pub const crypto_onetimeauth_BYTES: usize = crypto_onetimeauth_poly1305_BYTES;
+pub const crypto_onetimeauth_KEYBYTES: usize = crypto_onetimeauth_poly1305_KEYBYTES;
 pub const crypto_onetimeauth_PRIMITIVE: &'static str =  "poly1305";
 
-pub const crypto_onetimeauth_poly1305_BYTES: size_t = 16;
-pub const crypto_onetimeauth_poly1305_KEYBYTES: size_t = 32;
+pub const crypto_onetimeauth_poly1305_BYTES: usize = 16;
+pub const crypto_onetimeauth_poly1305_KEYBYTES: usize = 32;
 
 
 // hash
-pub const crypto_hash_BYTES: size_t = crypto_hash_sha512_BYTES;
+pub const crypto_hash_BYTES: usize = crypto_hash_sha512_BYTES;
 pub const crypto_hash_PRIMITIVE: &'static str = "sha512";
 
-pub const crypto_hash_sha256_BYTES: size_t =  32;
+pub const crypto_hash_sha256_BYTES: usize =  32;
 
-pub const crypto_hash_sha512_BYTES: size_t = 64;
+pub const crypto_hash_sha512_BYTES: usize = 64;
 
 
 // box
-pub const crypto_box_curve25519xsalsa20poly1305_SEEDBYTES: size_t = 32;
-pub const crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES: size_t = 32;
-pub const crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES: size_t = 32;
-pub const crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES: size_t = 32;
-pub const crypto_box_curve25519xsalsa20poly1305_NONCEBYTES: size_t = 24;
-pub const crypto_box_curve25519xsalsa20poly1305_ZEROBYTES: size_t = 32;
-pub const crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES: size_t = 16;
-pub const crypto_box_curve25519xsalsa20poly1305_MACBYTES: size_t =
+pub const crypto_box_curve25519xsalsa20poly1305_SEEDBYTES: usize = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES: usize = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES: usize = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES: usize = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_NONCEBYTES: usize = 24;
+pub const crypto_box_curve25519xsalsa20poly1305_ZEROBYTES: usize = 32;
+pub const crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES: usize = 16;
+pub const crypto_box_curve25519xsalsa20poly1305_MACBYTES: usize =
     crypto_box_curve25519xsalsa20poly1305_ZEROBYTES -
     crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
 
 // scalarmult
-pub const crypto_scalarmult_curve25519_BYTES: size_t = 32;
-pub const crypto_scalarmult_curve25519_SCALARBYTES: size_t = 32;
+pub const crypto_scalarmult_curve25519_BYTES: usize = 32;
+pub const crypto_scalarmult_curve25519_SCALARBYTES: usize = 32;
 
 
 // sign
-pub const crypto_sign_ed25519_BYTES: size_t = 64;
-pub const crypto_sign_ed25519_SEEDBYTES: size_t = 32;
-pub const crypto_sign_ed25519_PUBLICKEYBYTES: size_t = 32;
-pub const crypto_sign_ed25519_SECRETKEYBYTES: size_t = 64;
+pub const crypto_sign_ed25519_BYTES: usize = 64;
+pub const crypto_sign_ed25519_SEEDBYTES: usize = 32;
+pub const crypto_sign_ed25519_PUBLICKEYBYTES: usize = 32;
+pub const crypto_sign_ed25519_SECRETKEYBYTES: usize = 64;
 
-pub const crypto_sign_edwards25519sha512batch_BYTES: size_t = 64;
-pub const crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES: size_t = 32;
-pub const crypto_sign_edwards25519sha512batch_SECRETKEYBYTES: size_t = 64;
+pub const crypto_sign_edwards25519sha512batch_BYTES: usize = 64;
+pub const crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES: usize = 32;
+pub const crypto_sign_edwards25519sha512batch_SECRETKEYBYTES: usize = 64;
 
 
 // shorthash
-pub const crypto_shorthash_siphash24_BYTES: size_t = 8;
-pub const crypto_shorthash_siphash24_KEYBYTES: size_t = 16;
+pub const crypto_shorthash_siphash24_BYTES: usize = 8;
+pub const crypto_shorthash_siphash24_KEYBYTES: usize = 16;
 
 
 // secretbox
-pub const crypto_secretbox_xsalsa20poly1305_KEYBYTES: size_t = 32;
-pub const crypto_secretbox_xsalsa20poly1305_NONCEBYTES: size_t = 24;
-pub const crypto_secretbox_xsalsa20poly1305_ZEROBYTES: size_t = 32;
-pub const crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES: size_t = 16;
-pub const crypto_secretbox_xsalsa20poly1305_MACBYTES: size_t =
+pub const crypto_secretbox_xsalsa20poly1305_KEYBYTES: usize = 32;
+pub const crypto_secretbox_xsalsa20poly1305_NONCEBYTES: usize = 24;
+pub const crypto_secretbox_xsalsa20poly1305_ZEROBYTES: usize = 32;
+pub const crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES: usize = 16;
+pub const crypto_secretbox_xsalsa20poly1305_MACBYTES: usize =
     crypto_secretbox_xsalsa20poly1305_ZEROBYTES -
     crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES;
 
@@ -435,19 +435,23 @@ extern {
 // aead
 #[test]
 fn test_crypto_aead_chacha20poly1305_keybytes() {
-    assert!(unsafe { crypto_aead_chacha20poly1305_keybytes() } == crypto_aead_chacha20poly1305_KEYBYTES)
+    assert!(unsafe { crypto_aead_chacha20poly1305_keybytes() as usize } ==
+            crypto_aead_chacha20poly1305_KEYBYTES)
 }
 #[test]
 fn test_crypto_aead_chacha20poly1305_nsecbytes() {
-    assert!(unsafe { crypto_aead_chacha20poly1305_nsecbytes() } == crypto_aead_chacha20poly1305_NSECBYTES)
+    assert!(unsafe { crypto_aead_chacha20poly1305_nsecbytes() as usize } ==
+            crypto_aead_chacha20poly1305_NSECBYTES)
 }
 #[test]
 fn test_crypto_aead_chacha20poly1305_npubbytes() {
-    assert!(unsafe { crypto_aead_chacha20poly1305_npubbytes() } == crypto_aead_chacha20poly1305_NPUBBYTES)
+    assert!(unsafe { crypto_aead_chacha20poly1305_npubbytes() as usize } ==
+            crypto_aead_chacha20poly1305_NPUBBYTES)
 }
 #[test]
 fn test_crypto_aead_chacha20poly1305_abytes() {
-    assert!(unsafe { crypto_aead_chacha20poly1305_abytes() } == crypto_aead_chacha20poly1305_ABYTES)
+    assert!(unsafe { crypto_aead_chacha20poly1305_abytes() as usize } ==
+            crypto_aead_chacha20poly1305_ABYTES)
 }
 
 
@@ -455,11 +459,11 @@ fn test_crypto_aead_chacha20poly1305_abytes() {
 // crypto_auth.h
 #[test]
 fn test_crypto_auth_bytes() {
-    assert!(unsafe { crypto_auth_bytes() } == crypto_auth_BYTES)
+    assert!(unsafe { crypto_auth_bytes() as usize } == crypto_auth_BYTES)
 }
 #[test]
 fn test_crypto_auth_keybytes() {
-    assert!(unsafe { crypto_auth_keybytes() } == crypto_auth_KEYBYTES)
+    assert!(unsafe { crypto_auth_keybytes() as usize } == crypto_auth_KEYBYTES)
 }
 #[test]
 fn test_crypto_auth_primitive() {
@@ -473,40 +477,47 @@ fn test_crypto_auth_primitive() {
 // crypto_auth_hmacsha256.h
 #[test]
 fn test_crypto_auth_hmacsha256_bytes() {
-    assert!(unsafe { crypto_auth_hmacsha256_bytes() } == crypto_auth_hmacsha256_BYTES)
+    assert!(unsafe { crypto_auth_hmacsha256_bytes() as usize } ==
+            crypto_auth_hmacsha256_BYTES)
 }
 #[test]
 fn test_crypto_auth_hmacsha256_keybytes() {
-    assert!(unsafe { crypto_auth_hmacsha256_keybytes() } == crypto_auth_hmacsha256_KEYBYTES)
+    assert!(unsafe { crypto_auth_hmacsha256_keybytes() as usize } ==
+            crypto_auth_hmacsha256_KEYBYTES)
 }
 
 #[test]
 fn test_crypto_auth_hmacsha512_bytes() {
-    assert!(unsafe { crypto_auth_hmacsha512_bytes() } == crypto_auth_hmacsha512_BYTES)
+    assert!(unsafe { crypto_auth_hmacsha512_bytes() as usize } ==
+            crypto_auth_hmacsha512_BYTES)
 }
 #[test]
 fn test_crypto_auth_hmacsha512_keybytes() {
-    assert!(unsafe { crypto_auth_hmacsha512_keybytes() } == crypto_auth_hmacsha512_KEYBYTES)
+    assert!(unsafe { crypto_auth_hmacsha512_keybytes() as usize } ==
+            crypto_auth_hmacsha512_KEYBYTES)
 }
 
 #[test]
 fn test_crypto_auth_hmacsha512256_bytes() {
-    assert!(unsafe { crypto_auth_hmacsha512256_bytes() } == crypto_auth_hmacsha512256_BYTES)
+    assert!(unsafe { crypto_auth_hmacsha512256_bytes() as usize } ==
+            crypto_auth_hmacsha512256_BYTES)
 }
 #[test]
 fn test_crypto_auth_hmacsha512256_keybytes() {
-    assert!(unsafe { crypto_auth_hmacsha512256_keybytes() } == crypto_auth_hmacsha512256_KEYBYTES)
+    assert!(unsafe { crypto_auth_hmacsha512256_keybytes() as usize } == crypto_auth_hmacsha512256_KEYBYTES)
 }
 
 
 // onetimeauth
 #[test]
 fn test_crypto_onetimeauth_bytes() {
-    assert!(unsafe { crypto_onetimeauth_bytes() } == crypto_onetimeauth_BYTES)
+    assert!(unsafe { crypto_onetimeauth_bytes() as usize } ==
+            crypto_onetimeauth_BYTES)
 }
 #[test]
 fn test_crypto_onetimeauth_keybytes() {
-    assert!(unsafe { crypto_onetimeauth_keybytes() } == crypto_onetimeauth_KEYBYTES)
+    assert!(unsafe { crypto_onetimeauth_keybytes() as usize } ==
+            crypto_onetimeauth_KEYBYTES)
 }
 #[test]
 fn test_crypto_onetimeauth_primitive() {
@@ -518,18 +529,20 @@ fn test_crypto_onetimeauth_primitive() {
 }
 #[test]
 fn test_crypto_onetimeauth_poly1305_bytes() {
-    assert!(unsafe { crypto_onetimeauth_poly1305_bytes() } == crypto_onetimeauth_poly1305_BYTES)
+    assert!(unsafe { crypto_onetimeauth_poly1305_bytes() as usize } ==
+            crypto_onetimeauth_poly1305_BYTES)
 }
 #[test]
 fn test_crypto_onetimeauth_poly1305_keybytes() {
-    assert!(unsafe { crypto_onetimeauth_poly1305_keybytes() } == crypto_onetimeauth_poly1305_KEYBYTES)
+    assert!(unsafe { crypto_onetimeauth_poly1305_keybytes() as usize } ==
+            crypto_onetimeauth_poly1305_KEYBYTES)
 }
 
 
 // hash
 #[test]
 fn test_crypto_hash_bytes() {
-    assert!(unsafe { crypto_hash_bytes() } == crypto_hash_BYTES)
+    assert!(unsafe { crypto_hash_bytes() as usize } == crypto_hash_BYTES)
 }
 #[test]
 fn test_crypto_hash_primitive() {
@@ -542,23 +555,27 @@ fn test_crypto_hash_primitive() {
 
 #[test]
 fn test_crypto_hash_sha256_bytes() {
-    assert!(unsafe { crypto_hash_sha256_bytes() } == crypto_hash_sha256_BYTES)
+    assert!(unsafe { crypto_hash_sha256_bytes() as usize } ==
+            crypto_hash_sha256_BYTES)
 }
 
 #[test]
 fn test_crypto_hash_sha512_bytes() {
-    assert!(unsafe { crypto_hash_sha512_bytes() } == crypto_hash_sha512_BYTES)
+    assert!(unsafe { crypto_hash_sha512_bytes() as usize } ==
+            crypto_hash_sha512_BYTES)
 }
 
 
 // stream
 #[test]
 fn test_crypto_stream_keybytes() {
-    assert!(unsafe { crypto_stream_keybytes() } == crypto_stream_KEYBYTES)
+    assert!(unsafe { crypto_stream_keybytes() as usize } ==
+            crypto_stream_KEYBYTES)
 }
 #[test]
 fn test_crypto_stream_noncebytes() {
-    assert!(unsafe { crypto_stream_noncebytes() } == crypto_stream_NONCEBYTES)
+    assert!(unsafe { crypto_stream_noncebytes() as usize } ==
+            crypto_stream_NONCEBYTES)
 }
 #[test]
 fn test_crypto_stream_primitive() {
@@ -571,170 +588,231 @@ fn test_crypto_stream_primitive() {
 
 #[test]
 fn test_crypto_stream_aes128ctr_keybytes() {
-    assert!(unsafe { crypto_stream_aes128ctr_keybytes() } == crypto_stream_aes128ctr_KEYBYTES)
+    assert!(unsafe { crypto_stream_aes128ctr_keybytes() as usize } ==
+            crypto_stream_aes128ctr_KEYBYTES)
 }
 #[test]
 fn test_crypto_stream_aes128ctr_noncebytes() {
-    assert!(unsafe { crypto_stream_aes128ctr_noncebytes() } == crypto_stream_aes128ctr_NONCEBYTES)
+    assert!(unsafe { crypto_stream_aes128ctr_noncebytes() as usize } ==
+            crypto_stream_aes128ctr_NONCEBYTES)
 }
 #[test]
 fn test_crypto_stream_aes128ctr_beforenmbytes() {
-    assert!(unsafe { crypto_stream_aes128ctr_beforenmbytes() } == crypto_stream_aes128ctr_BEFORENMBYTES)
+    assert!(unsafe { crypto_stream_aes128ctr_beforenmbytes() as usize } ==
+            crypto_stream_aes128ctr_BEFORENMBYTES)
 }
 
 #[test]
 fn test_crypto_stream_chacha20_keybytes() {
-    assert!(unsafe { crypto_stream_chacha20_keybytes() } == crypto_stream_chacha20_KEYBYTES)
+    assert!(unsafe { crypto_stream_chacha20_keybytes() as usize } ==
+            crypto_stream_chacha20_KEYBYTES)
 }
 #[test]
 fn test_crypto_stream_chacha20_noncebytes() {
-    assert!(unsafe { crypto_stream_chacha20_noncebytes() } == crypto_stream_chacha20_NONCEBYTES)
+    assert!(unsafe { crypto_stream_chacha20_noncebytes() as usize } ==
+            crypto_stream_chacha20_NONCEBYTES)
 }
 
 #[test]
 fn test_crypto_stream_salsa20_keybytes() {
-    assert!(unsafe { crypto_stream_salsa20_keybytes() } == crypto_stream_salsa20_KEYBYTES)
+    assert!(unsafe { crypto_stream_salsa20_keybytes() as usize } ==
+            crypto_stream_salsa20_KEYBYTES)
 }
 #[test]
 fn test_crypto_stream_salsa20_noncebytes() {
-    assert!(unsafe { crypto_stream_salsa20_noncebytes() } == crypto_stream_salsa20_NONCEBYTES)
+    assert!(unsafe { crypto_stream_salsa20_noncebytes() as usize } ==
+            crypto_stream_salsa20_NONCEBYTES)
 }
 
 #[test]
 fn test_crypto_stream_salsa208_keybytes() {
-    assert!(unsafe { crypto_stream_salsa208_keybytes() } == crypto_stream_salsa208_KEYBYTES)
+    assert!(unsafe { crypto_stream_salsa208_keybytes() as usize } ==
+            crypto_stream_salsa208_KEYBYTES)
 }
 #[test]
 fn test_crypto_stream_salsa208_noncebytes() {
-    assert!(unsafe { crypto_stream_salsa208_noncebytes() } == crypto_stream_salsa208_NONCEBYTES)
+    assert!(unsafe { crypto_stream_salsa208_noncebytes() as usize } ==
+            crypto_stream_salsa208_NONCEBYTES)
 }
 
 #[test]
 fn test_crypto_stream_salsa2012_keybytes() {
-    assert!(unsafe { crypto_stream_salsa2012_keybytes() } == crypto_stream_salsa2012_KEYBYTES)
+    assert!(unsafe { crypto_stream_salsa2012_keybytes() as usize } ==
+            crypto_stream_salsa2012_KEYBYTES)
 }
 #[test]
 fn test_crypto_stream_salsa2012_noncebytes() {
-    assert!(unsafe { crypto_stream_salsa2012_noncebytes() } == crypto_stream_salsa2012_NONCEBYTES)
+    assert!(unsafe { crypto_stream_salsa2012_noncebytes() as usize } ==
+            crypto_stream_salsa2012_NONCEBYTES)
 }
 
 #[test]
 fn test_crypto_stream_xsalsa20_keybytes() {
-    assert!(unsafe { crypto_stream_xsalsa20_keybytes() } == crypto_stream_xsalsa20_KEYBYTES)
+    assert!(unsafe { crypto_stream_xsalsa20_keybytes() as usize } ==
+            crypto_stream_xsalsa20_KEYBYTES)
 }
 #[test]
 fn test_crypto_stream_xsalsa20_noncebytes() {
-    assert!(unsafe { crypto_stream_xsalsa20_noncebytes() } == crypto_stream_xsalsa20_NONCEBYTES)
+    assert!(unsafe { crypto_stream_xsalsa20_noncebytes() as usize } ==
+            crypto_stream_xsalsa20_NONCEBYTES)
 }
 
 
 // box
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_seedbytes() {
-    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_seedbytes() } == crypto_box_curve25519xsalsa20poly1305_SEEDBYTES)
+    assert!(unsafe {
+        crypto_box_curve25519xsalsa20poly1305_seedbytes() as usize
+    } == crypto_box_curve25519xsalsa20poly1305_SEEDBYTES)
 }
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_publickeybytes() {
-    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_publickeybytes() } == crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES)
+    assert!(unsafe {
+        crypto_box_curve25519xsalsa20poly1305_publickeybytes() as usize
+    } == crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES)
 }
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_secretkeybytes() {
-    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_secretkeybytes() } == crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES)
+    assert!(unsafe {
+        crypto_box_curve25519xsalsa20poly1305_secretkeybytes() as usize
+    } == crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES)
 }
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_beforenmbytes() {
-    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_beforenmbytes() } == crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES)
+    assert!(unsafe {
+        crypto_box_curve25519xsalsa20poly1305_beforenmbytes() as usize
+    } == crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES)
 }
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_noncebytes() {
-    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_noncebytes() } == crypto_box_curve25519xsalsa20poly1305_NONCEBYTES)
+    assert!(unsafe {
+        crypto_box_curve25519xsalsa20poly1305_noncebytes() as usize
+    } == crypto_box_curve25519xsalsa20poly1305_NONCEBYTES)
 }
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_zerobytes() {
-    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_zerobytes() } == crypto_box_curve25519xsalsa20poly1305_ZEROBYTES)
+    assert!(unsafe {
+        crypto_box_curve25519xsalsa20poly1305_zerobytes() as usize
+    } == crypto_box_curve25519xsalsa20poly1305_ZEROBYTES)
 }
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_boxzerobytes() {
-    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_boxzerobytes() } == crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES)
+    assert!(unsafe {
+        crypto_box_curve25519xsalsa20poly1305_boxzerobytes() as usize
+} == crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES)
 }
 #[test]
 fn test_crypto_box_curve25519xsalsa20poly1305_macbytes() {
-    assert!(unsafe { crypto_box_curve25519xsalsa20poly1305_macbytes() } == crypto_box_curve25519xsalsa20poly1305_MACBYTES)
+    assert!(unsafe {
+        crypto_box_curve25519xsalsa20poly1305_macbytes() as usize
+    } == crypto_box_curve25519xsalsa20poly1305_MACBYTES)
 }
 
 
 // scalarmult
 #[test]
 fn test_crypto_scalarmult_curve25519_bytes() {
-    assert!(unsafe { crypto_scalarmult_curve25519_bytes() } == crypto_scalarmult_curve25519_BYTES)
+    assert!(unsafe {
+        crypto_scalarmult_curve25519_bytes() as usize
+    } == crypto_scalarmult_curve25519_BYTES)
 }
 #[test]
 fn test_crypto_scalarmult_curve25519_scalarbytes() {
-    assert!(unsafe { crypto_scalarmult_curve25519_scalarbytes() } == crypto_scalarmult_curve25519_SCALARBYTES)
+    assert!(unsafe {
+        crypto_scalarmult_curve25519_scalarbytes() as usize
+    } == crypto_scalarmult_curve25519_SCALARBYTES)
 }
 
 
 // sign
 #[test]
 fn test_crypto_sign_ed25519_bytes() {
-    assert!(unsafe { crypto_sign_ed25519_bytes() } == crypto_sign_ed25519_BYTES)
+    assert!(unsafe {
+        crypto_sign_ed25519_bytes() as usize
+    } == crypto_sign_ed25519_BYTES)
 }
 #[test]
 fn test_crypto_sign_ed25519_seedbytes() {
-    assert!(unsafe { crypto_sign_ed25519_seedbytes() } == crypto_sign_ed25519_SEEDBYTES)
+    assert!(unsafe {
+        crypto_sign_ed25519_seedbytes() as usize
+    } == crypto_sign_ed25519_SEEDBYTES)
 }
 #[test]
 fn test_crypto_sign_ed25519_publickeybytes() {
-    assert!(unsafe { crypto_sign_ed25519_publickeybytes() } == crypto_sign_ed25519_PUBLICKEYBYTES)
+    assert!(unsafe {
+        crypto_sign_ed25519_publickeybytes() as usize
+    } == crypto_sign_ed25519_PUBLICKEYBYTES)
 }
 #[test]
 fn test_crypto_sign_ed25519_secretkeybytes() {
-    assert!(unsafe { crypto_sign_ed25519_secretkeybytes() } == crypto_sign_ed25519_SECRETKEYBYTES)
+    assert!(unsafe {
+        crypto_sign_ed25519_secretkeybytes() as usize
+    } == crypto_sign_ed25519_SECRETKEYBYTES)
 }
 
 #[test]
 fn test_crypto_sign_edwards25519sha512batch_bytes() {
-    assert!(unsafe { crypto_sign_edwards25519sha512batch_bytes() } == crypto_sign_edwards25519sha512batch_BYTES)
+    assert!(unsafe {
+        crypto_sign_edwards25519sha512batch_bytes() as usize
+    } == crypto_sign_edwards25519sha512batch_BYTES)
 }
 #[test]
 fn test_crypto_sign_edwards25519sha512batch_publickeybytes() {
-    assert!(unsafe { crypto_sign_edwards25519sha512batch_publickeybytes() } == crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES)
+    assert!(unsafe {
+        crypto_sign_edwards25519sha512batch_publickeybytes() as usize
+    } == crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES)
 }
 #[test]
 fn test_crypto_sign_edwards25519sha512batch_secretkeybytes() {
-    assert!(unsafe { crypto_sign_edwards25519sha512batch_secretkeybytes() } == crypto_sign_edwards25519sha512batch_SECRETKEYBYTES)
+    assert!(unsafe {
+        crypto_sign_edwards25519sha512batch_secretkeybytes() as usize
+    } == crypto_sign_edwards25519sha512batch_SECRETKEYBYTES)
 }
 
 
 // shorthash
 #[test]
 fn test_crypto_shorthash_siphash24_bytes() {
-    assert!(unsafe { crypto_shorthash_siphash24_bytes() } == crypto_shorthash_siphash24_BYTES)
+    assert!(unsafe {
+        crypto_shorthash_siphash24_bytes() as usize
+    } == crypto_shorthash_siphash24_BYTES)
 }
 #[test]
 fn test_crypto_shorthash_siphash24_keybytes() {
-    assert!(unsafe { crypto_shorthash_siphash24_keybytes() } == crypto_shorthash_siphash24_KEYBYTES)
+    assert!(unsafe {
+        crypto_shorthash_siphash24_keybytes() as usize
+    } == crypto_shorthash_siphash24_KEYBYTES)
 }
 
 
 // secretbox
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_keybytes() {
-    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_keybytes() } == crypto_secretbox_xsalsa20poly1305_KEYBYTES)
+    assert!(unsafe {
+        crypto_secretbox_xsalsa20poly1305_keybytes() as usize
+    } == crypto_secretbox_xsalsa20poly1305_KEYBYTES)
 }
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_noncebytes() {
-    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_noncebytes() } == crypto_secretbox_xsalsa20poly1305_NONCEBYTES)
+    assert!(unsafe {
+        crypto_secretbox_xsalsa20poly1305_noncebytes() as usize
+    } == crypto_secretbox_xsalsa20poly1305_NONCEBYTES)
 }
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_zerobytes() {
-    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_zerobytes() } == crypto_secretbox_xsalsa20poly1305_ZEROBYTES)
+    assert!(unsafe {
+        crypto_secretbox_xsalsa20poly1305_zerobytes() as usize
+    } == crypto_secretbox_xsalsa20poly1305_ZEROBYTES)
 }
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_boxzerobytes() {
-    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_boxzerobytes() } == crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES)
+    assert!(unsafe {
+        crypto_secretbox_xsalsa20poly1305_boxzerobytes() as usize
+    } == crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES)
 }
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_macbytes() {
-    assert!(unsafe { crypto_secretbox_xsalsa20poly1305_macbytes() } == crypto_secretbox_xsalsa20poly1305_MACBYTES)
+    assert!(unsafe {
+        crypto_secretbox_xsalsa20poly1305_macbytes() as usize
+    } == crypto_secretbox_xsalsa20poly1305_MACBYTES)
 }

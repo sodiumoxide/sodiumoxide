@@ -7,8 +7,8 @@ use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use randombytes::randombytes_into;
 
-pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES as usize;
-pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES as usize;
+pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
+pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES;
 
 /**
  * Digest-structure

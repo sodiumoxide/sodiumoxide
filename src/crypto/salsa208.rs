@@ -14,5 +14,5 @@ use randombytes::randombytes_into;
 
 stream_module!(crypto_stream_salsa208,
                crypto_stream_salsa208_xor,
-               crypto_stream_salsa208_KEYBYTES as usize,
-               crypto_stream_salsa208_NONCEBYTES as usize);
+               crypto_stream_salsa208_KEYBYTES,
+               crypto_stream_salsa208_NONCEBYTES);

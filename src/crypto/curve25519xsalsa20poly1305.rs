@@ -12,12 +12,12 @@ use std::intrinsics::volatile_set_memory;
 use utils::marshal;
 use randombytes::randombytes_into;
 
-pub const PUBLICKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES as usize;
-pub const SECRETKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES as usize;
-pub const NONCEBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_NONCEBYTES as usize;
-pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES as usize;
-const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES as usize;
-const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES as usize;
+pub const PUBLICKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES;
+pub const SECRETKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES;
+pub const NONCEBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_NONCEBYTES;
+pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES;
+const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES;
+const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
 /**
  * `PublicKey` for asymmetric authenticated encryption
