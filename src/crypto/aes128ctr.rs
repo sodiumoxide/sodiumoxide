@@ -14,5 +14,5 @@ use randombytes::randombytes_into;
 
 stream_module!(crypto_stream_aes128ctr,
                crypto_stream_aes128ctr_xor,
-               crypto_stream_aes128ctr_KEYBYTES as usize,
-               crypto_stream_aes128ctr_NONCEBYTES as usize);
+               crypto_stream_aes128ctr_KEYBYTES,
+               crypto_stream_aes128ctr_NONCEBYTES);

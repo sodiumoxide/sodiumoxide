@@ -13,7 +13,7 @@ use ffi::{crypto_hash_sha512, crypto_hash_sha512_BYTES};
 use libc::c_ulonglong;
 
 hash_module!(crypto_hash_sha512,
-             crypto_hash_sha512_BYTES as usize,
+             crypto_hash_sha512_BYTES,
              128);
 
 #[test]

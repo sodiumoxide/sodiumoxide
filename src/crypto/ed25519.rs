@@ -11,10 +11,10 @@ use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use std::iter::repeat;
 
-pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
-pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES as usize;
-pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as usize;
-pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES as usize;
+pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
+pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
+pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
+pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
 
 
 /**
