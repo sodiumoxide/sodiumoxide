@@ -34,11 +34,11 @@ newtype_impl!(GroupElement, BYTES);
  * by an integer `n`. It returns the resulting group element
  * `q`.
  */
-pub fn scalarmult(&Scalar(n): &Scalar,
-                  &GroupElement(p): &GroupElement) -> GroupElement {
+pub fn scalarmult(&Scalar(ref n): &Scalar,
+                  &GroupElement(ref p): &GroupElement) -> GroupElement {
     let mut q = [0; BYTES];
     unsafe {
-        ffi::crypto_scalarmult_curve25519(q.as_mut_ptr(), n.as_ptr(), p.as_ptr());
+        ffi::crypto_scalarmult_curve25519(&mut q, n, p);
     }
     GroupElement(q)
 }
@@ -48,10 +48,10 @@ pub fn scalarmult(&Scalar(n): &Scalar,
  * group element and an integer `n`. It returns the resulting
  * group element `q`/
  */
-pub fn scalarmult_base(&Scalar(n): &Scalar) -> GroupElement {
+pub fn scalarmult_base(&Scalar(ref n): &Scalar) -> GroupElement {
     let mut q = [0; BYTES];
     unsafe {
-        ffi::crypto_scalarmult_curve25519_base(q.as_mut_ptr(), n.as_ptr());
+        ffi::crypto_scalarmult_curve25519_base(&mut q, n);
     }
     GroupElement(q)
 }
