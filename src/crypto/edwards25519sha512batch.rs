@@ -44,8 +44,8 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
         let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_sign_edwards25519sha512batch_keypair(pk.as_mut_ptr(),
-                                                    sk.as_mut_ptr());
+        ffi::crypto_sign_edwards25519sha512batch_keypair(&mut pk,
+                                                         &mut sk);
         (PublicKey(pk), SecretKey(sk))
     }
 }
@@ -55,7 +55,7 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
  * `sign()` returns the resulting signed message `sm`.
  */
 pub fn sign(m: &[u8],
-            &SecretKey(sk): &SecretKey) -> Vec<u8> {
+            &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
     unsafe {
         let mut sm: Vec<u8> = repeat(0u8).take(m.len() + SIGNATUREBYTES).collect();
         let mut smlen = 0;
@@ -63,7 +63,7 @@ pub fn sign(m: &[u8],
                                                  &mut smlen,
                                                  m.as_ptr(),
                                                  m.len() as c_ulonglong,
-                                                 sk.as_ptr());
+                                                 sk);
         sm.truncate(smlen as usize);
         sm
     }
@@ -75,7 +75,7 @@ pub fn sign(m: &[u8],
  * If the signature fails verification, `verify()` returns `None`.
  */
 pub fn verify(sm: &[u8],
-              &PublicKey(pk): &PublicKey) -> Option<Vec<u8>> {
+              &PublicKey(ref pk): &PublicKey) -> Option<Vec<u8>> {
     unsafe {
         let mut m: Vec<u8> = repeat(0u8).take(sm.len()).collect();
         let mut mlen = 0;
@@ -83,7 +83,7 @@ pub fn verify(sm: &[u8],
                                                          &mut mlen,
                                                          sm.as_ptr(),
                                                          sm.len() as c_ulonglong,
-                                                         pk.as_ptr()) == 0 {
+                                                         pk) == 0 {
             m.truncate(mlen as usize);
             Some(m)
         } else {

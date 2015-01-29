@@ -61,8 +61,8 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
         let mut pk = [0u8; PUBLICKEYBYTES];
         let mut sk = [0u8; SECRETKEYBYTES];
         ffi::crypto_box_curve25519xsalsa20poly1305_keypair(
-            pk.as_mut_ptr(),
-            sk.as_mut_ptr());
+            &mut pk,
+            &mut sk);
         (PublicKey(pk), SecretKey(sk))
     }
 }
@@ -85,17 +85,17 @@ pub fn gen_nonce() -> Nonce {
  * the receivers public key `pk` and a nonce `n`. It returns a ciphertext `c`.
  */
 pub fn seal(m: &[u8],
-            &Nonce(n): &Nonce,
-            &PublicKey(pk): &PublicKey,
-            &SecretKey(sk): &SecretKey) -> Vec<u8> {
+            &Nonce(ref n): &Nonce,
+            &PublicKey(ref pk): &PublicKey,
+            &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
             ffi::crypto_box_curve25519xsalsa20poly1305(dst,
-                                                  src,
-                                                  len,
-                                                  n.as_ptr(),
-                                                  pk.as_ptr(),
-                                                  sk.as_ptr());
+                                                       src,
+                                                       len,
+                                                       n,
+                                                       pk,
+                                                       sk);
         }
     });
     c
@@ -107,20 +107,20 @@ pub fn seal(m: &[u8],
  * If the ciphertext fails verification, `open()` returns `None`.
  */
 pub fn open(c: &[u8],
-            &Nonce(n): &Nonce,
-            &PublicKey(pk): &PublicKey,
-            &SecretKey(sk): &SecretKey) -> Option<Vec<u8>> {
+            &Nonce(ref n): &Nonce,
+            &PublicKey(ref pk): &PublicKey,
+            &SecretKey(ref sk): &SecretKey) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
         return None
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
             ffi::crypto_box_curve25519xsalsa20poly1305_open(dst,
-                                                       src,
-                                                       len,
-                                                       n.as_ptr(),
-                                                       pk.as_ptr(),
-                                                       sk.as_ptr())
+                                                            src,
+                                                            len,
+                                                            n,
+                                                            pk,
+                                                            sk)
         }
     });
     if ret == 0 {
@@ -148,13 +148,13 @@ newtype_impl!(PrecomputedKey, PRECOMPUTEDKEYBYTES);
  * `precompute()` computes an intermediate key that can be used by `seal_precomputed()`
  * and `open_precomputed()`
  */
-pub fn precompute(&PublicKey(pk): &PublicKey,
-                  &SecretKey(sk): &SecretKey) -> PrecomputedKey {
+pub fn precompute(&PublicKey(ref pk): &PublicKey,
+                  &SecretKey(ref sk): &SecretKey) -> PrecomputedKey {
     let mut k = [0u8; PRECOMPUTEDKEYBYTES];
     unsafe {
-        ffi::crypto_box_curve25519xsalsa20poly1305_beforenm(k.as_mut_ptr(),
-                                                       pk.as_ptr(),
-                                                       sk.as_ptr());
+        ffi::crypto_box_curve25519xsalsa20poly1305_beforenm(&mut k,
+                                                            pk,
+                                                            sk);
     }
     PrecomputedKey(k)
 }
@@ -164,15 +164,15 @@ pub fn precompute(&PublicKey(pk): &PublicKey,
  * and a nonce `n`. It returns a ciphertext `c`.
  */
 pub fn seal_precomputed(m: &[u8],
-                        &Nonce(n): &Nonce,
-                        &PrecomputedKey(k): &PrecomputedKey) -> Vec<u8> {
+                        &Nonce(ref n): &Nonce,
+                        &PrecomputedKey(ref k): &PrecomputedKey) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
             ffi::crypto_box_curve25519xsalsa20poly1305_afternm(dst,
-                                                          src,
-                                                          len,
-                                                          n.as_ptr(),
-                                                          k.as_ptr());
+                                                               src,
+                                                               len,
+                                                               n,
+                                                               k);
         }
     });
     c
@@ -184,18 +184,18 @@ pub fn seal_precomputed(m: &[u8],
  * If the ciphertext fails verification, `open_precomputed()` returns `None`.
  */
 pub fn open_precomputed(c: &[u8],
-                        &Nonce(n): &Nonce,
-                        &PrecomputedKey(k): &PrecomputedKey) -> Option<Vec<u8>> {
+                        &Nonce(ref n): &Nonce,
+                        &PrecomputedKey(ref k): &PrecomputedKey) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
         return None
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
             ffi::crypto_box_curve25519xsalsa20poly1305_open_afternm(dst,
-                                                               src,
-                                                               len,
-                                                               n.as_ptr(),
-                                                               k.as_ptr())
+                                                                    src,
+                                                                    len,
+                                                                    n,
+                                                                    k)
         }
     });
     if ret == 0 {

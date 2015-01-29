@@ -74,7 +74,7 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
         let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_sign_ed25519_keypair(pk.as_mut_ptr(), sk.as_mut_ptr());
+        ffi::crypto_sign_ed25519_keypair(&mut pk, &mut sk);
         (PublicKey(pk), SecretKey(sk))
     }
 }
@@ -83,13 +83,13 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
  * `keypair_from_seed()` computes a secret key and a corresponding public key
  * from a `Seed`.
  */
-pub fn keypair_from_seed(&Seed(seed): &Seed) -> (PublicKey, SecretKey) {
+pub fn keypair_from_seed(&Seed(ref seed): &Seed) -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
         let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_sign_ed25519_seed_keypair(pk.as_mut_ptr(),
-                                         sk.as_mut_ptr(),
-                                         seed.as_ptr());
+        ffi::crypto_sign_ed25519_seed_keypair(&mut pk,
+                                              &mut sk,
+                                              seed);
         (PublicKey(pk), SecretKey(sk))
     }
 }
@@ -99,7 +99,7 @@ pub fn keypair_from_seed(&Seed(seed): &Seed) -> (PublicKey, SecretKey) {
  * `sign()` returns the resulting signed message `sm`.
  */
 pub fn sign(m: &[u8],
-            &SecretKey(sk): &SecretKey) -> Vec<u8> {
+            &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
     unsafe {
         let mut sm: Vec<u8> = repeat(0u8).take(m.len() + SIGNATUREBYTES).collect();
         let mut smlen = 0;
@@ -107,7 +107,7 @@ pub fn sign(m: &[u8],
                                  &mut smlen,
                                  m.as_ptr(),
                                  m.len() as c_ulonglong,
-                                 sk.as_ptr());
+                                 sk);
         sm.truncate(smlen as usize);
         sm
     }
@@ -119,7 +119,7 @@ pub fn sign(m: &[u8],
  * If the signature fails verification, `verify()` returns `None`.
  */
 pub fn verify(sm: &[u8],
-              &PublicKey(pk): &PublicKey) -> Option<Vec<u8>> {
+              &PublicKey(ref pk): &PublicKey) -> Option<Vec<u8>> {
     unsafe {
         let mut m: Vec<u8> = repeat(0u8).take(sm.len()).collect();
         let mut mlen = 0;
@@ -127,7 +127,7 @@ pub fn verify(sm: &[u8],
                                          &mut mlen,
                                          sm.as_ptr(),
                                          sm.len() as c_ulonglong,
-                                         pk.as_ptr()) == 0 {
+                                         pk) == 0 {
             m.truncate(mlen as usize);
             Some(m)
         } else {
@@ -141,15 +141,15 @@ pub fn verify(sm: &[u8],
  * `sign_detached()` returns the resulting signature `sig`.
  */
 pub fn sign_detached(m: &[u8],
-                     &SecretKey(sk): &SecretKey) -> Signature {
+                     &SecretKey(ref sk): &SecretKey) -> Signature {
     unsafe {
         let mut sig = [0u8; SIGNATUREBYTES];
         let mut siglen: c_ulonglong = 0;
-        ffi::crypto_sign_ed25519_detached(sig.as_mut_ptr(),
+        ffi::crypto_sign_ed25519_detached(&mut sig,
                                           &mut siglen,
                                           m.as_ptr(),
                                           m.len() as c_ulonglong,
-                                          sk.as_ptr());
+                                          sk);
         assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
         Signature(sig)
     }
@@ -162,12 +162,12 @@ pub fn sign_detached(m: &[u8],
  */
 pub fn verify_detached(&Signature(sig): &Signature,
                        m: &[u8],
-                       &PublicKey(pk): &PublicKey) -> bool {
+                       &PublicKey(ref pk): &PublicKey) -> bool {
     unsafe {
         0 == ffi::crypto_sign_ed25519_verify_detached(sig.as_ptr(),
                                                       m.as_ptr(),
                                                       m.len() as c_ulonglong,
-                                                      pk.as_ptr())
+                                                      pk)
     }
 }
 

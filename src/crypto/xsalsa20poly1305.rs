@@ -69,11 +69,12 @@ pub fn gen_nonce() -> Nonce {
  * nonce `n`.  It returns a ciphertext `c`.
  */
 pub fn seal(m: &[u8],
-            &Nonce(n): &Nonce,
-            &Key(k): &Key) -> Vec<u8> {
+            &Nonce(ref n): &Nonce,
+            &Key(ref k): &Key) -> Vec<u8> {
     let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
         unsafe {
-            ffi::crypto_secretbox_xsalsa20poly1305(dst, src, len, n.as_ptr(), k.as_ptr())
+            ffi::crypto_secretbox_xsalsa20poly1305(dst, src, len,
+                                                   n, k)
         }
     });
     c
@@ -85,18 +86,18 @@ pub fn seal(m: &[u8],
  * If the ciphertext fails verification, `open()` returns `None`.
  */
 pub fn open(c: &[u8],
-            &Nonce(n): &Nonce,
-            &Key(k): &Key) -> Option<Vec<u8>> {
+            &Nonce(ref n): &Nonce,
+            &Key(ref k): &Key) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
         return None
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
             ffi::crypto_secretbox_xsalsa20poly1305_open(dst,
-                                                   src,
-                                                   len,
-                                                   n.as_ptr(),
-                                                   k.as_ptr())
+                                                        src,
+                                                        len,
+                                                        n,
+                                                        k)
         }
     });
     if ret == 0 {
