@@ -18,7 +18,7 @@ newtype_impl!(Digest, HASHBYTES);
 pub fn hash(m: &[u8]) -> Digest {
     unsafe {
         let mut h = [0; HASHBYTES];
-        $hash_name(h.as_mut_ptr(), m.as_ptr(), m.len() as c_ulonglong);
+        $hash_name(&mut h, m.as_ptr(), m.len() as c_ulonglong);
         Digest(h)
     }
 }
