@@ -13,52 +13,52 @@ pub const crypto_aead_chacha20poly1305_ABYTES: size_t = 16;
 
 
 // stream
-pub const crypto_stream_KEYBYTES : size_t = crypto_stream_xsalsa20_KEYBYTES;
-pub const crypto_stream_NONCEBYTES : size_t = crypto_stream_xsalsa20_NONCEBYTES;
-pub const crypto_stream_PRIMITIVE : &'static str = "xsalsa20";
+pub const crypto_stream_KEYBYTES: size_t = crypto_stream_xsalsa20_KEYBYTES;
+pub const crypto_stream_NONCEBYTES: size_t = crypto_stream_xsalsa20_NONCEBYTES;
+pub const crypto_stream_PRIMITIVE: &'static str = "xsalsa20";
 
-pub const crypto_stream_aes128ctr_KEYBYTES : size_t = 16;
-pub const crypto_stream_aes128ctr_NONCEBYTES : size_t = 16;
-pub const crypto_stream_aes128ctr_BEFORENMBYTES : size_t = 1408;
+pub const crypto_stream_aes128ctr_KEYBYTES: size_t = 16;
+pub const crypto_stream_aes128ctr_NONCEBYTES: size_t = 16;
+pub const crypto_stream_aes128ctr_BEFORENMBYTES: size_t = 1408;
 
-pub const crypto_stream_chacha20_KEYBYTES : size_t = 32;
-pub const crypto_stream_chacha20_NONCEBYTES : size_t = 8;
+pub const crypto_stream_chacha20_KEYBYTES: size_t = 32;
+pub const crypto_stream_chacha20_NONCEBYTES: size_t = 8;
 
-pub const crypto_stream_salsa20_KEYBYTES : size_t = 32;
-pub const crypto_stream_salsa20_NONCEBYTES : size_t = 8;
+pub const crypto_stream_salsa20_KEYBYTES: size_t = 32;
+pub const crypto_stream_salsa20_NONCEBYTES: size_t = 8;
 
-pub const crypto_stream_salsa2012_KEYBYTES : size_t = 32;
-pub const crypto_stream_salsa2012_NONCEBYTES : size_t = 8;
+pub const crypto_stream_salsa2012_KEYBYTES: size_t = 32;
+pub const crypto_stream_salsa2012_NONCEBYTES: size_t = 8;
 
-pub const crypto_stream_salsa208_KEYBYTES : size_t = 32;
-pub const crypto_stream_salsa208_NONCEBYTES : size_t = 8;
+pub const crypto_stream_salsa208_KEYBYTES: size_t = 32;
+pub const crypto_stream_salsa208_NONCEBYTES: size_t = 8;
 
-pub const crypto_stream_xsalsa20_KEYBYTES : size_t = 32;
-pub const crypto_stream_xsalsa20_NONCEBYTES : size_t = 24;
+pub const crypto_stream_xsalsa20_KEYBYTES: size_t = 32;
+pub const crypto_stream_xsalsa20_NONCEBYTES: size_t = 24;
 
 
 // auth
-pub const crypto_auth_BYTES : size_t = crypto_auth_hmacsha512256_BYTES;
-pub const crypto_auth_KEYBYTES : size_t = crypto_auth_hmacsha512256_KEYBYTES;
-pub const crypto_auth_PRIMITIVE : &'static str = "hmacsha512256";
+pub const crypto_auth_BYTES: size_t = crypto_auth_hmacsha512256_BYTES;
+pub const crypto_auth_KEYBYTES: size_t = crypto_auth_hmacsha512256_KEYBYTES;
+pub const crypto_auth_PRIMITIVE: &'static str = "hmacsha512256";
 
-pub const crypto_auth_hmacsha256_BYTES : size_t = 32;
-pub const crypto_auth_hmacsha256_KEYBYTES : size_t = 32;
+pub const crypto_auth_hmacsha256_BYTES: size_t = 32;
+pub const crypto_auth_hmacsha256_KEYBYTES: size_t = 32;
 
-pub const crypto_auth_hmacsha512_BYTES : size_t = 64;
-pub const crypto_auth_hmacsha512_KEYBYTES : size_t = 32;
+pub const crypto_auth_hmacsha512_BYTES: size_t = 64;
+pub const crypto_auth_hmacsha512_KEYBYTES: size_t = 32;
 
-pub const crypto_auth_hmacsha512256_BYTES : size_t = 32;
-pub const crypto_auth_hmacsha512256_KEYBYTES : size_t = 32;
+pub const crypto_auth_hmacsha512256_BYTES: size_t = 32;
+pub const crypto_auth_hmacsha512256_KEYBYTES: size_t = 32;
 
 
 // onetimeauth
-pub const crypto_onetimeauth_BYTES : size_t = crypto_onetimeauth_poly1305_BYTES;
-pub const crypto_onetimeauth_KEYBYTES : size_t = crypto_onetimeauth_poly1305_KEYBYTES;
-pub const crypto_onetimeauth_PRIMITIVE : &'static str =  "poly1305";
+pub const crypto_onetimeauth_BYTES: size_t = crypto_onetimeauth_poly1305_BYTES;
+pub const crypto_onetimeauth_KEYBYTES: size_t = crypto_onetimeauth_poly1305_KEYBYTES;
+pub const crypto_onetimeauth_PRIMITIVE: &'static str =  "poly1305";
 
-pub const crypto_onetimeauth_poly1305_BYTES : size_t = 16;
-pub const crypto_onetimeauth_poly1305_KEYBYTES : size_t = 32;
+pub const crypto_onetimeauth_poly1305_BYTES: size_t = 16;
+pub const crypto_onetimeauth_poly1305_KEYBYTES: size_t = 32;
 
 
 // hash
