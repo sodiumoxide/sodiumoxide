@@ -49,12 +49,12 @@ pub fn gen_key() -> Key {
  * returns a hash `h`.
  */
 pub fn shorthash(m: &[u8],
-                 &Key(k): &Key) -> Digest {
+                 &Key(ref k): &Key) -> Digest {
     unsafe {
         let mut h = [0; HASHBYTES];
-        ffi::crypto_shorthash_siphash24(h.as_mut_ptr(),
-                                   m.as_ptr(), m.len() as c_ulonglong,
-                                   k.as_ptr());
+        ffi::crypto_shorthash_siphash24(&mut h, m.as_ptr(),
+                                        m.len() as c_ulonglong,
+                                        k);
         Digest(h)
     }
 }
