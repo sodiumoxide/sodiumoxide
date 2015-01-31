@@ -49,8 +49,8 @@ fn test_vector_2() {
 fn test_nist_vector(filename: &str) {
     use self::serialize::hex::{FromHex};
     use std::path::Path;
-    use std::io::BufferedReader;
-    use std::io::File;
+    use std::old_io::BufferedReader;
+    use std::old_io::File;
 
     let p = &Path::new(filename);
     let mut r = BufferedReader::new(File::open(p).unwrap());
