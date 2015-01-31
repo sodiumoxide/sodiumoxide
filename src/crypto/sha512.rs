@@ -8,7 +8,7 @@ inspire satisfactory levels of confidence. One can hope that NIST's
 SHA-3 competition will improve the situation.
 */
 #[cfg(test)]
-extern crate serialize;
+extern crate "rustc-serialize" as rustc_serialize;
 use ffi::{crypto_hash_sha512, crypto_hash_sha512_BYTES};
 use libc::c_ulonglong;
 
@@ -35,7 +35,7 @@ fn test_vector_1() {
 
 #[cfg(test)]
 fn test_nist_vector(filename: &str) {
-    use self::serialize::hex::{FromHex};
+    use self::rustc_serialize::hex::{FromHex};
     use std::path::Path;
     use std::old_io::BufferedReader;
     use std::old_io::File;

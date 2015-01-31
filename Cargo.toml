@@ -12,3 +12,6 @@ license = "MIT"
 [dependencies.libsodium-sys]
 version = "*"
 path = "libsodium-sys"
+
+[dev-dependencies.rustc-serialize]
+rustc-serialize = "0.2.10"
