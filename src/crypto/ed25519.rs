@@ -264,8 +264,8 @@ fn test_vectors() {
     // test vectors from the Python implementation
     // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
     use self::serialize::hex::{FromHex, ToHex};
-    use std::io::BufferedReader;
-    use std::io::File;
+    use std::old_io::BufferedReader;
+    use std::old_io::File;
     use std::path::Path;
 
     let p = &Path::new("testvectors/ed25519.input");
@@ -301,8 +301,8 @@ fn test_vectors_detached() {
     // test vectors from the Python implementation
     // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
     use self::serialize::hex::{FromHex, ToHex};
-    use std::io::BufferedReader;
-    use std::io::File;
+    use std::old_io::BufferedReader;
+    use std::old_io::File;
     use std::path::Path;
 
     let p = &Path::new("testvectors/ed25519.input");
