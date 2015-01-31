@@ -1,5 +1,5 @@
 #![allow(non_upper_case_globals)]
-#![allow(unstable)]
+#![feature(libc)]
 
 extern crate libc;
 use libc::{c_int, c_ulonglong, c_char, size_t};
