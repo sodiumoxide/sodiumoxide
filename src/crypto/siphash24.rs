@@ -155,7 +155,7 @@ mod bench {
         }).collect();
         b.iter(|| {
             for m in ms.iter() {
-                shorthash(m.as_slice(), &k);
+                shorthash(m, &k);
             }
         });
     }

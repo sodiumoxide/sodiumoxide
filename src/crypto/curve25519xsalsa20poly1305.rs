@@ -214,8 +214,8 @@ fn test_seal_open() {
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
         let n = gen_nonce();
-        let c = seal(m.as_slice(), &n, &pk1, &sk2);
-        let opened = open(c.as_slice(), &n, &pk2, &sk1);
+        let c = seal(&m, &n, &pk1, &sk2);
+        let opened = open(&c, &n, &pk2, &sk1);
         assert!(Some(m) == opened);
     }
 }
@@ -233,8 +233,8 @@ fn test_seal_open_precomputed() {
         assert!(k1buf == k2buf);
         let m = randombytes(i);
         let n = gen_nonce();
-        let c = seal_precomputed(m.as_slice(), &n, &k1);
-        let opened = open_precomputed(c.as_slice(), &n, &k2);
+        let c = seal_precomputed(&m, &n, &k1);
+        let opened = open_precomputed(&c, &n, &k2);
         assert!(Some(m) == opened);
     }
 }
@@ -247,7 +247,7 @@ fn test_seal_open_tamper() {
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
         let n = gen_nonce();
-        let mut cv = seal(m.as_slice(), &n, &pk1, &sk2);
+        let mut cv = seal(&m, &n, &pk1, &sk2);
         let c = cv.as_mut_slice();
         for j in (0..c.len()) {
             c[j] ^= 0x20;
@@ -267,7 +267,7 @@ fn test_seal_open_precomputed_tamper() {
         let k2 = precompute(&pk2, &sk1);
         let m = randombytes(i);
         let n = gen_nonce();
-        let mut cv = seal_precomputed(m.as_slice(), &n, &k1);
+        let mut cv = seal_precomputed(&m, &n, &k1);
         let c = cv.as_mut_slice();
         for j in (0..c.len()) {
             c[j] ^= 0x20;
@@ -409,7 +409,7 @@ mod bench {
         }).collect();
         b.iter(|| {
             for m in ms.iter() {
-                open(seal(m.as_slice(), &n, &pk, &sk).as_slice(), &n, &pk, &sk).unwrap();
+                open(&seal(m, &n, &pk, &sk), &n, &pk, &sk).unwrap();
             }
         });
     }

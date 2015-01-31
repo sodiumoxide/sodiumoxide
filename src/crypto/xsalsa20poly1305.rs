@@ -115,8 +115,8 @@ fn test_seal_open() {
         let k = gen_key();
         let m = randombytes(i);
         let n = gen_nonce();
-        let c = seal(m.as_slice(), &n, &k);
-        let opened = open(c.as_slice(), &n, &k);
+        let c = seal(&m, &n, &k);
+        let opened = open(&c, &n, &k);
         assert!(Some(m) == opened);
     }
 }
@@ -128,7 +128,7 @@ fn test_seal_open_tamper() {
         let k = gen_key();
         let m = randombytes(i);
         let n = gen_nonce();
-        let mut cv = seal(m.as_slice(), &n, &k);
+        let mut cv = seal(&m, &n, &k);
         let c = cv.as_mut_slice();
         for i in (0..c.len()) {
             c[i] ^= 0x20;
@@ -184,9 +184,9 @@ fn test_vector_1() {
                       ,0x79,0x73,0xf6,0x22,0xa4,0x3d,0x14,0xa6
                       ,0x59,0x9b,0x1f,0x65,0x4c,0xb4,0x5a,0x74
                       ,0xe3,0x55,0xa5];
-    let c = seal(m.as_slice(), &nonce, &firstkey);
+    let c = seal(&m, &nonce, &firstkey);
     assert!(c == c_expected);
-    let m2 = open(c.as_slice(), &nonce, &firstkey);
+    let m2 = open(&c, &nonce, &firstkey);
     assert!(Some(m) == m2);
 }
 
@@ -208,7 +208,7 @@ mod bench {
         }).collect();
         b.iter(|| {
             for m in ms.iter() {
-                open(seal(m.as_slice(), &n, &k).as_slice(), &n, &k).unwrap();
+                open(&seal(&m, &n, &k), &n, &k).unwrap();
             }
         });
     }

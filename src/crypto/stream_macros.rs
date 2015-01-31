@@ -122,8 +122,8 @@ fn test_encrypt_decrypt() {
         let k = gen_key();
         let n = gen_nonce();
         let m = randombytes(i);
-        let c = stream_xor(m.as_slice(), &n, &k);
-        let m2 = stream_xor(c.as_slice(), &n, &k);
+        let c = stream_xor(&m, &n, &k);
+        let m2 = stream_xor(&c, &n, &k);
         assert!(m == m2);
     }
 }
@@ -140,7 +140,7 @@ fn test_stream_xor() {
         for (e, v) in c.iter_mut().zip(s.iter()) {
             *e ^= *v;
         }
-        let c2 = stream_xor(m.as_slice(), &n, &k);
+        let c2 = stream_xor(&m, &n, &k);
         assert!(c == c2);
     }
 }

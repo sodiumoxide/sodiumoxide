@@ -39,7 +39,7 @@ mod bench {
         }).collect();
         b.iter(|| {
             for m in ms.iter() {
-                hash(m.as_slice());
+                hash(&m);
             }
         });
     }

@@ -60,7 +60,7 @@ fn test_nist_vector(filename: &str) {
             Err(_) => break,
             Ok(line) => line
         };
-        if line.as_slice().starts_with("Len = ") {
+        if line.starts_with("Len = ") {
             let s = &line[6..];
             let len: usize = s.trim().parse().unwrap();
             let line2 = r.read_line().unwrap();
@@ -69,7 +69,7 @@ fn test_nist_vector(filename: &str) {
             let line3 = r.read_line().unwrap();
             let md = line3[5..].from_hex().unwrap();
             let Digest(digest) = hash(msg);
-            assert!(digest.as_slice() == md.as_slice());
+            assert!(digest == md);
         }
     }
 }
