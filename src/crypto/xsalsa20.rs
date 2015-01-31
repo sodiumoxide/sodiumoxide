@@ -11,6 +11,7 @@ use ffi::{crypto_stream_xsalsa20,
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use std::iter::repeat;
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
 
 stream_module!(crypto_stream_xsalsa20,

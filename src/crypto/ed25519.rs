@@ -10,6 +10,7 @@ use ffi;
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
 use std::iter::repeat;
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
@@ -291,7 +292,7 @@ fn test_vectors() {
         let m = x2.from_hex().unwrap();
         let sm = sign(m.as_slice(), &sk);
         verify(sm.as_slice(), &pk).unwrap();
-        assert!(x1 == pk.as_slice().to_hex().as_slice());
+        assert!(x1 == pk[].to_hex().as_slice());
         assert!(x3 == sm.as_slice().to_hex().as_slice());
     }
 }
@@ -328,8 +329,8 @@ fn test_vectors_detached() {
         let m = x2.from_hex().unwrap();
         let sig = sign_detached(m.as_slice(), &sk);
         assert!(verify_detached(&sig, m.as_slice(), &pk));
-        assert!(x1 == pk.as_slice().to_hex().as_slice());
-        let sm = sig.as_slice().to_hex() + x2; // x2 is m hex encoded
+        assert!(x1 == pk[].to_hex().as_slice());
+        let sm = sig[].to_hex() + x2; // x2 is m hex encoded
         assert!(x3 == sm);
     }
 }

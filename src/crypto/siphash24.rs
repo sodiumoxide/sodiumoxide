@@ -5,6 +5,7 @@
 use ffi;
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
 
 pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
