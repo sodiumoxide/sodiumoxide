@@ -7,7 +7,7 @@
 #![feature(std_misc)]
 
 extern crate libc;
-use libc::{c_int, c_ulonglong, c_char, c_uchar, size_t};
+use libc::{c_int, c_ulonglong, c_char, size_t};
 
 // aead
 pub const crypto_aead_chacha20poly1305_KEYBYTES: usize = 32;
@@ -240,21 +240,21 @@ extern {
     pub fn crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive() -> size_t;
     pub fn crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive() -> size_t;
     pub fn crypto_pwhash_scryptsalsa208sha256(
-        out: *mut c_uchar,
+        out: *mut u8,
         outlen: c_ulonglong,
         passwd: *const c_char,
         passwdlen: c_ulonglong,
-        salt: *const c_uchar,
+        salt: *const [u8; crypto_pwhash_scryptsalsa208sha256_SALTBYTES],
         opslimit: c_ulonglong,
         memlimit: size_t) -> c_int;
     pub fn crypto_pwhash_scryptsalsa208sha256_str(
-        out: *mut c_char,
+        out: *mut [c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES],
         passwd: *const c_char,
         passwdlen: c_ulonglong,
         opslimit: c_ulonglong,
         memlimit: size_t) -> c_int;
     pub fn crypto_pwhash_scryptsalsa208sha256_str_verify(
-        str_: *const c_char,
+        str_: *const [c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES],
         passwd: *const c_char,
         passwdlen: c_ulonglong) -> c_int;
     pub fn crypto_pwhash_scryptsalsa208sha256_ll(
@@ -678,7 +678,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_str() {
         [0 as c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES];
     let ret_hash = unsafe {
         crypto_pwhash_scryptsalsa208sha256_str(
-            hashed_password.as_mut_ptr(),
+            &mut hashed_password,
             password.as_ptr() as *const c_char,
             password.len() as c_ulonglong,
             crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE
@@ -689,7 +689,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_str() {
     assert!(ret_hash == 0);
     let ret_verify = unsafe {
         crypto_pwhash_scryptsalsa208sha256_str_verify(
-            hashed_password.as_ptr(),
+            &hashed_password,
             password.as_ptr() as *const c_char,
             password.len() as c_ulonglong)
     };
