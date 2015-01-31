@@ -5,7 +5,7 @@ standard notion of unforgeability for a public-key signature scheme under
 chosen-message attacks.
 */
 #[cfg(test)]
-extern crate serialize;
+extern crate "rustc-serialize" as rustc_serialize;
 use ffi;
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
@@ -263,7 +263,7 @@ fn test_sign_verify_tamper_seed() {
 fn test_vectors() {
     // test vectors from the Python implementation
     // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-    use self::serialize::hex::{FromHex, ToHex};
+    use self::rustc_serialize::hex::{FromHex, ToHex};
     use std::old_io::BufferedReader;
     use std::old_io::File;
     use std::path::Path;
@@ -300,7 +300,7 @@ fn test_vectors() {
 fn test_vectors_detached() {
     // test vectors from the Python implementation
     // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-    use self::serialize::hex::{FromHex, ToHex};
+    use self::rustc_serialize::hex::{FromHex, ToHex};
     use std::old_io::BufferedReader;
     use std::old_io::File;
     use std::path::Path;
