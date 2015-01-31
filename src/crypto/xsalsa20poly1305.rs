@@ -8,6 +8,7 @@ authenticity.
 */
 use ffi;
 use std::intrinsics::volatile_set_memory;
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use utils::marshal;
 use randombytes::randombytes_into;
 

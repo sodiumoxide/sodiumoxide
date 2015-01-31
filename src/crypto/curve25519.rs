@@ -6,6 +6,7 @@ This function is conjectured to be strong. For background see Bernstein,
 Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 */
 
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use ffi;
 
 pub const BYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES;
