@@ -9,6 +9,7 @@ use ffi::{crypto_auth_hmacsha256,
 };
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
 use crypto::verify::verify_32;
 
