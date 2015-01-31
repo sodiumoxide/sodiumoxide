@@ -1,5 +1,10 @@
 #![allow(non_upper_case_globals)]
-#![feature(libc)]
+#![feature(libc, std_misc)]
+/* workaround: the rust compiler doesn't recognize
+   the feature std_misc yet, still it warns
+   about using it */
+#![allow(unused_features)]
+#![feature(std_misc)]
 
 extern crate libc;
 use libc::{c_int, c_ulonglong, c_char, size_t};
