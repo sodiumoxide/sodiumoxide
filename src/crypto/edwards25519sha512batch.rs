@@ -99,8 +99,8 @@ fn test_sign_verify() {
     for i in (0..256us) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let sm = sign(m.as_slice(), &sk);
-        let m2 = verify(sm.as_slice(), &pk);
+        let sm = sign(&m, &sk);
+        let m2 = verify(&sm, &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -111,7 +111,7 @@ fn test_sign_verify_tamper() {
     for i in (0..32us) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let mut smv = sign(m.as_slice(), &sk);
+        let mut smv = sign(&m, &sk);
         let sm = smv.as_mut_slice();
         for j in (0..sm.len()) {
             sm[j] ^= 0x20;
@@ -138,7 +138,7 @@ mod bench {
         }).collect();
         b.iter(|| {
             for m in ms.iter() {
-                sign(m.as_slice(), &sk);
+                sign(m, &sk);
             }
         });
     }
@@ -148,11 +148,11 @@ mod bench {
         let (pk, sk) = gen_keypair();
         let sms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
             let m = randombytes(*s);
-            sign(m.as_slice(), &sk)
+            sign(&m, &sk)
         }).collect();
         b.iter(|| {
             for sm in sms.iter() {
-                verify(sm.as_slice(), &pk);
+                verify(sm, &pk);
             }
         });
     }

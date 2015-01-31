@@ -178,8 +178,8 @@ fn test_sign_verify() {
     for i in (0..256us) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let sm = sign(m.as_slice(), &sk);
-        let m2 = verify(sm.as_slice(), &pk);
+        let sm = sign(&m, &sk);
+        let m2 = verify(&sm, &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -190,7 +190,7 @@ fn test_sign_verify_tamper() {
     for i in (0..32us) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let mut smv = sign(m.as_slice(), &sk);
+        let mut smv = sign(&m, &sk);
         let sm = smv.as_mut_slice();
         for j in (0..sm.len()) {
             sm[j] ^= 0x20;
@@ -206,8 +206,8 @@ fn test_sign_verify_detached() {
     for i in (0..256us) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let sig = sign_detached(m.as_slice(), &sk);
-        assert!(verify_detached(&sig, m.as_slice(), &pk));
+        let sig = sign_detached(&m, &sk);
+        assert!(verify_detached(&sig, &m, &pk));
     }
 }
 
@@ -217,10 +217,10 @@ fn test_sign_verify_detached_tamper() {
     for i in (0..32us) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let Signature(mut sig) = sign_detached(m.as_slice(), &sk);
+        let Signature(mut sig) = sign_detached(&m, &sk);
         for j in (0..SIGNATUREBYTES) {
             sig[j] ^= 0x20;
-            assert!(!verify_detached(&Signature(sig), m.as_slice(), &pk));
+            assert!(!verify_detached(&Signature(sig), &m, &pk));
             sig[j] ^= 0x20;
         }
     }
@@ -235,8 +235,8 @@ fn test_sign_verify_seed() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);
-        let sm = sign(m.as_slice(), &sk);
-        let m2 = verify(sm.as_slice(), &pk);
+        let sm = sign(&m, &sk);
+        let m2 = verify(&sm, &pk);
         assert!(Some(m) == m2);
     }
 }
@@ -250,7 +250,7 @@ fn test_sign_verify_tamper_seed() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);
-        let mut smv = sign(m.as_slice(), &sk);
+        let mut smv = sign(&m, &sk);
         let sm = smv.as_mut_slice();
         for j in (0..sm.len()) {
             sm[j] ^= 0x20;
@@ -276,7 +276,7 @@ fn test_vectors() {
             Err(_) => break,
             Ok(line) => line
         };
-        let mut x = line.as_slice().split(':');
+        let mut x = line.split(':');
         let x0 = x.next().unwrap();
         let x1 = x.next().unwrap();
         let x2 = x.next().unwrap();
@@ -290,10 +290,10 @@ fn test_vectors() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = x2.from_hex().unwrap();
-        let sm = sign(m.as_slice(), &sk);
-        verify(sm.as_slice(), &pk).unwrap();
-        assert!(x1 == pk[].to_hex().as_slice());
-        assert!(x3 == sm.as_slice().to_hex().as_slice());
+        let sm = sign(&m, &sk);
+        verify(&sm, &pk).unwrap();
+        assert!(x1 == pk[].to_hex());
+        assert!(x3 == sm.to_hex());
     }
 }
 
@@ -313,7 +313,7 @@ fn test_vectors_detached() {
             Err(_) => break,
             Ok(line) => line
         };
-        let mut x = line.as_slice().split(':');
+        let mut x = line.split(':');
         let x0 = x.next().unwrap();
         let x1 = x.next().unwrap();
         let x2 = x.next().unwrap();
@@ -327,9 +327,9 @@ fn test_vectors_detached() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = x2.from_hex().unwrap();
-        let sig = sign_detached(m.as_slice(), &sk);
-        assert!(verify_detached(&sig, m.as_slice(), &pk));
-        assert!(x1 == pk[].to_hex().as_slice());
+        let sig = sign_detached(&m, &sk);
+        assert!(verify_detached(&sig, &m, &pk));
+        assert!(x1 == pk[].to_hex());
         let sm = sig[].to_hex() + x2; // x2 is m hex encoded
         assert!(x3 == sm);
     }
@@ -352,7 +352,7 @@ mod bench {
         }).collect();
         b.iter(|| {
             for m in ms.iter() {
-                sign(m.as_slice(), &sk);
+                sign(m, &sk);
             }
         });
     }
@@ -362,11 +362,11 @@ mod bench {
         let (pk, sk) = gen_keypair();
         let sms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
             let m = randombytes(*s);
-            sign(m.as_slice(), &sk)
+            sign(&m, &sk)
         }).collect();
         b.iter(|| {
             for sm in sms.iter() {
-                verify(sm.as_slice(), &pk);
+                verify(sm, &pk);
             }
         });
     }

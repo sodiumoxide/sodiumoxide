@@ -89,8 +89,8 @@ fn test_auth_verify() {
     for i in (0..256us) {
         let k = gen_key();
         let m = randombytes(i);
-        let tag = authenticate(m.as_slice(), &k);
-        assert!(verify(&tag, m.as_slice(), &k));
+        let tag = authenticate(&m, &k);
+        assert!(verify(&tag, &m, &k));
     }
 }
 
@@ -101,10 +101,10 @@ fn test_auth_verify_tamper() {
         let k = gen_key();
         let mut mv = randombytes(i);
         let m = mv.as_mut_slice();
-        let Tag(mut tagbuf) = authenticate(m.as_slice(), &k);
+        let Tag(mut tagbuf) = authenticate(&m, &k);
         for j in (0..m.len()) {
             m[j] ^= 0x20;
-            assert!(!verify(&Tag(tagbuf), m.as_slice(), &k));
+            assert!(!verify(&Tag(tagbuf), &m, &k));
             m[j] ^= 0x20;
         }
         for j in (0..tagbuf.len()) {
@@ -132,7 +132,7 @@ mod bench {
         }).collect();
         b.iter(|| {
             for m in ms.iter() {
-                authenticate(m.as_slice(), &k);
+                authenticate(&m, &k);
             }
         });
     }
@@ -144,11 +144,11 @@ mod bench {
             randombytes(*s)
         }).collect();
         let tags: Vec<Tag> = ms.iter().map(|m| {
-            authenticate(m.as_slice(), &k)
+            authenticate(&m, &k)
         }).collect();
         b.iter(|| {
             for (m, t) in ms.iter().zip(tags.iter()) {
-                verify(t, m.as_slice(), &k);
+                verify(t, &m, &k);
             }
         });
     }
