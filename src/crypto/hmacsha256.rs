@@ -7,10 +7,6 @@ use ffi::{crypto_auth_hmacsha256,
           crypto_auth_hmacsha256_KEYBYTES,
           crypto_auth_hmacsha256_BYTES
 };
-use libc::c_ulonglong;
-use std::intrinsics::volatile_set_memory;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
-use randombytes::randombytes_into;
 use crypto::verify::verify_32;
 
 auth_module!(crypto_auth_hmacsha256,

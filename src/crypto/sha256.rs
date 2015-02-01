@@ -9,9 +9,7 @@ SHA-3 competition will improve the situation.
 */
 #[cfg(test)]
 extern crate "rustc-serialize" as rustc_serialize;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use ffi::{crypto_hash_sha256, crypto_hash_sha256_BYTES};
-use libc::c_ulonglong;
 
 hash_module!(crypto_hash_sha256,
              crypto_hash_sha256_BYTES,
