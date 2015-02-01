@@ -1,5 +1,8 @@
 macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
 
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
+use libc::c_ulonglong;
+
 pub const HASHBYTES: usize = $hashbytes;
 pub const BLOCKBYTES: usize = $blockbytes;
 

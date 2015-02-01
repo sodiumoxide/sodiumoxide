@@ -8,10 +8,6 @@ use ffi::{crypto_onetimeauth_poly1305,
           crypto_onetimeauth_poly1305_verify,
           crypto_onetimeauth_poly1305_KEYBYTES,
            crypto_onetimeauth_poly1305_BYTES};
-use libc::c_ulonglong;
-use std::intrinsics::volatile_set_memory;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
-use randombytes::randombytes_into;
 use crypto::verify::verify_16;
 
 auth_module!(crypto_onetimeauth_poly1305,

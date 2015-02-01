@@ -3,6 +3,12 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
+use libc::c_ulonglong;
+use std::intrinsics::volatile_set_memory;
+use std::iter::repeat;
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
+use randombytes::randombytes_into;
+
 pub const KEYBYTES: usize = $keybytes;
 pub const NONCEBYTES: usize = $noncebytes;
 
