@@ -1,5 +1,3 @@
-
 fn main () {
-  // dummy
-  println!("cargo:rustc-flags=-l sodium");
+    println!("cargo:rustc-flags=-l sodium");
 }
