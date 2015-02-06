@@ -267,7 +267,6 @@ fn test_vectors() {
     use self::rustc_serialize::hex::{FromHex, ToHex};
     use std::old_io::BufferedReader;
     use std::old_io::File;
-    use std::path::Path;
 
     let p = &Path::new("testvectors/ed25519.input");
     let mut r = BufferedReader::new(File::open(p).unwrap());
@@ -304,7 +303,6 @@ fn test_vectors_detached() {
     use self::rustc_serialize::hex::{FromHex, ToHex};
     use std::old_io::BufferedReader;
     use std::old_io::File;
-    use std::path::Path;
 
     let p = &Path::new("testvectors/ed25519.input");
     let mut r = BufferedReader::new(File::open(p).unwrap());
