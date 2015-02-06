@@ -35,7 +35,6 @@ fn test_vector_1() {
 #[cfg(test)]
 fn test_nist_vector(filename: &str) {
     use self::rustc_serialize::hex::{FromHex};
-    use std::path::Path;
     use std::old_io::BufferedReader;
     use std::old_io::File;
 
