@@ -79,12 +79,31 @@ pub const crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE: usize =
     1073741824;
 
 // hash
+// crypto_hash.h
 pub const crypto_hash_BYTES: usize = crypto_hash_sha512_BYTES;
 pub const crypto_hash_PRIMITIVE: &'static str = "sha512";
 
+// crypto_hash_sha256.h
+#[repr(C)]
+#[derive(Copy)]
+pub struct crypto_hash_sha256_state {
+    state: [u32; 8],
+    count: [u32; 2],
+    buf: [u8; 64],
+}
 pub const crypto_hash_sha256_BYTES: usize =  32;
 
+// crypto_hash_sha512.h
+#[repr(C)]
+#[derive(Copy)]
+pub struct crypto_hash_sha512_state {
+    state: [u64; 8],
+    count: [u64; 2],
+    buf: [u8; 128],
+}
 pub const crypto_hash_sha512_BYTES: usize = 64;
+
+
 
 // box
 pub const crypto_box_curve25519xsalsa20poly1305_SEEDBYTES: usize = 32;
@@ -354,16 +373,31 @@ extern {
                        mlen: c_ulonglong) -> c_int;
     pub fn crypto_hash_primitive() -> *const c_char;
     
+    // crypto_hash_sha256.h
+    pub fn crypto_hash_sha256_bytes() -> size_t;
     pub fn crypto_hash_sha256(h: *mut [u8; crypto_hash_sha256_BYTES],
                               m: *const u8,
                               mlen: c_ulonglong) -> c_int;
-    pub fn crypto_hash_sha256_bytes() -> size_t;
-    
+    pub fn crypto_hash_sha256_init(state: *mut crypto_hash_sha256_state) -> c_int;
+    pub fn crypto_hash_sha256_update(state: *mut crypto_hash_sha256_state,
+                                     m: *const u8,
+                                     mlen: c_ulonglong) -> c_int;
+    pub fn crypto_hash_sha256_final(state: *mut crypto_hash_sha256_state,
+                                    h: *mut [u8; crypto_hash_sha256_BYTES]) -> c_int;
+
+    // crypto_hash_sha512.h
+    pub fn crypto_hash_sha512_bytes() -> size_t;    
     pub fn crypto_hash_sha512(h: *mut [u8; crypto_hash_sha512_BYTES],
                               m: *const u8,
                               mlen: c_ulonglong) -> c_int;
-    pub fn crypto_hash_sha512_bytes() -> size_t;
-    
+    pub fn crypto_hash_sha512_init(state: *mut crypto_hash_sha512_state) -> c_int;
+    pub fn crypto_hash_sha512_update(state: *mut crypto_hash_sha512_state,
+                                     m: *const u8,
+                                     mlen: c_ulonglong) -> c_int;
+    pub fn crypto_hash_sha512_final(state: *mut crypto_hash_sha512_state,
+                                    h: *mut [u8; crypto_hash_sha512_BYTES]) -> c_int;
+
+
     // scalarmult
     pub fn crypto_scalarmult_curve25519(
         q: *mut [u8; crypto_scalarmult_curve25519_BYTES],
@@ -845,6 +879,7 @@ fn test_crypto_hash_sha512_bytes() {
     assert!(unsafe { crypto_hash_sha512_bytes() as usize } ==
             crypto_hash_sha512_BYTES)
 }
+
 
 // stream
 #[test]
