@@ -96,7 +96,7 @@ pub fn verify(sm: &[u8],
 #[test]
 fn test_sign_verify() {
     use randombytes::randombytes;
-    for i in (0..256us) {
+    for i in (0..256usize) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
         let sm = sign(&m, &sk);
@@ -108,7 +108,7 @@ fn test_sign_verify() {
 #[test]
 fn test_sign_verify_tamper() {
     use randombytes::randombytes;
-    for i in (0..32us) {
+    for i in (0..32usize) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
         let mut smv = sign(&m, &sk);

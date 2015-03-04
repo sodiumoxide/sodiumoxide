@@ -42,7 +42,7 @@ pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
 fn test_verify_16() {
     use randombytes::randombytes_into;
 
-    for _ in (0us..256) {
+    for _ in (0usize..256) {
         let mut x = [0; 16];
         let mut y = [0; 16];
         assert!(verify_16(&x, &y));
@@ -60,7 +60,7 @@ fn test_verify_16() {
 fn test_verify_32() {
     use randombytes::randombytes_into;
 
-    for _ in (0us..256) {
+    for _ in (0usize..256) {
         let mut x = [0; 32];
         let mut y = [0; 32];
         assert!(verify_32(&x, &y));

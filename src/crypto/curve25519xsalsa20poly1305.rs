@@ -209,7 +209,7 @@ pub fn open_precomputed(c: &[u8],
 #[test]
 fn test_seal_open() {
     use randombytes::randombytes;
-    for i in (0..256us) {
+    for i in (0..256usize) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
@@ -223,7 +223,7 @@ fn test_seal_open() {
 #[test]
 fn test_seal_open_precomputed() {
     use randombytes::randombytes;
-    for i in (0..256us) {
+    for i in (0..256usize) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
@@ -242,7 +242,7 @@ fn test_seal_open_precomputed() {
 #[test]
 fn test_seal_open_tamper() {
     use randombytes::randombytes;
-    for i in (0..32us) {
+    for i in (0..32usize) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
@@ -260,7 +260,7 @@ fn test_seal_open_tamper() {
 #[test]
 fn test_seal_open_precomputed_tamper() {
     use randombytes::randombytes;
-    for i in (0..32us) {
+    for i in (0..32usize) {
         let (pk1, sk1) = gen_keypair();
         let (pk2, sk2) = gen_keypair();
         let k1 = precompute(&pk1, &sk2);
