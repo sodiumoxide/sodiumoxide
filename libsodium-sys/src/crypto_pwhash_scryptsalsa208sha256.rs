@@ -94,7 +94,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive() {
 fn test_crypto_pwhash_scryptsalsa208sha256_strprefix() {
     unsafe {
          let s = crypto_pwhash_scryptsalsa208sha256_strprefix();
-         let s = std::ffi::c_str_to_bytes(&s);
+         let s = std::ffi::CStr::from_ptr(s).to_bytes();
         assert!(s ==
                 crypto_pwhash_scryptsalsa208sha256_STRPREFIX.as_bytes());
     }

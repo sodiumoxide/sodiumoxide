@@ -21,7 +21,7 @@ fn test_crypto_hash_bytes() {
 fn test_crypto_hash_primitive() {
     unsafe {
         let s = crypto_hash_primitive();
-        let s = std::ffi::c_str_to_bytes(&s);
+        let s = std::ffi::CStr::from_ptr(s).to_bytes();
         assert!(s == crypto_hash_PRIMITIVE.as_bytes());
     }
 }

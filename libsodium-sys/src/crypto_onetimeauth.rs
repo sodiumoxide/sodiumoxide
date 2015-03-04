@@ -28,7 +28,7 @@ fn test_crypto_onetimeauth_keybytes() {
 fn test_crypto_onetimeauth_primitive() {
     unsafe {
         let s = crypto_onetimeauth_primitive();
-        let s = std::ffi::c_str_to_bytes(&s);
+        let s = std::ffi::CStr::from_ptr(s).to_bytes();
         assert!(s == crypto_onetimeauth_PRIMITIVE.as_bytes());
     }
 }
