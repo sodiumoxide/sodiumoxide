@@ -111,7 +111,7 @@ pub fn open(c: &[u8],
 #[test]
 fn test_seal_open() {
     use randombytes::randombytes;
-    for i in (0..256us) {
+    for i in (0..256usize) {
         let k = gen_key();
         let m = randombytes(i);
         let n = gen_nonce();
@@ -124,7 +124,7 @@ fn test_seal_open() {
 #[test]
 fn test_seal_open_tamper() {
     use randombytes::randombytes;
-    for i in (0..32us) {
+    for i in (0..32usize) {
         let k = gen_key();
         let m = randombytes(i);
         let n = gen_nonce();
