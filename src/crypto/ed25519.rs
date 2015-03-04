@@ -175,7 +175,7 @@ pub fn verify_detached(&Signature(sig): &Signature,
 #[test]
 fn test_sign_verify() {
     use randombytes::randombytes;
-    for i in (0..256us) {
+    for i in (0..256usize) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
         let sm = sign(&m, &sk);
@@ -187,7 +187,7 @@ fn test_sign_verify() {
 #[test]
 fn test_sign_verify_tamper() {
     use randombytes::randombytes;
-    for i in (0..32us) {
+    for i in (0..32usize) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
         let mut smv = sign(&m, &sk);
@@ -203,7 +203,7 @@ fn test_sign_verify_tamper() {
 #[test]
 fn test_sign_verify_detached() {
     use randombytes::randombytes;
-    for i in (0..256us) {
+    for i in (0..256usize) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
         let sig = sign_detached(&m, &sk);
@@ -214,7 +214,7 @@ fn test_sign_verify_detached() {
 #[test]
 fn test_sign_verify_detached_tamper() {
     use randombytes::randombytes;
-    for i in (0..32us) {
+    for i in (0..32usize) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
         let Signature(mut sig) = sign_detached(&m, &sk);
@@ -229,7 +229,7 @@ fn test_sign_verify_detached_tamper() {
 #[test]
 fn test_sign_verify_seed() {
     use randombytes::{randombytes, randombytes_into};
-    for i in (0..256us) {
+    for i in (0..256usize) {
         let mut seedbuf = [0; 32];
         randombytes_into(&mut seedbuf);
         let seed = Seed(seedbuf);
@@ -244,7 +244,7 @@ fn test_sign_verify_seed() {
 #[test]
 fn test_sign_verify_tamper_seed() {
     use randombytes::{randombytes, randombytes_into};
-    for i in (0..32us) {
+    for i in (0..32usize) {
         let mut seedbuf = [0; 32];
         randombytes_into(&mut seedbuf);
         let seed = Seed(seedbuf);
@@ -291,7 +291,7 @@ fn test_vectors() {
         let m = x2.from_hex().unwrap();
         let sm = sign(&m, &sk);
         verify(&sm, &pk).unwrap();
-        assert!(x1 == pk[].to_hex());
+        assert!(x1 == pk[..].to_hex());
         assert!(x3 == sm.to_hex());
     }
 }
@@ -327,8 +327,8 @@ fn test_vectors_detached() {
         let m = x2.from_hex().unwrap();
         let sig = sign_detached(&m, &sk);
         assert!(verify_detached(&sig, &m, &pk));
-        assert!(x1 == pk[].to_hex());
-        let sm = sig[].to_hex() + x2; // x2 is m hex encoded
+        assert!(x1 == pk[..].to_hex());
+        let sm = sig[..].to_hex() + x2; // x2 is m hex encoded
         assert!(x3 == sm);
     }
 }

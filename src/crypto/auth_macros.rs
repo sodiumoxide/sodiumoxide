@@ -91,7 +91,7 @@ pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
 #[test]
 fn test_auth_verify() {
     use randombytes::randombytes;
-    for i in (0..256us) {
+    for i in (0..256usize) {
         let k = gen_key();
         let m = randombytes(i);
         let tag = authenticate(&m, &k);
@@ -102,7 +102,7 @@ fn test_auth_verify() {
 #[test]
 fn test_auth_verify_tamper() {
     use randombytes::randombytes;
-    for i in (0..32us) {
+    for i in (0..32usize) {
         let k = gen_key();
         let mut mv = randombytes(i);
         let m = mv.as_mut_slice();
