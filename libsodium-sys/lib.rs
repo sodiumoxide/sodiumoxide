@@ -1,5 +1,5 @@
 #![allow(non_upper_case_globals)]
-#![feature(libc, std_misc)]
+#![feature(std_misc)]
 /* workaround: the rust compiler doesn't recognize
    the feature std_misc yet, still it warns
    about using it */
