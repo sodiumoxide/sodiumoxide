@@ -48,14 +48,13 @@ fn test_vector_2() {
 fn test_nist_vector(filename: &str) {
     use self::rustc_serialize::hex::{FromHex};
     use std::fs::File;
-    use std::io::BufReader;
-    use std::io::BufRead;
+    use std::io::{BufRead, BufReader};
 
-    let mut file = BufReader::new(File::open(filename).unwrap());
+    let mut r = BufReader::new(File::open(filename).unwrap());
     let mut line = String::new();
     loop {
         line.clear();
-        file.read_line(&mut line).unwrap();
+        r.read_line(&mut line).unwrap();
         if line.len() == 0 {
             break;
         }
@@ -63,11 +62,11 @@ fn test_nist_vector(filename: &str) {
         if  starts_with_len {
             let len: usize = line[6..].trim().parse().unwrap();
             line.clear();
-            file.read_line(&mut line).unwrap();
+            r.read_line(&mut line).unwrap();
             let rawmsg = line[6..].from_hex().unwrap();
             let msg = &rawmsg[..len/8];
             line.clear();
-            file.read_line(&mut line).unwrap();
+            r.read_line(&mut line).unwrap();
             let md = line[5..].from_hex().unwrap();
             let Digest(digest) = hash(msg);
             assert!(digest == md);
