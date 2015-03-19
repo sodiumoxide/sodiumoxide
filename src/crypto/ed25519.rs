@@ -266,12 +266,11 @@ fn test_vectors() {
     // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
     use self::rustc_serialize::hex::{FromHex, ToHex};
     use std::fs::File;
-    use std::io::BufReader;
-    use std::io::BufReadExt;
+    use std::io::{BufRead, BufReader};
 
-    let file = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
-    for maybe_line in file.lines() {
-        let line = maybe_line.unwrap();
+    let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+    for mline in r.lines() {
+        let line = mline.unwrap();
         let mut x = line.split(':');
         let x0 = x.next().unwrap();
         let x1 = x.next().unwrap();
@@ -299,12 +298,11 @@ fn test_vectors_detached() {
     // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
     use self::rustc_serialize::hex::{FromHex, ToHex};
     use std::fs::File;
-    use std::io::BufReader;
-    use std::io::BufReadExt;
+    use std::io::{BufRead, BufReader};
 
-    let file = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
-    for maybe_line in file.lines() {
-        let line = maybe_line.unwrap();
+    let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+    for mline in r.lines() {
+        let line = mline.unwrap();
         let mut x = line.split(':');
         let x0 = x.next().unwrap();
         let x1 = x.next().unwrap();
