@@ -17,4 +17,4 @@ path = "libsodium-sys"
 libc = "*"
 
 [dev-dependencies.rustc-serialize]
-rustc-serialize = "0.2.11"
+rustc-serialize = "*"
