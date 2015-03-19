@@ -57,7 +57,7 @@ generation functions and the key-generation functions are thread-safe.
    the features old_io, old_path, and test yet, still it warns
    about using them */
 #![allow(unused_features)]
-#![feature(old_io, old_path, test)]
+#![feature(test)]
 
 extern crate "libsodium-sys" as ffi;
 extern crate libc;
