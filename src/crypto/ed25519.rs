@@ -265,16 +265,12 @@ fn test_vectors() {
     // test vectors from the Python implementation
     // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
     use self::rustc_serialize::hex::{FromHex, ToHex};
-    use std::old_io::BufferedReader;
-    use std::old_io::File;
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
 
-    let p = &Path::new("testvectors/ed25519.input");
-    let mut r = BufferedReader::new(File::open(p).unwrap());
-    loop {
-        let line = match r.read_line() {
-            Err(_) => break,
-            Ok(line) => line
-        };
+    let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+    for mline in r.lines() {
+        let line = mline.unwrap();
         let mut x = line.split(':');
         let x0 = x.next().unwrap();
         let x1 = x.next().unwrap();
@@ -301,16 +297,12 @@ fn test_vectors_detached() {
     // test vectors from the Python implementation
     // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
     use self::rustc_serialize::hex::{FromHex, ToHex};
-    use std::old_io::BufferedReader;
-    use std::old_io::File;
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
 
-    let p = &Path::new("testvectors/ed25519.input");
-    let mut r = BufferedReader::new(File::open(p).unwrap());
-    loop {
-        let line = match r.read_line() {
-            Err(_) => break,
-            Ok(line) => line
-        };
+    let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+    for mline in r.lines() {
+        let line = mline.unwrap();
         let mut x = line.split(':');
         let x0 = x.next().unwrap();
         let x1 = x.next().unwrap();

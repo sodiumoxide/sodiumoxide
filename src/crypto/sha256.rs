@@ -47,27 +47,30 @@ fn test_vector_2() {
 #[cfg(test)]
 fn test_nist_vector(filename: &str) {
     use self::rustc_serialize::hex::{FromHex};
-    use std::old_io::BufferedReader;
-    use std::old_io::File;
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
 
-    let p = &Path::new(filename);
-    let mut r = BufferedReader::new(File::open(p).unwrap());
+    let mut r = BufReader::new(File::open(filename).unwrap());
+    let mut line = String::new();
     loop {
-        let line = match r.read_line() {
-            Err(_) => break,
-            Ok(line) => line
-        };
-        if line.starts_with("Len = ") {
-            let s = &line[6..];
-            let len: usize = s.trim().parse().unwrap();
-            let line2 = r.read_line().unwrap();
-            let rawmsg = line2[6..].from_hex().unwrap();
+        line.clear();
+        r.read_line(&mut line).unwrap();
+        if line.len() == 0 {
+            break;
+        }
+        let starts_with_len = line.starts_with("Len = ");
+        if  starts_with_len {
+            let len: usize = line[6..].trim().parse().unwrap();
+            line.clear();
+            r.read_line(&mut line).unwrap();
+            let rawmsg = line[6..].from_hex().unwrap();
             let msg = &rawmsg[..len/8];
-            let line3 = r.read_line().unwrap();
-            let md = line3[5..].from_hex().unwrap();
+            line.clear();
+            r.read_line(&mut line).unwrap();
+            let md = line[5..].from_hex().unwrap();
             let Digest(digest) = hash(msg);
             assert!(digest == md);
-        }
+       }
     }
 }
 
