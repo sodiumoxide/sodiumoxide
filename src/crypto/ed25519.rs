@@ -5,7 +5,7 @@ standard notion of unforgeability for a public-key signature scheme under
 chosen-message attacks.
 */
 #[cfg(test)]
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 use ffi;
 use libc::c_ulonglong;
 use std::intrinsics::volatile_set_memory;

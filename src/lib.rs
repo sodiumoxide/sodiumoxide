@@ -59,7 +59,7 @@ generation functions and the key-generation functions are thread-safe.
 #![allow(unused_features)]
 #![feature(test)]
 
-extern crate "libsodium-sys" as ffi;
+extern crate libsodium_sys as ffi;
 extern crate libc;
 
 /**

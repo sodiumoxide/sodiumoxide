@@ -8,7 +8,7 @@ inspire satisfactory levels of confidence. One can hope that NIST's
 SHA-3 competition will improve the situation.
 */
 #[cfg(test)]
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 use ffi::{crypto_hash_sha512, crypto_hash_sha512_BYTES};
 
 hash_module!(crypto_hash_sha512,
