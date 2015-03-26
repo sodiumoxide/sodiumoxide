@@ -3,14 +3,14 @@ name = "libsodium-sys"
 description = "FFI binding to libsodium"
 repository = "https://github.com/dnaq/sodiumoxide.git"
 keywords = ["libsodium", "NaCl", "crypto"]
-version = "0.0.1"
+version = "0.0.2"
 authors = ["dnaq"]
 links = "sodium"
 build = "build.rs"
 license = "MIT"
 
 [lib]
-name = "libsodium-sys"
+name = "libsodium_sys"
 path = "lib.rs"
 
 [dependencies]
