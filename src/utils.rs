@@ -71,7 +71,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
      */
     impl Index<Range<usize>> for $newtype {
         type Output = [u8];
-        fn index(&self, _index: &Range<usize>) -> &[u8] {
+        fn index(&self, _index: Range<usize>) -> &[u8] {
             let &$newtype(ref b) = self;
             b.index(_index)
         }
@@ -86,7 +86,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
      */
     impl Index<RangeTo<usize>> for $newtype {
         type Output = [u8];
-        fn index(&self, _index: &RangeTo<usize>) -> &[u8] {
+        fn index(&self, _index: RangeTo<usize>) -> &[u8] {
             let &$newtype(ref b) = self;
             b.index(_index)
         }
@@ -101,7 +101,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
      */
     impl Index<RangeFrom<usize>> for $newtype {
         type Output = [u8];
-        fn index(&self, _index: &RangeFrom<usize>) -> &[u8] {
+        fn index(&self, _index: RangeFrom<usize>) -> &[u8] {
             let &$newtype(ref b) = self;
             b.index(_index)
         }
@@ -116,7 +116,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
      */
     impl Index<RangeFull> for $newtype {
         type Output = [u8];
-        fn index(&self, _index: &RangeFull) -> &[u8] {
+        fn index(&self, _index: RangeFull) -> &[u8] {
             let &$newtype(ref b) = self;
             b.index(_index)
         }
