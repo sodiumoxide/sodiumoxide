@@ -103,7 +103,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_strprefix() {
 fn test_crypto_pwhash_scryptsalsa208sha256_str() {
     let password = "Correct Horse Battery Staple";
     let mut hashed_password =
-        [0 as c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES];
+        [0; crypto_pwhash_scryptsalsa208sha256_STRBYTES];
     let ret_hash = unsafe {
         crypto_pwhash_scryptsalsa208sha256_str(
             &mut hashed_password,
