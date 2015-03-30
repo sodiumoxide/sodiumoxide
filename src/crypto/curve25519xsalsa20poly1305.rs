@@ -247,11 +247,10 @@ fn test_seal_open_tamper() {
         let (pk2, sk2) = gen_keypair();
         let m = randombytes(i);
         let n = gen_nonce();
-        let mut cv = seal(&m, &n, &pk1, &sk2);
-        let c = cv.as_mut_slice();
+        let mut c = seal(&m, &n, &pk1, &sk2);
         for j in (0..c.len()) {
             c[j] ^= 0x20;
-            assert!(None == open(c, &n, &pk2, &sk1));
+            assert!(None == open(&mut c, &n, &pk2, &sk1));
             c[j] ^= 0x20;
         }
     }
@@ -267,11 +266,10 @@ fn test_seal_open_precomputed_tamper() {
         let k2 = precompute(&pk2, &sk1);
         let m = randombytes(i);
         let n = gen_nonce();
-        let mut cv = seal_precomputed(&m, &n, &k1);
-        let c = cv.as_mut_slice();
+        let mut c = seal_precomputed(&m, &n, &k1);
         for j in (0..c.len()) {
             c[j] ^= 0x20;
-            assert!(None == open_precomputed(c, &n, &k2));
+            assert!(None == open_precomputed(&mut c, &n, &k2));
             c[j] ^= 0x20;
         }
     }

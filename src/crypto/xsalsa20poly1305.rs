@@ -128,11 +128,10 @@ fn test_seal_open_tamper() {
         let k = gen_key();
         let m = randombytes(i);
         let n = gen_nonce();
-        let mut cv = seal(&m, &n, &k);
-        let c = cv.as_mut_slice();
+        let mut c = seal(&m, &n, &k);
         for i in (0..c.len()) {
             c[i] ^= 0x20;
-            assert!(None == open(c, &n, &k));
+            assert!(None == open(&mut c, &n, &k));
             c[i] ^= 0x20;
         }
     }
