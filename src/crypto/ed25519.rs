@@ -190,11 +190,10 @@ fn test_sign_verify_tamper() {
     for i in (0..32usize) {
         let (pk, sk) = gen_keypair();
         let m = randombytes(i);
-        let mut smv = sign(&m, &sk);
-        let sm = smv.as_mut_slice();
+        let mut sm = sign(&m, &sk);
         for j in (0..sm.len()) {
             sm[j] ^= 0x20;
-            assert!(None == verify(sm, &pk));
+            assert!(None == verify(&mut sm, &pk));
             sm[j] ^= 0x20;
         }
     }
@@ -250,11 +249,10 @@ fn test_sign_verify_tamper_seed() {
         let seed = Seed(seedbuf);
         let (pk, sk) = keypair_from_seed(&seed);
         let m = randombytes(i);
-        let mut smv = sign(&m, &sk);
-        let sm = smv.as_mut_slice();
+        let mut sm = sign(&m, &sk);
         for j in (0..sm.len()) {
             sm[j] ^= 0x20;
-            assert!(None == verify(sm, &pk));
+            assert!(None == verify(&mut sm, &pk));
             sm[j] ^= 0x20;
         }
     }

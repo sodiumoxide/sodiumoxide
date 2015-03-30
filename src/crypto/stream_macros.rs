@@ -163,7 +163,7 @@ fn test_stream_xor_inplace() {
         for (e, v) in c.iter_mut().zip(s.iter()) {
             *e ^= *v;
         }
-        stream_xor_inplace(m.as_mut_slice(), &n, &k);
+        stream_xor_inplace(&mut m, &n, &k);
         assert!(c == m);
     }
 }

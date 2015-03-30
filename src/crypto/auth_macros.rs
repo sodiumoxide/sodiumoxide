@@ -104,17 +104,16 @@ fn test_auth_verify_tamper() {
     use randombytes::randombytes;
     for i in (0..32usize) {
         let k = gen_key();
-        let mut mv = randombytes(i);
-        let m = mv.as_mut_slice();
-        let Tag(mut tagbuf) = authenticate(&m, &k);
+        let mut m = randombytes(i);
+        let Tag(mut tagbuf) = authenticate(&mut m, &k);
         for j in (0..m.len()) {
             m[j] ^= 0x20;
-            assert!(!verify(&Tag(tagbuf), &m, &k));
+            assert!(!verify(&Tag(tagbuf), &mut m, &k));
             m[j] ^= 0x20;
         }
         for j in (0..tagbuf.len()) {
             tagbuf[j] ^= 0x20;
-            assert!(!verify(&Tag(tagbuf), m, &k));
+            assert!(!verify(&Tag(tagbuf), &mut m, &k));
             tagbuf[j] ^= 0x20;
         }
     }
