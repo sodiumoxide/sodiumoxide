@@ -1,7 +1,7 @@
 // crypto_auth_hmacsha512.h
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct crypto_auth_hmacsha512_state {
     ictx: crypto_hash_sha512_state,
     octx: crypto_hash_sha512_state,

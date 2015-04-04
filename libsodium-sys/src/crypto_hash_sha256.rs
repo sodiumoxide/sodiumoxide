@@ -7,6 +7,7 @@ pub struct crypto_hash_sha256_state {
     count: [u32; 2],
     buf: [u8; 64],
 }
+impl Clone for crypto_hash_sha256_state { fn clone(&self) -> crypto_hash_sha256_state { *self } }
 pub const crypto_hash_sha256_BYTES: usize =  32;
 
 
