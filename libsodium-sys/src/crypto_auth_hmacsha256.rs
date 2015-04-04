@@ -1,7 +1,7 @@
 // crypto_auth_hmacsha256.h
 
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Clone)]
 pub struct crypto_auth_hmacsha256_state {
     ictx: crypto_hash_sha256_state,
     octx: crypto_hash_sha256_state,
