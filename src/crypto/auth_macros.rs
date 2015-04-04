@@ -119,6 +119,7 @@ fn test_auth_verify_tamper() {
     }
 }
 
+#[cfg(feature="benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;

@@ -189,6 +189,7 @@ fn test_vector_1() {
     assert!(Some(m) == m2);
 }
 
+#[cfg(feature="benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;
