@@ -168,6 +168,7 @@ fn test_stream_xor_inplace() {
     }
 }
 
+#[cfg(feature="benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;

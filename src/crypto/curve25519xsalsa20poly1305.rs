@@ -389,6 +389,7 @@ fn test_vector_2() {
     assert!(m_pre == mexp);
 }
 
+#[cfg(feature="benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;

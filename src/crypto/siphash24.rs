@@ -138,6 +138,7 @@ fn test_vectors() {
     }
 }
 
+#[cfg(feature="benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;

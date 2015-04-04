@@ -15,3 +15,6 @@ libsodium-sys = "*"
 
 [dev-dependencies.rustc-serialize]
 rustc-serialize = "*"
+
+[features]
+benchmarks = []
