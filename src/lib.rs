@@ -51,13 +51,6 @@ generation functions and the key-generation functions are thread-safe.
 #![warn(non_upper_case_globals)]
 #![warn(non_camel_case_types)]
 #![warn(unused_qualifications)]
-#![feature(collections, core)]
-
-/* workaround: the rust compiler doesn't recognize
-   the features old_io, old_path, and test yet, still it warns
-   about using them */
-#![allow(unused_features)]
-#![feature(test)]
 
 extern crate libsodium_sys as ffi;
 extern crate libc;

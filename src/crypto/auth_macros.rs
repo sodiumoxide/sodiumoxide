@@ -5,7 +5,6 @@ macro_rules! auth_module (($auth_name:ident,
                            $tagbytes:expr) => (
 
 use libc::c_ulonglong;
-use std::intrinsics::volatile_set_memory;
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
 
@@ -119,6 +118,7 @@ fn test_auth_verify_tamper() {
     }
 }
 
+#[cfg(feature="benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;

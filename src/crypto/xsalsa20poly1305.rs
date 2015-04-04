@@ -7,7 +7,6 @@ This function is conjectured to meet the standard notions of privacy and
 authenticity.
 */
 use ffi;
-use std::intrinsics::volatile_set_memory;
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use utils::marshal;
 use randombytes::randombytes_into;
@@ -189,6 +188,7 @@ fn test_vector_1() {
     assert!(Some(m) == m2);
 }
 
+#[cfg(feature="benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;

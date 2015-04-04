@@ -26,6 +26,7 @@ pub fn hash(m: &[u8]) -> Digest {
     }
 }
 
+#[cfg(feature="benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;
