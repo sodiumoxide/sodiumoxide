@@ -42,3 +42,4 @@ include!("src/crypto_verify_16.rs");
 include!("src/crypto_verify_32.rs");
 
 include!("src/randombytes.rs");
+include!("src/utils.rs");
