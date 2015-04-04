@@ -12,6 +12,7 @@ as easy to use.
 Dependencies
 ------------
 
+[Rust](http://www.rust-lang.org/install.html) nightly. Beta isn't supported as of yet 
 [Sodium](https://github.com/jedisct1/libsodium)
 
 Building
