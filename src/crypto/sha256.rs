@@ -69,7 +69,7 @@ fn test_nist_vector(filename: &str) {
             r.read_line(&mut line).unwrap();
             let md = line[5..].from_hex().unwrap();
             let Digest(digest) = hash(msg);
-            assert!(digest == md);
+            assert!(&digest[..] == &md[..]);
        }
     }
 }
