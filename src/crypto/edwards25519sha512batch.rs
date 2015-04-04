@@ -4,7 +4,6 @@ WARNING: This signature software is a prototype. It has been replaced by the fin
 */
 use ffi;
 use libc::c_ulonglong;
-use std::intrinsics::volatile_set_memory;
 use std::iter::repeat;
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 

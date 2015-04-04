@@ -4,7 +4,6 @@ macro_rules! stream_module (($stream_name:ident,
                              $noncebytes:expr) => (
 
 use libc::c_ulonglong;
-use std::intrinsics::volatile_set_memory;
 use std::iter::repeat;
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
