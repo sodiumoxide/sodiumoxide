@@ -26,7 +26,7 @@ Ed25519 and is only kept here for compatibility reasons.
 
 */
 pub use self::ed25519::*;
-#[path="ed25519.rs"]
+#[path="sign/ed25519.rs"]
 pub mod ed25519;
-#[path="edwards25519sha512batch.rs"]
+#[path="sign/edwards25519sha512batch.rs"]
 pub mod edwards25519sha512batch;
