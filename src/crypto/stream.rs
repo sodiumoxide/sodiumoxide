@@ -53,16 +53,16 @@ message.
 
 */
 pub use self::xsalsa20::*;
-#[path="stream_macros.rs"]
+#[path="stream/stream_macros.rs"]
 #[macro_use]
 mod stream_macros;
-#[path="xsalsa20.rs"]
+#[path="stream/xsalsa20.rs"]
 pub mod xsalsa20;
-#[path="aes128ctr.rs"]
+#[path="stream/aes128ctr.rs"]
 pub mod aes128ctr;
-#[path="salsa208.rs"]
+#[path="stream/salsa208.rs"]
 pub mod salsa208;
-#[path="salsa2012.rs"]
+#[path="stream/salsa2012.rs"]
 pub mod salsa2012;
-#[path="salsa20.rs"]
+#[path="stream/salsa20.rs"]
 pub mod salsa20;
