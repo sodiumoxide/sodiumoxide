@@ -49,7 +49,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
         /// the byte-slice isn't equal to the length of the object
         pub fn from_slice(bs: &[u8]) -> Option<$newtype> {
             if bs.len() != $len {
-                return None
+                return None;
             }
             let mut n = $newtype([0; $len]);
             {
