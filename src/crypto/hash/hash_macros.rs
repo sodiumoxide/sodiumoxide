@@ -24,7 +24,7 @@ pub fn hash(m: &[u8]) -> Digest {
 
 #[cfg(feature = "benchmarks")]
 #[cfg(test)]
-mod bench {
+mod bench_m {
     extern crate test;
     use randombytes::randombytes;
     use super::*;

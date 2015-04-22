@@ -31,38 +31,43 @@ pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
     }
 }
 
-#[test]
-fn test_verify_16() {
-    use randombytes::randombytes_into;
+#[cfg(test)]
+mod test {
+    use super::*;
 
-    for _ in (0usize..256) {
-        let mut x = [0; 16];
-        let mut y = [0; 16];
-        assert!(verify_16(&x, &y));
-        randombytes_into(&mut x);
-        randombytes_into(&mut y);
-        if x == y {
-            assert!(verify_16(&x, &y))
-        } else {
-            assert!(!verify_16(&x, &y))
+    #[test]
+    fn test_verify_16() {
+        use randombytes::randombytes_into;
+
+        for _ in (0usize..256) {
+            let mut x = [0; 16];
+            let mut y = [0; 16];
+            assert!(verify_16(&x, &y));
+            randombytes_into(&mut x);
+            randombytes_into(&mut y);
+            if x == y {
+                assert!(verify_16(&x, &y))
+            } else {
+                assert!(!verify_16(&x, &y))
+            }
         }
     }
-}
 
-#[test]
-fn test_verify_32() {
-    use randombytes::randombytes_into;
+    #[test]
+    fn test_verify_32() {
+        use randombytes::randombytes_into;
 
-    for _ in (0usize..256) {
-        let mut x = [0; 32];
-        let mut y = [0; 32];
-        assert!(verify_32(&x, &y));
-        randombytes_into(&mut x);
-        randombytes_into(&mut y);
-        if x == y {
-            assert!(verify_32(&x, &y))
-        } else {
-            assert!(!verify_32(&x, &y))
+        for _ in (0usize..256) {
+            let mut x = [0; 32];
+            let mut y = [0; 32];
+            assert!(verify_32(&x, &y));
+            randombytes_into(&mut x);
+            randombytes_into(&mut y);
+            if x == y {
+                assert!(verify_32(&x, &y))
+            } else {
+                assert!(!verify_32(&x, &y))
+            }
         }
     }
 }

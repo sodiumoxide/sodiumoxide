@@ -77,40 +77,45 @@ pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
     }
 }
 
-#[test]
-fn test_auth_verify() {
-    use randombytes::randombytes;
-    for i in (0..256usize) {
-        let k = gen_key();
-        let m = randombytes(i);
-        let tag = authenticate(&m, &k);
-        assert!(verify(&tag, &m, &k));
-    }
-}
+#[cfg(test)]
+mod test_m {
+    use super::*;
 
-#[test]
-fn test_auth_verify_tamper() {
-    use randombytes::randombytes;
-    for i in (0..32usize) {
-        let k = gen_key();
-        let mut m = randombytes(i);
-        let Tag(mut tagbuf) = authenticate(&mut m, &k);
-        for j in (0..m.len()) {
-            m[j] ^= 0x20;
-            assert!(!verify(&Tag(tagbuf), &mut m, &k));
-            m[j] ^= 0x20;
+    #[test]
+    fn test_auth_verify() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let k = gen_key();
+            let m = randombytes(i);
+            let tag = authenticate(&m, &k);
+            assert!(verify(&tag, &m, &k));
         }
-        for j in (0..tagbuf.len()) {
-            tagbuf[j] ^= 0x20;
-            assert!(!verify(&Tag(tagbuf), &mut m, &k));
-            tagbuf[j] ^= 0x20;
+    }
+
+    #[test]
+    fn test_auth_verify_tamper() {
+        use randombytes::randombytes;
+        for i in (0..32usize) {
+            let k = gen_key();
+            let mut m = randombytes(i);
+            let Tag(mut tagbuf) = authenticate(&mut m, &k);
+            for j in (0..m.len()) {
+                m[j] ^= 0x20;
+                assert!(!verify(&Tag(tagbuf), &mut m, &k));
+                m[j] ^= 0x20;
+            }
+            for j in (0..tagbuf.len()) {
+                tagbuf[j] ^= 0x20;
+                assert!(!verify(&Tag(tagbuf), &mut m, &k));
+                tagbuf[j] ^= 0x20;
+            }
         }
     }
 }
 
 #[cfg(feature = "benchmarks")]
 #[cfg(test)]
-mod bench {
+mod bench_m {
     extern crate test;
     use randombytes::randombytes;
     use super::*;
