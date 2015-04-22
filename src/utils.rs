@@ -5,7 +5,7 @@ pub fn marshal<T, F>(buf: &[u8],
                      padbefore: usize,
                      bytestodrop: usize,
                      f: F
-                     ) -> (Vec<u8>, T) 
+                     ) -> (Vec<u8>, T)
     where F: Fn(*mut u8, *const u8, c_ulonglong) -> T {
     let mut dst = Vec::with_capacity(buf.len() + padbefore);
     for _ in (0..padbefore) {
