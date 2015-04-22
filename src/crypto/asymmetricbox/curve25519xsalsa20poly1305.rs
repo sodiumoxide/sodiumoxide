@@ -1,12 +1,9 @@
-/*!
-`crypto_box_curve25519xsalsa20poly1305` , a particular
-combination of Curve25519, Salsa20, and Poly1305 specified in
-[Cryptography in NaCl](http://nacl.cr.yp.to/valid.html).
-
-This function is conjectured to meet the standard notions of privacy and
-third-party unforgeability.
-
-*/
+//! `crypto_box_curve25519xsalsa20poly1305` , a particular
+//! combination of Curve25519, Salsa20, and Poly1305 specified in
+//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html).
+//!
+//! This function is conjectured to meet the standard notions of privacy and
+//! third-party unforgeability.
 use ffi;
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use utils::marshal;
@@ -19,43 +16,35 @@ pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly130
 const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES;
 const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
-/**
- * `PublicKey` for asymmetric authenticated encryption
- */
+/// `PublicKey` for asymmetric authenticated encryption
 #[derive(Copy)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
-/**
- * `SecretKey` for asymmetric authenticated encryption
- *
- * When a `SecretKey` goes out of scope its contents
- * will be zeroed out
- */
+/// `SecretKey` for asymmetric authenticated encryption
+///
+/// When a `SecretKey` goes out of scope its contents
+/// will be zeroed out
 pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
 newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
-/**
- * `Nonce` for asymmetric authenticated encryption
- */
+/// `Nonce` for asymmetric authenticated encryption
 #[derive(Copy)]
 pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);
 newtype_impl!(Nonce, NONCEBYTES);
 
-/**
- * `gen_keypair()` randomly generates a secret key and a corresponding public key.
- *
- * THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_keypair()` randomly generates a secret key and a corresponding public key.
+///
+/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
@@ -67,23 +56,19 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     }
 }
 
-/**
- * `gen_nonce()` randomly generates a nonce
- *
- * THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_nonce()` randomly generates a nonce
+///
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
     let mut n = [0; NONCEBYTES];
     randombytes_into(&mut n);
     Nonce(n)
 }
 
-/**
- * `seal()` encrypts and authenticates a message `m` using the senders secret key `sk`,
- * the receivers public key `pk` and a nonce `n`. It returns a ciphertext `c`.
- */
+/// `seal()` encrypts and authenticates a message `m` using the senders secret key `sk`,
+/// the receivers public key `pk` and a nonce `n`. It returns a ciphertext `c`.
 pub fn seal(m: &[u8],
             &Nonce(ref n): &Nonce,
             &PublicKey(ref pk): &PublicKey,
@@ -101,11 +86,9 @@ pub fn seal(m: &[u8],
     c
 }
 
-/**
- * `open()` verifies and decrypts a ciphertext `c` using the receiver's secret key `sk`,
- * the senders public key `pk`, and a nonce `n`. It returns a plaintext `Some(m)`.
- * If the ciphertext fails verification, `open()` returns `None`.
- */
+/// `open()` verifies and decrypts a ciphertext `c` using the receiver's secret key `sk`,
+/// the senders public key `pk`, and a nonce `n`. It returns a plaintext `Some(m)`.
+/// If the ciphertext fails verification, `open()` returns `None`.
 pub fn open(c: &[u8],
             &Nonce(ref n): &Nonce,
             &PublicKey(ref pk): &PublicKey,
@@ -130,24 +113,20 @@ pub fn open(c: &[u8],
     }
 }
 
-/**
- * Applications that send several messages to the same receiver can gain speed by
- * splitting `seal()` into two steps, `precompute()` and `seal_precomputed()`.
- * Similarly, applications that receive several messages from the same sender can gain
- * speed by splitting `open()` into two steps, `precompute()` and `open_precomputed()`.
- *
- * When a `PrecomputedKey` goes out of scope its contents will be zeroed out
- */
+/// Applications that send several messages to the same receiver can gain speed by
+/// splitting `seal()` into two steps, `precompute()` and `seal_precomputed()`.
+/// Similarly, applications that receive several messages from the same sender can gain
+/// speed by splitting `open()` into two steps, `precompute()` and `open_precomputed()`.
+///
+/// When a `PrecomputedKey` goes out of scope its contents will be zeroed out
 pub struct PrecomputedKey([u8; PRECOMPUTEDKEYBYTES]);
 
 newtype_drop!(PrecomputedKey);
 newtype_clone!(PrecomputedKey);
 newtype_impl!(PrecomputedKey, PRECOMPUTEDKEYBYTES);
 
-/**
- * `precompute()` computes an intermediate key that can be used by `seal_precomputed()`
- * and `open_precomputed()`
- */
+/// `precompute()` computes an intermediate key that can be used by `seal_precomputed()`
+/// and `open_precomputed()`
 pub fn precompute(&PublicKey(ref pk): &PublicKey,
                   &SecretKey(ref sk): &SecretKey) -> PrecomputedKey {
     let mut k = [0u8; PRECOMPUTEDKEYBYTES];
@@ -159,10 +138,8 @@ pub fn precompute(&PublicKey(ref pk): &PublicKey,
     PrecomputedKey(k)
 }
 
-/**
- * `seal_precomputed()` encrypts and authenticates a message `m` using a precomputed key `k`,
- * and a nonce `n`. It returns a ciphertext `c`.
- */
+/// `seal_precomputed()` encrypts and authenticates a message `m` using a precomputed key `k`,
+/// and a nonce `n`. It returns a ciphertext `c`.
 pub fn seal_precomputed(m: &[u8],
                         &Nonce(ref n): &Nonce,
                         &PrecomputedKey(ref k): &PrecomputedKey) -> Vec<u8> {
@@ -178,11 +155,9 @@ pub fn seal_precomputed(m: &[u8],
     c
 }
 
-/**
- * `open_precomputed()` verifies and decrypts a ciphertext `c` using a precomputed
- * key `k` and a nonce `n`. It returns a plaintext `Some(m)`.
- * If the ciphertext fails verification, `open_precomputed()` returns `None`.
- */
+/// `open_precomputed()` verifies and decrypts a ciphertext `c` using a precomputed
+/// key `k` and a nonce `n`. It returns a plaintext `Some(m)`.
+/// If the ciphertext fails verification, `open_precomputed()` returns `None`.
 pub fn open_precomputed(c: &[u8],
                         &Nonce(ref n): &Nonce,
                         &PrecomputedKey(ref k): &PrecomputedKey) -> Option<Vec<u8>> {
@@ -416,8 +391,8 @@ mod bench {
     fn bench_precompute(b: &mut test::Bencher) {
         let (pk, sk) = gen_keypair();
         b.iter(|| {
-            /* we do this benchmark as many times as the other benchmarks
-            so that we can compare the times */
+            // we do this benchmark as many times as the other benchmarks so
+            // that we can compare the times
             for _ in BENCH_SIZES.iter() {
                 precompute(&pk, &sk);
                 precompute(&pk, &sk);

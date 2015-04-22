@@ -1,8 +1,6 @@
-/*!
-`HMAC-SHA-512-256`, i.e., the first 256 bits of
-`HMAC-SHA-512`.  `HMAC-SHA-512-256` is conjectured to meet the standard notion
-of unforgeability.
-*/
+//! `HMAC-SHA-512-256`, i.e., the first 256 bits of
+//! `HMAC-SHA-512`.  `HMAC-SHA-512-256` is conjectured to meet the standard notion
+//! of unforgeability.
 use ffi::{crypto_auth_hmacsha512256,
           crypto_auth_hmacsha512256_verify,
           crypto_auth_hmacsha512256_KEYBYTES,
@@ -18,7 +16,7 @@ auth_module!(crypto_auth_hmacsha512256,
 #[test]
 fn test_vector_1() {
     // corresponding to tests/auth.c from NaCl
-    /* "Test Case 2" from RFC 4231 */
+    // "Test Case 2" from RFC 4231
     let key = Key([74, 101, 102, 101, 0, 0, 0, 0
                   , 0, 0, 0, 0, 0, 0, 0, 0
                   , 0, 0, 0, 0, 0, 0, 0, 0

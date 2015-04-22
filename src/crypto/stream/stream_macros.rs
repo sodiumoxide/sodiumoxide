@@ -11,60 +11,50 @@ use randombytes::randombytes_into;
 pub const KEYBYTES: usize = $keybytes;
 pub const NONCEBYTES: usize = $noncebytes;
 
-/**
- * `Key` for symmetric encryption
- *
- * When a `Key` goes out of scope its contents
- * will be zeroed out
- */
+/// `Key` for symmetric encryption
+///
+/// When a `Key` goes out of scope its contents
+/// will be zeroed out
 pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
 newtype_clone!(Key);
 newtype_impl!(Key, KEYBYTES);
 
-/**
- * `Nonce` for symmetric encryption
- */
+/// `Nonce` for symmetric encryption
 #[derive(Copy)]
 pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);
 newtype_impl!(Nonce, NONCEBYTES);
 
-/**
- * `gen_key()` randomly generates a key for symmetric encryption
- *
- * THREAD SAFETY: `gen_key()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_key()` randomly generates a key for symmetric encryption
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut key = [0; KEYBYTES];
     randombytes_into(&mut key);
     Key(key)
 }
 
-/**
- * `gen_nonce()` randomly generates a nonce for symmetric encryption
- *
- * THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- *
- * NOTE: When using primitives with short nonces (e.g. salsa20, salsa208, salsa2012)
- * do not use random nonces since the probability of nonce-collision is not negligible
- */
+/// `gen_nonce()` randomly generates a nonce for symmetric encryption
+///
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
+///
+/// NOTE: When using primitives with short nonces (e.g. salsa20, salsa208, salsa2012)
+/// do not use random nonces since the probability of nonce-collision is not negligible
 pub fn gen_nonce() -> Nonce {
     let mut nonce = [0; NONCEBYTES];
     randombytes_into(&mut nonce);
     Nonce(nonce)
 }
 
-/**
- * `stream()` produces a `len`-byte stream `c` as a function of a
- * secret key `k` and a nonce `n`.
- */
+/// `stream()` produces a `len`-byte stream `c` as a function of a
+/// secret key `k` and a nonce `n`.
 pub fn stream(len: usize,
               &Nonce(ref n): &Nonce,
               &Key(ref k): &Key) -> Vec<u8> {
@@ -78,14 +68,12 @@ pub fn stream(len: usize,
     }
 }
 
-/**
- * `stream_xor()` encrypts a message `m` using a secret key `k` and a nonce `n`.
- * The `stream_xor()` function returns the ciphertext `c`.
- *
- * `stream_xor()` guarantees that the ciphertext has the same length as the plaintext,
- * and is the plaintext xor the output of `stream()`.
- * Consequently `stream_xor()` can also be used to decrypt.
- */
+/// `stream_xor()` encrypts a message `m` using a secret key `k` and a nonce `n`.
+/// The `stream_xor()` function returns the ciphertext `c`.
+///
+/// `stream_xor()` guarantees that the ciphertext has the same length as the plaintext,
+/// and is the plaintext xor the output of `stream()`.
+/// Consequently `stream_xor()` can also be used to decrypt.
 pub fn stream_xor(m: &[u8],
                   &Nonce(ref n): &Nonce,
                   &Key(ref k): &Key) -> Vec<u8> {
@@ -100,14 +88,12 @@ pub fn stream_xor(m: &[u8],
     }
 }
 
-/**
-* `stream_xor_inplace` encrypts a message `m` using a secret key `k` and a nonce `n`.
-* The `stream_xor_inplace()` function encrypts the message in place.
-*
-* `stream_xor_inplace()` guarantees that the ciphertext has the same length as
-* the plaintext, and is the plaintext xor the output of `stream_inplace()`.
-* Consequently `stream_xor_inplace()` can also be used to decrypt.
-*/
+/// `stream_xor_inplace` encrypts a message `m` using a secret key `k` and a nonce `n`.
+/// The `stream_xor_inplace()` function encrypts the message in place.
+///
+/// `stream_xor_inplace()` guarantees that the ciphertext has the same length as
+/// the plaintext, and is the plaintext xor the output of `stream_inplace()`.
+/// Consequently `stream_xor_inplace()` can also be used to decrypt.
 pub fn stream_xor_inplace(m: &mut [u8],
                           &Nonce(ref n): &Nonce,
                           &Key(ref k): &Key) {

@@ -1,12 +1,10 @@
-/*!
-`SHA-512`.
-
-There has been considerable degradation of public confidence in the
-security conjectures for many hash functions, including `SHA-512`.
-However, for the moment, there do not appear to be alternatives that
-inspire satisfactory levels of confidence. One can hope that NIST's
-SHA-3 competition will improve the situation.
-*/
+//! `SHA-512`.
+//!
+//! There has been considerable degradation of public confidence in the
+//! security conjectures for many hash functions, including `SHA-512`.
+//! However, for the moment, there do not appear to be alternatives that
+//! inspire satisfactory levels of confidence. One can hope that NIST's
+//! SHA-3 competition will improve the situation.
 #[cfg(test)]
 extern crate rustc_serialize;
 use ffi::{crypto_hash_sha512, crypto_hash_sha512_BYTES};

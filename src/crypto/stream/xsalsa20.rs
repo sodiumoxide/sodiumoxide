@@ -1,9 +1,7 @@
-/*!
-`crypto_stream_xsalsa20`, a particular cipher specified in
-[Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 7.
-This cipher is conjectured to meet the standard notion of
-unpredictability.
-*/
+//! `crypto_stream_xsalsa20`, a particular cipher specified in
+//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 7.
+//! This cipher is conjectured to meet the standard notion of
+//! unpredictability.
 use ffi::{crypto_stream_xsalsa20,
           crypto_stream_xsalsa20_xor,
           crypto_stream_xsalsa20_KEYBYTES,

@@ -1,11 +1,9 @@
-/*!
-`crypto_secretbox_xsalsa20poly1305`, a particular
-combination of Salsa20 and Poly1305 specified in
-[Cryptography in NaCl](http://nacl.cr.yp.to/valid.html).
-
-This function is conjectured to meet the standard notions of privacy and
-authenticity.
-*/
+//! `crypto_secretbox_xsalsa20poly1305`, a particular
+//! combination of Salsa20 and Poly1305 specified in
+//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html).
+//!
+//! This function is conjectured to meet the standard notions of privacy and
+//! authenticity.
 use ffi;
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use utils::marshal;
@@ -14,21 +12,17 @@ use randombytes::randombytes_into;
 pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES;
 pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
 
-/**
- * `Key` for symmetric authenticated encryption
- *
- * When a `Key` goes out of scope its contents
- * will be zeroed out
- */
+/// `Key` for symmetric authenticated encryption
+///
+/// When a `Key` goes out of scope its contents
+/// will be zeroed out
 pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
 newtype_clone!(Key);
 newtype_impl!(Key, KEYBYTES);
 
-/**
- * `Nonce` for symmetric authenticated encryption
- */
+/// `Nonce` for symmetric authenticated encryption
 #[derive(Copy)]
 pub struct Nonce(pub [u8; NONCEBYTES]);
 
@@ -38,36 +32,30 @@ newtype_impl!(Nonce, NONCEBYTES);
 const ZEROBYTES: usize = 32;
 const BOXZEROBYTES: usize = 16;
 
-/**
- * `gen_key()` randomly generates a secret key
- *
- * THREAD SAFETY: `gen_key()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_key()` randomly generates a secret key
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut key = [0; KEYBYTES];
     randombytes_into(&mut key);
     Key(key)
 }
 
-/**
- * `gen_nonce()` randomly generates a nonce
- *
- * THREAD SAFETY: `gen_key()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_nonce()` randomly generates a nonce
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
     let mut nonce = [0; NONCEBYTES];
     randombytes_into(&mut nonce);
     Nonce(nonce)
 }
 
-/**
- * `seal()` encrypts and authenticates a message `m` using a secret key `k` and a
- * nonce `n`.  It returns a ciphertext `c`.
- */
+/// `seal()` encrypts and authenticates a message `m` using a secret key `k` and a
+/// nonce `n`.  It returns a ciphertext `c`.
 pub fn seal(m: &[u8],
             &Nonce(ref n): &Nonce,
             &Key(ref k): &Key) -> Vec<u8> {
@@ -80,11 +68,9 @@ pub fn seal(m: &[u8],
     c
 }
 
-/**
- * `open()` verifies and decrypts a ciphertext `c` using a secret key `k` and a nonce `n`.
- * It returns a plaintext `Some(m)`.
- * If the ciphertext fails verification, `open()` returns `None`.
- */
+/// `open()` verifies and decrypts a ciphertext `c` using a secret key `k` and a nonce `n`.
+/// It returns a plaintext `Some(m)`.
+/// If the ciphertext fails verification, `open()` returns `None`.
 pub fn open(c: &[u8],
             &Nonce(ref n): &Nonce,
             &Key(ref k): &Key) -> Option<Vec<u8>> {

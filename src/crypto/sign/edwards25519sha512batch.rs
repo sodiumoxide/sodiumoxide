@@ -1,7 +1,5 @@
-/*!
-WARNING: This signature software is a prototype. It has been replaced by the final system
-[Ed25519](http://ed25519.cr.yp.to/). It is only kept here for compatibility reasons.
-*/
+//! WARNING: This signature software is a prototype. It has been replaced by the final system
+//! [Ed25519](http://ed25519.cr.yp.to/). It is only kept here for compatibility reasons.
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
@@ -11,35 +9,29 @@ pub const SECRETKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_SECRE
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES;
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_BYTES;
 
-/**
- * `SecretKey` for signatures
- *
- * When a `SecretKey` goes out of scope its contents
- * will be zeroed out
- */
+/// `SecretKey` for signatures
+///
+/// When a `SecretKey` goes out of scope its contents
+/// will be zeroed out
 pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
 newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
-/**
- * `PublicKey` for signatures
- */
+/// `PublicKey` for signatures
 #[derive(Copy)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
-/**
- * `gen_keypair()` randomly generates a secret key and a corresponding public
- * key.
- *
- * THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_keypair()` randomly generates a secret key and a corresponding public
+/// key.
+///
+/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
@@ -50,10 +42,8 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     }
 }
 
-/**
- * `sign()` signs a message `m` using the signer's secret key `sk`.
- * `sign()` returns the resulting signed message `sm`.
- */
+/// `sign()` signs a message `m` using the signer's secret key `sk`.
+/// `sign()` returns the resulting signed message `sm`.
 pub fn sign(m: &[u8],
             &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
     unsafe {
@@ -69,11 +59,9 @@ pub fn sign(m: &[u8],
     }
 }
 
-/**
- * `verify()` verifies the signature in `sm` using the signer's public key `pk`.
- * `verify()` returns the message `Some(m)`.
- * If the signature fails verification, `verify()` returns `None`.
- */
+/// `verify()` verifies the signature in `sm` using the signer's public key `pk`.
+/// `verify()` returns the message `Some(m)`.
+/// If the signature fails verification, `verify()` returns `None`.
 pub fn verify(sm: &[u8],
               &PublicKey(ref pk): &PublicKey) -> Option<Vec<u8>> {
     unsafe {
