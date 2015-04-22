@@ -11,24 +11,20 @@ use randombytes::randombytes_into;
 pub const KEYBYTES: usize = $keybytes;
 pub const TAGBYTES: usize = $tagbytes;
 
-/**
- * Authentication `Key`
- *
- * When a `Key` goes out of scope its contents
- * will be zeroed out
- */
+/// Authentication `Key`
+///
+/// When a `Key` goes out of scope its contents
+/// will be zeroed out
 pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
 newtype_clone!(Key);
 newtype_impl!(Key, KEYBYTES);
 
-/**
-  * Authentication `Tag`
-  *
-  * The tag implements the traits `PartialEq` and `Eq` using constant-time
-  * comparison functions. See `sodiumoxide::crypto::verify::verify_32`
-  */
+/// Authentication `Tag`
+///
+/// The tag implements the traits `PartialEq` and `Eq` using constant-time
+/// comparison functions. See `sodiumoxide::crypto::verify::verify_32`
 #[derive(Copy)]
 pub struct Tag(pub [u8; TAGBYTES]);
 
@@ -44,23 +40,19 @@ impl PartialEq for Tag {
 newtype_clone!(Tag);
 newtype_impl!(Tag, TAGBYTES);
 
-/**
- * `gen_key()` randomly generates a key for authentication
- *
- * THREAD SAFETY: `gen_key()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_key()` randomly generates a key for authentication
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut k = [0; KEYBYTES];
     randombytes_into(&mut k);
     Key(k)
 }
 
-/**
- * `authenticate()` authenticates a message `m` using a secret key `k`.
- * The function returns an authenticator tag.
- */
+/// `authenticate()` authenticates a message `m` using a secret key `k`.
+/// The function returns an authenticator tag.
 pub fn authenticate(m: &[u8],
                     &Key(ref k): &Key) -> Tag {
     unsafe {
@@ -73,10 +65,8 @@ pub fn authenticate(m: &[u8],
     }
 }
 
-/**
- * `verify()` returns `true` if `tag` is a correct authenticator of message `m`
- * under a secret key `k`. Otherwise it returns false.
- */
+/// `verify()` returns `true` if `tag` is a correct authenticator of message `m`
+/// under a secret key `k`. Otherwise it returns false.
 pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
               &Key(ref k): &Key) -> bool {
     unsafe {

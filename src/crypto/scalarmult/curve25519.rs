@@ -1,40 +1,31 @@
-/*!
-`crypto_scalarmult_curve25519` specified in
-[Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Sections 2, 3, and 4.
-This function is conjectured to be strong. For background see Bernstein,
-"Curve25519: new Diffie-Hellman speed records," Lecture Notes in Computer
-Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
-*/
-
+//! `crypto_scalarmult_curve25519` specified in
+//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Sections 2, 3, and 4.
+//! This function is conjectured to be strong. For background see Bernstein,
+//! "Curve25519: new Diffie-Hellman speed records," Lecture Notes in Computer
+//! Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use ffi;
 
 pub const BYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES;
 pub const SCALARBYTES: usize = ffi::crypto_scalarmult_curve25519_SCALARBYTES;
 
-/**
- * `Scalar` value (integer in byte representation)
- */
+/// `Scalar` value (integer in byte representation)
 #[derive(Copy)]
 pub struct Scalar(pub [u8; SCALARBYTES]);
 
 newtype_clone!(Scalar);
 newtype_impl!(Scalar, SCALARBYTES);
 
-/**
- * `GroupElement`
- */
+/// `GroupElement`
 #[derive(Copy)]
 pub struct GroupElement(pub [u8; BYTES]);
 
 newtype_clone!(GroupElement);
 newtype_impl!(GroupElement, BYTES);
 
-/**
- * `scalarmult()` multiplies a group element `p`
- * by an integer `n`. It returns the resulting group element
- * `q`.
- */
+/// `scalarmult()` multiplies a group element `p`
+/// by an integer `n`. It returns the resulting group element
+/// `q`.
 pub fn scalarmult(&Scalar(ref n): &Scalar,
                   &GroupElement(ref p): &GroupElement) -> GroupElement {
     let mut q = [0; BYTES];
@@ -44,11 +35,9 @@ pub fn scalarmult(&Scalar(ref n): &Scalar,
     GroupElement(q)
 }
 
-/**
- * `scalarmult_base()` computes the scalar product of a standard
- * group element and an integer `n`. It returns the resulting
- * group element `q`/
- */
+/// `scalarmult_base()` computes the scalar product of a standard
+/// group element and an integer `n`. It returns the resulting
+/// group element `q`/
 pub fn scalarmult_base(&Scalar(ref n): &Scalar) -> GroupElement {
     let mut q = [0; BYTES];
     unsafe {

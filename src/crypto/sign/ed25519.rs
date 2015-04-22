@@ -1,9 +1,7 @@
-/*!
-`ed25519`, a signature scheme specified in
-[Ed25519](http://ed25519.cr.yp.to/). This function is conjectured to meet the
-standard notion of unforgeability for a public-key signature scheme under
-chosen-message attacks.
-*/
+//! `ed25519`, a signature scheme specified in
+//! [Ed25519](http://ed25519.cr.yp.to/). This function is conjectured to meet the
+//! standard notion of unforgeability for a public-key signature scheme under
+//! chosen-message attacks.
 #[cfg(test)]
 extern crate rustc_serialize;
 use ffi;
@@ -17,59 +15,49 @@ pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
 
 
-/**
- * `Seed` that can be used for keypair generation
- *
- * The `Seed` is used by `keypair_from_seed()` to generate
- * a secret and public signature key.
- *
- * When a `Seed` goes out of scope its contents
- * will be zeroed out
- */
+/// `Seed` that can be used for keypair generation
+///
+/// The `Seed` is used by `keypair_from_seed()` to generate
+/// a secret and public signature key.
+///
+/// When a `Seed` goes out of scope its contents
+/// will be zeroed out
 pub struct Seed(pub [u8; SEEDBYTES]);
 
 newtype_drop!(Seed);
 newtype_clone!(Seed);
 newtype_impl!(Seed, SEEDBYTES);
 
-/**
- * `SecretKey` for signatures
- *
- * When a `SecretKey` goes out of scope its contents
- * will be zeroed out
- */
+/// `SecretKey` for signatures
+///
+/// When a `SecretKey` goes out of scope its contents
+/// will be zeroed out
 pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
 newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
-/**
- * `PublicKey` for signatures
- */
+/// `PublicKey` for signatures
 #[derive(Copy)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
-/**
- * Detached signature
- */
+/// Detached signature
 #[derive(Copy)]
 pub struct Signature(pub [u8; SIGNATUREBYTES]);
 
 newtype_clone!(Signature);
 newtype_impl!(Signature, SIGNATUREBYTES);
 
-/**
- * `gen_keypair()` randomly generates a secret key and a corresponding public
- * key.
- *
- * THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_keypair()` randomly generates a secret key and a corresponding public
+/// key.
+///
+/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
@@ -79,10 +67,8 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     }
 }
 
-/**
- * `keypair_from_seed()` computes a secret key and a corresponding public key
- * from a `Seed`.
- */
+/// `keypair_from_seed()` computes a secret key and a corresponding public key
+/// from a `Seed`.
 pub fn keypair_from_seed(&Seed(ref seed): &Seed) -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
@@ -94,10 +80,8 @@ pub fn keypair_from_seed(&Seed(ref seed): &Seed) -> (PublicKey, SecretKey) {
     }
 }
 
-/**
- * `sign()` signs a message `m` using the signer's secret key `sk`.
- * `sign()` returns the resulting signed message `sm`.
- */
+/// `sign()` signs a message `m` using the signer's secret key `sk`.
+/// `sign()` returns the resulting signed message `sm`.
 pub fn sign(m: &[u8],
             &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
     unsafe {
@@ -113,11 +97,9 @@ pub fn sign(m: &[u8],
     }
 }
 
-/**
- * `verify()` verifies the signature in `sm` using the signer's public key `pk`.
- * `verify()` returns the message `Some(m)`.
- * If the signature fails verification, `verify()` returns `None`.
- */
+/// `verify()` verifies the signature in `sm` using the signer's public key `pk`.
+/// `verify()` returns the message `Some(m)`.
+/// If the signature fails verification, `verify()` returns `None`.
 pub fn verify(sm: &[u8],
               &PublicKey(ref pk): &PublicKey) -> Option<Vec<u8>> {
     unsafe {
@@ -136,10 +118,8 @@ pub fn verify(sm: &[u8],
     }
 }
 
-/**
- * `sign_detached()` signs a message `m` using the signer's secret key `sk`.
- * `sign_detached()` returns the resulting signature `sig`.
- */
+/// `sign_detached()` signs a message `m` using the signer's secret key `sk`.
+/// `sign_detached()` returns the resulting signature `sig`.
 pub fn sign_detached(m: &[u8],
                      &SecretKey(ref sk): &SecretKey) -> Signature {
     unsafe {
@@ -155,11 +135,9 @@ pub fn sign_detached(m: &[u8],
     }
 }
 
-/**
- * `verify_detached()` verifies the signature in `sig` against the message `m`
- * and the signer's public key `pk`.
- * `verify_detached()` returns true if the signature is valid, false otherwise.
- */
+/// `verify_detached()` verifies the signature in `sig` against the message `m`
+/// and the signer's public key `pk`.
+/// `verify_detached()` returns true if the signature is valid, false otherwise.
 pub fn verify_detached(&Signature(sig): &Signature,
                        m: &[u8],
                        &PublicKey(ref pk): &PublicKey) -> bool {

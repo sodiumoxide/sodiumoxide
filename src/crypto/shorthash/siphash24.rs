@@ -1,7 +1,4 @@
-/*!
-`SipHash-2-4`
-
-*/
+//! `SipHash-2-4`
 use ffi;
 use libc::c_ulonglong;
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
@@ -10,44 +7,36 @@ use randombytes::randombytes_into;
 pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
 pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES;
 
-/**
- * Digest-structure
- */
+/// Digest-structure
 #[derive(Copy)]
 pub struct Digest(pub [u8; HASHBYTES]);
 
 newtype_clone!(Digest);
 newtype_impl!(Digest, HASHBYTES);
 
-/**
- * Key
- *
- * When a `Key` goes out of scope its contents
- * will be zeroed out
- */
+/// Key
+///
+/// When a `Key` goes out of scope its contents
+/// will be zeroed out
 pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
 newtype_clone!(Key);
 newtype_impl!(Key, KEYBYTES);
 
-/**
- * `gen_key()` randomly generates a key for shorthash
- *
- * THREAD SAFETY: `gen_key()` is thread-safe provided that you have
- * called `sodiumoxide::init()` once before using any other function
- * from sodiumoxide.
- */
+/// `gen_key()` randomly generates a key for shorthash
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut k = [0; KEYBYTES];
     randombytes_into(&mut k);
     Key(k)
 }
 
-/**
- * `shorthash` hashes a message `m` under a key `k`. It
- * returns a hash `h`.
- */
+/// `shorthash` hashes a message `m` under a key `k`. It
+/// returns a hash `h`.
 pub fn shorthash(m: &[u8],
                  &Key(ref k): &Key) -> Digest {
     unsafe {

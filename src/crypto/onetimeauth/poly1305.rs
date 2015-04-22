@@ -1,9 +1,7 @@
-/*!
-`crypto_onetimeauth_poly1305`, an authenticator specified
-in [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 9. This
-authenticator is proven to meet the standard notion of unforgeability after a
-single message.
-*/
+//! `crypto_onetimeauth_poly1305`, an authenticator specified
+//! in [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 9. This
+//! authenticator is proven to meet the standard notion of unforgeability after a
+//! single message.
 use ffi::{crypto_onetimeauth_poly1305,
           crypto_onetimeauth_poly1305_verify,
           crypto_onetimeauth_poly1305_KEYBYTES,
