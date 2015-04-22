@@ -94,7 +94,7 @@ pub fn open(c: &[u8],
             &PublicKey(ref pk): &PublicKey,
             &SecretKey(ref sk): &SecretKey) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
-        return None
+        return None;
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
@@ -162,7 +162,7 @@ pub fn open_precomputed(c: &[u8],
                         &Nonce(ref n): &Nonce,
                         &PrecomputedKey(ref k): &PrecomputedKey) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
-        return None
+        return None;
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {

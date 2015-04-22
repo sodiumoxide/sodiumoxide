@@ -75,7 +75,7 @@ pub fn open(c: &[u8],
             &Nonce(ref n): &Nonce,
             &Key(ref k): &Key) -> Option<Vec<u8>> {
     if c.len() < BOXZEROBYTES {
-        return None
+        return None;
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
