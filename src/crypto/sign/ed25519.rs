@@ -2,8 +2,6 @@
 //! [Ed25519](http://ed25519.cr.yp.to/). This function is conjectured to meet the
 //! standard notion of unforgeability for a public-key signature scheme under
 //! chosen-message attacks.
-#[cfg(test)]
-extern crate rustc_serialize;
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
@@ -149,154 +147,160 @@ pub fn verify_detached(&Signature(sig): &Signature,
     }
 }
 
-#[test]
-fn test_sign_verify() {
-    use randombytes::randombytes;
-    for i in (0..256usize) {
-        let (pk, sk) = gen_keypair();
-        let m = randombytes(i);
-        let sm = sign(&m, &sk);
-        let m2 = verify(&sm, &pk);
-        assert!(Some(m) == m2);
-    }
-}
+#[cfg(test)]
+mod test {
+    extern crate rustc_serialize;
+    use super::*;
 
-#[test]
-fn test_sign_verify_tamper() {
-    use randombytes::randombytes;
-    for i in (0..32usize) {
-        let (pk, sk) = gen_keypair();
-        let m = randombytes(i);
-        let mut sm = sign(&m, &sk);
-        for j in (0..sm.len()) {
-            sm[j] ^= 0x20;
-            assert!(None == verify(&mut sm, &pk));
-            sm[j] ^= 0x20;
+    #[test]
+    fn test_sign_verify() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let sm = sign(&m, &sk);
+            let m2 = verify(&sm, &pk);
+            assert!(Some(m) == m2);
         }
     }
-}
 
-#[test]
-fn test_sign_verify_detached() {
-    use randombytes::randombytes;
-    for i in (0..256usize) {
-        let (pk, sk) = gen_keypair();
-        let m = randombytes(i);
-        let sig = sign_detached(&m, &sk);
-        assert!(verify_detached(&sig, &m, &pk));
-    }
-}
-
-#[test]
-fn test_sign_verify_detached_tamper() {
-    use randombytes::randombytes;
-    for i in (0..32usize) {
-        let (pk, sk) = gen_keypair();
-        let m = randombytes(i);
-        let Signature(mut sig) = sign_detached(&m, &sk);
-        for j in (0..SIGNATUREBYTES) {
-            sig[j] ^= 0x20;
-            assert!(!verify_detached(&Signature(sig), &m, &pk));
-            sig[j] ^= 0x20;
+    #[test]
+    fn test_sign_verify_tamper() {
+        use randombytes::randombytes;
+        for i in (0..32usize) {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let mut sm = sign(&m, &sk);
+            for j in (0..sm.len()) {
+                sm[j] ^= 0x20;
+                assert!(None == verify(&mut sm, &pk));
+                sm[j] ^= 0x20;
+            }
         }
     }
-}
 
-#[test]
-fn test_sign_verify_seed() {
-    use randombytes::{randombytes, randombytes_into};
-    for i in (0..256usize) {
-        let mut seedbuf = [0; 32];
-        randombytes_into(&mut seedbuf);
-        let seed = Seed(seedbuf);
-        let (pk, sk) = keypair_from_seed(&seed);
-        let m = randombytes(i);
-        let sm = sign(&m, &sk);
-        let m2 = verify(&sm, &pk);
-        assert!(Some(m) == m2);
-    }
-}
-
-#[test]
-fn test_sign_verify_tamper_seed() {
-    use randombytes::{randombytes, randombytes_into};
-    for i in (0..32usize) {
-        let mut seedbuf = [0; 32];
-        randombytes_into(&mut seedbuf);
-        let seed = Seed(seedbuf);
-        let (pk, sk) = keypair_from_seed(&seed);
-        let m = randombytes(i);
-        let mut sm = sign(&m, &sk);
-        for j in (0..sm.len()) {
-            sm[j] ^= 0x20;
-            assert!(None == verify(&mut sm, &pk));
-            sm[j] ^= 0x20;
+    #[test]
+    fn test_sign_verify_detached() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let sig = sign_detached(&m, &sk);
+            assert!(verify_detached(&sig, &m, &pk));
         }
     }
-}
 
-#[test]
-fn test_vectors() {
-    // test vectors from the Python implementation
-    // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-    use self::rustc_serialize::hex::{FromHex, ToHex};
-    use std::fs::File;
-    use std::io::{BufRead, BufReader};
-
-    let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
-    for mline in r.lines() {
-        let line = mline.unwrap();
-        let mut x = line.split(':');
-        let x0 = x.next().unwrap();
-        let x1 = x.next().unwrap();
-        let x2 = x.next().unwrap();
-        let x3 = x.next().unwrap();
-        let seed_bytes = x0[..64].from_hex().unwrap();
-        assert!(seed_bytes.len() == SEEDBYTES);
-        let mut seedbuf = [0u8; SEEDBYTES];
-        for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
-            *s = *b
+    #[test]
+    fn test_sign_verify_detached_tamper() {
+        use randombytes::randombytes;
+        for i in (0..32usize) {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let Signature(mut sig) = sign_detached(&m, &sk);
+            for j in (0..SIGNATUREBYTES) {
+                sig[j] ^= 0x20;
+                assert!(!verify_detached(&Signature(sig), &m, &pk));
+                sig[j] ^= 0x20;
+            }
         }
-        let seed = Seed(seedbuf);
-        let (pk, sk) = keypair_from_seed(&seed);
-        let m = x2.from_hex().unwrap();
-        let sm = sign(&m, &sk);
-        verify(&sm, &pk).unwrap();
-        assert!(x1 == pk[..].to_hex());
-        assert!(x3 == sm.to_hex());
     }
-}
 
-#[test]
-fn test_vectors_detached() {
-    // test vectors from the Python implementation
-    // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-    use self::rustc_serialize::hex::{FromHex, ToHex};
-    use std::fs::File;
-    use std::io::{BufRead, BufReader};
-
-    let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
-    for mline in r.lines() {
-        let line = mline.unwrap();
-        let mut x = line.split(':');
-        let x0 = x.next().unwrap();
-        let x1 = x.next().unwrap();
-        let x2 = x.next().unwrap();
-        let x3 = x.next().unwrap();
-        let seed_bytes = x0[..64].from_hex().unwrap();
-        assert!(seed_bytes.len() == SEEDBYTES);
-        let mut seedbuf = [0u8; SEEDBYTES];
-        for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
-            *s = *b
+    #[test]
+    fn test_sign_verify_seed() {
+        use randombytes::{randombytes, randombytes_into};
+        for i in (0..256usize) {
+            let mut seedbuf = [0; 32];
+            randombytes_into(&mut seedbuf);
+            let seed = Seed(seedbuf);
+            let (pk, sk) = keypair_from_seed(&seed);
+            let m = randombytes(i);
+            let sm = sign(&m, &sk);
+            let m2 = verify(&sm, &pk);
+            assert!(Some(m) == m2);
         }
-        let seed = Seed(seedbuf);
-        let (pk, sk) = keypair_from_seed(&seed);
-        let m = x2.from_hex().unwrap();
-        let sig = sign_detached(&m, &sk);
-        assert!(verify_detached(&sig, &m, &pk));
-        assert!(x1 == pk[..].to_hex());
-        let sm = sig[..].to_hex() + x2; // x2 is m hex encoded
-        assert!(x3 == sm);
+    }
+
+    #[test]
+    fn test_sign_verify_tamper_seed() {
+        use randombytes::{randombytes, randombytes_into};
+        for i in (0..32usize) {
+            let mut seedbuf = [0; 32];
+            randombytes_into(&mut seedbuf);
+            let seed = Seed(seedbuf);
+            let (pk, sk) = keypair_from_seed(&seed);
+            let m = randombytes(i);
+            let mut sm = sign(&m, &sk);
+            for j in (0..sm.len()) {
+                sm[j] ^= 0x20;
+                assert!(None == verify(&mut sm, &pk));
+                sm[j] ^= 0x20;
+            }
+        }
+    }
+
+    #[test]
+    fn test_vectors() {
+        // test vectors from the Python implementation
+        // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
+        use self::rustc_serialize::hex::{FromHex, ToHex};
+        use std::fs::File;
+        use std::io::{BufRead, BufReader};
+
+        let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+        for mline in r.lines() {
+            let line = mline.unwrap();
+            let mut x = line.split(':');
+            let x0 = x.next().unwrap();
+            let x1 = x.next().unwrap();
+            let x2 = x.next().unwrap();
+            let x3 = x.next().unwrap();
+            let seed_bytes = x0[..64].from_hex().unwrap();
+            assert!(seed_bytes.len() == SEEDBYTES);
+            let mut seedbuf = [0u8; SEEDBYTES];
+            for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
+                *s = *b
+            }
+            let seed = Seed(seedbuf);
+            let (pk, sk) = keypair_from_seed(&seed);
+            let m = x2.from_hex().unwrap();
+            let sm = sign(&m, &sk);
+            verify(&sm, &pk).unwrap();
+            assert!(x1 == pk[..].to_hex());
+            assert!(x3 == sm.to_hex());
+        }
+    }
+
+    #[test]
+    fn test_vectors_detached() {
+        // test vectors from the Python implementation
+        // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
+        use self::rustc_serialize::hex::{FromHex, ToHex};
+        use std::fs::File;
+        use std::io::{BufRead, BufReader};
+
+        let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+        for mline in r.lines() {
+            let line = mline.unwrap();
+            let mut x = line.split(':');
+            let x0 = x.next().unwrap();
+            let x1 = x.next().unwrap();
+            let x2 = x.next().unwrap();
+            let x3 = x.next().unwrap();
+            let seed_bytes = x0[..64].from_hex().unwrap();
+            assert!(seed_bytes.len() == SEEDBYTES);
+            let mut seedbuf = [0u8; SEEDBYTES];
+            for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
+                *s = *b
+            }
+            let seed = Seed(seedbuf);
+            let (pk, sk) = keypair_from_seed(&seed);
+            let m = x2.from_hex().unwrap();
+            let sig = sign_detached(&m, &sk);
+            assert!(verify_detached(&sig, &m, &pk));
+            assert!(x1 == pk[..].to_hex());
+            let sm = sig[..].to_hex() + x2; // x2 is m hex encoded
+            assert!(x3 == sm);
+        }
     }
 }
 

@@ -80,29 +80,34 @@ pub fn verify(sm: &[u8],
     }
 }
 
-#[test]
-fn test_sign_verify() {
-    use randombytes::randombytes;
-    for i in (0..256usize) {
-        let (pk, sk) = gen_keypair();
-        let m = randombytes(i);
-        let sm = sign(&m, &sk);
-        let m2 = verify(&sm, &pk);
-        assert!(Some(m) == m2);
-    }
-}
+#[cfg(test)]
+mod test {
+    use super::*;
 
-#[test]
-fn test_sign_verify_tamper() {
-    use randombytes::randombytes;
-    for i in (0..32usize) {
-        let (pk, sk) = gen_keypair();
-        let m = randombytes(i);
-        let mut sm = sign(&m, &sk);
-        for j in (0..sm.len()) {
-            sm[j] ^= 0x20;
-            assert!(None == verify(&mut sm, &pk));
-            sm[j] ^= 0x20;
+    #[test]
+    fn test_sign_verify() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let sm = sign(&m, &sk);
+            let m2 = verify(&sm, &pk);
+            assert!(Some(m) == m2);
+        }
+    }
+
+    #[test]
+    fn test_sign_verify_tamper() {
+        use randombytes::randombytes;
+        for i in (0..32usize) {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let mut sm = sign(&m, &sk);
+            for j in (0..sm.len()) {
+                sm[j] ^= 0x20;
+                assert!(None == verify(&mut sm, &pk));
+                sm[j] ^= 0x20;
+            }
         }
     }
 }

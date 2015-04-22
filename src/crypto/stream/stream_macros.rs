@@ -106,56 +106,61 @@ pub fn stream_xor_inplace(m: &mut [u8],
     }
 }
 
-#[test]
-fn test_encrypt_decrypt() {
-    use randombytes::randombytes;
-    for i in (0..1024usize) {
-        let k = gen_key();
-        let n = gen_nonce();
-        let m = randombytes(i);
-        let c = stream_xor(&m, &n, &k);
-        let m2 = stream_xor(&c, &n, &k);
-        assert!(m == m2);
-    }
-}
+#[cfg(test)]
+mod test_m {
+    use super::*;
 
-#[test]
-fn test_stream_xor() {
-    use randombytes::randombytes;
-    for i in (0..1024usize) {
-        let k = gen_key();
-        let n = gen_nonce();
-        let m = randombytes(i);
-        let mut c = m.clone();
-        let s = stream(c.len(), &n, &k);
-        for (e, v) in c.iter_mut().zip(s.iter()) {
-            *e ^= *v;
+    #[test]
+    fn test_encrypt_decrypt() {
+        use randombytes::randombytes;
+        for i in (0..1024usize) {
+            let k = gen_key();
+            let n = gen_nonce();
+            let m = randombytes(i);
+            let c = stream_xor(&m, &n, &k);
+            let m2 = stream_xor(&c, &n, &k);
+            assert!(m == m2);
         }
-        let c2 = stream_xor(&m, &n, &k);
-        assert!(c == c2);
     }
-}
 
-#[test]
-fn test_stream_xor_inplace() {
-    use randombytes::randombytes;
-    for i in (0..1024usize) {
-        let k = gen_key();
-        let n = gen_nonce();
-        let mut m = randombytes(i);
-        let mut c = m.clone();
-        let s = stream(c.len(), &n, &k);
-        for (e, v) in c.iter_mut().zip(s.iter()) {
-            *e ^= *v;
+    #[test]
+    fn test_stream_xor() {
+        use randombytes::randombytes;
+        for i in (0..1024usize) {
+            let k = gen_key();
+            let n = gen_nonce();
+            let m = randombytes(i);
+            let mut c = m.clone();
+            let s = stream(c.len(), &n, &k);
+            for (e, v) in c.iter_mut().zip(s.iter()) {
+                *e ^= *v;
+            }
+            let c2 = stream_xor(&m, &n, &k);
+            assert!(c == c2);
         }
-        stream_xor_inplace(&mut m, &n, &k);
-        assert!(c == m);
+    }
+
+    #[test]
+    fn test_stream_xor_inplace() {
+        use randombytes::randombytes;
+        for i in (0..1024usize) {
+            let k = gen_key();
+            let n = gen_nonce();
+            let mut m = randombytes(i);
+            let mut c = m.clone();
+            let s = stream(c.len(), &n, &k);
+            for (e, v) in c.iter_mut().zip(s.iter()) {
+                *e ^= *v;
+            }
+            stream_xor_inplace(&mut m, &n, &k);
+            assert!(c == m);
+        }
     }
 }
 
 #[cfg(feature = "benchmarks")]
 #[cfg(test)]
-mod bench {
+mod bench_m {
     extern crate test;
     use super::*;
 
