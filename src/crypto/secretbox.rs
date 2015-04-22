@@ -22,5 +22,5 @@
 //! This function is conjectured to meet the standard notions of privacy and
 //! authenticity.
 pub use self::xsalsa20poly1305::*;
-#[path="secretbox/xsalsa20poly1305.rs"]
+#[path = "secretbox/xsalsa20poly1305.rs"]
 pub mod xsalsa20poly1305;

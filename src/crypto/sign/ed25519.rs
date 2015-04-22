@@ -300,7 +300,7 @@ fn test_vectors_detached() {
     }
 }
 
-#[cfg(feature="benchmarks")]
+#[cfg(feature = "benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;

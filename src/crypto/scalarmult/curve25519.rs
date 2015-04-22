@@ -114,7 +114,7 @@ fn test_vector_4() {
     assert!(k == k_expected);
 }
 
-#[cfg(feature="benchmarks")]
+#[cfg(feature = "benchmarks")]
 #[cfg(test)]
 mod bench {
     extern crate test;

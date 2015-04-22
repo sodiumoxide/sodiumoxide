@@ -32,10 +32,10 @@
 //! |crypto_auth_hmacsha512256|HMAC_SHA-512-256 |32   |32      |
 //! ------------------------------------------------------------
 pub use self::hmacsha512256::*;
-#[path="auth/auth_macros.rs"]
+#[path = "auth/auth_macros.rs"]
 #[macro_use]
 mod auth_macros;
-#[path="auth/hmacsha512256.rs"]
+#[path = "auth/hmacsha512256.rs"]
 pub mod hmacsha512256;
-#[path="auth/hmacsha256.rs"]
+#[path = "auth/hmacsha256.rs"]
 pub mod hmacsha256;

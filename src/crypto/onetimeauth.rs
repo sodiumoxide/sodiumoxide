@@ -18,8 +18,8 @@
 //! authenticator is proven to meet the standard notion of unforgeability after a
 //! single message.
 pub use self::poly1305::*;
-#[path="auth/auth_macros.rs"]
+#[path = "auth/auth_macros.rs"]
 #[macro_use]
 mod auth_macros;
-#[path="onetimeauth/poly1305.rs"]
+#[path = "onetimeauth/poly1305.rs"]
 pub mod poly1305;

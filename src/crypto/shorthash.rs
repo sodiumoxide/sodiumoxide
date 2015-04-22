@@ -12,5 +12,5 @@
 //! `shorthash()` is currently an implementation of `SipHash-2-4` as specified in
 //! [SipHash: a fast short-input PRF](https://131002.net/siphash/)
 pub use self::siphash24::*;
-#[path="shorthash/siphash24.rs"]
+#[path = "shorthash/siphash24.rs"]
 pub mod siphash24;

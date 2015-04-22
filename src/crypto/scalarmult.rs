@@ -35,5 +35,5 @@
 //! "Curve25519: new Diffie-Hellman speed records," Lecture Notes in Computer
 //! Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 pub use self::curve25519::*;
-#[path="scalarmult/curve25519.rs"]
+#[path = "scalarmult/curve25519.rs"]
 pub mod curve25519;
