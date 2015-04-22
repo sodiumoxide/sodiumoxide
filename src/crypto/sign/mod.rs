@@ -23,7 +23,5 @@
 //! crypto_sign_edwards25519sha512batch is a prototype. It has been replaced with
 //! Ed25519 and is only kept here for compatibility reasons.
 pub use self::ed25519::*;
-#[path = "sign/ed25519.rs"]
 pub mod ed25519;
-#[path = "sign/edwards25519sha512batch.rs"]
 pub mod edwards25519sha512batch;

@@ -29,10 +29,7 @@
 //! |crypto_hash_sha512|SHA-512  |64   |
 //! ------------------------------------
 pub use self::sha512::*;
-#[path = "hash/hash_macros.rs"]
 #[macro_use]
 mod hash_macros;
-#[path = "hash/sha512.rs"]
 pub mod sha512;
-#[path = "hash/sha256.rs"]
 pub mod sha256;
