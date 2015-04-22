@@ -44,5 +44,5 @@
 //! This function is conjectured to meet the standard notions of privacy and
 //! third-party unforgeability.
 pub use self::curve25519xsalsa20poly1305::*;
-#[path="asymmetricbox/curve25519xsalsa20poly1305.rs"]
+#[path = "asymmetricbox/curve25519xsalsa20poly1305.rs"]
 pub mod curve25519xsalsa20poly1305;
