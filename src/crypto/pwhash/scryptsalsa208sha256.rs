@@ -75,7 +75,7 @@ pub fn gen_salt() -> Salt {
 /// The function returns `Some(key)` on success and `None` if the computation didn't
 /// complete, usually because the operating system refused to allocate the
 /// amount of requested memory.
-pub fn derive_key(key: &'a mut [u8], passwd: &[u8], &Salt(ref sb): &Salt,
+pub fn derive_key(key: &mut [u8], passwd: &[u8], &Salt(ref sb): &Salt,
                   opslimit: usize, memlimit: usize) -> Option<()> {
     if unsafe {
         ffi::crypto_pwhash_scryptsalsa208sha256(key.as_mut_ptr(),
