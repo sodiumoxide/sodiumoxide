@@ -135,3 +135,40 @@ pub fn pwhash_verify(&HashedPassword(ref str_): &HashedPassword,
             == 0
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_pwhash() {
+        let password = "Correct Horse Battery Staple".as_bytes();
+        let hashed_password = pwhash(password,
+                                     OPSLIMIT_INTERACTIVE,
+                                     MEMLIMIT_INTERACTIVE).unwrap();
+        assert!(pwhash_verify(&hashed_password, password));
+    }
+
+    #[test]
+    fn test_pwhash_verify() {
+        use randombytes::randombytes;
+        for i in (0..32usize) {
+            let pw = randombytes(i);
+            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
+            assert!(pwhash_verify(&pwh, &pw));
+        }
+    }
+    #[test]
+    fn test_pwhash_verify_tamper() {
+        use randombytes::randombytes;
+        for i in (0..16usize) {
+            let mut pw = randombytes(i);
+            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
+            for j in (0..pw.len()) {
+                pw[j] ^= 0x20;
+                assert!(!pwhash_verify(&pwh, &pw));
+                pw[j] ^= 0x20;
+            }
+        }
+    }
+}
