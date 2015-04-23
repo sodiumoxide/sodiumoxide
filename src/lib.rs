@@ -4,7 +4,7 @@
 //! Cryptography library](http://nacl.cr.yp.to)
 //!
 //! For most users, if you want public-key (asymmetric) cryptography you should use
-//! the functions in `crypto::asymmetricbox` for encryption/decryption.
+//! the functions in `crypto::box_` for encryption/decryption.
 //!
 //! If you want secret-key (symmetric) cryptography you should be using the
 //! functions in `crypto::secretbox` for encryption/decryption.
@@ -24,7 +24,7 @@
 //! generation functions and the key-generation functions are thread-safe.
 //!
 //! # Public-key cryptography
-//!  `crypto::asymmetricbox`
+//!  `crypto::box_`
 //!
 //!  `crypto::sign`
 //!
@@ -71,7 +71,7 @@ pub mod randombytes;
 
 /// Cryptographic functions
 pub mod crypto {
-    pub mod asymmetricbox;
+    pub mod box_;
     pub mod sign;
     pub mod scalarmult;
     pub mod auth;
