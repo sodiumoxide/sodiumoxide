@@ -1,4 +1,4 @@
-//! #Password Hashing
+//! Password Hashing
 //!
 //! Secret keys used to encrypt or sign confidential data have to be chosen from
 //! a very large keyspace. However, passwords are usually short, human-generated
