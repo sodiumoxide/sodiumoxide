@@ -195,15 +195,6 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_pwhash() {
-        let password = "Correct Horse Battery Staple".as_bytes();
-        let hashed_password = pwhash(password,
-                                     OPSLIMIT_INTERACTIVE,
-                                     MEMLIMIT_INTERACTIVE).unwrap();
-        assert!(pwhash_verify(&hashed_password, password));
-    }
-
-    #[test]
     fn test_pwhash_verify() {
         use randombytes::randombytes;
         for i in (0..32usize) {
