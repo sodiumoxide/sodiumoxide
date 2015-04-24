@@ -26,20 +26,20 @@ extern {
     pub fn crypto_pwhash_scryptsalsa208sha256(
         out: *mut u8,
         outlen: c_ulonglong,
-        passwd: *const c_char,
+        passwd: *const u8,
         passwdlen: c_ulonglong,
         salt: *const [u8; crypto_pwhash_scryptsalsa208sha256_SALTBYTES],
         opslimit: c_ulonglong,
         memlimit: size_t) -> c_int;
     pub fn crypto_pwhash_scryptsalsa208sha256_str(
-        out: *mut [c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES],
-        passwd: *const c_char,
+        out: *mut [u8; crypto_pwhash_scryptsalsa208sha256_STRBYTES],
+        passwd: *const u8,
         passwdlen: c_ulonglong,
         opslimit: c_ulonglong,
         memlimit: size_t) -> c_int;
     pub fn crypto_pwhash_scryptsalsa208sha256_str_verify(
-        str_: *const [c_char; crypto_pwhash_scryptsalsa208sha256_STRBYTES],
-        passwd: *const c_char,
+        str_: *const [u8; crypto_pwhash_scryptsalsa208sha256_STRBYTES],
+        passwd: *const u8,
         passwdlen: c_ulonglong) -> c_int;
     pub fn crypto_pwhash_scryptsalsa208sha256_ll(
         passwd: *const u8,
@@ -107,7 +107,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_str() {
     let ret_hash = unsafe {
         crypto_pwhash_scryptsalsa208sha256_str(
             &mut hashed_password,
-            password.as_ptr() as *const c_char,
+            password.as_ptr(),
             password.len() as c_ulonglong,
             crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE
                 as c_ulonglong,
@@ -118,7 +118,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_str() {
     let ret_verify = unsafe {
         crypto_pwhash_scryptsalsa208sha256_str_verify(
             &hashed_password,
-            password.as_ptr() as *const c_char,
+            password.as_ptr(),
             password.len() as c_ulonglong)
     };
     assert!(ret_verify == 0);
