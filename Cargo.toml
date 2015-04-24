@@ -11,7 +11,10 @@ license = "MIT"
 
 [dependencies]
 libc = "*"
-libsodium-sys = "*"
+#libsodium-sys = "*"
+
+[dependencies.libsodium-sys]
+path = "./libsodium-sys"
 
 [dev-dependencies.rustc-serialize]
 rustc-serialize = "*"
