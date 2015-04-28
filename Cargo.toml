@@ -5,16 +5,13 @@ documentation = "http://rust-ci.org/dnaq/sodiumoxide/doc/sodiumoxide/"
 repository = "https://github.com/dnaq/sodiumoxide"
 readme = "README.md"
 keywords = ["crypto", "NaCl", "libsodium"]
-version = "0.0.4"
+version = "0.0.5"
 authors = ["dnaq"]
 license = "MIT"
 
 [dependencies]
 libc = "*"
-#libsodium-sys = "*"
-
-[dependencies.libsodium-sys]
-path = "./libsodium-sys"
+libsodium-sys = "*"
 
 [dev-dependencies.rustc-serialize]
 rustc-serialize = "*"
