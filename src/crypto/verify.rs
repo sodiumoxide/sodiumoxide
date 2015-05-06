@@ -12,7 +12,7 @@ use ffi;
 /// timing attacks.
 pub fn verify_16(x: &[u8; 16], y: &[u8; 16]) -> bool {
     unsafe {
-        ffi::crypto_verify_16(x.as_ptr(), y.as_ptr()) == 0
+        ffi::crypto_verify_16(x, y) == 0
     }
 }
 
@@ -27,7 +27,22 @@ pub fn verify_16(x: &[u8; 16], y: &[u8; 16]) -> bool {
 /// timing attacks.
 pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
     unsafe {
-        ffi::crypto_verify_32(x.as_ptr(), y.as_ptr()) == 0
+        ffi::crypto_verify_32(x, y) == 0
+    }
+}
+
+/// `verify_64()` returns true if `x[0]`, `x[1]`, ..., `x[63]` are the
+/// same as `y[0]`, `y[1]`, ..., `y[63]`. Otherwise it returns `false`.
+///
+/// This functions is safe to use for secrets `x[0]`, `x[1]`, ..., `x[63]`,
+/// `y[0]`, `y[1]`, ..., `y[63]`. The time taken by `verify_64` is independent
+/// of the contents of `x[0]`, `x[1]`, ..., `x[63]`, `y[0]`, `y[1]`, ..., `y[63]`.
+/// In contrast, the standard C comparison function `memcmp(x,y,64)` takes time
+/// that depends on the longest matching prefix of `x` and `y`, often allowing easy
+/// timing attacks.
+pub fn verify_64(x: &[u8; 64], y: &[u8; 64]) -> bool {
+    unsafe {
+        ffi::crypto_verify_64(x, y) == 0
     }
 }
 
@@ -67,6 +82,24 @@ mod test {
                 assert!(verify_32(&x, &y))
             } else {
                 assert!(!verify_32(&x, &y))
+            }
+        }
+    }
+
+    #[test]
+    fn test_verify_64() {
+        use randombytes::randombytes_into;
+
+        for _ in (0usize..256) {
+            let mut x = [0; 64];
+            let mut y = [0; 64];
+            assert!(verify_64(&x, &y));
+            randombytes_into(&mut x);
+            randombytes_into(&mut y);
+            if x[..] == y[..] {
+                assert!(verify_64(&x, &y))
+            } else {
+                assert!(!verify_64(&x, &y))
             }
         }
     }
