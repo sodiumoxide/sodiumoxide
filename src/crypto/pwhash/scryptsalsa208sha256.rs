@@ -90,7 +90,7 @@ pub fn gen_salt() -> Salt {
 /// The function returns `Some(key)` on success and `None` if the computation didn't
 /// complete, usually because the operating system refused to allocate the
 /// amount of requested memory.
-/// #Example
+/// # Example
 /// ```
 /// use sodiumoxide::crypto::secretbox::{Key, KEYBYTES};
 /// use sodiumoxide::crypto::pwhash::{gen_salt, derive_key,

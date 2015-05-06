@@ -21,5 +21,15 @@
 //!
 //! This function is conjectured to meet the standard notions of privacy and
 //! authenticity.
+//! # Example
+//! ```
+//! use sodiumoxide::crypto::secretbox;
+//! let key = secretbox::gen_key();
+//! let nonce = secretbox::gen_nonce();
+//! let plaintext = "plaintext".as_bytes();
+//! let ciphertext = secretbox::seal(plaintext, &nonce, &key);
+//! let plaintext2 = secretbox::open(&ciphertext, &nonce, &key).unwrap();
+//! assert!(plaintext == &plaintext2[..]);
+//! ```
 pub use self::xsalsa20poly1305::*;
 pub mod xsalsa20poly1305;
