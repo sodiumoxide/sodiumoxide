@@ -30,9 +30,11 @@
 //! |-------------------------|-----------------|-----|--------|
 //! |crypto_auth_hmacsha256   |HMAC_SHA-256     |32   |32      |
 //! |crypto_auth_hmacsha512256|HMAC_SHA-512-256 |32   |32      |
+//! |crypto_auth_hmacsha512   |HMAC_SHA-512     |64   |32      |
 //! ------------------------------------------------------------
 pub use self::hmacsha512256::*;
 #[macro_use]
 mod auth_macros;
+pub mod hmacsha512;
 pub mod hmacsha512256;
 pub mod hmacsha256;
