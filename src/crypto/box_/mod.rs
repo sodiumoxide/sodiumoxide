@@ -43,6 +43,7 @@
 //!
 //! This function is conjectured to meet the standard notions of privacy and
 //! third-party unforgeability.
+//!
 //! # Example (simple interface)
 //! ```
 //! use sodiumoxide::crypto::box_;
@@ -51,7 +52,7 @@
 //! // normally theirpk is sent by the other party
 //! let (theirpk, theirsk) = box_::gen_keypair();
 //! let nonce = box_::gen_nonce();
-//! let plaintext = "plaintext".as_bytes();
+//! let plaintext = b"some data";
 //! let ciphertext = box_::seal(plaintext, &nonce, &theirpk, &oursk);
 //! let their_plaintext = box_::open(&ciphertext, &nonce, &ourpk, &theirsk).unwrap();
 //! assert!(plaintext == &their_plaintext[..]);
@@ -64,7 +65,7 @@
 //! let (theirpk, theirsk) = box_::gen_keypair();
 //! let our_precomputed_key = box_::precompute(&theirpk, &oursk);
 //! let nonce = box_::gen_nonce();
-//! let plaintext = "plaintext".as_bytes();
+//! let plaintext = b"plaintext";
 //! let ciphertext = box_::seal_precomputed(plaintext, &nonce, &our_precomputed_key);
 //! // this will be identical to our_precomputed_key
 //! let their_precomputed_key = box_::precompute(&ourpk, &theirsk);

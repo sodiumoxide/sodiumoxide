@@ -23,5 +23,46 @@
 //! - Protecting an on-disk secret key with a password,
 //! - Password storage, or rather: storing what it takes to verify a password
 //!   without having to store the actual password.
+//!
+//! # Example (key derivation)
+//! ```
+//! use sodiumoxide::crypto::secretbox;
+//! use sodiumoxide::crypto::pwhash;
+//!
+//! let passwd = b"Correct Horse Battery Staple";
+//! let salt = pwhash::gen_salt();
+//! let mut k = secretbox::Key([0; secretbox::KEYBYTES]);
+//! {
+//!     let secretbox::Key(ref mut kb) = k;
+//!     pwhash::derive_key(kb, passwd, &salt,
+//!                        pwhash::OPSLIMIT_INTERACTIVE,
+//!                        pwhash::MEMLIMIT_INTERACTIVE).unwrap();
+//! }
+//! ```
+//!
+//! # Example (password hashing)
+//! ```
+//! use sodiumoxide::crypto::pwhash;
+//! let passwd = b"Correct Horse Battery Staple";
+//! let pwh = pwhash::pwhash(passwd,
+//!                          pwhash::OPSLIMIT_INTERACTIVE,
+//!                          pwhash::MEMLIMIT_INTERACTIVE).unwrap();
+//! let pwh_bytes = &pwh[..];
+//! //store pwh_bytes somewhere
+//! ```
+//!
+//! # Example (password verification)
+//! ```
+//! use sodiumoxide::crypto::pwhash;
+//!
+//! let passwd = b"Correct Horse Battery Staple";
+//! // in reality we want to load the password hash from somewhere
+//! // and we might want to create a `HashedPassword` from it using
+//! // `HashedPassword::from_slice(pwhash_bytes).unwrap()`
+//! let pwh = pwhash::pwhash(passwd,
+//!                          pwhash::OPSLIMIT_INTERACTIVE,
+//!                          pwhash::MEMLIMIT_INTERACTIVE).unwrap();
+//! assert!(pwhash::pwhash_verify(&pwh, passwd));
+//! ```
 pub use self::scryptsalsa208sha256::*;
 pub mod scryptsalsa208sha256;
