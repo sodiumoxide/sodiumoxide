@@ -49,6 +49,41 @@
 //! risk of collision. Callers who are unable to count 1, 2, 3..., and who insist
 //! on using these primitives, are advised to use a randomly derived key for each
 //! message.
+//!
+//! # Example (keystream generation)
+//! ```
+//! use sodiumoxide::crypto::stream;
+//!
+//! let key = stream::gen_key();
+//! let nonce = stream::gen_nonce();
+//! let keystream = stream::stream(128, &nonce, &key); // generate 128 bytes of keystream
+//! ```
+//!
+//! # Example (encryption)
+//! ```
+//! use sodiumoxide::crypto::stream;
+//!
+//! let key = stream::gen_key();
+//! let nonce = stream::gen_nonce();
+//! let plaintext = b"some data";
+//! let ciphertext = stream::stream_xor(plaintext, &nonce, &key);
+//! let their_plaintext = stream::stream_xor(&ciphertext, &nonce, &key);
+//! assert_eq!(plaintext, &their_plaintext[..]);
+//! ```
+//!
+//! # Example (in place encryption)
+//! ```
+//! use sodiumoxide::crypto::stream;
+//!
+//! let key = stream::gen_key();
+//! let nonce = stream::gen_nonce();
+//! let plaintext = &mut [0, 1, 2, 3];
+//! // encrypt the plaintext
+//! stream::stream_xor_inplace(plaintext, &nonce, &key);
+//! // decrypt the plaintext
+//! stream::stream_xor_inplace(plaintext, &nonce, &key);
+//! assert_eq!(plaintext, &mut [0, 1, 2, 3]);
+//! ```
 pub use self::xsalsa20::*;
 #[macro_use]
 mod stream_macros;

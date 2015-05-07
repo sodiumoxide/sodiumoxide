@@ -28,6 +28,14 @@
 //! |crypto_hash_sha256|SHA-256  |32   |
 //! |crypto_hash_sha512|SHA-512  |64   |
 //! ------------------------------------
+//!
+//! # Example
+//! ```
+//! use sodiumoxide::crypto::hash;
+//!
+//! let data_to_hash = b"some data";
+//! let digest = hash::hash(data_to_hash);
+//! ```
 pub use self::sha512::*;
 #[macro_use]
 mod hash_macros;
