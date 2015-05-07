@@ -17,6 +17,16 @@
 //! in [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 9. This
 //! authenticator is proven to meet the standard notion of unforgeability after a
 //! single message.
+//!
+//! # Example
+//! ```
+//! use sodiumoxide::crypto::onetimeauth;
+//!
+//! let key = onetimeauth::gen_key();
+//! let data_to_authenticate = b"some data";
+//! let tag = onetimeauth::authenticate(data_to_authenticate, &key);
+//! assert!(onetimeauth::verify(&tag, data_to_authenticate, &key));
+//! ```
 pub use self::poly1305::*;
 #[path = "../auth/auth_macros.rs"]
 #[macro_use]
