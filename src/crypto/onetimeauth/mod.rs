@@ -18,14 +18,14 @@
 //! authenticator is proven to meet the standard notion of unforgeability after a
 //! single message.
 //!
-//! #Example
+//! # Example
 //! ```
 //! use sodiumoxide::crypto::onetimeauth;
 //!
 //! let key = onetimeauth::gen_key();
-//! let text_to_authenticate = "some text".as_bytes();
-//! let tag = onetimeauth::authenticate(text_to_authenticate, &key);
-//! assert!(onetimeauth::verify(&tag, text_to_authenticate, &key));
+//! let data_to_authenticate = b"some data";
+//! let tag = onetimeauth::authenticate(data_to_authenticate, &key);
+//! assert!(onetimeauth::verify(&tag, data_to_authenticate, &key));
 //! ```
 pub use self::poly1305::*;
 #[path = "../auth/auth_macros.rs"]

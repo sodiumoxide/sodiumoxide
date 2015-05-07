@@ -32,14 +32,15 @@
 //! |crypto_auth_hmacsha512256|HMAC_SHA-512-256 |32   |32      |
 //! |crypto_auth_hmacsha512   |HMAC_SHA-512     |64   |32      |
 //! ------------------------------------------------------------
+//!
 //! # Example
 //! ```
 //! use sodiumoxide::crypto::auth;
 //!
 //! let key = auth::gen_key();
-//! let text_to_authenticate = "some text".as_bytes();
-//! let tag = auth::authenticate(text_to_authenticate, &key);
-//! assert!(auth::verify(&tag, text_to_authenticate, &key));
+//! let data_to_authenticate = b"some data";
+//! let tag = auth::authenticate(data_to_authenticate, &key);
+//! assert!(auth::verify(&tag, data_to_authenticate, &key));
 //! ```
 pub use self::hmacsha512256::*;
 #[macro_use]
