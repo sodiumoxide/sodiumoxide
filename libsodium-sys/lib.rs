@@ -17,6 +17,8 @@ include!("src/crypto_box_curve25519xsalsa20poly1305.rs");
 
 include!("src/crypto_core_hsalsa20.rs");
 
+include!("src/crypto_generichash_blake2b.rs");
+
 include!("src/crypto_hash.rs");
 include!("src/crypto_hash_sha256.rs");
 include!("src/crypto_hash_sha512.rs");
