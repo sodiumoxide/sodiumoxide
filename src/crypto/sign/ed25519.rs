@@ -37,7 +37,7 @@ newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
 /// `PublicKey` for signatures
-#[derive(Copy)]
+#[derive(PartialEq, Eq, Copy)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
