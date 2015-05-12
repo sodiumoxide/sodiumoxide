@@ -17,7 +17,7 @@ const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES;
 const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
 /// `PublicKey` for asymmetric authenticated encryption
-#[derive(Copy)]
+#[derive(Copy, Eq, PartialEq)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
