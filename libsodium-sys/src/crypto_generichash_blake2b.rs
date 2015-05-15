@@ -41,7 +41,6 @@ extern {
         -> c_int;
 }
 
-
 #[test]
 fn test_crypto_generichash_blake2b_bytes_min() {
     assert_eq!(unsafe { crypto_generichash_blake2b_bytes_min() as usize },
