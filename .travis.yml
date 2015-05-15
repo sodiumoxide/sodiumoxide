@@ -6,9 +6,6 @@ install:
     - wget https://github.com/jedisct1/libsodium/releases/download/1.0.0/libsodium-1.0.0.tar.gz
     - tar xvfz libsodium-1.0.0.tar.gz
     - cd libsodium-1.0.0 && ./configure --prefix=/usr && make && sudo make install && cd ..
-before_script:
-    - sed -i 's/libsodium-sys/#libsodium-sys/' Cargo.toml
-    - printf "\n[dependencies.libsodium-sys]\npath = './libsodium-sys'\n" >> Cargo.toml
 script:
     - cargo build --verbose
     - cargo test --verbose
