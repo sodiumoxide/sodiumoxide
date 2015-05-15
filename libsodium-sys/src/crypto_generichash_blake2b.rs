@@ -19,7 +19,7 @@ extern {
     pub fn crypto_generichash_blake2b_keybytes() -> size_t;
     pub fn crypto_generichash_blake2b_saltbytes() -> size_t;
     pub fn crypto_generichash_blake2b_personalbytes() -> size_t;
-    
+
     pub fn crypto_generichash_blake2b(
         out: *mut u8,
         outlen: size_t,
