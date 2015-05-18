@@ -5,7 +5,6 @@ macro_rules! auth_module (($auth_name:ident,
                            $tagbytes:expr) => (
 
 use libc::c_ulonglong;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
 
 pub const KEYBYTES: usize = $keybytes;

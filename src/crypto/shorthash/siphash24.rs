@@ -1,7 +1,6 @@
 //! `SipHash-2-4`
 use ffi;
 use libc::c_ulonglong;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
 
 pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;

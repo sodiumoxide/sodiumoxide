@@ -5,7 +5,6 @@
 //! This function is conjectured to meet the standard notions of privacy and
 //! third-party unforgeability.
 use ffi;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use marshal::marshal;
 use randombytes::randombytes_into;
 

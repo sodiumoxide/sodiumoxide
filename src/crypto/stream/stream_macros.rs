@@ -5,7 +5,6 @@ macro_rules! stream_module (($stream_name:ident,
 
 use libc::c_ulonglong;
 use std::iter::repeat;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
 
 pub const KEYBYTES: usize = $keybytes;

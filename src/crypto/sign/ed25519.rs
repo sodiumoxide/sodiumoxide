@@ -5,7 +5,6 @@
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
