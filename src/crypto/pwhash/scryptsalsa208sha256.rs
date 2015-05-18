@@ -1,7 +1,6 @@
 //! `crypto_pwhash_scryptsalsa208sha256`, a particular combination of Scrypt, Salsa20/8
 //! and SHA-256
 use ffi;
-use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 use randombytes::randombytes_into;
 use libc::{c_ulonglong, size_t};
 

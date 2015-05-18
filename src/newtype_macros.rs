@@ -47,9 +47,9 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
     /// by using `x[a..b] == y[a..b]`. This will open up for timing attacks
     /// when comparing for example authenticator tags. Because of this only
     /// use the comparison functions exposed by the sodiumoxide API.
-    impl Index<Range<usize>> for $newtype {
+    impl ::std::ops::Index<::std::ops::Range<usize>> for $newtype {
         type Output = [u8];
-        fn index(&self, _index: Range<usize>) -> &[u8] {
+        fn index(&self, _index: ::std::ops::Range<usize>) -> &[u8] {
             let &$newtype(ref b) = self;
             b.index(_index)
         }
@@ -60,9 +60,9 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
     /// by using `x[..b] == y[..b]`. This will open up for timing attacks
     /// when comparing for example authenticator tags. Because of this only
     /// use the comparison functions exposed by the sodiumoxide API.
-    impl Index<RangeTo<usize>> for $newtype {
+    impl ::std::ops::Index<::std::ops::RangeTo<usize>> for $newtype {
         type Output = [u8];
-        fn index(&self, _index: RangeTo<usize>) -> &[u8] {
+        fn index(&self, _index: ::std::ops::RangeTo<usize>) -> &[u8] {
             let &$newtype(ref b) = self;
             b.index(_index)
         }
@@ -73,9 +73,9 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
     /// by using `x[a..] == y[a..]`. This will open up for timing attacks
     /// when comparing for example authenticator tags. Because of this only
     /// use the comparison functions exposed by the sodiumoxide API.
-    impl Index<RangeFrom<usize>> for $newtype {
+    impl ::std::ops::Index<::std::ops::RangeFrom<usize>> for $newtype {
         type Output = [u8];
-        fn index(&self, _index: RangeFrom<usize>) -> &[u8] {
+        fn index(&self, _index: ::std::ops::RangeFrom<usize>) -> &[u8] {
             let &$newtype(ref b) = self;
             b.index(_index)
         }
@@ -86,9 +86,9 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
     /// by using `x[] == y[]`. This will open up for timing attacks
     /// when comparing for example authenticator tags. Because of this only
     /// use the comparison functions exposed by the sodiumoxide API.
-    impl Index<RangeFull> for $newtype {
+    impl ::std::ops::Index<::std::ops::RangeFull> for $newtype {
         type Output = [u8];
-        fn index(&self, _index: RangeFull) -> &[u8] {
+        fn index(&self, _index: ::std::ops::RangeFull) -> &[u8] {
             let &$newtype(ref b) = self;
             b.index(_index)
         }
