@@ -33,7 +33,7 @@ extern {
         mlen: c_ulonglong,
         sk: *const [u8; crypto_sign_ed25519_SECRETKEYBYTES]) -> c_int;
     pub fn crypto_sign_ed25519_verify_detached(
-        sig: *const u8,
+        sig: *const [u8; crypto_sign_ed25519_BYTES],
         m: *const u8,
         mlen: c_ulonglong,
         pk: *const [u8; crypto_sign_ed25519_PUBLICKEYBYTES]) -> c_int;

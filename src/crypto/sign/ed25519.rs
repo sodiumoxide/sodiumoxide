@@ -135,11 +135,11 @@ pub fn sign_detached(m: &[u8],
 /// `verify_detached()` verifies the signature in `sig` against the message `m`
 /// and the signer's public key `pk`.
 /// `verify_detached()` returns true if the signature is valid, false otherwise.
-pub fn verify_detached(&Signature(sig): &Signature,
+pub fn verify_detached(&Signature(ref sig): &Signature,
                        m: &[u8],
                        &PublicKey(ref pk): &PublicKey) -> bool {
     unsafe {
-        0 == ffi::crypto_sign_ed25519_verify_detached(sig.as_ptr(),
+        0 == ffi::crypto_sign_ed25519_verify_detached(sig,
                                                       m.as_ptr(),
                                                       m.len() as c_ulonglong,
                                                       pk)
