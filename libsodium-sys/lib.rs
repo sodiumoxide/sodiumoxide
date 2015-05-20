@@ -18,6 +18,7 @@ include!("src/crypto_box_curve25519xsalsa20poly1305.rs");
 include!("src/crypto_core_hsalsa20.rs");
 include!("src/crypto_core_salsa20.rs");
 include!("src/crypto_core_salsa2012.rs");
+include!("src/crypto_core_salsa208.rs");
 
 include!("src/crypto_generichash.rs");
 include!("src/crypto_generichash_blake2b.rs");
