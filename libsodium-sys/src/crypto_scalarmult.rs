@@ -10,26 +10,25 @@ extern {
     pub fn crypto_scalarmult_primitive() -> *const c_char;
     pub fn crypto_scalarmult_base(
         q: *mut [u8; crypto_scalarmult_BYTES],
-        n: *const [u8; crypto_scalarmult_SCALARBYTES])
-        -> c_int;
+        n: *const [u8; crypto_scalarmult_SCALARBYTES]) -> c_int;
     pub fn crypto_scalarmult(
         q: *mut [u8; crypto_scalarmult_BYTES],
         n: *const [u8; crypto_scalarmult_SCALARBYTES],
-        p: *const [u8; crypto_scalarmult_BYTES])
-        -> c_int;
+        p: *const [u8; crypto_scalarmult_BYTES]) -> c_int;
 }
 
 #[test]
 fn test_crypto_scalarmult_bytes() {
     assert_eq!(unsafe { crypto_scalarmult_bytes() as usize },
-                        crypto_scalarmult_BYTES)
+               crypto_scalarmult_BYTES);
 }
 
 #[test]
 fn test_crypto_scalarmult_scalarbytes() {
     assert_eq!(unsafe { crypto_scalarmult_scalarbytes() as usize },
-                        crypto_scalarmult_SCALARBYTES)
+               crypto_scalarmult_SCALARBYTES);
 }
+
 #[test]
 fn test_crypto_scalarmult_primitive() {
     unsafe {
