@@ -9,9 +9,9 @@ pub const BYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES;
 pub const SCALARBYTES: usize = ffi::crypto_scalarmult_curve25519_SCALARBYTES;
 
 /// `Scalar` value (integer in byte representation)
-#[derive(Copy)]
 pub struct Scalar(pub [u8; SCALARBYTES]);
 
+newtype_drop!(Scalar);
 newtype_clone!(Scalar);
 newtype_impl!(Scalar, SCALARBYTES);
 
