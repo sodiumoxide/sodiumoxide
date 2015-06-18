@@ -92,3 +92,4 @@ pub mod aes128ctr;
 pub mod salsa208;
 pub mod salsa2012;
 pub mod salsa20;
+pub mod chacha20;
