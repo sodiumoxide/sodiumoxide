@@ -7,6 +7,7 @@
 use ffi;
 use marshal::marshal;
 use randombytes::randombytes_into;
+use rustc_serialize::{Encodable, Decodable, Decoder};
 
 pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES;
 pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
@@ -15,6 +16,7 @@ pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
 ///
 /// When a `Key` goes out of scope its contents
 /// will be zeroed out
+#[derive(RustcEncodable)]
 pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
@@ -22,7 +24,7 @@ newtype_clone!(Key);
 newtype_impl!(Key, KEYBYTES);
 
 /// `Nonce` for symmetric authenticated encryption
-#[derive(Copy)]
+#[derive(Copy, RustcEncodable)]
 pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);

@@ -5,12 +5,13 @@
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
-
+use std::cmp::{PartialEq, Eq};
+use std::fmt;
+use rustc_serialize::{Encodable, Decodable, Decoder};
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
-
 
 /// `Seed` that can be used for keypair generation
 ///
@@ -19,6 +20,7 @@ pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
 ///
 /// When a `Seed` goes out of scope its contents
 /// will be zeroed out
+#[derive(RustcEncodable)]
 pub struct Seed(pub [u8; SEEDBYTES]);
 
 newtype_drop!(Seed);
@@ -29,6 +31,7 @@ newtype_impl!(Seed, SEEDBYTES);
 ///
 /// When a `SecretKey` goes out of scope its contents
 /// will be zeroed out
+#[derive(RustcEncodable)]
 pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
@@ -36,15 +39,28 @@ newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
 /// `PublicKey` for signatures
-#[derive(Copy, Eq, PartialEq)]
+#[derive(Copy, Debug, Eq, PartialEq, RustcEncodable)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
+
 /// Detached signature
-#[derive(Copy)]
+#[derive(Copy, RustcEncodable)]
 pub struct Signature(pub [u8; SIGNATUREBYTES]);
+
+impl fmt::Debug for Signature {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        self[..].fmt(formatter)
+    }
+}
+
+impl PartialEq for Signature {
+  fn eq(&self, other: &Signature) -> bool {
+    self[..] == other[..]
+  }
+}
 
 newtype_clone!(Signature);
 newtype_impl!(Signature, SIGNATUREBYTES);
@@ -148,8 +164,28 @@ pub fn verify_detached(&Signature(ref sig): &Signature,
 
 #[cfg(test)]
 mod test {
-    extern crate rustc_serialize;
     use super::*;
+    extern crate cbor; // to test encodable / decodable traits 
+    use self::cbor::{Encoder, Decoder};
+    use rustc_serialize::{Decodable, Encodable};
+    use std::fmt::Debug;
+    
+    fn encode<T: Encodable>(v: T) -> Vec<u8> {
+        let mut enc = Encoder::from_memory();
+        enc.encode(&[v]).unwrap();
+        enc.as_bytes().to_vec()
+    }
+    
+    fn decode<T: Decodable>(bytes: &[u8]) -> T {
+    Decoder::from_bytes(bytes).decode().next().unwrap().unwrap()
+    }
+    
+    fn round_trip<T>(v: T) -> bool
+        where T: Decodable + Encodable + Debug + PartialEq {
+            let backv: T = decode(&encode(&v));
+            assert_eq!(backv, v);
+            true
+    }
 
     #[test]
     fn test_sign_verify() {
@@ -186,6 +222,18 @@ mod test {
             let m = randombytes(i);
             let sig = sign_detached(&m, &sk);
             assert!(verify_detached(&sig, &m, &pk));
+        }
+    }
+    
+    #[test]
+    fn test_serialisation() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let sig = sign_detached(&m, &sk);
+            round_trip(pk);
+            round_trip(sig);
         }
     }
 
@@ -241,7 +289,7 @@ mod test {
     fn test_vectors() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use self::rustc_serialize::hex::{FromHex, ToHex};
+        use rustc_serialize::hex::{FromHex, ToHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -273,7 +321,7 @@ mod test {
     fn test_vectors_detached() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use self::rustc_serialize::hex::{FromHex, ToHex};
+        use rustc_serialize::hex::{FromHex, ToHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 

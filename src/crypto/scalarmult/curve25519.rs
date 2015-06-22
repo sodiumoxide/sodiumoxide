@@ -7,8 +7,11 @@ use ffi;
 
 pub const BYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES;
 pub const SCALARBYTES: usize = ffi::crypto_scalarmult_curve25519_SCALARBYTES;
+use rustc_serialize::{Encodable, Decodable, Decoder};
 
 /// `Scalar` value (integer in byte representation)
+
+#[derive(RustcEncodable)]
 pub struct Scalar(pub [u8; SCALARBYTES]);
 
 newtype_drop!(Scalar);
@@ -16,7 +19,7 @@ newtype_clone!(Scalar);
 newtype_impl!(Scalar, SCALARBYTES);
 
 /// `GroupElement`
-#[derive(Copy)]
+#[derive(Copy, RustcEncodable)]
 pub struct GroupElement(pub [u8; BYTES]);
 
 newtype_clone!(GroupElement);
