@@ -3,7 +3,7 @@
 use ffi;
 use randombytes::randombytes_into;
 use libc::{c_ulonglong, size_t};
-use rustc_serialize::{Encodable, Decodable, Decoder};
+use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
 
 pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES;
 pub const STRBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES;
@@ -34,7 +34,7 @@ pub struct OpsLimit(pub usize);
 pub struct MemLimit(pub usize);
 
 /// `Salt` used for password hashing
-#[derive(Copy, RustcEncodable)]
+#[derive(Copy)]
 pub struct Salt(pub [u8; SALTBYTES]);
 newtype_clone!(Salt);
 newtype_impl!(Salt, SALTBYTES);

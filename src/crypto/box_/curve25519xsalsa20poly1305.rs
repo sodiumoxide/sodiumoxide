@@ -7,7 +7,7 @@
 use ffi;
 use marshal::marshal;
 use randombytes::randombytes_into;
-use rustc_serialize::{Encodable, Decodable, Decoder};
+use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
 
 pub const PUBLICKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES;
@@ -17,7 +17,7 @@ const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES;
 const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
 /// `PublicKey` for asymmetric authenticated encryption
-#[derive(Copy, Eq, PartialEq, RustcEncodable)]
+#[derive(Copy, Eq, PartialEq)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
@@ -28,7 +28,6 @@ newtype_impl!(PublicKey, PUBLICKEYBYTES);
 /// When a `SecretKey` goes out of scope its contents
 /// will be zeroed out
 
-#[derive(RustcEncodable)]
 pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
@@ -36,7 +35,7 @@ newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
 /// `Nonce` for asymmetric authenticated encryption
-#[derive(Copy, RustcEncodable)]
+#[derive(Copy)]
 pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);
@@ -121,7 +120,6 @@ pub fn open(c: &[u8],
 /// speed by splitting `open()` into two steps, `precompute()` and `open_precomputed()`.
 ///
 /// When a `PrecomputedKey` goes out of scope its contents will be zeroed out
-#[derive(RustcEncodable)]
 pub struct PrecomputedKey([u8; PRECOMPUTEDKEYBYTES]);
 
 newtype_drop!(PrecomputedKey);

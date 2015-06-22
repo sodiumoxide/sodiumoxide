@@ -6,7 +6,7 @@ macro_rules! auth_module (($auth_name:ident,
 
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
-use rustc_serialize::{Encodable, Decodable, Decoder};
+use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
 
 pub const KEYBYTES: usize = $keybytes;
 pub const TAGBYTES: usize = $tagbytes;
@@ -15,7 +15,6 @@ pub const TAGBYTES: usize = $tagbytes;
 ///
 /// When a `Key` goes out of scope its contents
 /// will be zeroed out
-#[derive(RustcEncodable)]
 pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
@@ -26,7 +25,7 @@ newtype_impl!(Key, KEYBYTES);
 ///
 /// The tag implements the traits `PartialEq` and `Eq` using constant-time
 /// comparison functions. See `sodiumoxide::crypto::verify::verify_32`
-#[derive(Copy, RustcEncodable)]
+#[derive(Copy)]
 pub struct Tag(pub [u8; TAGBYTES]);
 
 impl Eq for Tag {}
