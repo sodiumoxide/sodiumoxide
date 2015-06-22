@@ -6,6 +6,7 @@ macro_rules! stream_module (($stream_name:ident,
 use libc::c_ulonglong;
 use std::iter::repeat;
 use randombytes::randombytes_into;
+use rustc_serialize::{Encodable, Decodable, Decoder};
 
 pub const KEYBYTES: usize = $keybytes;
 pub const NONCEBYTES: usize = $noncebytes;
@@ -14,6 +15,7 @@ pub const NONCEBYTES: usize = $noncebytes;
 ///
 /// When a `Key` goes out of scope its contents
 /// will be zeroed out
+#[derive(RustcEncodable)]
 pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);
@@ -21,7 +23,7 @@ newtype_clone!(Key);
 newtype_impl!(Key, KEYBYTES);
 
 /// `Nonce` for symmetric encryption
-#[derive(Copy)]
+#[derive(Copy, RustcEncodable)]
 pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);

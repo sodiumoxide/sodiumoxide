@@ -2,12 +2,13 @@
 use ffi;
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
+use rustc_serialize::{Encodable, Decodable, Decoder};
 
 pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
 pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES;
 
 /// Digest-structure
-#[derive(Copy)]
+#[derive(Copy, RustcEncodable)]
 pub struct Digest(pub [u8; HASHBYTES]);
 
 newtype_clone!(Digest);
@@ -17,6 +18,7 @@ newtype_impl!(Digest, HASHBYTES);
 ///
 /// When a `Key` goes out of scope its contents
 /// will be zeroed out
+#[derive(RustcEncodable)]
 pub struct Key(pub [u8; KEYBYTES]);
 
 newtype_drop!(Key);

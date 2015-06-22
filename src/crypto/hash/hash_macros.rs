@@ -1,12 +1,13 @@
 macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
 
 use libc::c_ulonglong;
+use rustc_serialize::{Encodable, Decodable, Decoder};
 
 pub const HASHBYTES: usize = $hashbytes;
 pub const BLOCKBYTES: usize = $blockbytes;
 
 /// Digest-structure
-#[derive(Copy)]
+#[derive(Copy, RustcEncodable)]
 pub struct Digest(pub [u8; HASHBYTES]);
 
 newtype_clone!(Digest);

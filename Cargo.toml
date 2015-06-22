@@ -12,9 +12,10 @@ license = "MIT"
 [dependencies]
 libc = "*"
 libsodium-sys = "*"
-
-[dev-dependencies.rustc-serialize]
 rustc-serialize = "*"
+
+[dev-dependencies.cbor]
+cbor = "*"
 
 [features]
 benchmarks = []
