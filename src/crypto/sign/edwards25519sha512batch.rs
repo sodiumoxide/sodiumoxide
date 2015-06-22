@@ -3,7 +3,7 @@
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
-use rustc_serialize::{Encodable, Decodable, Decoder};
+use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
 
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES;
@@ -14,7 +14,6 @@ pub const SIGNATUREBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_BYTES
 /// When a `SecretKey` goes out of scope its contents
 /// will be zeroed out
 
-#[derive(RustcEncodable)]
 pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);

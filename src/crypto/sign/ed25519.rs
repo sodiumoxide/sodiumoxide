@@ -7,7 +7,7 @@ use libc::c_ulonglong;
 use std::iter::repeat;
 use std::cmp::{PartialEq, Eq};
 use std::fmt;
-use rustc_serialize::{Encodable, Decodable, Decoder};
+use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
@@ -20,7 +20,6 @@ pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
 ///
 /// When a `Seed` goes out of scope its contents
 /// will be zeroed out
-#[derive(RustcEncodable)]
 pub struct Seed(pub [u8; SEEDBYTES]);
 
 newtype_drop!(Seed);
@@ -31,7 +30,6 @@ newtype_impl!(Seed, SEEDBYTES);
 ///
 /// When a `SecretKey` goes out of scope its contents
 /// will be zeroed out
-#[derive(RustcEncodable)]
 pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
@@ -39,7 +37,7 @@ newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
 /// `PublicKey` for signatures
-#[derive(Copy, Debug, Eq, PartialEq, RustcEncodable)]
+#[derive(Copy, Debug, Eq, PartialEq)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
@@ -47,7 +45,7 @@ newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
 
 /// Detached signature
-#[derive(Copy, RustcEncodable)]
+#[derive(Copy)]
 pub struct Signature(pub [u8; SIGNATUREBYTES]);
 
 impl fmt::Debug for Signature {
@@ -177,12 +175,12 @@ mod test {
     }
     
     fn decode<T: Decodable>(bytes: &[u8]) -> T {
-    Decoder::from_bytes(bytes).decode().next().unwrap().unwrap()
+    Decoder::from_bytes(bytes).decode().inspect(|ref x| println!("after decode {}", x.is_ok())).next().unwrap().unwrap()
     }
     
     fn round_trip<T>(v: T) -> bool
         where T: Decodable + Encodable + Debug + PartialEq {
-            let backv: T = decode(&encode(&v));
+            let backv: T = decode(&encode(&v)[..]);
             assert_eq!(backv, v);
             true
     }

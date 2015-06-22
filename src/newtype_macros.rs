@@ -41,22 +41,33 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
             Some(n)
         }
     }
-    /// This requires to be defined to allow serialisation. 
     /// #[derive(RustcEncodable)] should be defined for all types.
     impl Decodable for $newtype {
         fn decode<D: Decoder>(d: &mut D)-> Result<$newtype, D::Error> {
-            d.read_seq(|decoder, len| {
+            d.read_seq(|d, len| {
                 if len != $len {
-                    return Err(decoder.error(&format!("Expecting array of length: {}, but found {}", $len, len)));
+                    return Err(d.error(&format!("Expecting array of length: {}, but found {}", $len, len)));
                 }
             let mut arr = [0u8; $len];
             for (i, val) in arr.iter_mut().enumerate() {
-                *val = try!(decoder.read_seq_elt(i, |d| Decodable::decode(d)));
+                *val = try!(d.read_seq_elt(i, |d| Decodable::decode(d)));
             }
             Ok($newtype(arr))
             })
         }
     }
+
+    impl Encodable for $newtype {
+        fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
+            s.emit_seq($len(), |s| {
+                    for (i, e) in self[..].iter().enumerate() {
+                    try!(s.emit_seq_elt(i, |s| e.encode(s)))
+                    }
+                    Ok(())
+                    })
+        }
+    }
+
     /// Allows a user to access the byte contents of an object as a slice.
     ///
     /// WARNING: it might be tempting to do comparisons on objects
