@@ -83,5 +83,6 @@ pub mod crypto {
     pub mod stream;
     pub mod shorthash;
     pub mod verify;
+    mod test_utils;
 }
 

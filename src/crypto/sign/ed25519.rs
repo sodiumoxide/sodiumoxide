@@ -6,8 +6,8 @@ use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
 use std::cmp::{PartialEq, Eq};
-use std::fmt;
-use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
+use rustc_serialize;
+use crypto::verify::verify_64;
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
@@ -37,27 +37,21 @@ newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
 /// `PublicKey` for signatures
-#[derive(Copy, Debug, Eq, PartialEq)]
+#[derive(Copy, Eq, PartialEq)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
-
 /// Detached signature
-#[derive(Copy)]
+#[derive(Copy, Eq)]
 pub struct Signature(pub [u8; SIGNATUREBYTES]);
 
-impl fmt::Debug for Signature {
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        self[..].fmt(formatter)
-    }
-}
-
 impl PartialEq for Signature {
-  fn eq(&self, other: &Signature) -> bool {
-    self[..] == other[..]
-  }
+    fn eq(&self, &Signature(other): &Signature) -> bool {
+        let &Signature(ref signature) = self;
+        verify_64(signature, &other)
+    }
 }
 
 newtype_clone!(Signature);
@@ -163,27 +157,7 @@ pub fn verify_detached(&Signature(ref sig): &Signature,
 #[cfg(test)]
 mod test {
     use super::*;
-    extern crate cbor; // to test encodable / decodable traits 
-    use self::cbor::{Encoder, Decoder};
-    use rustc_serialize::{Decodable, Encodable};
-    use std::fmt::Debug;
-    
-    fn encode<T: Encodable>(v: T) -> Vec<u8> {
-        let mut enc = Encoder::from_memory();
-        enc.encode(&[v]).unwrap();
-        enc.as_bytes().to_vec()
-    }
-    
-    fn decode<T: Decodable>(bytes: &[u8]) -> T {
-    Decoder::from_bytes(bytes).decode().inspect(|ref x| println!("after decode {}", x.is_ok())).next().unwrap().unwrap()
-    }
-    
-    fn round_trip<T>(v: T) -> bool
-        where T: Decodable + Encodable + Debug + PartialEq {
-            let backv: T = decode(&encode(&v)[..]);
-            assert_eq!(backv, v);
-            true
-    }
+    use crypto::test_utils::round_trip;
 
     #[test]
     fn test_sign_verify() {
@@ -220,18 +194,6 @@ mod test {
             let m = randombytes(i);
             let sig = sign_detached(&m, &sk);
             assert!(verify_detached(&sig, &m, &pk));
-        }
-    }
-    
-    #[test]
-    fn test_serialisation() {
-        use randombytes::randombytes;
-        for i in (0..256usize) {
-            let (pk, sk) = gen_keypair();
-            let m = randombytes(i);
-            let sig = sign_detached(&m, &sk);
-            round_trip(pk);
-            round_trip(sig);
         }
     }
 
@@ -345,6 +307,19 @@ mod test {
             assert!(x1 == pk[..].to_hex());
             let sm = sig[..].to_hex() + x2; // x2 is m hex encoded
             assert!(x3 == sm);
+        }
+    }
+
+    #[test]
+    fn test_serialisation() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let sig = sign_detached(&m, &sk);
+            round_trip(pk);
+            round_trip(sk);
+            round_trip(sig);
         }
     }
 }

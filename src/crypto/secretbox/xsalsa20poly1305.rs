@@ -7,7 +7,7 @@
 use ffi;
 use marshal::marshal;
 use randombytes::randombytes_into;
-use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
+use rustc_serialize;
 
 pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES;
 pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
@@ -23,7 +23,7 @@ newtype_clone!(Key);
 newtype_impl!(Key, KEYBYTES);
 
 /// `Nonce` for symmetric authenticated encryption
-#[derive(Copy)]
+#[derive(Copy, Eq, PartialEq)]
 pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);
@@ -96,6 +96,7 @@ pub fn open(c: &[u8],
 #[cfg(test)]
 mod test {
     use super::*;
+    use crypto::test_utils::round_trip;
 
     #[test]
     fn test_seal_open() {
@@ -176,6 +177,16 @@ mod test {
         assert!(c == c_expected);
         let m2 = open(&c, &nonce, &firstkey);
         assert!(Some(m) == m2);
+    }
+
+    #[test]
+    fn test_serialisation() {
+        for _ in (0..256usize) {
+            let k = gen_key();
+            let n = gen_nonce();
+            round_trip(k);
+            round_trip(n);
+        }
     }
 }
 

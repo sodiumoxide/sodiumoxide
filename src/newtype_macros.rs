@@ -41,33 +41,35 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
             Some(n)
         }
     }
-    /// #[derive(RustcEncodable)] should be defined for all types.
-    impl Decodable for $newtype {
-        fn decode<D: Decoder>(d: &mut D)-> Result<$newtype, D::Error> {
-            d.read_seq(|d, len| {
-                if len != $len {
-                    return Err(d.error(&format!("Expecting array of length: {}, but found {}", $len, len)));
+    impl rustc_serialize::Encodable for $newtype {
+        fn encode<E: rustc_serialize::Encoder>(&self, encoder: &mut E)
+                -> Result<(), E::Error> {
+            encoder.emit_seq($len, |encoder| {
+                for (i, e) in self[..].iter().enumerate() {
+                    try!(encoder.emit_seq_elt(i, |encoder| e.encode(encoder)))
                 }
-            let mut arr = [0u8; $len];
-            for (i, val) in arr.iter_mut().enumerate() {
-                *val = try!(d.read_seq_elt(i, |d| Decodable::decode(d)));
-            }
-            Ok($newtype(arr))
+                Ok(())
             })
         }
     }
-
-    impl Encodable for $newtype {
-        fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
-            s.emit_seq($len(), |s| {
-                    for (i, e) in self[..].iter().enumerate() {
-                    try!(s.emit_seq_elt(i, |s| e.encode(s)))
-                    }
-                    Ok(())
-                    })
+    impl rustc_serialize::Decodable for $newtype {
+        fn decode<D: rustc_serialize::Decoder>(decoder: &mut D)
+                -> Result<$newtype, D::Error> {
+            decoder.read_seq(|decoder, len| {
+                if len != $len {
+                    return Err(decoder.error(
+                        &format!("Expecting array of length: {}, but found {}",
+                                 $len, len)));
+                }
+                let mut arr = [0u8; $len];
+                for (i, val) in arr.iter_mut().enumerate() {
+                    *val = try!(decoder.read_seq_elt(i,
+                        |decoder| rustc_serialize::Decodable::decode(decoder)));
+                }
+                Ok($newtype(arr))
+            })
         }
     }
-
     /// Allows a user to access the byte contents of an object as a slice.
     ///
     /// WARNING: it might be tempting to do comparisons on objects

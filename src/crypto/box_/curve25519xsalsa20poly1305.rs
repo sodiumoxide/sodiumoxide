@@ -7,7 +7,7 @@
 use ffi;
 use marshal::marshal;
 use randombytes::randombytes_into;
-use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
+use rustc_serialize;
 
 pub const PUBLICKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES;
@@ -27,7 +27,6 @@ newtype_impl!(PublicKey, PUBLICKEYBYTES);
 ///
 /// When a `SecretKey` goes out of scope its contents
 /// will be zeroed out
-
 pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
 
 newtype_drop!(SecretKey);
@@ -35,7 +34,7 @@ newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
 /// `Nonce` for asymmetric authenticated encryption
-#[derive(Copy)]
+#[derive(Copy, Eq, PartialEq)]
 pub struct Nonce(pub [u8; NONCEBYTES]);
 
 newtype_clone!(Nonce);
@@ -184,6 +183,7 @@ pub fn open_precomputed(c: &[u8],
 #[cfg(test)]
 mod test {
     use super::*;
+    use crypto::test_utils::round_trip;
 
     #[test]
     fn test_seal_open() {
@@ -366,6 +366,17 @@ mod test {
         let m_pre = open_precomputed(&c, &nonce, &pk);
         assert!(m == mexp);
         assert!(m_pre == mexp);
+    }
+
+    #[test]
+    fn test_serialisation() {
+        for _ in (0..256usize) {
+            let (pk, sk) = gen_keypair();
+            let n = gen_nonce();
+            round_trip(pk);
+            round_trip(sk);
+            round_trip(n);
+        }
     }
 }
 
