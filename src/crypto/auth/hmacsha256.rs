@@ -5,7 +5,6 @@ use ffi::{crypto_auth_hmacsha256,
           crypto_auth_hmacsha256_KEYBYTES,
           crypto_auth_hmacsha256_BYTES
 };
-use crypto::verify::verify_32;
 
 auth_module!(crypto_auth_hmacsha256,
              crypto_auth_hmacsha256_verify,

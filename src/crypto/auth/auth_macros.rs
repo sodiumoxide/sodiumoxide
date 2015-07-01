@@ -25,15 +25,8 @@ newtype_impl!(Key, KEYBYTES);
 ///
 /// The tag implements the traits `PartialEq` and `Eq` using constant-time
 /// comparison functions. See `sodiumoxide::crypto::verify::verify_32`
-#[derive(Copy, Eq)]
+#[derive(Copy)]
 pub struct Tag(pub [u8; TAGBYTES]);
-
-impl PartialEq for Tag {
-    fn eq(&self, &Tag(other): &Tag) -> bool {
-        let &Tag(ref tag) = self;
-        $verify_fn(tag, &other)
-    }
-}
 
 newtype_clone!(Tag);
 newtype_impl!(Tag, TAGBYTES);

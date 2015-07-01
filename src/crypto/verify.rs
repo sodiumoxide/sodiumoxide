@@ -4,7 +4,7 @@ use ffi;
 /// `verify_16()` returns `true` if `x[0]`, `x[1]`, ..., `x[15]` are the
 /// same as `y[0]`, `y[1]`, ..., `y[15]`. Otherwise it returns `false`.
 ///
-/// This functions is safe to use for secrets `x[0]`, `x[1]`, ..., `x[15]`,
+/// This function is safe to use for secrets `x[0]`, `x[1]`, ..., `x[15]`,
 /// `y[0]`, `y[1]`, ..., `y[15]`. The time taken by `verify_16` is independent
 /// of the contents of `x[0]`, `x[1]`, ..., `x[15]`, `y[0]`, `y[1]`, ..., `y[15]`.
 /// In contrast, the standard C comparison function `memcmp(x,y,16)` takes time
@@ -19,7 +19,7 @@ pub fn verify_16(x: &[u8; 16], y: &[u8; 16]) -> bool {
 /// `verify_32()` returns true if `x[0]`, `x[1]`, ..., `x[31]` are the
 /// same as `y[0]`, `y[1]`, ..., `y[31]`. Otherwise it returns `false`.
 ///
-/// This functions is safe to use for secrets `x[0]`, `x[1]`, ..., `x[31]`,
+/// This function is safe to use for secrets `x[0]`, `x[1]`, ..., `x[31]`,
 /// `y[0]`, `y[1]`, ..., `y[31]`. The time taken by `verify_32` is independent
 /// of the contents of `x[0]`, `x[1]`, ..., `x[31]`, `y[0]`, `y[1]`, ..., `y[31]`.
 /// In contrast, the standard C comparison function `memcmp(x,y,32)` takes time
@@ -34,7 +34,7 @@ pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
 /// `verify_64()` returns true if `x[0]`, `x[1]`, ..., `x[63]` are the
 /// same as `y[0]`, `y[1]`, ..., `y[63]`. Otherwise it returns `false`.
 ///
-/// This functions is safe to use for secrets `x[0]`, `x[1]`, ..., `x[63]`,
+/// This function is safe to use for secrets `x[0]`, `x[1]`, ..., `x[63]`,
 /// `y[0]`, `y[1]`, ..., `y[63]`. The time taken by `verify_64` is independent
 /// of the contents of `x[0]`, `x[1]`, ..., `x[63]`, `y[0]`, `y[1]`, ..., `y[63]`.
 /// In contrast, the standard C comparison function `memcmp(x,y,64)` takes time
@@ -43,6 +43,23 @@ pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
 pub fn verify_64(x: &[u8; 64], y: &[u8; 64]) -> bool {
     unsafe {
         ffi::crypto_verify_64(x, y) == 0
+    }
+}
+
+/// `safe_memcmp()` returns true if `x[0]`, `x[1]`, ..., `x[len-1]` are the
+/// same as `y[0]`, `y[1]`, ..., `y[len-1]`. Otherwise it returns `false`.
+///
+/// This function is safe to use for secrets `x[0]`, `x[1]`, ..., `x[len-1]`,
+/// `y[0]`, `y[1]`, ..., `y[len-1]`. The time taken by `safe_memcmp` is independent
+/// of the contents of `x[0]`, `x[1]`, ..., `x[len-1]`, `y[0]`, `y[1]`, ..., `y[len-1]`.
+/// In contrast, the standard C comparison function `memcmp(x,y,len)` takes time
+/// that depends on the longest matching prefix of `x` and `y`, often allowing easy
+/// timing attacks.
+pub fn safe_memcmp(x: &[u8], y: &[u8], len: usize) -> bool {
+    assert!(x.len() >= len && y.len() >= len,
+            "One of the parameters does not have the required length.");
+    unsafe {
+        ffi::sodium_memcmp(x.as_ptr(), y.as_ptr(), len as u64) == 0
     }
 }
 
@@ -102,5 +119,43 @@ mod test {
                 assert!(!verify_64(&x, &y))
             }
         }
+    }
+
+    #[test]
+    fn test_safe_memcmp() {
+        use randombytes::randombytes;
+
+        for i in (0usize..256) {
+            let x = randombytes(i);
+            assert!(safe_memcmp(&x, &x, i));
+            let mut y = x.clone();
+            assert!(safe_memcmp(&x, &y, i));
+            y = randombytes(i);
+            if x == y {
+                assert!(safe_memcmp(&x, &y, i))
+            } else {
+                assert!(!safe_memcmp(&x, &y, i))
+            }
+        }
+    }
+
+    #[test]
+    #[should_panic(expected =
+        "One of the parameters does not have the required length.")]
+    fn test_safe_memcmp_lhs_bounds() {
+        let x = [0u8];
+        let y = [0u8, 0u8];
+        assert!(safe_memcmp(&x, &y, 1));
+        safe_memcmp(&x, &y, 2);
+    }
+
+    #[test]
+    #[should_panic(expected =
+        "One of the parameters does not have the required length.")]
+    fn test_safe_memcmp_rhs_bounds() {
+        let x = [0u8, 0u8];
+        let y = [0u8];
+        assert!(safe_memcmp(&x, &y, 1));
+        safe_memcmp(&x, &y, 2);
     }
 }

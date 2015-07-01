@@ -8,7 +8,7 @@ pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
 pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES;
 
 /// Digest-structure
-#[derive(Copy, Eq, PartialEq)]
+#[derive(Copy)]
 pub struct Digest(pub [u8; HASHBYTES]);
 
 newtype_clone!(Digest);
