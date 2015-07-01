@@ -7,17 +7,11 @@ pub const HASHBYTES: usize = $hashbytes;
 pub const BLOCKBYTES: usize = $blockbytes;
 
 /// Digest-structure
-#[derive(Copy, Eq)]
+#[derive(Copy)]
 pub struct Digest(pub [u8; HASHBYTES]);
 
 newtype_clone!(Digest);
 newtype_impl!(Digest, HASHBYTES);
-
-impl PartialEq for Digest {
-    fn eq(&self, other: &Digest) -> bool {
-        self[..] == other[..]
-    }
-}
 
 /// `hash` hashes a message `m`. It returns a hash `h`.
 pub fn hash(m: &[u8]) -> Digest {

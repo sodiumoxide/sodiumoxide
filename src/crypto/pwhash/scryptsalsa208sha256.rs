@@ -34,7 +34,7 @@ pub struct OpsLimit(pub usize);
 pub struct MemLimit(pub usize);
 
 /// `Salt` used for password hashing
-#[derive(Copy, Eq, PartialEq)]
+#[derive(Copy)]
 pub struct Salt(pub [u8; SALTBYTES]);
 newtype_clone!(Salt);
 newtype_impl!(Salt, SALTBYTES);
@@ -44,16 +44,10 @@ newtype_impl!(Salt, SALTBYTES);
 /// A `HashedPassword` is zero-terminated, includes only ASCII characters and can
 /// be conveniently stored into SQL databases and other data stores. No
 /// additional information has to be stored in order to verify the password.
-#[derive(Copy, Eq)]
+#[derive(Copy)]
 pub struct HashedPassword(pub [u8; STRBYTES]);
 newtype_clone!(HashedPassword);
 newtype_impl!(HashedPassword, STRBYTES);
-
-impl PartialEq for HashedPassword {
-    fn eq(&self, other: &HashedPassword) -> bool {
-        self[..] == other[..]
-    }
-}
 
 /// `gen_salt()` randombly generates a new `Salt` for key derivation
 ///

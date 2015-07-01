@@ -7,7 +7,6 @@ use libc::c_ulonglong;
 use std::iter::repeat;
 use std::cmp::{PartialEq, Eq};
 use rustc_serialize;
-use crypto::verify::verify_64;
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
@@ -37,22 +36,15 @@ newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
 /// `PublicKey` for signatures
-#[derive(Copy, Eq, PartialEq)]
+#[derive(Copy)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
 
 /// Detached signature
-#[derive(Copy, Eq)]
+#[derive(Copy)]
 pub struct Signature(pub [u8; SIGNATUREBYTES]);
-
-impl PartialEq for Signature {
-    fn eq(&self, &Signature(other): &Signature) -> bool {
-        let &Signature(ref signature) = self;
-        verify_64(signature, &other)
-    }
-}
 
 newtype_clone!(Signature);
 newtype_impl!(Signature, SIGNATUREBYTES);

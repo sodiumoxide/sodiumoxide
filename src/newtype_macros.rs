@@ -41,6 +41,14 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
             Some(n)
         }
     }
+    impl PartialEq for $newtype {
+        fn eq(&self, &$newtype(other): &$newtype) -> bool {
+            use crypto::verify::safe_memcmp;
+            let &$newtype(ref this) = self;
+            safe_memcmp(this, &other, $len)
+        }
+    }
+    impl Eq for $newtype {}
     impl rustc_serialize::Encodable for $newtype {
         fn encode<E: rustc_serialize::Encoder>(&self, encoder: &mut E)
                 -> Result<(), E::Error> {

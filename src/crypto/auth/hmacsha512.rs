@@ -4,7 +4,6 @@ use ffi::{crypto_auth_hmacsha512,
           crypto_auth_hmacsha512_verify,
           crypto_auth_hmacsha512_KEYBYTES,
           crypto_auth_hmacsha512_BYTES};
-use crypto::verify::verify_64;
 
 auth_module!(crypto_auth_hmacsha512,
              crypto_auth_hmacsha512_verify,
