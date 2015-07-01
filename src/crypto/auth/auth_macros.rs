@@ -6,7 +6,7 @@ macro_rules! auth_module (($auth_name:ident,
 
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
-use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
+use rustc_serialize;
 
 pub const KEYBYTES: usize = $keybytes;
 pub const TAGBYTES: usize = $tagbytes;
@@ -25,10 +25,8 @@ newtype_impl!(Key, KEYBYTES);
 ///
 /// The tag implements the traits `PartialEq` and `Eq` using constant-time
 /// comparison functions. See `sodiumoxide::crypto::verify::verify_32`
-#[derive(Copy)]
+#[derive(Copy, Eq)]
 pub struct Tag(pub [u8; TAGBYTES]);
-
-impl Eq for Tag {}
 
 impl PartialEq for Tag {
     fn eq(&self, &Tag(other): &Tag) -> bool {
@@ -80,6 +78,7 @@ pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
 #[cfg(test)]
 mod test_m {
     use super::*;
+    use crypto::test_utils::round_trip;
 
     #[test]
     fn test_auth_verify() {
@@ -109,6 +108,18 @@ mod test_m {
                 assert!(!verify(&Tag(tagbuf), &mut m, &k));
                 tagbuf[j] ^= 0x20;
             }
+        }
+    }
+
+    #[test]
+    fn test_serialisation() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let k = gen_key();
+            let m = randombytes(i);
+            let tag = authenticate(&m, &k);
+            round_trip(k);
+            round_trip(tag);
         }
     }
 }

@@ -3,7 +3,7 @@
 use ffi;
 use randombytes::randombytes_into;
 use libc::{c_ulonglong, size_t};
-use rustc_serialize::{Encodable, Decodable, Decoder, Encoder};
+use rustc_serialize;
 
 pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES;
 pub const STRBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES;
@@ -34,7 +34,7 @@ pub struct OpsLimit(pub usize);
 pub struct MemLimit(pub usize);
 
 /// `Salt` used for password hashing
-#[derive(Copy)]
+#[derive(Copy, Eq, PartialEq)]
 pub struct Salt(pub [u8; SALTBYTES]);
 newtype_clone!(Salt);
 newtype_impl!(Salt, SALTBYTES);
@@ -44,9 +44,16 @@ newtype_impl!(Salt, SALTBYTES);
 /// A `HashedPassword` is zero-terminated, includes only ASCII characters and can
 /// be conveniently stored into SQL databases and other data stores. No
 /// additional information has to be stored in order to verify the password.
+#[derive(Copy, Eq)]
 pub struct HashedPassword(pub [u8; STRBYTES]);
 newtype_clone!(HashedPassword);
 newtype_impl!(HashedPassword, STRBYTES);
+
+impl PartialEq for HashedPassword {
+    fn eq(&self, other: &HashedPassword) -> bool {
+        self[..] == other[..]
+    }
+}
 
 /// `gen_salt()` randombly generates a new `Salt` for key derivation
 ///
@@ -156,6 +163,7 @@ pub fn pwhash_verify(&HashedPassword(ref str_): &HashedPassword,
 #[cfg(test)]
 mod test {
     use super::*;
+    use crypto::test_utils::round_trip;
 
     #[test]
     fn test_derive_key() {
@@ -193,6 +201,18 @@ mod test {
                 assert!(!pwhash_verify(&pwh, &pw));
                 pw[j] ^= 0x20;
             }
+        }
+    }
+
+    #[test]
+    fn test_serialisation() {
+        use randombytes::randombytes;
+        for i in (0..32usize) {
+            let pw = randombytes(i);
+            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
+            let salt = gen_salt();
+            round_trip(pwh);
+            round_trip(salt);
         }
     }
 }
