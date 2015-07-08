@@ -42,10 +42,10 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
         }
     }
     impl PartialEq for $newtype {
-        fn eq(&self, &$newtype(other): &$newtype) -> bool {
+        fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
             use crypto::verify::safe_memcmp;
             let &$newtype(ref this) = self;
-            safe_memcmp(this, &other, $len)
+            safe_memcmp(this, other)
         }
     }
     impl Eq for $newtype {}
