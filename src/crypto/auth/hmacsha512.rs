@@ -7,7 +7,6 @@ use ffi::{crypto_auth_hmacsha512,
 
 auth_module!(crypto_auth_hmacsha512,
              crypto_auth_hmacsha512_verify,
-             verify_64,
              crypto_auth_hmacsha512_KEYBYTES,
              crypto_auth_hmacsha512_BYTES);
 
