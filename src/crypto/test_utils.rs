@@ -1,16 +1,11 @@
 #![cfg(test)]
-extern crate cbor;
 
-use self::cbor::{Encoder, Decoder};
-use rustc_serialize::{Decodable, Encodable};
+use rustc_serialize::{Decodable, Encodable, json};
 
 #[doc(hidden)]
-// Encodes then decodes `value` using CBOR
-pub fn round_trip<T>(value: T) where T: Clone + Decodable + Encodable + Eq {
-    let mut encoder = Encoder::from_memory();
-    encoder.encode(&[value.clone()]).unwrap();
-
-    let decoded_value: T = Decoder::from_bytes(encoder.as_bytes())
-                                   .decode().next().unwrap().unwrap();
+// Encodes then decodes `value` using JSON
+pub fn round_trip<T>(value: T) where T: Decodable + Encodable + Eq {
+    let encoded_value = json::encode(&value).unwrap();
+    let decoded_value = json::decode(&encoded_value).unwrap();
     assert!(value == decoded_value);
 }
