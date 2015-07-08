@@ -55,11 +55,12 @@ pub fn verify_64(x: &[u8; 64], y: &[u8; 64]) -> bool {
 /// In contrast, the standard C comparison function `memcmp(x,y,len)` takes time
 /// that depends on the longest matching prefix of `x` and `y`, often allowing easy
 /// timing attacks.
-pub fn safe_memcmp(x: &[u8], y: &[u8], len: usize) -> bool {
-    assert!(x.len() >= len && y.len() >= len,
-            "One of the parameters does not have the required length.");
+pub fn safe_memcmp(x: &[u8], y: &[u8]) -> bool {
+    if x.len() != y.len() {
+        return false
+    }
     unsafe {
-        ffi::sodium_memcmp(x.as_ptr(), y.as_ptr(), len as u64) == 0
+        ffi::sodium_memcmp(x.as_ptr(), y.as_ptr(), x.len() as u64) == 0
     }
 }
 
@@ -127,35 +128,19 @@ mod test {
 
         for i in (0usize..256) {
             let x = randombytes(i);
-            assert!(safe_memcmp(&x, &x, i));
+            assert!(safe_memcmp(&x, &x));
             let mut y = x.clone();
-            assert!(safe_memcmp(&x, &y, i));
+            assert!(safe_memcmp(&x, &y));
+            y.push(0);
+            assert!(!safe_memcmp(&x, &y));
+            assert!(!safe_memcmp(&y, &x));
+
             y = randombytes(i);
             if x == y {
-                assert!(safe_memcmp(&x, &y, i))
+                assert!(safe_memcmp(&x, &y))
             } else {
-                assert!(!safe_memcmp(&x, &y, i))
+                assert!(!safe_memcmp(&x, &y))
             }
         }
-    }
-
-    #[test]
-    #[should_panic(expected =
-        "One of the parameters does not have the required length.")]
-    fn test_safe_memcmp_lhs_bounds() {
-        let x = [0u8];
-        let y = [0u8, 0u8];
-        assert!(safe_memcmp(&x, &y, 1));
-        safe_memcmp(&x, &y, 2);
-    }
-
-    #[test]
-    #[should_panic(expected =
-        "One of the parameters does not have the required length.")]
-    fn test_safe_memcmp_rhs_bounds() {
-        let x = [0u8, 0u8];
-        let y = [0u8];
-        assert!(safe_memcmp(&x, &y, 1));
-        safe_memcmp(&x, &y, 2);
     }
 }
