@@ -8,7 +8,6 @@ use ffi::{crypto_auth_hmacsha256,
 
 auth_module!(crypto_auth_hmacsha256,
              crypto_auth_hmacsha256_verify,
-             verify_32,
              crypto_auth_hmacsha256_KEYBYTES,
              crypto_auth_hmacsha256_BYTES);
 
