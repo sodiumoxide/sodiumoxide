@@ -2,7 +2,6 @@
 
 use rustc_serialize::{Decodable, Encodable, json};
 
-#[doc(hidden)]
 // Encodes then decodes `value` using JSON
 pub fn round_trip<T>(value: T) where T: Decodable + Encodable + Eq {
     let encoded_value = json::encode(&value).unwrap();
