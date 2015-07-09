@@ -13,6 +13,7 @@ pub struct Digest(pub [u8; HASHBYTES]);
 
 newtype_clone!(Digest);
 newtype_impl!(Digest, HASHBYTES);
+non_secret_newtype_impl!(Digest);
 
 /// Key
 ///

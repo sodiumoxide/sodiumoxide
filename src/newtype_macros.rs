@@ -41,14 +41,14 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
             Some(n)
         }
     }
-    impl PartialEq for $newtype {
+    impl ::std::cmp::PartialEq for $newtype {
         fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
             use crypto::verify::safe_memcmp;
             let &$newtype(ref this) = self;
             safe_memcmp(this, other)
         }
     }
-    impl Eq for $newtype {}
+    impl ::std::cmp::Eq for $newtype {}
     impl rustc_serialize::Encodable for $newtype {
         fn encode<E: rustc_serialize::Encoder>(&self, encoder: &mut E)
                 -> Result<(), E::Error> {
@@ -131,8 +131,52 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
         }
     }
     impl ::std::fmt::Debug for $newtype  {
-        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        fn fmt(&self,
+               formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
             write!(formatter, "{}({:?})", stringify!($newtype), &self[..])
+        }
+    }
+    ));
+
+macro_rules! non_secret_newtype_impl (($newtype:ident) => (
+    impl AsRef<[u8]> for $newtype {
+        #[inline]
+        fn as_ref(&self) -> &[u8] {
+            &self[..]
+        }
+    }
+    impl ::std::cmp::PartialOrd for $newtype {
+        #[inline]
+        fn partial_cmp(&self,
+                       other: &$newtype) -> Option<::std::cmp::Ordering> {
+            ::std::cmp::PartialOrd::partial_cmp(self.as_ref(), other.as_ref())
+        }
+        #[inline]
+        fn lt(&self, other: &$newtype) -> bool {
+            ::std::cmp::PartialOrd::lt(self.as_ref(), other.as_ref())
+        }
+        #[inline]
+        fn le(&self, other: &$newtype) -> bool {
+            ::std::cmp::PartialOrd::le(self.as_ref(), other.as_ref())
+        }
+        #[inline]
+        fn ge(&self, other: &$newtype) -> bool {
+            ::std::cmp::PartialOrd::ge(self.as_ref(), other.as_ref())
+        }
+        #[inline]
+        fn gt(&self, other: &$newtype) -> bool {
+            ::std::cmp::PartialOrd::gt(self.as_ref(), other.as_ref())
+        }
+    }
+    impl ::std::cmp::Ord for $newtype {
+        #[inline]
+        fn cmp(&self, other: &$newtype) -> ::std::cmp::Ordering {
+            ::std::cmp::Ord::cmp(self.as_ref(), other.as_ref())
+        }
+    }
+    impl ::std::hash::Hash for $newtype {
+        fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+            ::std::hash::Hash::hash(self.as_ref(), state)
         }
     }
     ));

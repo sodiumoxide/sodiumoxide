@@ -5,7 +5,6 @@
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
-use std::cmp::{PartialEq, Eq};
 use rustc_serialize;
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
@@ -41,6 +40,7 @@ pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
+non_secret_newtype_impl!(PublicKey);
 
 /// Detached signature
 #[derive(Copy)]
@@ -48,6 +48,7 @@ pub struct Signature(pub [u8; SIGNATUREBYTES]);
 
 newtype_clone!(Signature);
 newtype_impl!(Signature, SIGNATUREBYTES);
+non_secret_newtype_impl!(Signature);
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
 /// key.
