@@ -48,6 +48,7 @@ newtype_impl!(Salt, SALTBYTES);
 pub struct HashedPassword(pub [u8; STRBYTES]);
 newtype_clone!(HashedPassword);
 newtype_impl!(HashedPassword, STRBYTES);
+non_secret_newtype_impl!(HashedPassword);
 
 /// `gen_salt()` randombly generates a new `Salt` for key derivation
 ///

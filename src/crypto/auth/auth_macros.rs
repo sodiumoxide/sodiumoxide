@@ -30,6 +30,7 @@ pub struct Tag(pub [u8; TAGBYTES]);
 
 newtype_clone!(Tag);
 newtype_impl!(Tag, TAGBYTES);
+non_secret_newtype_impl!(Tag);
 
 /// `gen_key()` randomly generates a key for authentication
 ///
