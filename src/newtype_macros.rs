@@ -130,4 +130,9 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
             b.index(_index)
         }
     }
+    impl ::std::fmt::Debug for $newtype  {
+        fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+            write!(formatter, "{}({:?})", stringify!($newtype), &self[..])
+        }
+    }
     ));
