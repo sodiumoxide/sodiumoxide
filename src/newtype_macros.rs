@@ -41,6 +41,46 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
             Some(n)
         }
     }
+    impl PartialEq for $newtype {
+        fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
+            use crypto::verify::safe_memcmp;
+            let &$newtype(ref this) = self;
+            safe_memcmp(this, other)
+        }
+    }
+    impl Eq for $newtype {}
+    impl rustc_serialize::Encodable for $newtype {
+        fn encode<E: rustc_serialize::Encoder>(&self, encoder: &mut E)
+                -> Result<(), E::Error> {
+            encoder.emit_seq($len, |encoder| {
+                for (i, e) in self[..].iter().enumerate() {
+                    try!(encoder.emit_seq_elt(i, |encoder| e.encode(encoder)))
+                }
+                Ok(())
+            })
+        }
+    }
+    impl rustc_serialize::Decodable for $newtype {
+        fn decode<D: rustc_serialize::Decoder>(decoder: &mut D)
+                -> Result<$newtype, D::Error> {
+            decoder.read_seq(|decoder, len| {
+                if len != $len {
+                    return Err(decoder.error(
+                        &format!("Expecting array of length: {}, but found {}",
+                                 $len, len)));
+                }
+                let mut res = $newtype([0; $len]);
+                {
+                    let $newtype(ref mut arr) = res;
+                    for (i, val) in arr.iter_mut().enumerate() {
+                        *val = try!(decoder.read_seq_elt(i,
+                            |decoder| rustc_serialize::Decodable::decode(decoder)));
+                    }
+                }
+                Ok(res)
+            })
+        }
+    }
     /// Allows a user to access the byte contents of an object as a slice.
     ///
     /// WARNING: it might be tempting to do comparisons on objects

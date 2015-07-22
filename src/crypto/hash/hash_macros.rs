@@ -1,6 +1,7 @@
 macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
 
 use libc::c_ulonglong;
+use rustc_serialize;
 
 pub const HASHBYTES: usize = $hashbytes;
 pub const BLOCKBYTES: usize = $blockbytes;
@@ -18,6 +19,22 @@ pub fn hash(m: &[u8]) -> Digest {
         let mut h = [0; HASHBYTES];
         $hash_name(&mut h, m.as_ptr(), m.len() as c_ulonglong);
         Digest(h)
+    }
+}
+
+#[cfg(test)]
+mod test_encode {
+    use super::*;
+    use test_utils::round_trip;
+
+    #[test]
+    fn test_serialisation() {
+        use randombytes::randombytes;
+        for i in (0..32usize) {
+            let m = randombytes(i);
+            let d = hash(&m[..]);
+            round_trip(d);
+        }
     }
 }
 

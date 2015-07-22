@@ -7,6 +7,7 @@ use ffi;
 
 pub const BYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES;
 pub const SCALARBYTES: usize = ffi::crypto_scalarmult_curve25519_SCALARBYTES;
+use rustc_serialize;
 
 /// `Scalar` value (integer in byte representation)
 pub struct Scalar(pub [u8; SCALARBYTES]);

@@ -13,7 +13,6 @@ hash_module!(crypto_hash_sha256,
 
 #[cfg(test)]
 mod test {
-    extern crate rustc_serialize;
     use super::*;
 
     #[test]
@@ -46,7 +45,7 @@ mod test {
     }
 
     fn test_nist_vector(filename: &str) {
-        use self::rustc_serialize::hex::{FromHex};
+        use rustc_serialize::hex::{FromHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 

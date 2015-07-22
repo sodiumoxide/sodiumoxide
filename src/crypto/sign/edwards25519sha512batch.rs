@@ -3,6 +3,7 @@
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
+use rustc_serialize;
 
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES;
@@ -19,7 +20,7 @@ newtype_clone!(SecretKey);
 newtype_impl!(SecretKey, SECRETKEYBYTES);
 
 /// `PublicKey` for signatures
-#[derive(Copy, Eq, PartialEq)]
+#[derive(Copy)]
 pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
