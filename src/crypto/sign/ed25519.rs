@@ -150,7 +150,7 @@ pub fn verify_detached(&Signature(ref sig): &Signature,
 #[cfg(test)]
 mod test {
     use super::*;
-    use crypto::test_utils::round_trip;
+    use test_utils::round_trip;
 
     #[test]
     fn test_sign_verify() {
