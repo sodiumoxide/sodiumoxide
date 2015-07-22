@@ -9,7 +9,6 @@ use ffi::{crypto_onetimeauth_poly1305,
 
 auth_module!(crypto_onetimeauth_poly1305,
              crypto_onetimeauth_poly1305_verify,
-             verify_16,
              crypto_onetimeauth_poly1305_KEYBYTES,
              crypto_onetimeauth_poly1305_BYTES);
 

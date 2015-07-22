@@ -69,12 +69,15 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
                         &format!("Expecting array of length: {}, but found {}",
                                  $len, len)));
                 }
-                let mut arr = [0u8; $len];
-                for (i, val) in arr.iter_mut().enumerate() {
-                    *val = try!(decoder.read_seq_elt(i,
-                        |decoder| rustc_serialize::Decodable::decode(decoder)));
+                let mut res = $newtype([0; $len]);
+                {
+                    let $newtype(ref mut arr) = res;
+                    for (i, val) in arr.iter_mut().enumerate() {
+                        *val = try!(decoder.read_seq_elt(i,
+                            |decoder| rustc_serialize::Decodable::decode(decoder)));
+                    }
                 }
-                Ok($newtype(arr))
+                Ok(res)
             })
         }
     }

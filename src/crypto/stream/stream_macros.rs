@@ -109,7 +109,7 @@ pub fn stream_xor_inplace(m: &mut [u8],
 #[cfg(test)]
 mod test_m {
     use super::*;
-    use crypto::test_utils::round_trip;
+    use test_utils::round_trip;
 
     #[test]
     fn test_encrypt_decrypt() {

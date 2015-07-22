@@ -26,7 +26,7 @@ pub fn hash(m: &[u8]) -> Digest {
 #[cfg(test)]
 mod test_encode {
     use super::*;
-    use crypto::test_utils::round_trip;
+    use test_utils::round_trip;
 
     #[test]
     fn test_serialisation() {

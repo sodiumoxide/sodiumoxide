@@ -184,7 +184,7 @@ pub fn open_precomputed(c: &[u8],
 #[cfg(test)]
 mod test {
     use super::*;
-    use crypto::test_utils::round_trip;
+    use test_utils::round_trip;
 
     #[test]
     fn test_seal_open() {

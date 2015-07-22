@@ -1,6 +1,5 @@
 macro_rules! auth_module (($auth_name:ident,
                            $verify_name:ident,
-                           $verify_fn:ident,
                            $keybytes:expr,
                            $tagbytes:expr) => (
 
@@ -72,7 +71,7 @@ pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
 #[cfg(test)]
 mod test_m {
     use super::*;
-    use crypto::test_utils::round_trip;
+    use test_utils::round_trip;
 
     #[test]
     fn test_auth_verify() {

@@ -70,6 +70,9 @@ mod newtype_macros;
 
 pub mod randombytes;
 
+#[cfg(test)]
+mod test_utils;
+
 /// Cryptographic functions
 pub mod crypto {
     pub mod box_;
@@ -83,6 +86,5 @@ pub mod crypto {
     pub mod stream;
     pub mod shorthash;
     pub mod verify;
-    mod test_utils;
 }
 
