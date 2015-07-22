@@ -6,6 +6,7 @@ macro_rules! stream_module (($stream_name:ident,
 use libc::c_ulonglong;
 use std::iter::repeat;
 use randombytes::randombytes_into;
+use rustc_serialize;
 
 pub const KEYBYTES: usize = $keybytes;
 pub const NONCEBYTES: usize = $noncebytes;
@@ -108,6 +109,7 @@ pub fn stream_xor_inplace(m: &mut [u8],
 #[cfg(test)]
 mod test_m {
     use super::*;
+    use test_utils::round_trip;
 
     #[test]
     fn test_encrypt_decrypt() {
@@ -153,6 +155,16 @@ mod test_m {
             }
             stream_xor_inplace(&mut m, &n, &k);
             assert!(c == m);
+        }
+    }
+
+    #[test]
+    fn test_serialisation() {
+        for _ in (0..1024usize) {
+            let k = gen_key();
+            let n = gen_nonce();
+            round_trip(k);
+            round_trip(n);
         }
     }
 }

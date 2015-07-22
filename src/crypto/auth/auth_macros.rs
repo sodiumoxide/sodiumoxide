@@ -1,11 +1,11 @@
 macro_rules! auth_module (($auth_name:ident,
                            $verify_name:ident,
-                           $verify_fn:ident,
                            $keybytes:expr,
                            $tagbytes:expr) => (
 
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
+use rustc_serialize;
 
 pub const KEYBYTES: usize = $keybytes;
 pub const TAGBYTES: usize = $tagbytes;
@@ -26,15 +26,6 @@ newtype_impl!(Key, KEYBYTES);
 /// comparison functions. See `sodiumoxide::crypto::verify::verify_32`
 #[derive(Copy)]
 pub struct Tag(pub [u8; TAGBYTES]);
-
-impl Eq for Tag {}
-
-impl PartialEq for Tag {
-    fn eq(&self, &Tag(other): &Tag) -> bool {
-        let &Tag(ref tag) = self;
-        $verify_fn(tag, &other)
-    }
-}
 
 newtype_clone!(Tag);
 newtype_impl!(Tag, TAGBYTES);
@@ -79,6 +70,7 @@ pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
 #[cfg(test)]
 mod test_m {
     use super::*;
+    use test_utils::round_trip;
 
     #[test]
     fn test_auth_verify() {
@@ -108,6 +100,18 @@ mod test_m {
                 assert!(!verify(&Tag(tagbuf), &mut m, &k));
                 tagbuf[j] ^= 0x20;
             }
+        }
+    }
+
+    #[test]
+    fn test_serialisation() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let k = gen_key();
+            let m = randombytes(i);
+            let tag = authenticate(&m, &k);
+            round_trip(k);
+            round_trip(tag);
         }
     }
 }
