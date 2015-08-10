@@ -88,7 +88,7 @@ pub fn gen_salt() -> Salt {
 /// the same salt, and the same values for opslimit and memlimit have to be
 /// used.
 ///
-/// The function returns `Some(key)` on success and `None` if the computation didn't
+/// The function returns `Some(())` on success and `None` if the computation didn't
 /// complete, usually because the operating system refused to allocate the
 /// amount of requested memory.
 pub fn derive_key(key: &mut [u8], passwd: &[u8], &Salt(ref sb): &Salt,
