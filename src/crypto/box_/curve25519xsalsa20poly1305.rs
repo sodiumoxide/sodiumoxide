@@ -22,6 +22,7 @@ pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
+non_secret_newtype_impl!(PublicKey);
 
 /// `SecretKey` for asymmetric authenticated encryption
 ///

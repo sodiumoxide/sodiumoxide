@@ -45,7 +45,7 @@ mod test {
     }
 
     fn test_nist_vector(filename: &str) {
-        use rustc_serialize::hex::{FromHex};
+        use rustc_serialize::hex::FromHex;
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
