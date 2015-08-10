@@ -25,6 +25,7 @@ pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
 
 newtype_clone!(PublicKey);
 newtype_impl!(PublicKey, PUBLICKEYBYTES);
+non_secret_newtype_impl!(PublicKey);
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
 /// key.
