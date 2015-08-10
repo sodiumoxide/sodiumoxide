@@ -69,13 +69,13 @@ pub fn seal(m: &[u8],
 }
 
 /// `open()` verifies and decrypts a ciphertext `c` using a secret key `k` and a nonce `n`.
-/// It returns a plaintext `Some(m)`.
-/// If the ciphertext fails verification, `open()` returns `None`.
+/// It returns a plaintext `Ok(m)`.
+/// If the ciphertext fails verification, `open()` returns `Err(())`.
 pub fn open(c: &[u8],
             &Nonce(ref n): &Nonce,
-            &Key(ref k): &Key) -> Option<Vec<u8>> {
+            &Key(ref k): &Key) -> Result<Vec<u8>, ()> {
     if c.len() < BOXZEROBYTES {
-        return None;
+        return Err(());
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
@@ -87,9 +87,9 @@ pub fn open(c: &[u8],
         }
     });
     if ret == 0 {
-        Some(m)
+        Ok(m)
     } else {
-        None
+        Err(())
     }
 }
 
@@ -107,7 +107,7 @@ mod test {
             let n = gen_nonce();
             let c = seal(&m, &n, &k);
             let opened = open(&c, &n, &k);
-            assert!(Some(m) == opened);
+            assert!(Ok(m) == opened);
         }
     }
 
@@ -121,7 +121,7 @@ mod test {
             let mut c = seal(&m, &n, &k);
             for i in (0..c.len()) {
                 c[i] ^= 0x20;
-                assert!(None == open(&mut c, &n, &k));
+                assert!(Err(()) == open(&mut c, &n, &k));
                 c[i] ^= 0x20;
             }
         }
@@ -176,7 +176,7 @@ mod test {
         let c = seal(&m, &nonce, &firstkey);
         assert!(c == c_expected);
         let m2 = open(&c, &nonce, &firstkey);
-        assert!(Some(m) == m2);
+        assert!(Ok(m) == m2);
     }
 
     #[test]

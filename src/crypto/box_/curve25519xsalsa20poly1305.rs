@@ -88,14 +88,14 @@ pub fn seal(m: &[u8],
 }
 
 /// `open()` verifies and decrypts a ciphertext `c` using the receiver's secret key `sk`,
-/// the senders public key `pk`, and a nonce `n`. It returns a plaintext `Some(m)`.
-/// If the ciphertext fails verification, `open()` returns `None`.
+/// the senders public key `pk`, and a nonce `n`. It returns a plaintext `Ok(m)`.
+/// If the ciphertext fails verification, `open()` returns `Err(())`.
 pub fn open(c: &[u8],
             &Nonce(ref n): &Nonce,
             &PublicKey(ref pk): &PublicKey,
-            &SecretKey(ref sk): &SecretKey) -> Option<Vec<u8>> {
+            &SecretKey(ref sk): &SecretKey) -> Result<Vec<u8>, ()> {
     if c.len() < BOXZEROBYTES {
-        return None;
+        return Err(());
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
@@ -108,9 +108,9 @@ pub fn open(c: &[u8],
         }
     });
     if ret == 0 {
-        Some(m)
+        Ok(m)
     } else {
-        None
+        Err(())
     }
 }
 
@@ -157,13 +157,13 @@ pub fn seal_precomputed(m: &[u8],
 }
 
 /// `open_precomputed()` verifies and decrypts a ciphertext `c` using a precomputed
-/// key `k` and a nonce `n`. It returns a plaintext `Some(m)`.
-/// If the ciphertext fails verification, `open_precomputed()` returns `None`.
+/// key `k` and a nonce `n`. It returns a plaintext `Ok(m)`.
+/// If the ciphertext fails verification, `open_precomputed()` returns `Err(())`.
 pub fn open_precomputed(c: &[u8],
                         &Nonce(ref n): &Nonce,
-                        &PrecomputedKey(ref k): &PrecomputedKey) -> Option<Vec<u8>> {
+                        &PrecomputedKey(ref k): &PrecomputedKey) -> Result<Vec<u8>, ()> {
     if c.len() < BOXZEROBYTES {
-        return None;
+        return Err(());
     }
     let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
         unsafe {
@@ -175,9 +175,9 @@ pub fn open_precomputed(c: &[u8],
         }
     });
     if ret == 0 {
-        Some(m)
+        Ok(m)
     } else {
-        None
+        Err(())
     }
 }
 
@@ -196,7 +196,7 @@ mod test {
             let n = gen_nonce();
             let c = seal(&m, &n, &pk1, &sk2);
             let opened = open(&c, &n, &pk2, &sk1);
-            assert!(Some(m) == opened);
+            assert!(Ok(m) == opened);
         }
     }
 
@@ -215,7 +215,7 @@ mod test {
             let n = gen_nonce();
             let c = seal_precomputed(&m, &n, &k1);
             let opened = open_precomputed(&c, &n, &k2);
-            assert!(Some(m) == opened);
+            assert!(Ok(m) == opened);
         }
     }
 
@@ -230,7 +230,7 @@ mod test {
             let mut c = seal(&m, &n, &pk1, &sk2);
             for j in (0..c.len()) {
                 c[j] ^= 0x20;
-                assert!(None == open(&mut c, &n, &pk2, &sk1));
+                assert!(Err(()) == open(&mut c, &n, &pk2, &sk1));
                 c[j] ^= 0x20;
             }
         }
@@ -249,7 +249,7 @@ mod test {
             let mut c = seal_precomputed(&m, &n, &k1);
             for j in (0..c.len()) {
                 c[j] ^= 0x20;
-                assert!(None == open_precomputed(&mut c, &n, &k2));
+                assert!(Err(()) == open_precomputed(&mut c, &n, &k2));
                 c[j] ^= 0x20;
             }
         }
@@ -345,7 +345,7 @@ mod test {
                  0x79,0x73,0xf6,0x22,0xa4,0x3d,0x14,0xa6,
                  0x59,0x9b,0x1f,0x65,0x4c,0xb4,0x5a,0x74,
                  0xe3,0x55,0xa5];
-        let mexp = Some(vec![0xbe,0x07,0x5f,0xc5,0x3c,0x81,0xf2,0xd5,
+        let mexp = Ok(vec![0xbe,0x07,0x5f,0xc5,0x3c,0x81,0xf2,0xd5,
                              0xcf,0x14,0x13,0x16,0xeb,0xeb,0x0c,0x7b,
                              0x52,0x28,0xc5,0x2a,0x4c,0x62,0xcb,0xd4,
                              0x4b,0x66,0x84,0x9b,0x64,0x24,0x4f,0xfc,
