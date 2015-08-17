@@ -1,5 +1,6 @@
 //! Constant-time comparison of fixed-size vecs
 use ffi;
+use libc::size_t;
 
 /// `verify_16()` returns `true` if `x[0]`, `x[1]`, ..., `x[15]` are the
 /// same as `y[0]`, `y[1]`, ..., `y[15]`. Otherwise it returns `false`.
@@ -60,7 +61,7 @@ pub fn safe_memcmp(x: &[u8], y: &[u8]) -> bool {
         return false
     }
     unsafe {
-        ffi::sodium_memcmp(x.as_ptr(), y.as_ptr(), x.len() as u64) == 0
+        ffi::sodium_memcmp(x.as_ptr(), y.as_ptr(), x.len() as size_t) == 0
     }
 }
 
