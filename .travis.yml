@@ -1,6 +1,6 @@
 env:
-    global:
-        - secure: RVFYihimdtv0UqBioZp8pEhyYLLQ/md6DOg6h3F7IZP2XhXZvjxevVmLMTITuXKMIls5o0jjaQZfSNYg29ItD5y0/fEaNI0A6zZi6SDtdVQyO5opJP9oh0x/gmRrPMaJPVgmdTztJcIgtGapYVImkkX6A+UhET7Rw+VrGLEXbdY=
+  global:
+    - secure: Oi1sYzUwhYNlkbBrnNKYhItOXnG9Ak6fixgIBbOv+gHkKn2vuwMixrdCIKoJMThBJr2nU8bSfeqm4lmTR1xHE69CX/bIfon8EZ0QN3AqzJcjtAU+vRZer9PFYeaIppz/ZuD4k5rs2wjbtjcIPWV8dBAWn0SU2mxj6MMpXYlmNWs=
 language: rust
 install:
     - wget https://github.com/jedisct1/libsodium/releases/download/1.0.3/libsodium-1.0.3.tar.gz
@@ -10,5 +10,6 @@ script:
     - cargo build --verbose
     - cargo test --verbose
     - cargo doc
+    - mv target/doc doc
 after_script:
     - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
