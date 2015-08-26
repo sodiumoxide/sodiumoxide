@@ -1,15 +1,23 @@
-env:
-  global:
-    - secure: Oi1sYzUwhYNlkbBrnNKYhItOXnG9Ak6fixgIBbOv+gHkKn2vuwMixrdCIKoJMThBJr2nU8bSfeqm4lmTR1xHE69CX/bIfon8EZ0QN3AqzJcjtAU+vRZer9PFYeaIppz/ZuD4k5rs2wjbtjcIPWV8dBAWn0SU2mxj6MMpXYlmNWs=
 language: rust
 install:
-    - wget https://github.com/jedisct1/libsodium/releases/download/1.0.3/libsodium-1.0.3.tar.gz
-    - tar xvfz libsodium-1.0.3.tar.gz
-    - cd libsodium-1.0.3 && ./configure --prefix=/usr && make && sudo make install && cd ..
+- wget https://github.com/jedisct1/libsodium/releases/download/1.0.3/libsodium-1.0.3.tar.gz
+- tar xvfz libsodium-1.0.3.tar.gz
+- cd libsodium-1.0.3 && ./configure --prefix=/usr && make && sudo make install &&
+  cd ..
 script:
-    - cargo build --verbose
-    - cargo test --verbose
-    - cargo doc
-    - mv target/doc doc
+- cargo build --verbose
+- cargo test --verbose
+- cargo doc
 after_script:
-    - curl http://www.rust-ci.org/artifacts/put?t=$RUSTCI_TOKEN | sh
+- cd target/doc
+- git init
+- git config user.name "Travis CI"
+- git config user.email "travis-ci@example.org"
+- echo "<meta http-equiv=refresh content=0;url=doc/sodiumoxide/index.html>" > index.html
+- git add .
+- git commit -m "Deploy to GitHub Pages"
+- git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:gh-pages > /dev/null 2>&1
+env:
+  global:
+    - GH_REF: github.com/dnaq/sodiumoxide_doc.git
+    - secure: LFhOKKRNMdfsU4bUKLi+9ly5l0mrvnL9rS0M33aEyvCoeTiptuHsOCoSxZMk4iH5dA3IGQX+q6BjQlB5o/W4svSeOFfTvvXQ7QgqIoWqO0a9kAstVDZFTFM7xGMbI9jrihH4mHeT4dZdN779Mbnhg3tynbNapB+0ewA+cz3Wb5s=
