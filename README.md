@@ -34,7 +34,7 @@ Most documentation is taken from NaCl, with minor modification where the API
 differs between the C and Rust versions.
 
 Documentation for the latest build can be found at
-[gh-pages](https://dnaq.github.com/sodiumoxide).
+[gh-pages](https://dnaq.github.io/sodiumoxide).
 
 Examples
 --------
