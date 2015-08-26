@@ -13,7 +13,7 @@ after_script:
 - git init
 - git config user.name "Travis CI"
 - git config user.email "travis-ci@example.org"
-- echo "<meta http-equiv=refresh content=0;url=doc/sodiumoxide/index.html>" > index.html
+- echo "<meta http-equiv=refresh content=0;url=sodiumoxide/index.html>" > index.html
 - git add .
 - git commit -m "Deploy to GitHub Pages"
 - git push --force --quiet "https://${GH_TOKEN}@${GH_REF}" master:gh-pages > /dev/null 2>&1
