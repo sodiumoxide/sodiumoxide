@@ -2,6 +2,7 @@
 name = "libsodium-sys"
 description = "FFI binding to libsodium"
 repository = "https://github.com/dnaq/sodiumoxide.git"
+documentation = "https://dnaq.github.io/sodiumoxide_doc"
 keywords = ["libsodium", "NaCl", "crypto"]
 version = "0.0.6"
 authors = ["dnaq"]
