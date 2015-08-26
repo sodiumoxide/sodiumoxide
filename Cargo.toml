@@ -5,7 +5,7 @@ documentation = "https://dnaq.github.io/sodiumoxide_doc"
 repository = "https://github.com/dnaq/sodiumoxide"
 readme = "README.md"
 keywords = ["crypto", "NaCl", "libsodium"]
-version = "0.0.6"
+version = "0.0.7"
 authors = ["dnaq"]
 license = "MIT"
 
