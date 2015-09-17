@@ -60,7 +60,7 @@ extern crate rustc_serialize;
 /// thread-safe
 pub fn init() -> bool {
     unsafe {
-        ffi::sodium_init() == 0
+        ffi::sodium_init() != -1
     }
 }
 
