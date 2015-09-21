@@ -239,5 +239,21 @@ mod test_s {
             assert_eq!(tag, tag2);
         }
     }
+
+    #[test]
+    fn test_auth_eq_auth_state_chunked() {
+        use randombytes::randombytes;
+        for i in (0..256usize) {
+            let k = gen_key();
+            let m = randombytes(i);
+            let tag = authenticate(&m, &k);
+            let mut state = State::init(&k[..]);
+            for c in m.chunks(1) {
+                state.update(c);
+            }
+            let tag2 = state.finalize();
+            assert_eq!(tag, tag2);
+        }
+    }
 }
 ));
