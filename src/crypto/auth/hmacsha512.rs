@@ -2,13 +2,23 @@
 //! unforgeability.
 use ffi::{crypto_auth_hmacsha512,
           crypto_auth_hmacsha512_verify,
+          crypto_auth_hmacsha512_state,
+          crypto_auth_hmacsha512_init,
+          crypto_auth_hmacsha512_update,
+          crypto_auth_hmacsha512_final,
           crypto_auth_hmacsha512_KEYBYTES,
-          crypto_auth_hmacsha512_BYTES};
+          crypto_auth_hmacsha512_BYTES
+};
 
 auth_module!(crypto_auth_hmacsha512,
              crypto_auth_hmacsha512_verify,
              crypto_auth_hmacsha512_KEYBYTES,
              crypto_auth_hmacsha512_BYTES);
+
+auth_state!(crypto_auth_hmacsha512_state,
+            crypto_auth_hmacsha512_init,
+            crypto_auth_hmacsha512_update,
+            crypto_auth_hmacsha512_final);
 
 #[cfg(test)]
 mod test {

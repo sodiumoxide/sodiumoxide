@@ -2,6 +2,10 @@
 //! unforgeability.
 use ffi::{crypto_auth_hmacsha256,
           crypto_auth_hmacsha256_verify,
+          crypto_auth_hmacsha256_state,
+          crypto_auth_hmacsha256_init,
+          crypto_auth_hmacsha256_update,
+          crypto_auth_hmacsha256_final,
           crypto_auth_hmacsha256_KEYBYTES,
           crypto_auth_hmacsha256_BYTES
 };
@@ -10,6 +14,11 @@ auth_module!(crypto_auth_hmacsha256,
              crypto_auth_hmacsha256_verify,
              crypto_auth_hmacsha256_KEYBYTES,
              crypto_auth_hmacsha256_BYTES);
+
+auth_state!(crypto_auth_hmacsha256_state,
+            crypto_auth_hmacsha256_init,
+            crypto_auth_hmacsha256_update,
+            crypto_auth_hmacsha256_final);
 
 #[cfg(test)]
 mod test {
