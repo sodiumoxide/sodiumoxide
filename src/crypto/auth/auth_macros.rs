@@ -162,14 +162,18 @@ mod bench_m {
 macro_rules! auth_state (($state_name:ident,
                           $init_name:ident,
                           $update_name:ident,
-                          $final_name:ident) => (
+                          $final_name:ident,
+                          $tagbytes:expr) => (
 
 use libc::size_t;
 use std::mem;
+use ffi;
 
 /// Authentication `State`
 ///
 /// State for multi-part (streaming) authenticator tag computation.
+///
+/// When a `State` goes out of scope its contents will be zeroed out.
 ///
 /// NOTE: the streaming interface takes variable length keys, as opposed to the
 /// simple interface which takes a fixed length key. The streaming interface also does not
@@ -178,23 +182,23 @@ use std::mem;
 /// (in contrast to the simple interface which defines a `Drop` implementation for `Key`).
 pub struct State($state_name);
 
-/*
 impl Drop for State {
     fn drop(&mut self) {
-        unsafe { *self = mem::zeroed(); }
+        let &mut State(ref mut s) = self;
+        unsafe {
+            let sp: *mut $state_name = s;
+            ffi::sodium_memzero(sp as *mut u8, mem::size_of_val(s) as c_ulonglong);
+        }
     }
-}*/
+}
 
 impl State {
     /// `init()` initializes an authentication structure using a secret key 'k'.
     pub fn init(k: &[u8]) -> State {
         unsafe {
             let mut s = mem::uninitialized();
-            {
-                let &mut State(ref mut state) = &mut s;
-                $init_name(state, k.as_ptr(), k.len() as size_t);
-            }
-            s
+            $init_name(&mut s, k.as_ptr(), k.len() as size_t);
+            State(s)
         }
     }
 
@@ -209,14 +213,11 @@ impl State {
 
     /// `finalize()` finalizes the authenticator computation and returns a `Tag`.
     pub fn finalize(&mut self) -> Tag {
-        let &mut State(ref mut state) = self;
         unsafe {
-            let mut t = mem::uninitialized();
-            {
-                let &mut Tag(ref mut tagbytes) = &mut t;
-                $final_name(state, tagbytes);
-            }
-            t
+            let &mut State(ref mut state) = self;
+            let mut tag = [0; $tagbytes as usize];
+            $final_name(state, &mut tag);
+            Tag(tag)
         }
     }
 }

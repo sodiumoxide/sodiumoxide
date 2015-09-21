@@ -19,7 +19,8 @@ auth_module!(crypto_auth_hmacsha512256,
 auth_state!(crypto_auth_hmacsha512256_state,
             crypto_auth_hmacsha512256_init,
             crypto_auth_hmacsha512256_update,
-            crypto_auth_hmacsha512256_final);
+            crypto_auth_hmacsha512256_final,
+            crypto_auth_hmacsha512256_BYTES);
 
 #[cfg(test)]
 mod test {
