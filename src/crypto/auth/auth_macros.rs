@@ -159,6 +159,18 @@ mod bench_m {
 
 ));
 
+/// Macro for defining streaming authenticator tag computation types and functions.
+///
+/// Parameters:
+/// $state_name - The authenticator state type.
+///               SAFETY NOTE: This needs to be a type that does not define a `Drop`
+///               implementation, otherwise undefined behaviour will occur.
+/// $init_name - A function `f(s: *mut $state_name, k: *u8, klen: size_t)` that initializes
+///              a state with a key.
+/// $update_name - A function `f(s: *mut $state_name, m: *u8, mlen: size_t)` that updates
+///                a state with a message chunk.
+/// $final_name - A function `f(s: *mut $state_name, t: *u8)` that computes an authenticator                    tag of length $tagbytes from a $state_name.
+/// $tagbytes   - The number of bytes in an authenticator tag.
 macro_rules! auth_state (($state_name:ident,
                           $init_name:ident,
                           $update_name:ident,
