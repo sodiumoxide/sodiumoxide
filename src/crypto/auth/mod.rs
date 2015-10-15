@@ -33,7 +33,7 @@
 //! |crypto_auth_hmacsha512   |HMAC_SHA-512     |64   |32      |
 //! ------------------------------------------------------------
 //!
-//! # Example
+//! # Example (simple interface)
 //! ```
 //! use sodiumoxide::crypto::auth;
 //!
@@ -41,6 +41,29 @@
 //! let data_to_authenticate = b"some data";
 //! let tag = auth::authenticate(data_to_authenticate, &key);
 //! assert!(auth::verify(&tag, data_to_authenticate, &key));
+//! ```
+//!
+//! # Example (streaming interface)
+//! ```
+//! use sodiumoxide::crypto::auth;
+//! use sodiumoxide::randombytes;
+//!
+//! let key = randombytes::randombytes(123);
+//!
+//! let data_part_1 = b"some data";
+//! let data_part_2 = b"some other data";
+//! let mut state = auth::State::init(&key);
+//! state.update(data_part_1);
+//! state.update(data_part_2);
+//! let tag1 = state.finalize();
+//!
+//! let data_2_part_1 = b"some datasome ";
+//! let data_2_part_2 = b"other data";
+//! let mut state = auth::State::init(&key);
+//! state.update(data_2_part_1);
+//! state.update(data_2_part_2);
+//! let tag2 = state.finalize();
+//! assert_eq!(tag1, tag2);
 //! ```
 pub use self::hmacsha512256::*;
 #[macro_use]
