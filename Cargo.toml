@@ -7,11 +7,11 @@ license = "MIT"
 name = "sodiumoxide"
 readme = "README.md"
 repository = "https://github.com/dnaq/sodiumoxide"
-version = "0.0.8"
+version = "0.0.9"
 
 [dependencies]
 libc = "0.2.1"
-libsodium-sys = "*"
+libsodium-sys = "0.0.9"
 rustc-serialize = "0.3.16"
 
 [features]
