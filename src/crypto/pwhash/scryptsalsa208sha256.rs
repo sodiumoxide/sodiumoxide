@@ -5,15 +5,28 @@ use randombytes::randombytes_into;
 use libc::c_ulonglong;
 use rustc_serialize;
 
+/// Number of bytes in a `Salt`.
 pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES;
-pub const STRBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES;
+
+/// Number of bytes in a `HashedPassword`.
+pub const HASHEDPASSWORDBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES;
+
+/// All `HashedPasswords` start with this string.
 pub const STRPREFIX: &'static str = ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX;
+
+/// Safe base line for `OpsLimit` for interactive password hashing.
 pub const OPSLIMIT_INTERACTIVE: OpsLimit =
     OpsLimit(ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+
+/// Safe base line for `MemLimit` for interactive password hashing.
 pub const MEMLIMIT_INTERACTIVE: MemLimit =
     MemLimit(ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+
+/// `OpsLimit` for highly sensitive data.
 pub const OPSLIMIT_SENSITIVE: OpsLimit =
     OpsLimit(ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE);
+
+/// `MemLimit` for highly sensitive data.
 pub const MEMLIMIT_SENSITIVE: MemLimit =
     MemLimit(ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE);
 
@@ -45,9 +58,9 @@ newtype_impl!(Salt, SALTBYTES);
 /// be conveniently stored into SQL databases and other data stores. No
 /// additional information has to be stored in order to verify the password.
 #[derive(Copy)]
-pub struct HashedPassword(pub [u8; STRBYTES]);
+pub struct HashedPassword(pub [u8; HASHEDPASSWORDBYTES]);
 newtype_clone!(HashedPassword);
-newtype_impl!(HashedPassword, STRBYTES);
+newtype_impl!(HashedPassword, HASHEDPASSWORDBYTES);
 
 /// `gen_salt()` randombly generates a new `Salt` for key derivation
 ///
@@ -125,7 +138,7 @@ pub fn derive_key<'a>(key: &'a mut [u8], passwd: &[u8], &Salt(ref sb): &Salt,
 /// successfully
 pub fn pwhash(passwd: &[u8], OpsLimit(opslimit): OpsLimit,
               MemLimit(memlimit): MemLimit) -> Result<HashedPassword, ()> {
-    let mut out = HashedPassword([0; STRBYTES]);
+    let mut out = HashedPassword([0; HASHEDPASSWORDBYTES]);
     if unsafe {
         let HashedPassword(ref mut str_) = out;
         ffi::crypto_pwhash_scryptsalsa208sha256_str(str_,

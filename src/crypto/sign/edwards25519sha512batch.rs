@@ -5,8 +5,13 @@ use libc::c_ulonglong;
 use std::iter::repeat;
 use rustc_serialize;
 
+/// Number of bytes in a `SecretKey`.
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_SECRETKEYBYTES;
+
+/// Number of bytes in a `PublicKey`.
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES;
+
+/// Number of bytes in a `Signature`.
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_BYTES;
 
 /// `SecretKey` for signatures

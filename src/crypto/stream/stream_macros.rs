@@ -8,7 +8,10 @@ use std::iter::repeat;
 use randombytes::randombytes_into;
 use rustc_serialize;
 
+/// Number of bytes in a `Key`.
 pub const KEYBYTES: usize = $keybytes;
+
+/// Number of bytes in a `Nonce`.
 pub const NONCEBYTES: usize = $noncebytes;
 
 /// `Key` for symmetric encryption

@@ -9,7 +9,10 @@ use marshal::marshal;
 use randombytes::randombytes_into;
 use rustc_serialize;
 
+/// Number of bytes in `Key`.
 pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES;
+
+/// Number of bytes in a `Nonce`.
 pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
 
 /// `Key` for symmetric authenticated encryption

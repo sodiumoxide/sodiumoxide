@@ -4,15 +4,18 @@ use libc::c_ulonglong;
 use randombytes::randombytes_into;
 use rustc_serialize;
 
-pub const HASHBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
+/// Number of bytes in a `Digest`.
+pub const DIGESTBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
+
+/// Number of bytes in a `Key`.
 pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES;
 
 /// Digest-structure
 #[derive(Copy)]
-pub struct Digest(pub [u8; HASHBYTES]);
+pub struct Digest(pub [u8; DIGESTBYTES]);
 
 newtype_clone!(Digest);
-newtype_impl!(Digest, HASHBYTES);
+newtype_impl!(Digest, DIGESTBYTES);
 non_secret_newtype_impl!(Digest);
 
 /// Key
@@ -41,7 +44,7 @@ pub fn gen_key() -> Key {
 pub fn shorthash(m: &[u8],
                  &Key(ref k): &Key) -> Digest {
     unsafe {
-        let mut h = [0; HASHBYTES];
+        let mut h = [0; DIGESTBYTES];
         ffi::crypto_shorthash_siphash24(&mut h, m.as_ptr(),
                                         m.len() as c_ulonglong,
                                         k);

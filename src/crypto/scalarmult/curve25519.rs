@@ -5,8 +5,12 @@
 //! Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
 use ffi;
 
-pub const BYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES;
+/// Number of bytes in a `GroupElement`.
+pub const GROUPELEMENTBYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES;
+
+/// Number of bytes in a `Scalar`.
 pub const SCALARBYTES: usize = ffi::crypto_scalarmult_curve25519_SCALARBYTES;
+
 use rustc_serialize;
 
 /// `Scalar` value (integer in byte representation)
@@ -18,17 +22,17 @@ newtype_impl!(Scalar, SCALARBYTES);
 
 /// `GroupElement`
 #[derive(Copy)]
-pub struct GroupElement(pub [u8; BYTES]);
+pub struct GroupElement(pub [u8; GROUPELEMENTBYTES]);
 
 newtype_clone!(GroupElement);
-newtype_impl!(GroupElement, BYTES);
+newtype_impl!(GroupElement, GROUPELEMENTBYTES);
 
 /// `scalarmult()` multiplies a group element `p`
 /// by an integer `n`. It returns the resulting group element
 /// `q`.
 pub fn scalarmult(&Scalar(ref n): &Scalar,
                   &GroupElement(ref p): &GroupElement) -> GroupElement {
-    let mut q = [0; BYTES];
+    let mut q = [0; GROUPELEMENTBYTES];
     unsafe {
         ffi::crypto_scalarmult_curve25519(&mut q, n, p);
     }
@@ -39,7 +43,7 @@ pub fn scalarmult(&Scalar(ref n): &Scalar,
 /// group element and an integer `n`. It returns the resulting
 /// group element `q`/
 pub fn scalarmult_base(&Scalar(ref n): &Scalar) -> GroupElement {
-    let mut q = [0; BYTES];
+    let mut q = [0; GROUPELEMENTBYTES];
     unsafe {
         ffi::crypto_scalarmult_curve25519_base(&mut q, n);
     }

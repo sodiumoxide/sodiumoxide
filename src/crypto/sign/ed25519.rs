@@ -6,9 +6,17 @@ use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
 use rustc_serialize;
+
+/// Number of bytes in a `Seed`.
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
+
+/// Number of bytes in a `SecretKey`.
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
+
+/// Number of bytes in a `PublicKey`.
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
+
+/// Number of bytes in a `Signature`.
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
 
 /// `Seed` that can be used for keypair generation

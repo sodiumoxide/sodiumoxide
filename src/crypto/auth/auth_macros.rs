@@ -7,7 +7,10 @@ use libc::c_ulonglong;
 use randombytes::randombytes_into;
 use rustc_serialize;
 
+/// Number of bytes in a `Key`.
 pub const KEYBYTES: usize = $keybytes;
+
+/// Number of bytes in a `Tag`.
 pub const TAGBYTES: usize = $tagbytes;
 
 /// Authentication `Key`
