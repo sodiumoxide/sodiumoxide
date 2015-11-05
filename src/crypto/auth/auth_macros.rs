@@ -183,7 +183,7 @@ use ffi;
 
 /// Authentication `State`
 ///
-/// State for multi-part (streaming) authenticator tag computation.
+/// State for multi-part (streaming) authenticator tag (HMAC) computation.
 ///
 /// When a `State` goes out of scope its contents will be zeroed out.
 ///
@@ -192,6 +192,9 @@ use ffi;
 /// define its own `Key` type, instead using slices for its `init()` method.
 /// The caller of the functions is responsible for zeroing out the key after it's been used
 /// (in contrast to the simple interface which defines a `Drop` implementation for `Key`).
+///
+/// NOTE: these functions are specific to `libsodium` and do not exist in `NaCl`.
+
 pub struct State($state_name);
 
 impl Drop for State {
