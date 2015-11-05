@@ -1,18 +1,18 @@
 [package]
-name = "sodiumoxide"
+authors = ["dnaq"]
 description = "Fast cryptographic library for Rust (bindings to libsodium)"
 documentation = "https://dnaq.github.io/sodiumoxide"
-repository = "https://github.com/dnaq/sodiumoxide"
-readme = "README.md"
 keywords = ["crypto", "NaCl", "libsodium"]
-version = "0.0.8"
-authors = ["dnaq"]
 license = "MIT"
+name = "sodiumoxide"
+readme = "README.md"
+repository = "https://github.com/dnaq/sodiumoxide"
+version = "0.0.8"
 
 [dependencies]
-libc = "*"
+libc = "0.2.1"
 libsodium-sys = "*"
-rustc-serialize = "*"
+rustc-serialize = "0.3.16"
 
 [features]
 benchmarks = []
