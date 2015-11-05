@@ -2,7 +2,7 @@
 //! and SHA-256
 use ffi;
 use randombytes::randombytes_into;
-use libc::{c_ulonglong, size_t};
+use libc::c_ulonglong;
 use rustc_serialize;
 
 pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES;
@@ -101,7 +101,7 @@ pub fn derive_key<'a>(key: &'a mut [u8], passwd: &[u8], &Salt(ref sb): &Salt,
                                                 passwd.len() as c_ulonglong,
                                                 sb,
                                                 opslimit as c_ulonglong,
-                                                memlimit as size_t)
+                                                memlimit)
     } == 0 {
         Ok(key)
     } else {
@@ -132,7 +132,7 @@ pub fn pwhash(passwd: &[u8], OpsLimit(opslimit): OpsLimit,
                                                     passwd.as_ptr(),
                                                     passwd.len() as c_ulonglong,
                                                     opslimit as c_ulonglong,
-                                                    memlimit as size_t)
+                                                    memlimit)
     } == 0 {
         Ok(out)
     } else {

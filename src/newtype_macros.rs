@@ -11,11 +11,10 @@ macro_rules! newtype_clone (($newtype:ident) => (
 macro_rules! newtype_drop (($newtype:ident) => (
         impl Drop for $newtype {
             fn drop(&mut self) {
-                use libc::size_t;
                 use ffi;
                 let &mut $newtype(ref mut v) = self;
                 unsafe {
-                    ffi::sodium_memzero(v.as_mut_ptr(), v.len() as size_t);
+                    ffi::sodium_memzero(v.as_mut_ptr(), v.len());
                 }
             }
         }

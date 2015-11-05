@@ -3,7 +3,7 @@ macro_rules! auth_module (($auth_name:ident,
                            $keybytes:expr,
                            $tagbytes:expr) => (
 
-use libc::{c_ulonglong};
+use libc::c_ulonglong;
 use randombytes::randombytes_into;
 use rustc_serialize;
 
@@ -177,7 +177,6 @@ macro_rules! auth_state (($state_name:ident,
                           $final_name:ident,
                           $tagbytes:expr) => (
 
-use libc::size_t;
 use std::mem;
 use ffi;
 
@@ -202,7 +201,7 @@ impl Drop for State {
         let &mut State(ref mut s) = self;
         unsafe {
             let sp: *mut $state_name = s;
-            ffi::sodium_memzero(sp as *mut u8, mem::size_of_val(s) as c_ulonglong);
+            ffi::sodium_memzero(sp as *mut u8, mem::size_of_val(s));
         }
     }
 }
@@ -212,7 +211,7 @@ impl State {
     pub fn init(k: &[u8]) -> State {
         unsafe {
             let mut s = mem::uninitialized();
-            $init_name(&mut s, k.as_ptr(), k.len() as size_t);
+            $init_name(&mut s, k.as_ptr(), k.len());
             State(s)
         }
     }
@@ -222,7 +221,7 @@ impl State {
     pub fn update(&mut self, in_: &[u8]) {
         let &mut State(ref mut state) = self;
         unsafe {
-            $update_name(state, in_.as_ptr(), in_.len() as size_t);
+            $update_name(state, in_.as_ptr(), in_.len() as c_ulonglong);
         }
     }
 
