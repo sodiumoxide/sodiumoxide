@@ -41,6 +41,12 @@ extern {
     pub fn crypto_sign_ed25519_seedbytes() -> size_t;
     pub fn crypto_sign_ed25519_publickeybytes() -> size_t;
     pub fn crypto_sign_ed25519_secretkeybytes() -> size_t;
+    pub fn crypto_sign_ed25519_pk_to_curve25519(
+        curve25519_pk: *mut [u8; crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES],
+        ed25519_pk: *const [u8; crypto_sign_ed25519_PUBLICKEYBYTES]) -> c_int;
+    pub fn crypto_sign_ed25519_sk_to_curve25519(
+        curve25519_sk: *mut [u8; crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES],
+        ed25519_sk: *const [u8; crypto_sign_ed25519_SECRETKEYBYTES]) -> c_int;
 }
 
 
