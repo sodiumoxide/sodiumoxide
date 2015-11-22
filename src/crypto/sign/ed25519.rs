@@ -336,6 +336,23 @@ mod test {
             round_trip(sig);
         }
     }
+
+    #[test]
+    fn test_conversion() {
+        use randombytes::randombytes;
+        use crypto::box_;
+        for i in (0..256usize) {
+            let (ed25519_pk, ed25519_sk) = gen_keypair();
+            let curve25519_pk1 = pk_to_curve25519(&ed25519_pk);
+            let curve25519_sk1 = sk_to_curve25519(&ed25519_sk);
+            let (curve25519_pk2, curve25519_sk2) = box_::gen_keypair();
+            let m = randombytes(i);
+            let n = box_::gen_nonce();
+            let c = box_::seal(&m, &n, &curve25519_pk1, &curve25519_sk2);
+            let opened = box_::open(&c, &n, &curve25519_pk2, &curve25519_sk1);
+            assert!(Ok(m) == opened);
+        }
+    }
 }
 
 #[cfg(feature = "benchmarks")]
