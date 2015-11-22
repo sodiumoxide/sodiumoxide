@@ -6,6 +6,7 @@ use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
 use rustc_serialize;
+use super::super::box_;
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
 pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
 pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
@@ -144,6 +145,26 @@ pub fn verify_detached(&Signature(ref sig): &Signature,
                                                       m.as_ptr(),
                                                       m.len() as c_ulonglong,
                                                       pk)
+    }
+}
+
+/// `pk_to_curve25519()` converts an Ed25519 public key `pk` to a Curve25519
+/// public key and returns it.
+pub fn pk_to_curve25519(&PublicKey(ref pk): &PublicKey) -> box_::PublicKey {
+    let mut curve25519_pk = [0u8; box_::PUBLICKEYBYTES];
+    unsafe {
+        ffi::crypto_sign_ed25519_pk_to_curve25519(&mut curve25519_pk, pk);
+        box_::PublicKey(curve25519_pk)
+    }
+}
+
+/// `sk_to_curve25519()` converts an Ed25519 secret key `sk` to a Curve25519
+/// secret key and returns it.
+pub fn sk_to_curve25519(&SecretKey(ref sk): &SecretKey) -> box_::SecretKey {
+    let mut curve25519_sk = [0u8; box_::SECRETKEYBYTES];
+    unsafe {
+        ffi::crypto_sign_ed25519_sk_to_curve25519(&mut curve25519_sk, sk);
+        box_::SecretKey(curve25519_sk)
     }
 }
 
@@ -313,6 +334,23 @@ mod test {
             round_trip(pk);
             round_trip(sk);
             round_trip(sig);
+        }
+    }
+
+    #[test]
+    fn test_conversion() {
+        use randombytes::randombytes;
+        use crypto::box_;
+        for i in (0..256usize) {
+            let (ed25519_pk, ed25519_sk) = gen_keypair();
+            let curve25519_pk1 = pk_to_curve25519(&ed25519_pk);
+            let curve25519_sk1 = sk_to_curve25519(&ed25519_sk);
+            let (curve25519_pk2, curve25519_sk2) = box_::gen_keypair();
+            let m = randombytes(i);
+            let n = box_::gen_nonce();
+            let c = box_::seal(&m, &n, &curve25519_pk1, &curve25519_sk2);
+            let opened = box_::open(&c, &n, &curve25519_pk2, &curve25519_sk1);
+            assert!(Ok(m) == opened);
         }
     }
 }
