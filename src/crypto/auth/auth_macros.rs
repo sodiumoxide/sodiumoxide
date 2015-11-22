@@ -199,7 +199,7 @@ impl Drop for State {
         let &mut State(ref mut s) = self;
         unsafe {
             let sp: *mut $state_name = s;
-            ffi::sodium_memzero(sp as *mut u8, mem::size_of_val(s) as c_ulonglong);
+            ffi::sodium_memzero(sp as *mut u8, mem::size_of_val(s) as size_t);
         }
     }
 }
@@ -219,7 +219,7 @@ impl State {
     pub fn update(&mut self, in_: &[u8]) {
         let &mut State(ref mut state) = self;
         unsafe {
-            $update_name(state, in_.as_ptr(), in_.len() as size_t);
+            $update_name(state, in_.as_ptr(), in_.len() as c_ulonglong);
         }
     }
 
