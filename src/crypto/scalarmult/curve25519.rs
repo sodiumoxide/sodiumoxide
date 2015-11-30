@@ -18,14 +18,14 @@ pub struct Scalar(pub [u8; SCALARBYTES]);
 
 newtype_drop!(Scalar);
 newtype_clone!(Scalar);
-newtype_impl!(Scalar, SCALARBYTES);
+newtype_traits!(Scalar, SCALARBYTES);
 
 /// `GroupElement`
 #[derive(Copy)]
 pub struct GroupElement(pub [u8; GROUPELEMENTBYTES]);
 
 newtype_clone!(GroupElement);
-newtype_impl!(GroupElement, GROUPELEMENTBYTES);
+newtype_traits!(GroupElement, GROUPELEMENTBYTES);
 
 /// `scalarmult()` multiplies a group element `p`
 /// by an integer `n`. It returns the resulting group element

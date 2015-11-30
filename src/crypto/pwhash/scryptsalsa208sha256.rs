@@ -50,7 +50,7 @@ pub struct MemLimit(pub usize);
 #[derive(Copy)]
 pub struct Salt(pub [u8; SALTBYTES]);
 newtype_clone!(Salt);
-newtype_impl!(Salt, SALTBYTES);
+newtype_traits!(Salt, SALTBYTES);
 
 /// `HashedPassword`is a password verifier generated from a password
 ///
@@ -60,7 +60,7 @@ newtype_impl!(Salt, SALTBYTES);
 #[derive(Copy)]
 pub struct HashedPassword(pub [u8; HASHEDPASSWORDBYTES]);
 newtype_clone!(HashedPassword);
-newtype_impl!(HashedPassword, HASHEDPASSWORDBYTES);
+newtype_traits!(HashedPassword, HASHEDPASSWORDBYTES);
 
 /// `gen_salt()` randombly generates a new `Salt` for key derivation
 ///

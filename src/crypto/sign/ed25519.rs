@@ -30,7 +30,7 @@ pub struct Seed(pub [u8; SEEDBYTES]);
 
 newtype_drop!(Seed);
 newtype_clone!(Seed);
-newtype_impl!(Seed, SEEDBYTES);
+newtype_traits!(Seed, SEEDBYTES);
 
 new_keypair!(SECRETKEYBYTES, PUBLICKEYBYTES);
 
@@ -39,8 +39,8 @@ new_keypair!(SECRETKEYBYTES, PUBLICKEYBYTES);
 pub struct Signature(pub [u8; SIGNATUREBYTES]);
 
 newtype_clone!(Signature);
-newtype_impl!(Signature, SIGNATUREBYTES);
-non_secret_newtype_impl!(Signature);
+newtype_traits!(Signature, SIGNATUREBYTES);
+non_secret_newtype_traits!(Signature);
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
 /// key.

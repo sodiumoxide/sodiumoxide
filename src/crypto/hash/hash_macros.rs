@@ -14,8 +14,8 @@ pub const BLOCKBYTES: usize = $blockbytes;
 pub struct Digest(pub [u8; DIGESTBYTES]);
 
 newtype_clone!(Digest);
-newtype_impl!(Digest, DIGESTBYTES);
-non_secret_newtype_impl!(Digest);
+newtype_traits!(Digest, DIGESTBYTES);
+non_secret_newtype_traits!(Digest);
 
 /// `hash` hashes a message `m`. It returns a hash `h`.
 pub fn hash(m: &[u8]) -> Digest {

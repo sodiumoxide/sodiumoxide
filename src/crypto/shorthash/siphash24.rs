@@ -15,8 +15,8 @@ pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES;
 pub struct Digest(pub [u8; DIGESTBYTES]);
 
 newtype_clone!(Digest);
-newtype_impl!(Digest, DIGESTBYTES);
-non_secret_newtype_impl!(Digest);
+newtype_traits!(Digest, DIGESTBYTES);
+non_secret_newtype_traits!(Digest);
 
 new_key!(KEYBYTES);
 

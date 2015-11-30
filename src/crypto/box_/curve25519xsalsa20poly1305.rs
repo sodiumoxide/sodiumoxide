@@ -110,7 +110,7 @@ pub struct PrecomputedKey([u8; PRECOMPUTEDKEYBYTES]);
 
 newtype_drop!(PrecomputedKey);
 newtype_clone!(PrecomputedKey);
-newtype_impl!(PrecomputedKey, PRECOMPUTEDKEYBYTES);
+newtype_traits!(PrecomputedKey, PRECOMPUTEDKEYBYTES);
 
 /// `precompute()` computes an intermediate key that can be used by `seal_precomputed()`
 /// and `open_precomputed()`

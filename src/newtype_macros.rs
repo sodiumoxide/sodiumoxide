@@ -20,7 +20,7 @@ macro_rules! newtype_drop (($newtype:ident) => (
         }
         ));
 
-macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
+macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl $newtype {
         /// `from_slice()` creates an object from a byte slice
         ///
@@ -140,7 +140,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
     }
     ));
 
-macro_rules! non_secret_newtype_impl (($newtype:ident) => (
+macro_rules! non_secret_newtype_traits (($newtype:ident) => (
     impl AsRef<[u8]> for $newtype {
         #[inline]
         fn as_ref(&self) -> &[u8] {
@@ -191,7 +191,7 @@ macro_rules! new_key (($keybytes:expr) => (
     pub struct Key(pub [u8; $keybytes]);
     newtype_drop!(Key);
     newtype_clone!(Key);
-    newtype_impl!(Key, $keybytes);
+    newtype_traits!(Key, $keybytes);
     ));
 
 macro_rules! new_keypair (($secretkeybytes:expr, $publickeybytes:expr) => (
@@ -202,14 +202,14 @@ macro_rules! new_keypair (($secretkeybytes:expr, $publickeybytes:expr) => (
     pub struct SecretKey(pub [u8; $secretkeybytes]);
     newtype_drop!(SecretKey);
     newtype_clone!(SecretKey);
-    newtype_impl!(SecretKey, $secretkeybytes);
+    newtype_traits!(SecretKey, $secretkeybytes);
 
     /// `PublicKey`
     #[derive(Copy)]
     pub struct PublicKey(pub [u8; $publickeybytes]);
     newtype_clone!(PublicKey);
-    newtype_impl!(PublicKey, $publickeybytes);
-    non_secret_newtype_impl!(PublicKey);
+    newtype_traits!(PublicKey, $publickeybytes);
+    non_secret_newtype_traits!(PublicKey);
     ));
 
 macro_rules! new_nonce (($noncebytes:expr) => (
@@ -217,5 +217,5 @@ macro_rules! new_nonce (($noncebytes:expr) => (
     #[derive(Copy)]
     pub struct Nonce(pub [u8; $noncebytes]);
     newtype_clone!(Nonce);
-    newtype_impl!(Nonce, $noncebytes);
+    newtype_traits!(Nonce, $noncebytes);
     ));
