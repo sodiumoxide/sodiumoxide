@@ -18,15 +18,7 @@ newtype_clone!(Digest);
 newtype_impl!(Digest, DIGESTBYTES);
 non_secret_newtype_impl!(Digest);
 
-/// Key
-///
-/// When a `Key` goes out of scope its contents
-/// will be zeroed out
-pub struct Key(pub [u8; KEYBYTES]);
-
-newtype_drop!(Key);
-newtype_clone!(Key);
-newtype_impl!(Key, KEYBYTES);
+new_key!(KEYBYTES);
 
 /// `gen_key()` randomly generates a key for shorthash
 ///

@@ -13,15 +13,7 @@ pub const KEYBYTES: usize = $keybytes;
 /// Number of bytes in a `Tag`.
 pub const TAGBYTES: usize = $tagbytes;
 
-/// Authentication `Key`
-///
-/// When a `Key` goes out of scope its contents
-/// will be zeroed out
-pub struct Key(pub [u8; KEYBYTES]);
-
-newtype_drop!(Key);
-newtype_clone!(Key);
-newtype_impl!(Key, KEYBYTES);
+new_key!(KEYBYTES);
 
 /// Authentication `Tag`
 ///

@@ -32,23 +32,7 @@ newtype_drop!(Seed);
 newtype_clone!(Seed);
 newtype_impl!(Seed, SEEDBYTES);
 
-/// `SecretKey` for signatures
-///
-/// When a `SecretKey` goes out of scope its contents
-/// will be zeroed out
-pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
-
-newtype_drop!(SecretKey);
-newtype_clone!(SecretKey);
-newtype_impl!(SecretKey, SECRETKEYBYTES);
-
-/// `PublicKey` for signatures
-#[derive(Copy)]
-pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
-
-newtype_clone!(PublicKey);
-newtype_impl!(PublicKey, PUBLICKEYBYTES);
-non_secret_newtype_impl!(PublicKey);
+new_keypair!(SECRETKEYBYTES, PUBLICKEYBYTES);
 
 /// Detached signature
 #[derive(Copy)]

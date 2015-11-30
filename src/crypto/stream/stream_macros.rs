@@ -14,22 +14,8 @@ pub const KEYBYTES: usize = $keybytes;
 /// Number of bytes in a `Nonce`.
 pub const NONCEBYTES: usize = $noncebytes;
 
-/// `Key` for symmetric encryption
-///
-/// When a `Key` goes out of scope its contents
-/// will be zeroed out
-pub struct Key(pub [u8; KEYBYTES]);
-
-newtype_drop!(Key);
-newtype_clone!(Key);
-newtype_impl!(Key, KEYBYTES);
-
-/// `Nonce` for symmetric encryption
-#[derive(Copy)]
-pub struct Nonce(pub [u8; NONCEBYTES]);
-
-newtype_clone!(Nonce);
-newtype_impl!(Nonce, NONCEBYTES);
+new_key!(KEYBYTES);
+new_nonce!(NONCEBYTES);
 
 /// `gen_key()` randomly generates a key for symmetric encryption
 ///

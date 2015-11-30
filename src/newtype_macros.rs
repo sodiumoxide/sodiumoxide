@@ -182,3 +182,40 @@ macro_rules! non_secret_newtype_impl (($newtype:ident) => (
         }
     }
     ));
+
+macro_rules! new_key (($keybytes:expr) => (
+    /// `Key`
+    ///
+    /// When a `Key` goes out of scope its contents will be
+    /// zeroed out.
+    pub struct Key(pub [u8; $keybytes]);
+    newtype_drop!(Key);
+    newtype_clone!(Key);
+    newtype_impl!(Key, $keybytes);
+    ));
+
+macro_rules! new_keypair (($secretkeybytes:expr, $publickeybytes:expr) => (
+    /// `SecretKey`
+    ///
+    /// When a `SecretKey` goes out of scope its contents
+    /// will be zeroed out
+    pub struct SecretKey(pub [u8; $secretkeybytes]);
+    newtype_drop!(SecretKey);
+    newtype_clone!(SecretKey);
+    newtype_impl!(SecretKey, $secretkeybytes);
+
+    /// `PublicKey`
+    #[derive(Copy)]
+    pub struct PublicKey(pub [u8; $publickeybytes]);
+    newtype_clone!(PublicKey);
+    newtype_impl!(PublicKey, $publickeybytes);
+    non_secret_newtype_impl!(PublicKey);
+    ));
+
+macro_rules! new_nonce (($noncebytes:expr) => (
+    /// `Nonce`
+    #[derive(Copy)]
+    pub struct Nonce(pub [u8; $noncebytes]);
+    newtype_clone!(Nonce);
+    newtype_impl!(Nonce, $noncebytes);
+    ));

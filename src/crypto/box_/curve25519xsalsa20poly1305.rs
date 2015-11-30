@@ -24,30 +24,8 @@ pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly130
 const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES;
 const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
-/// `PublicKey` for asymmetric authenticated encryption
-#[derive(Copy)]
-pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
-
-newtype_clone!(PublicKey);
-newtype_impl!(PublicKey, PUBLICKEYBYTES);
-non_secret_newtype_impl!(PublicKey);
-
-/// `SecretKey` for asymmetric authenticated encryption
-///
-/// When a `SecretKey` goes out of scope its contents
-/// will be zeroed out
-pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
-
-newtype_drop!(SecretKey);
-newtype_clone!(SecretKey);
-newtype_impl!(SecretKey, SECRETKEYBYTES);
-
-/// `Nonce` for asymmetric authenticated encryption
-#[derive(Copy)]
-pub struct Nonce(pub [u8; NONCEBYTES]);
-
-newtype_clone!(Nonce);
-newtype_impl!(Nonce, NONCEBYTES);
+new_keypair!(SECRETKEYBYTES, PUBLICKEYBYTES);
+new_nonce!(NONCEBYTES);
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public key.
 ///
