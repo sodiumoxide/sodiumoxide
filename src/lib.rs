@@ -67,8 +67,8 @@ pub fn init() -> bool {
 mod marshal;
 #[macro_use]
 mod newtype_macros;
-
 pub mod randombytes;
+pub mod traits;
 
 #[cfg(test)]
 mod test_utils;
@@ -87,4 +87,3 @@ pub mod crypto {
     pub mod shorthash;
     pub mod verify;
 }
-

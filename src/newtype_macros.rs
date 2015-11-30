@@ -21,29 +21,25 @@ macro_rules! newtype_drop (($newtype:ident) => (
         ));
 
 macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
-    /// `from_slice()` creates an object from a byte slice
-    ///
-    /// This function will fail and return None if the length of
-    /// the byte-slice isn't equal to the length of the object
-    pub fn from_slice(bs: &[u8]) -> Option<$newtype> {
-        if bs.len() != $len {
-            return None;
-        }
-        let mut n = $newtype([0; $len]);
-        {
-            let $newtype(ref mut b) = n;
-            for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
-                *bi = bsi
+    impl ::traits::FromSlice for $newtype {
+        fn from_slice(bs: &[u8]) -> Option<$newtype> {
+            if bs.len() != $len {
+                return None;
             }
+            let mut n = $newtype([0; $len]);
+            {
+                let $newtype(ref mut b) = n;
+                for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
+                    *bi = bsi
+                }
+            }
+            Some(n)
         }
-        Some(n)
     }
     ));
 
 macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
-    impl $newtype {
-        newtype_from_slice!($newtype, $len);
-    }
+    newtype_from_slice!($newtype, $len);
     impl ::std::cmp::PartialEq for $newtype {
         fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
             use crypto::verify::safe_memcmp;
