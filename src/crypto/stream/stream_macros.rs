@@ -14,8 +14,18 @@ pub const KEYBYTES: usize = $keybytes;
 /// Number of bytes in a `Nonce`.
 pub const NONCEBYTES: usize = $noncebytes;
 
-new_key!(KEYBYTES);
-new_nonce!(NONCEBYTES);
+new_type! {
+    /// `Key` for symmetric encryption
+    ///
+    /// When a `Key` goes out of scope its contents
+    /// will be zeroed out
+    secret Key(KEYBYTES);
+}
+
+new_type! {
+    /// `Nonce` for symmetric encryption
+    nonce Nonce(NONCEBYTES);
+}
 
 /// `gen_key()` randomly generates a key for symmetric encryption
 ///

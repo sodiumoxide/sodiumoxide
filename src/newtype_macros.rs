@@ -20,7 +20,7 @@ macro_rules! newtype_drop (($newtype:ident) => (
         }
         ));
 
-macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
+macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::traits::FromSlice for $newtype {
         fn from_slice(bs: &[u8]) -> Option<$newtype> {
             if bs.len() != $len {
@@ -36,10 +36,6 @@ macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
             Some(n)
         }
     }
-    ));
-
-macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
-    newtype_from_slice!($newtype, $len);
     impl ::std::cmp::PartialEq for $newtype {
         fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
             use crypto::verify::safe_memcmp;
@@ -140,7 +136,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     }
     ));
 
-macro_rules! non_secret_newtype_traits (($newtype:ident) => (
+macro_rules! public_newtype_traits (($newtype:ident) => (
     impl AsRef<[u8]> for $newtype {
         #[inline]
         fn as_ref(&self) -> &[u8] {
@@ -183,39 +179,56 @@ macro_rules! non_secret_newtype_traits (($newtype:ident) => (
     }
     ));
 
-macro_rules! new_key (($keybytes:expr) => (
-    /// `Key`
-    ///
-    /// When a `Key` goes out of scope its contents will be
-    /// zeroed out.
-    pub struct Key(pub [u8; $keybytes]);
-    newtype_drop!(Key);
-    newtype_clone!(Key);
-    newtype_traits!(Key, $keybytes);
-    ));
-
-macro_rules! new_keypair (($secretkeybytes:expr, $publickeybytes:expr) => (
-    /// `SecretKey`
-    ///
-    /// When a `SecretKey` goes out of scope its contents
-    /// will be zeroed out
-    pub struct SecretKey(pub [u8; $secretkeybytes]);
-    newtype_drop!(SecretKey);
-    newtype_clone!(SecretKey);
-    newtype_traits!(SecretKey, $secretkeybytes);
-
-    /// `PublicKey`
-    #[derive(Copy)]
-    pub struct PublicKey(pub [u8; $publickeybytes]);
-    newtype_clone!(PublicKey);
-    newtype_traits!(PublicKey, $publickeybytes);
-    non_secret_newtype_traits!(PublicKey);
-    ));
-
-macro_rules! new_nonce (($noncebytes:expr) => (
-    /// `Nonce`
-    #[derive(Copy)]
-    pub struct Nonce(pub [u8; $noncebytes]);
-    newtype_clone!(Nonce);
-    newtype_traits!(Nonce, $noncebytes);
-    ));
+/// Macro used for generating newtypes of byte-arrays
+///
+/// Usage:
+/// Generating secret datatypes, e.g. keys
+/// new_type! {
+///     /// This is some documentation for our type
+///     secret Key(KEYBYTES);
+/// }
+/// Generating public datatypes, e.g. public keys
+/// ```
+/// new_type! {
+///     /// This is some documentation for our type
+///     public PublicKey(PUBLICKEYBYTES);
+/// }
+/// ```
+/// Generating nonce types
+/// ```
+/// new_type! {
+///     /// This is some documentation for our type
+///     nonce Nonce(NONCEBYTES);
+/// }
+/// ```
+macro_rules! new_type {
+    ( $(#[$meta:meta])*
+      secret $name:ident($bytes:expr);
+      ) => (
+        $(#[$meta])*
+        pub struct $name(pub [u8; $bytes]);
+        newtype_drop!($name);
+        newtype_clone!($name);
+        newtype_traits!($name, $bytes);
+        );
+    ( $(#[$meta:meta])*
+      public $name:ident($bytes:expr);
+      ) => (
+        $(#[$meta])*
+        #[derive(Copy)]
+        pub struct $name(pub [u8; $bytes]);
+        newtype_clone!($name);
+        newtype_traits!($name, $bytes);
+        public_newtype_traits!($name);
+        );
+    ( $(#[$meta:meta])*
+      nonce $name:ident($bytes:expr);
+      ) => (
+        $(#[$meta])*
+        #[derive(Copy)]
+        pub struct $name(pub [u8; $bytes]);
+        newtype_clone!($name);
+        newtype_traits!($name, $bytes);
+        public_newtype_traits!($name);
+        );
+}

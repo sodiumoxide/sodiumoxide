@@ -46,21 +46,19 @@ pub struct OpsLimit(pub usize);
 #[derive(Copy, Clone)]
 pub struct MemLimit(pub usize);
 
-/// `Salt` used for password hashing
-#[derive(Copy)]
-pub struct Salt(pub [u8; SALTBYTES]);
-newtype_clone!(Salt);
-newtype_traits!(Salt, SALTBYTES);
+new_type! {
+    /// `Salt` used for password hashing
+    public Salt(SALTBYTES);
+}
 
-/// `HashedPassword`is a password verifier generated from a password
-///
-/// A `HashedPassword` is zero-terminated, includes only ASCII characters and can
-/// be conveniently stored into SQL databases and other data stores. No
-/// additional information has to be stored in order to verify the password.
-#[derive(Copy)]
-pub struct HashedPassword(pub [u8; HASHEDPASSWORDBYTES]);
-newtype_clone!(HashedPassword);
-newtype_traits!(HashedPassword, HASHEDPASSWORDBYTES);
+new_type! {
+    /// `HashedPassword`is a password verifier generated from a password
+    ///
+    /// A `HashedPassword` is zero-terminated, includes only ASCII characters and can
+    /// be conveniently stored into SQL databases and other data stores. No
+    /// additional information has to be stored in order to verify the password.
+    public HashedPassword(HASHEDPASSWORDBYTES);
+}
 
 /// `gen_salt()` randombly generates a new `Salt` for key derivation
 ///

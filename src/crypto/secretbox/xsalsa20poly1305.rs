@@ -15,8 +15,18 @@ pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES;
 /// Number of bytes in a `Nonce`.
 pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
 
-new_key!(KEYBYTES);
-new_nonce!(NONCEBYTES);
+new_type! {
+    /// `Key` for symmetric authenticated encryption
+    ///
+    /// When a `Key` goes out of scope its contents
+    /// will be zeroed out
+    secret Key(KEYBYTES);
+}
+
+new_type! {
+    /// `Nonce` for symmetric authenticated encryption
+    nonce Nonce(NONCEBYTES);
+}
 
 const ZEROBYTES: usize = 32;
 const BOXZEROBYTES: usize = 16;

@@ -13,18 +13,21 @@ pub const KEYBYTES: usize = $keybytes;
 /// Number of bytes in a `Tag`.
 pub const TAGBYTES: usize = $tagbytes;
 
-new_key!(KEYBYTES);
+new_type! {
+    /// Authentication `Key`
+    ///
+    /// When a `Key` goes out of scope its contents
+    /// will be zeroed out
+    secret Key(KEYBYTES);
+}
 
-/// Authentication `Tag`
-///
-/// The tag implements the traits `PartialEq` and `Eq` using constant-time
-/// comparison functions. See `sodiumoxide::crypto::verify::safe_memcmp`
-#[derive(Copy)]
-pub struct Tag(pub [u8; TAGBYTES]);
-
-newtype_clone!(Tag);
-newtype_traits!(Tag, TAGBYTES);
-non_secret_newtype_traits!(Tag);
+new_type! {
+    /// Authentication `Tag`
+    ///
+    /// The tag implements the traits `PartialEq` and `Eq` using constant-time
+    /// comparison functions. See `sodiumoxide::crypto::verify::safe_memcmp`
+    public Tag(TAGBYTES);
+}
 
 /// `gen_key()` randomly generates a key for authentication
 ///

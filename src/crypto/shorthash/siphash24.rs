@@ -10,15 +10,17 @@ pub const DIGESTBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
 /// Number of bytes in a `Key`.
 pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES;
 
-/// Digest-structure
-#[derive(Copy)]
-pub struct Digest(pub [u8; DIGESTBYTES]);
+new_type! {
+    /// `Digest` structure
+    public Digest(DIGESTBYTES);
+}
 
-newtype_clone!(Digest);
-newtype_traits!(Digest, DIGESTBYTES);
-non_secret_newtype_traits!(Digest);
-
-new_key!(KEYBYTES);
+new_type! {
+    /// `Key`
+    ///
+    /// When a `Key` goes out of scope its contents will be zeroed out.
+    secret Key(KEYBYTES);
+}
 
 /// `gen_key()` randomly generates a key for shorthash
 ///

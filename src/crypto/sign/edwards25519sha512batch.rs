@@ -14,7 +14,18 @@ pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_PUBLI
 /// Number of bytes in a `Signature`.
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_edwards25519sha512batch_BYTES;
 
-new_keypair!(SECRETKEYBYTES, PUBLICKEYBYTES);
+new_type! {
+    /// `SecretKey` for signatures
+    ///
+    /// When a `SecretKey` goes out of scope its contents
+    /// will be zeroed out
+    secret SecretKey(SECRETKEYBYTES);
+}
+
+new_type! {
+    /// `PublicKey` for signatures
+    public PublicKey(PUBLICKEYBYTES);
+}
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
 /// key.

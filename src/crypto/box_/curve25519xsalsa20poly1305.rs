@@ -24,8 +24,23 @@ pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly130
 const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES;
 const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
-new_keypair!(SECRETKEYBYTES, PUBLICKEYBYTES);
-new_nonce!(NONCEBYTES);
+new_type! {
+    /// `SecretKey` for asymmetric authenticated encryption
+    ///
+    /// When a `SecretKey` goes out of scope its contents
+    /// will be zeroed out
+    secret SecretKey(SECRETKEYBYTES);
+}
+
+new_type! {
+    /// `PublicKey` for asymmetric authenticated encryption
+    public PublicKey(PUBLICKEYBYTES);
+}
+
+new_type! {
+    /// `Nonce` for asymmetric authenticated encryption
+    nonce Nonce(NONCEBYTES);
+}
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public key.
 ///
@@ -100,17 +115,15 @@ pub fn open(c: &[u8],
     }
 }
 
-/// Applications that send several messages to the same receiver can gain speed by
-/// splitting `seal()` into two steps, `precompute()` and `seal_precomputed()`.
-/// Similarly, applications that receive several messages from the same sender can gain
-/// speed by splitting `open()` into two steps, `precompute()` and `open_precomputed()`.
-///
-/// When a `PrecomputedKey` goes out of scope its contents will be zeroed out
-pub struct PrecomputedKey([u8; PRECOMPUTEDKEYBYTES]);
-
-newtype_drop!(PrecomputedKey);
-newtype_clone!(PrecomputedKey);
-newtype_traits!(PrecomputedKey, PRECOMPUTEDKEYBYTES);
+new_type! {
+    /// Applications that send several messages to the same receiver can gain speed by
+    /// splitting `seal()` into two steps, `precompute()` and `seal_precomputed()`.
+    /// Similarly, applications that receive several messages from the same sender can gain
+    /// speed by splitting `open()` into two steps, `precompute()` and `open_precomputed()`.
+    ///
+    /// When a `PrecomputedKey` goes out of scope its contents will be zeroed out
+    secret PrecomputedKey(PRECOMPUTEDKEYBYTES);
+}
 
 /// `precompute()` computes an intermediate key that can be used by `seal_precomputed()`
 /// and `open_precomputed()`
