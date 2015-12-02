@@ -8,18 +8,6 @@ macro_rules! newtype_clone (($newtype:ident) => (
 
         ));
 
-macro_rules! newtype_drop (($newtype:ident) => (
-        impl Drop for $newtype {
-            fn drop(&mut self) {
-                use ffi;
-                let &mut $newtype(ref mut v) = self;
-                unsafe {
-                    ffi::sodium_memzero(v.as_mut_ptr(), v.len());
-                }
-            }
-        }
-        ));
-
 macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
     /// `from_slice()` creates an object from a byte slice
     ///
@@ -212,11 +200,19 @@ macro_rules! new_type {
       ) => (
         $(#[$meta])*
         pub struct $name(pub [u8; $bytes]);
-        newtype_drop!($name);
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
         impl $name {
             newtype_from_slice!($name, $bytes);
+        }
+        impl Drop for $name {
+            fn drop(&mut self) {
+                use ffi;
+                let &mut $name(ref mut v) = self;
+                unsafe {
+                    ffi::sodium_memzero(v.as_mut_ptr(), v.len());
+                }
+            }
         }
         );
     ( $(#[$meta:meta])*
