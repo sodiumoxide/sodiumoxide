@@ -111,6 +111,22 @@ mod test_m {
     use test_utils::round_trip;
 
     #[test]
+    #[should_panic]
+    fn test_increment_nonce_overflow() {
+        let n = Nonce([0xff; NONCEBYTES]);
+        n.increment_le().unwrap();
+    }
+
+    #[test]
+    fn test_increment_nonce() {
+        let n = Nonce([0; NONCEBYTES]);
+        let mut v = [0; NONCEBYTES];
+        v[0] += 1;
+        let n2 = Nonce(v);
+        assert_eq!(n.increment_le(), Ok(n2));
+    }
+
+    #[test]
     fn test_encrypt_decrypt() {
         use randombytes::randombytes;
         for i in (0..1024usize) {

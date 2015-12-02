@@ -98,6 +98,22 @@ mod test {
     use test_utils::round_trip;
 
     #[test]
+    #[should_panic]
+    fn test_increment_nonce_overflow() {
+        let n = Nonce([0xff; NONCEBYTES]);
+        n.increment_le().unwrap();
+    }
+
+    #[test]
+    fn test_increment_nonce() {
+        let n = Nonce([0; NONCEBYTES]);
+        let n2 = Nonce([1, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0,
+                        0, 0, 0, 0, 0, 0, 0, 0]);
+        assert_eq!(n.increment_le(), Ok(n2));
+    }
+
+    #[test]
     fn test_seal_open() {
         use randombytes::randombytes;
         for i in (0..256usize) {
