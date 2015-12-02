@@ -68,7 +68,6 @@ mod marshal;
 #[macro_use]
 mod newtype_macros;
 pub mod randombytes;
-pub mod traits;
 
 #[cfg(test)]
 mod test_utils;

@@ -20,22 +20,27 @@ macro_rules! newtype_drop (($newtype:ident) => (
         }
         ));
 
-macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
-    impl ::traits::FromSlice for $newtype {
-        fn from_slice(bs: &[u8]) -> Option<$newtype> {
-            if bs.len() != $len {
-                return None;
-            }
-            let mut n = $newtype([0; $len]);
-            {
-                let $newtype(ref mut b) = n;
-                for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
-                    *bi = bsi
-                }
-            }
-            Some(n)
+macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
+    /// `from_slice()` creates an object from a byte slice
+    ///
+    /// This function will fail and return `None` if the length of
+    /// the byte-s;ice isn't equal to the length of the object
+    pub fn from_slice(bs: &[u8]) -> Option<$newtype> {
+        if bs.len() != $len {
+            return None;
         }
+        let mut n = $newtype([0; $len]);
+        {
+            let $newtype(ref mut b) = n;
+            for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
+                *bi = bsi
+            }
+        }
+        Some(n)
     }
+    ));
+
+macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::cmp::PartialEq for $newtype {
         fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
             use crypto::verify::safe_memcmp;
@@ -210,6 +215,9 @@ macro_rules! new_type {
         newtype_drop!($name);
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
+        impl $name {
+            newtype_from_slice!($name, $bytes);
+        }
         );
     ( $(#[$meta:meta])*
       public $name:ident($bytes:expr);
@@ -220,6 +228,9 @@ macro_rules! new_type {
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
         public_newtype_traits!($name);
+        impl $name {
+            newtype_from_slice!($name, $bytes);
+        }
         );
     ( $(#[$meta:meta])*
       nonce $name:ident($bytes:expr);
@@ -230,5 +241,8 @@ macro_rules! new_type {
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
         public_newtype_traits!($name);
+        impl $name {
+            newtype_from_slice!($name, $bytes);
+        }
         );
 }
