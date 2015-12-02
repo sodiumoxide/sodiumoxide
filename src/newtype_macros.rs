@@ -243,6 +243,25 @@ macro_rules! new_type {
         public_newtype_traits!($name);
         impl $name {
             newtype_from_slice!($name, $bytes);
+
+            /// `increment_le()` treats `self` as a little-endian number and returns
+            /// an incremented version of it.
+            ///
+            /// If an overflow occurs (the result is zero) `increment_le()`
+            /// returns `Err(())`.
+            pub fn increment_le(&self) -> Result<$name, ()> {
+                use ffi;
+                let mut res = *self;
+                unsafe {
+                    let &mut $name(ref mut r) = &mut res;
+                    ffi::sodium_increment(r.as_mut_ptr(), r.len());
+                    // check for overflow
+                    if r.iter().all(|&x| { x == 0 }) {
+                        return Err(())
+                    }
+                }
+                Ok(res)
+            }
         }
         );
 }
