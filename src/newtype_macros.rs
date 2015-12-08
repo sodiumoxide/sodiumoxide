@@ -207,8 +207,9 @@ macro_rules! new_type {
         }
         impl Drop for $name {
             fn drop(&mut self) {
+                use utils::memzero;
                 let &mut $name(ref mut v) = self;
-                ::utils::memzero(v);
+                memzero(v);
             }
         }
         );
