@@ -25,7 +25,7 @@ new_type! {
     /// Authentication `Tag`
     ///
     /// The tag implements the traits `PartialEq` and `Eq` using constant-time
-    /// comparison functions. See `sodiumoxide::crypto::verify::safe_memcmp`
+    /// comparison functions. See `sodiumoxide::crypto::verify::memcmp`
     public Tag(TAGBYTES);
 }
 

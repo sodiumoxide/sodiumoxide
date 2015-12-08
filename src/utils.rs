@@ -9,16 +9,16 @@ pub fn memzero(x: &mut [u8]) {
     }
 }
 
-/// `safe_memcmp()` returns true if `x[0]`, `x[1]`, ..., `x[len-1]` are the
+/// `memcmp()` returns true if `x[0]`, `x[1]`, ..., `x[len-1]` are the
 /// same as `y[0]`, `y[1]`, ..., `y[len-1]`. Otherwise it returns `false`.
 ///
 /// This function is safe to use for secrets `x[0]`, `x[1]`, ..., `x[len-1]`,
-/// `y[0]`, `y[1]`, ..., `y[len-1]`. The time taken by `safe_memcmp` is independent
+/// `y[0]`, `y[1]`, ..., `y[len-1]`. The time taken by `memcmp` is independent
 /// of the contents of `x[0]`, `x[1]`, ..., `x[len-1]`, `y[0]`, `y[1]`, ..., `y[len-1]`.
 /// In contrast, the standard C comparison function `memcmp(x,y,len)` takes time
 /// that depends on the longest matching prefix of `x` and `y`, often allowing easy
 /// timing attacks.
-pub fn safe_memcmp(x: &[u8], y: &[u8]) -> bool {
+pub fn memcmp(x: &[u8], y: &[u8]) -> bool {
     if x.len() != y.len() {
         return false
     }
@@ -32,23 +32,23 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_safe_memcmp() {
+    fn test_memcmp() {
         use randombytes::randombytes;
 
         for i in (0usize..256) {
             let x = randombytes(i);
-            assert!(safe_memcmp(&x, &x));
+            assert!(memcmp(&x, &x));
             let mut y = x.clone();
-            assert!(safe_memcmp(&x, &y));
+            assert!(memcmp(&x, &y));
             y.push(0);
-            assert!(!safe_memcmp(&x, &y));
-            assert!(!safe_memcmp(&y, &x));
+            assert!(!memcmp(&x, &y));
+            assert!(!memcmp(&y, &x));
 
             y = randombytes(i);
             if x == y {
-                assert!(safe_memcmp(&x, &y))
+                assert!(memcmp(&x, &y))
             } else {
-                assert!(!safe_memcmp(&x, &y))
+                assert!(!memcmp(&x, &y))
             }
         }
     }
