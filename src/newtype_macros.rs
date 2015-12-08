@@ -207,11 +207,8 @@ macro_rules! new_type {
         }
         impl Drop for $name {
             fn drop(&mut self) {
-                use ffi;
                 let &mut $name(ref mut v) = self;
-                unsafe {
-                    ffi::sodium_memzero(v.as_mut_ptr(), v.len());
-                }
+                ::utils::memzero(v);
             }
         }
         );

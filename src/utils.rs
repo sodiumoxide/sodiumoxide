@@ -1,6 +1,14 @@
 //! Libsodium utility functions
 use ffi;
 
+/// `memzero()` tries to effectively zero out the data in `x` even if
+/// optimizations are being applied to the code.
+pub fn memzero(x: &mut [u8]) {
+    unsafe {
+        ffi::sodium_memzero(x.as_mut_ptr(), x.len());
+    }
+}
+
 /// `safe_memcmp()` returns true if `x[0]`, `x[1]`, ..., `x[len-1]` are the
 /// same as `y[0]`, `y[1]`, ..., `y[len-1]`. Otherwise it returns `false`.
 ///
