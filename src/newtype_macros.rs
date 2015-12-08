@@ -31,7 +31,7 @@ macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
 macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::cmp::PartialEq for $newtype {
         fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
-            use crypto::verify::safe_memcmp;
+            use utils::safe_memcmp;
             let &$newtype(ref this) = self;
             safe_memcmp(this, other)
         }
