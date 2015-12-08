@@ -238,24 +238,32 @@ macro_rules! new_type {
         impl $name {
             newtype_from_slice!($name, $bytes);
 
-            /// `increment_le()` treats `self` as a little-endian number and returns
-            /// an incremented version of it.
+            /// `increment_le()` treats the nonce as an unsigned little-endian number and
+            /// returns an incremented version of it.
             ///
-            /// If an overflow occurs (the result is zero) `increment_le()`
-            /// returns `Err(())`.
-            pub fn increment_le(&self) -> Result<$name, ()> {
-                use ffi;
+            /// WARNING: this method does not check for arithmetic overflow. It is the callers
+            /// responsibility to ensure that any given nonce value is only used once.
+            /// If the caller does not do that the cryptographic primitives in sodiumoxide
+            /// will not uphold any security guarantees (i.e. they will break)
+            pub fn increment_le(&self) -> $name {
                 let mut res = *self;
-                unsafe {
-                    let &mut $name(ref mut r) = &mut res;
-                    ffi::sodium_increment(r.as_mut_ptr(), r.len());
-                    // check for overflow
-                    if r.iter().all(|&x| { x == 0 }) {
-                        return Err(())
-                    }
-                }
-                Ok(res)
+                res.increment_le_inplace();
+                res
             }
+
+            /// `increment_le_inplace()` treats the nonce as an unsigned little-endian number
+            /// and increments it.
+            ///
+            /// WARNING: this method does not check for arithmetic overflow. It is the callers
+            /// responsibility to ensure that any given nonce value is only used once.
+            /// If the caller does not do that the cryptographic primitives in sodiumoxide
+            /// will not uphold any security guarantees.
+            pub fn increment_le_inplace(&mut self) {
+                use utils::increment_le;
+                let &mut $name(ref mut r) = self;
+                increment_le(r);
+            }
+
         }
         );
 }
