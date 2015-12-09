@@ -29,9 +29,9 @@ new_type! {
 
 /// `gen_key()` randomly generates a key for symmetric encryption
 ///
-/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// THREAD SAFETY: `gen_key()` is thread-safe provided
+/// [`sodiumoxide::init()`](../../../fn.init.html) has been called and has returned
+/// `true` before using any other function from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut key = [0; KEYBYTES];
     randombytes_into(&mut key);
@@ -40,9 +40,9 @@ pub fn gen_key() -> Key {
 
 /// `gen_nonce()` randomly generates a nonce for symmetric encryption
 ///
-/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided
+/// [`sodiumoxide::init()`](../../../fn.init.html) has been called and has returned
+/// `true` before using any other function from sodiumoxide.
 ///
 /// NOTE: When using primitives with short nonces (e.g. salsa20, salsa208, salsa2012)
 /// do not use random nonces since the probability of nonce-collision is not negligible

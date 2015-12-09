@@ -51,9 +51,9 @@ new_type! {
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
 /// key.
 ///
-/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// THREAD SAFETY: `gen_keypair()` is thread-safe provided
+/// [`sodiumoxide::init()`](../../../fn.init.html) has been called and has returned
+/// `true` before using any other function from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
