@@ -8,43 +8,32 @@ macro_rules! newtype_clone (($newtype:ident) => (
 
         ));
 
-macro_rules! newtype_drop (($newtype:ident) => (
-        impl Drop for $newtype {
-            fn drop(&mut self) {
-                use ffi;
-                let &mut $newtype(ref mut v) = self;
-                unsafe {
-                    ffi::sodium_memzero(v.as_mut_ptr(), v.len());
-                }
+macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
+    /// `from_slice()` creates an object from a byte slice
+    ///
+    /// This function will fail and return `None` if the length of
+    /// the byte-s;ice isn't equal to the length of the object
+    pub fn from_slice(bs: &[u8]) -> Option<$newtype> {
+        if bs.len() != $len {
+            return None;
+        }
+        let mut n = $newtype([0; $len]);
+        {
+            let $newtype(ref mut b) = n;
+            for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
+                *bi = bsi
             }
         }
-        ));
-
-macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
-    impl $newtype {
-        /// `from_slice()` creates an object from a byte slice
-        ///
-        /// This function will fail and return None if the length of
-        /// the byte-slice isn't equal to the length of the object
-        pub fn from_slice(bs: &[u8]) -> Option<$newtype> {
-            if bs.len() != $len {
-                return None;
-            }
-            let mut n = $newtype([0; $len]);
-            {
-                let $newtype(ref mut b) = n;
-                for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
-                    *bi = bsi
-                }
-            }
-            Some(n)
-        }
+        Some(n)
     }
+    ));
+
+macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::cmp::PartialEq for $newtype {
         fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
-            use crypto::verify::safe_memcmp;
+            use utils::memcmp;
             let &$newtype(ref this) = self;
-            safe_memcmp(this, other)
+            memcmp(this, other)
         }
     }
     impl ::std::cmp::Eq for $newtype {}
@@ -140,7 +129,7 @@ macro_rules! newtype_impl (($newtype:ident, $len:expr) => (
     }
     ));
 
-macro_rules! non_secret_newtype_impl (($newtype:ident) => (
+macro_rules! public_newtype_traits (($newtype:ident) => (
     impl AsRef<[u8]> for $newtype {
         #[inline]
         fn as_ref(&self) -> &[u8] {
@@ -182,3 +171,99 @@ macro_rules! non_secret_newtype_impl (($newtype:ident) => (
         }
     }
     ));
+
+/// Macro used for generating newtypes of byte-arrays
+///
+/// Usage:
+/// Generating secret datatypes, e.g. keys
+/// new_type! {
+///     /// This is some documentation for our type
+///     secret Key(KEYBYTES);
+/// }
+/// Generating public datatypes, e.g. public keys
+/// ```
+/// new_type! {
+///     /// This is some documentation for our type
+///     public PublicKey(PUBLICKEYBYTES);
+/// }
+/// ```
+/// Generating nonce types
+/// ```
+/// new_type! {
+///     /// This is some documentation for our type
+///     nonce Nonce(NONCEBYTES);
+/// }
+/// ```
+macro_rules! new_type {
+    ( $(#[$meta:meta])*
+      secret $name:ident($bytes:expr);
+      ) => (
+        $(#[$meta])*
+        pub struct $name(pub [u8; $bytes]);
+        newtype_clone!($name);
+        newtype_traits!($name, $bytes);
+        impl $name {
+            newtype_from_slice!($name, $bytes);
+        }
+        impl Drop for $name {
+            fn drop(&mut self) {
+                use utils::memzero;
+                let &mut $name(ref mut v) = self;
+                memzero(v);
+            }
+        }
+        );
+    ( $(#[$meta:meta])*
+      public $name:ident($bytes:expr);
+      ) => (
+        $(#[$meta])*
+        #[derive(Copy)]
+        pub struct $name(pub [u8; $bytes]);
+        newtype_clone!($name);
+        newtype_traits!($name, $bytes);
+        public_newtype_traits!($name);
+        impl $name {
+            newtype_from_slice!($name, $bytes);
+        }
+        );
+    ( $(#[$meta:meta])*
+      nonce $name:ident($bytes:expr);
+      ) => (
+        $(#[$meta])*
+        #[derive(Copy)]
+        pub struct $name(pub [u8; $bytes]);
+        newtype_clone!($name);
+        newtype_traits!($name, $bytes);
+        public_newtype_traits!($name);
+        impl $name {
+            newtype_from_slice!($name, $bytes);
+
+            /// `increment_le()` treats the nonce as an unsigned little-endian number and
+            /// returns an incremented version of it.
+            ///
+            /// WARNING: this method does not check for arithmetic overflow. It is the callers
+            /// responsibility to ensure that any given nonce value is only used once.
+            /// If the caller does not do that the cryptographic primitives in sodiumoxide
+            /// will not uphold any security guarantees (i.e. they will break)
+            pub fn increment_le(&self) -> $name {
+                let mut res = *self;
+                res.increment_le_inplace();
+                res
+            }
+
+            /// `increment_le_inplace()` treats the nonce as an unsigned little-endian number
+            /// and increments it.
+            ///
+            /// WARNING: this method does not check for arithmetic overflow. It is the callers
+            /// responsibility to ensure that any given nonce value is only used once.
+            /// If the caller does not do that the cryptographic primitives in sodiumoxide
+            /// will not uphold any security guarantees.
+            pub fn increment_le_inplace(&mut self) {
+                use utils::increment_le;
+                let &mut $name(ref mut r) = self;
+                increment_le(r);
+            }
+
+        }
+        );
+}

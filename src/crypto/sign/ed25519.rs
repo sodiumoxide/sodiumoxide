@@ -19,44 +19,34 @@ pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
 /// Number of bytes in a `Signature`.
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
 
-/// `Seed` that can be used for keypair generation
-///
-/// The `Seed` is used by `keypair_from_seed()` to generate
-/// a secret and public signature key.
-///
-/// When a `Seed` goes out of scope its contents
-/// will be zeroed out
-pub struct Seed(pub [u8; SEEDBYTES]);
+new_type! {
+    /// `Seed` that can be used for keypair generation
+    ///
+    /// The `Seed` is used by `keypair_from_seed()` to generate
+    /// a secret and public signature key.
+    ///
+    /// When a `Seed` goes out of scope its contents
+    /// will be zeroed out
+    secret Seed(SEEDBYTES);
+}
 
-newtype_drop!(Seed);
-newtype_clone!(Seed);
-newtype_impl!(Seed, SEEDBYTES);
+new_type! {
+    /// `SecretKey` for signatures
+    ///
+    /// When a `SecretKey` goes out of scope its contents
+    /// will be zeroed out
+    secret SecretKey(SECRETKEYBYTES);
+}
 
-/// `SecretKey` for signatures
-///
-/// When a `SecretKey` goes out of scope its contents
-/// will be zeroed out
-pub struct SecretKey(pub [u8; SECRETKEYBYTES]);
+new_type! {
+    /// `PublicKey` for signatures
+    public PublicKey(PUBLICKEYBYTES);
+}
 
-newtype_drop!(SecretKey);
-newtype_clone!(SecretKey);
-newtype_impl!(SecretKey, SECRETKEYBYTES);
-
-/// `PublicKey` for signatures
-#[derive(Copy)]
-pub struct PublicKey(pub [u8; PUBLICKEYBYTES]);
-
-newtype_clone!(PublicKey);
-newtype_impl!(PublicKey, PUBLICKEYBYTES);
-non_secret_newtype_impl!(PublicKey);
-
-/// Detached signature
-#[derive(Copy)]
-pub struct Signature(pub [u8; SIGNATUREBYTES]);
-
-newtype_clone!(Signature);
-newtype_impl!(Signature, SIGNATUREBYTES);
-non_secret_newtype_impl!(Signature);
+new_type! {
+    /// Detached signature
+    public Signature(SIGNATUREBYTES);
+}
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
 /// key.

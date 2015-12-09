@@ -13,19 +13,15 @@ pub const SCALARBYTES: usize = ffi::crypto_scalarmult_curve25519_SCALARBYTES;
 
 use rustc_serialize;
 
-/// `Scalar` value (integer in byte representation)
-pub struct Scalar(pub [u8; SCALARBYTES]);
+new_type! {
+    /// `Scalar` value (integer in byte representation)
+    secret Scalar(SCALARBYTES);
+}
 
-newtype_drop!(Scalar);
-newtype_clone!(Scalar);
-newtype_impl!(Scalar, SCALARBYTES);
-
-/// `GroupElement`
-#[derive(Copy)]
-pub struct GroupElement(pub [u8; GROUPELEMENTBYTES]);
-
-newtype_clone!(GroupElement);
-newtype_impl!(GroupElement, GROUPELEMENTBYTES);
+new_type! {
+    /// `GroupElement`
+    secret GroupElement(GROUPELEMENTBYTES);
+}
 
 /// `scalarmult()` multiplies a group element `p`
 /// by an integer `n`. It returns the resulting group element

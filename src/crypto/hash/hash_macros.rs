@@ -9,13 +9,10 @@ pub const DIGESTBYTES: usize = $hashbytes;
 /// Block size of the hash function.
 pub const BLOCKBYTES: usize = $blockbytes;
 
-/// Digest-structure
-#[derive(Copy)]
-pub struct Digest(pub [u8; DIGESTBYTES]);
-
-newtype_clone!(Digest);
-newtype_impl!(Digest, DIGESTBYTES);
-non_secret_newtype_impl!(Digest);
+new_type! {
+    /// Digest-structure
+    public Digest(DIGESTBYTES);
+}
 
 /// `hash` hashes a message `m`. It returns a hash `h`.
 pub fn hash(m: &[u8]) -> Digest {
