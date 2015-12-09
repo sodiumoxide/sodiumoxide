@@ -113,7 +113,7 @@ mod test_m {
     #[test]
     fn test_encrypt_decrypt() {
         use randombytes::randombytes;
-        for i in (0..1024usize) {
+        for i in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
             let m = randombytes(i);
@@ -126,7 +126,7 @@ mod test_m {
     #[test]
     fn test_stream_xor() {
         use randombytes::randombytes;
-        for i in (0..1024usize) {
+        for i in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
             let m = randombytes(i);
@@ -143,7 +143,7 @@ mod test_m {
     #[test]
     fn test_stream_xor_inplace() {
         use randombytes::randombytes;
-        for i in (0..1024usize) {
+        for i in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
             let mut m = randombytes(i);
@@ -159,7 +159,7 @@ mod test_m {
 
     #[test]
     fn test_serialisation() {
-        for _ in (0..1024usize) {
+        for _ in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
             round_trip(k);

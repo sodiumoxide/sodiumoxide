@@ -74,7 +74,7 @@ mod test_m {
     #[test]
     fn test_auth_verify() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let k = gen_key();
             let m = randombytes(i);
             let tag = authenticate(&m, &k);
@@ -85,16 +85,16 @@ mod test_m {
     #[test]
     fn test_auth_verify_tamper() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let k = gen_key();
             let mut m = randombytes(i);
             let Tag(mut tagbuf) = authenticate(&mut m, &k);
-            for j in (0..m.len()) {
+            for j in 0..m.len() {
                 m[j] ^= 0x20;
                 assert!(!verify(&Tag(tagbuf), &mut m, &k));
                 m[j] ^= 0x20;
             }
-            for j in (0..tagbuf.len()) {
+            for j in 0..tagbuf.len() {
                 tagbuf[j] ^= 0x20;
                 assert!(!verify(&Tag(tagbuf), &mut m, &k));
                 tagbuf[j] ^= 0x20;
@@ -105,7 +105,7 @@ mod test_m {
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let k = gen_key();
             let m = randombytes(i);
             let tag = authenticate(&m, &k);
@@ -241,7 +241,7 @@ mod test_s {
     #[test]
     fn test_auth_eq_auth_state() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let k = gen_key();
             let m = randombytes(i);
             let tag = authenticate(&m, &k);
@@ -255,7 +255,7 @@ mod test_s {
     #[test]
     fn test_auth_eq_auth_state_chunked() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let k = gen_key();
             let m = randombytes(i);
             let tag = authenticate(&m, &k);

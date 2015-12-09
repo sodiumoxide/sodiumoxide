@@ -100,7 +100,7 @@ mod test {
     #[test]
     fn test_seal_open() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let k = gen_key();
             let m = randombytes(i);
             let n = gen_nonce();
@@ -113,12 +113,12 @@ mod test {
     #[test]
     fn test_seal_open_tamper() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let k = gen_key();
             let m = randombytes(i);
             let n = gen_nonce();
             let mut c = seal(&m, &n, &k);
-            for i in (0..c.len()) {
+            for i in 0..c.len() {
                 c[i] ^= 0x20;
                 assert!(Err(()) == open(&mut c, &n, &k));
                 c[i] ^= 0x20;
@@ -180,7 +180,7 @@ mod test {
 
     #[test]
     fn test_serialisation() {
-        for _ in (0..256usize) {
+        for _ in 0..256usize {
             let k = gen_key();
             let n = gen_nonce();
             round_trip(k);

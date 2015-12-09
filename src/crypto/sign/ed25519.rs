@@ -153,7 +153,7 @@ mod test {
     #[test]
     fn test_sign_verify() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let sm = sign(&m, &sk);
@@ -165,11 +165,11 @@ mod test {
     #[test]
     fn test_sign_verify_tamper() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let mut sm = sign(&m, &sk);
-            for j in (0..sm.len()) {
+            for j in 0..sm.len() {
                 sm[j] ^= 0x20;
                 assert!(Err(()) == verify(&mut sm, &pk));
                 sm[j] ^= 0x20;
@@ -180,7 +180,7 @@ mod test {
     #[test]
     fn test_sign_verify_detached() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let sig = sign_detached(&m, &sk);
@@ -191,11 +191,11 @@ mod test {
     #[test]
     fn test_sign_verify_detached_tamper() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let Signature(mut sig) = sign_detached(&m, &sk);
-            for j in (0..SIGNATUREBYTES) {
+            for j in 0..SIGNATUREBYTES {
                 sig[j] ^= 0x20;
                 assert!(!verify_detached(&Signature(sig), &m, &pk));
                 sig[j] ^= 0x20;
@@ -206,7 +206,7 @@ mod test {
     #[test]
     fn test_sign_verify_seed() {
         use randombytes::{randombytes, randombytes_into};
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let mut seedbuf = [0; 32];
             randombytes_into(&mut seedbuf);
             let seed = Seed(seedbuf);
@@ -221,14 +221,14 @@ mod test {
     #[test]
     fn test_sign_verify_tamper_seed() {
         use randombytes::{randombytes, randombytes_into};
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let mut seedbuf = [0; 32];
             randombytes_into(&mut seedbuf);
             let seed = Seed(seedbuf);
             let (pk, sk) = keypair_from_seed(&seed);
             let m = randombytes(i);
             let mut sm = sign(&m, &sk);
-            for j in (0..sm.len()) {
+            for j in 0..sm.len() {
                 sm[j] ^= 0x20;
                 assert!(Err(()) == verify(&mut sm, &pk));
                 sm[j] ^= 0x20;
@@ -304,7 +304,7 @@ mod test {
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let sig = sign_detached(&m, &sk);

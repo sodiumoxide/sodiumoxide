@@ -188,7 +188,7 @@ mod test {
     #[test]
     fn test_seal_open() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let (pk1, sk1) = gen_keypair();
             let (pk2, sk2) = gen_keypair();
             let m = randombytes(i);
@@ -202,7 +202,7 @@ mod test {
     #[test]
     fn test_seal_open_precomputed() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let (pk1, sk1) = gen_keypair();
             let (pk2, sk2) = gen_keypair();
             let k1 = precompute(&pk1, &sk2);
@@ -221,13 +221,13 @@ mod test {
     #[test]
     fn test_seal_open_tamper() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let (pk1, sk1) = gen_keypair();
             let (pk2, sk2) = gen_keypair();
             let m = randombytes(i);
             let n = gen_nonce();
             let mut c = seal(&m, &n, &pk1, &sk2);
-            for j in (0..c.len()) {
+            for j in 0..c.len() {
                 c[j] ^= 0x20;
                 assert!(Err(()) == open(&mut c, &n, &pk2, &sk1));
                 c[j] ^= 0x20;
@@ -238,7 +238,7 @@ mod test {
     #[test]
     fn test_seal_open_precomputed_tamper() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let (pk1, sk1) = gen_keypair();
             let (pk2, sk2) = gen_keypair();
             let k1 = precompute(&pk1, &sk2);
@@ -246,7 +246,7 @@ mod test {
             let m = randombytes(i);
             let n = gen_nonce();
             let mut c = seal_precomputed(&m, &n, &k1);
-            for j in (0..c.len()) {
+            for j in 0..c.len() {
                 c[j] ^= 0x20;
                 assert!(Err(()) == open_precomputed(&mut c, &n, &k2));
                 c[j] ^= 0x20;
@@ -370,7 +370,7 @@ mod test {
 
     #[test]
     fn test_serialisation() {
-        for _ in (0..256usize) {
+        for _ in 0..256usize {
             let (pk, sk) = gen_keypair();
             let n = gen_nonce();
             round_trip(pk);
