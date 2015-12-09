@@ -3,6 +3,7 @@
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
+#[cfg(feature = "default")]
 use rustc_serialize;
 
 /// Number of bytes in a `SecretKey`.

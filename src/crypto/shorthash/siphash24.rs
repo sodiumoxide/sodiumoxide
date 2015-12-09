@@ -2,6 +2,7 @@
 use ffi;
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
+#[cfg(feature = "default")]
 use rustc_serialize;
 
 /// Number of bytes in a `Digest`.
@@ -49,7 +50,6 @@ pub fn shorthash(m: &[u8],
 #[cfg(test)]
 mod test {
     use super::*;
-    use test_utils::round_trip;
 
     #[test]
     fn test_vectors() {
@@ -129,9 +129,11 @@ mod test {
         }
     }
 
+    #[cfg(feature = "default")]
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
+        use test_utils::round_trip;
         for i in (0..64usize) {
             let k = gen_key();
             let m = randombytes(i);

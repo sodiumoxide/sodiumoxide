@@ -6,6 +6,7 @@ macro_rules! stream_module (($stream_name:ident,
 use libc::c_ulonglong;
 use std::iter::repeat;
 use randombytes::randombytes_into;
+#[cfg(feature = "default")]
 use rustc_serialize;
 
 /// Number of bytes in a `Key`.
@@ -108,7 +109,6 @@ pub fn stream_xor_inplace(m: &mut [u8],
 #[cfg(test)]
 mod test_m {
     use super::*;
-    use test_utils::round_trip;
 
     #[test]
     fn test_encrypt_decrypt() {
@@ -157,8 +157,10 @@ mod test_m {
         }
     }
 
+    #[cfg(feature = "default")]
     #[test]
     fn test_serialisation() {
+        use test_utils::round_trip;
         for _ in (0..1024usize) {
             let k = gen_key();
             let n = gen_nonce();

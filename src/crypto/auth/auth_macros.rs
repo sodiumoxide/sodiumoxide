@@ -5,6 +5,7 @@ macro_rules! auth_module (($auth_name:ident,
 
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
+#[cfg(feature = "default")]
 use rustc_serialize;
 
 /// Number of bytes in a `Key`.
@@ -69,7 +70,6 @@ pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
 #[cfg(test)]
 mod test_m {
     use super::*;
-    use test_utils::round_trip;
 
     #[test]
     fn test_auth_verify() {
@@ -102,9 +102,11 @@ mod test_m {
         }
     }
 
+    #[cfg(feature = "default")]
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
+        use test_utils::round_trip;
         for i in (0..256usize) {
             let k = gen_key();
             let m = randombytes(i);

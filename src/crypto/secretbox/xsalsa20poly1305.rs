@@ -7,6 +7,7 @@
 use ffi;
 use marshal::marshal;
 use randombytes::randombytes_into;
+#[cfg(feature = "default")]
 use rustc_serialize;
 
 /// Number of bytes in `Key`.
@@ -95,7 +96,6 @@ pub fn open(c: &[u8],
 #[cfg(test)]
 mod test {
     use super::*;
-    use test_utils::round_trip;
 
     #[test]
     fn test_seal_open() {
@@ -178,8 +178,10 @@ mod test {
         assert!(Ok(m) == m2);
     }
 
+    #[cfg(feature = "default")]
     #[test]
     fn test_serialisation() {
+        use test_utils::round_trip;
         for _ in (0..256usize) {
             let k = gen_key();
             let n = gen_nonce();
