@@ -1,4 +1,4 @@
-#![cfg(test)]
+#![cfg(all(test, feature = "default"))]
 
 use rustc_serialize::{Decodable, Encodable, json};
 

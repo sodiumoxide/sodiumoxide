@@ -3,6 +3,7 @@
 use ffi;
 use randombytes::randombytes_into;
 use libc::c_ulonglong;
+#[cfg(feature = "default")]
 use rustc_serialize;
 
 /// Number of bytes in a `Salt`.
@@ -168,7 +169,6 @@ pub fn pwhash_verify(&HashedPassword(ref str_): &HashedPassword,
 #[cfg(test)]
 mod test {
     use super::*;
-    use test_utils::round_trip;
 
     #[test]
     fn test_derive_key() {
@@ -210,9 +210,11 @@ mod test {
         }
     }
 
+    #[cfg(feature = "default")]
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
+        use test_utils::round_trip;
         for i in 0..32usize {
             let pw = randombytes(i);
             let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
