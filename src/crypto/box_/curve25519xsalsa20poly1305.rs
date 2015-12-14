@@ -7,6 +7,7 @@
 use ffi;
 use marshal::marshal;
 use randombytes::randombytes_into;
+#[cfg(feature = "default")]
 use rustc_serialize;
 
 /// Number of bytes in a `PublicKey`.
@@ -183,7 +184,6 @@ pub fn open_precomputed(c: &[u8],
 #[cfg(test)]
 mod test {
     use super::*;
-    use test_utils::round_trip;
 
     #[test]
     fn test_seal_open() {
@@ -368,8 +368,10 @@ mod test {
         assert!(m_pre == mexp);
     }
 
+    #[cfg(feature = "default")]
     #[test]
     fn test_serialisation() {
+        use test_utils::round_trip;
         for _ in 0..256usize {
             let (pk, sk) = gen_keypair();
             let n = gen_nonce();
