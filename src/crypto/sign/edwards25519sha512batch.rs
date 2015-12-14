@@ -88,7 +88,7 @@ mod test {
     #[test]
     fn test_sign_verify() {
         use randombytes::randombytes;
-        for i in (0..256usize) {
+        for i in 0..256usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let sm = sign(&m, &sk);
@@ -100,11 +100,11 @@ mod test {
     #[test]
     fn test_sign_verify_tamper() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let mut sm = sign(&m, &sk);
-            for j in (0..sm.len()) {
+            for j in 0..sm.len() {
                 sm[j] ^= 0x20;
                 assert!(Err(()) == verify(&mut sm, &pk));
                 sm[j] ^= 0x20;

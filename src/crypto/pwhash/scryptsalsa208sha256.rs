@@ -189,7 +189,7 @@ mod test {
     #[test]
     fn test_pwhash_verify() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let pw = randombytes(i);
             let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
             assert!(pwhash_verify(&pwh, &pw));
@@ -199,10 +199,10 @@ mod test {
     #[test]
     fn test_pwhash_verify_tamper() {
         use randombytes::randombytes;
-        for i in (0..16usize) {
+        for i in 0..16usize {
             let mut pw = randombytes(i);
             let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
-            for j in (0..pw.len()) {
+            for j in 0..pw.len() {
                 pw[j] ^= 0x20;
                 assert!(!pwhash_verify(&pwh, &pw));
                 pw[j] ^= 0x20;
@@ -213,7 +213,7 @@ mod test {
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
-        for i in (0..32usize) {
+        for i in 0..32usize {
             let pw = randombytes(i);
             let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
             let salt = gen_salt();

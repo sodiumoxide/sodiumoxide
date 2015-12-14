@@ -54,7 +54,7 @@ mod test {
     fn test_verify_16() {
         use randombytes::randombytes_into;
 
-        for _ in (0usize..256) {
+        for _ in 0usize..256 {
             let mut x = [0; 16];
             let mut y = [0; 16];
             assert!(verify_16(&x, &y));
@@ -72,7 +72,7 @@ mod test {
     fn test_verify_32() {
         use randombytes::randombytes_into;
 
-        for _ in (0usize..256) {
+        for _ in 0usize..256 {
             let mut x = [0; 32];
             let mut y = [0; 32];
             assert!(verify_32(&x, &y));
@@ -90,7 +90,7 @@ mod test {
     fn test_verify_64() {
         use randombytes::randombytes_into;
 
-        for _ in (0usize..256) {
+        for _ in 0usize..256 {
             let mut x = [0; 64];
             let mut y = [0; 64];
             assert!(verify_64(&x, &y));

@@ -48,7 +48,7 @@ mod test {
     fn test_memcmp() {
         use randombytes::randombytes;
 
-        for i in (0usize..256) {
+        for i in 0usize..256 {
             let x = randombytes(i);
             assert!(memcmp(&x, &x));
             let mut y = x.clone();
@@ -68,7 +68,7 @@ mod test {
 
     #[test]
     fn test_increment_le_zero() {
-        for i in (1usize..256) {
+        for i in 1usize..256 {
             let mut x = vec!(0u8; i);
             increment_le(&mut x);
             assert!(!x.iter().all(|x| { *x == 0 }));
@@ -109,7 +109,7 @@ mod test {
 
     #[test]
     fn test_increment_le_overflow() {
-        for i in (1usize..256) {
+        for i in 1usize..256 {
             let mut x = vec!(255u8; i);
             increment_le(&mut x);
             assert!(x.iter().all(|xi| { *xi == 0 }));
