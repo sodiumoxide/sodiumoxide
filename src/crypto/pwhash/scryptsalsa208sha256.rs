@@ -63,8 +63,9 @@ new_type! {
 
 /// `gen_salt()` randombly generates a new `Salt` for key derivation
 ///
-/// THREAD SAFETY: `gen_salt()` is thread-safe provided that you have called
-/// `sodiumoxide::init()` once before using any other function from sodiumoxide.
+/// THREAD SAFETY: `gen_salt()` is thread-safe provided
+/// [`sodiumoxide::init()`](../../../fn.init.html) has been called and has returned
+/// `true` before using any other function from sodiumoxide.
 pub fn gen_salt() -> Salt {
     let mut salt = Salt([0; SALTBYTES]);
     {

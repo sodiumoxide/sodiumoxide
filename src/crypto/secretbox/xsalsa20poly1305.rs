@@ -34,9 +34,9 @@ const BOXZEROBYTES: usize = 16;
 
 /// `gen_key()` randomly generates a secret key
 ///
-/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// THREAD SAFETY: `gen_key()` is thread-safe provided
+/// [`sodiumoxide::init()`](../../../fn.init.html) has been called and has returned
+/// `true` before using any other function from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut key = [0; KEYBYTES];
     randombytes_into(&mut key);
@@ -45,9 +45,9 @@ pub fn gen_key() -> Key {
 
 /// `gen_nonce()` randomly generates a nonce
 ///
-/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided
+/// [`sodiumoxide::init()`](../../../fn.init.html) has been called and has returned
+/// `true` before using any other function from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
     let mut nonce = [0; NONCEBYTES];
     randombytes_into(&mut nonce);
