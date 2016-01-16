@@ -9,6 +9,8 @@ pub const crypto_generichash_blake2b_KEYBYTES: usize = 32;
 pub const crypto_generichash_blake2b_SALTBYTES: usize = 16;
 pub const crypto_generichash_blake2b_PERSONALBYTES: usize = 16;
 
+#[allow(non_camel_case_types)]
+pub enum crypto_generichash_blake2b_state { }
 
 extern {
     pub fn crypto_generichash_blake2b_bytes_min() -> size_t;
@@ -38,6 +40,34 @@ extern {
         keylen: size_t,
         salt: *const [u8; crypto_generichash_blake2b_SALTBYTES],
         personal: *const [u8; crypto_generichash_blake2b_PERSONALBYTES])
+        -> c_int;
+
+    pub fn crypto_generichash_blake2b_init(
+        state: *mut crypto_generichash_blake2b_state,
+        key: *const u8,
+        keylen: size_t,
+        outlen: size_t)
+        -> c_int;
+
+    pub fn crypto_generichash_blake2b_init_salt_personal(
+        state: *mut crypto_generichash_blake2b_state,
+        key: *const u8,
+        keylen: size_t,
+        outlen: size_t,
+        salt: *const [u8; crypto_generichash_blake2b_SALTBYTES],
+        personal: *const [u8; crypto_generichash_blake2b_PERSONALBYTES])
+        -> c_int;
+
+    pub fn crypto_generichash_blake2b_update(
+        state: *mut crypto_generichash_blake2b_state,
+        in_: *const u8,
+        inlen: c_ulonglong)
+        -> c_int;
+
+    pub fn crypto_generichash_blake2b_final(
+        state: *mut crypto_generichash_blake2b_state,
+        out: *mut u8,
+        outlen: size_t)
         -> c_int;
 }
 
