@@ -8,6 +8,9 @@ pub const crypto_generichash_KEYBYTES_MAX: usize = crypto_generichash_blake2b_KE
 pub const crypto_generichash_KEYBYTES: usize = crypto_generichash_blake2b_KEYBYTES;
 pub const crypto_generichash_PRIMITIVE: &'static str = "blake2b";
 
+#[allow(non_camel_case_types)]
+pub enum crypto_generichash_state { }
+
 extern {
     pub fn crypto_generichash_bytes_min() -> size_t;
     pub fn crypto_generichash_bytes_max() -> size_t;
@@ -25,6 +28,27 @@ extern {
         key: *const u8,
         keylen: size_t)
         -> c_int;
+
+    pub fn crypto_generichash_init(
+        state: *mut crypto_generichash_state,
+        key: *const u8,
+        keylen: size_t,
+        outlen: size_t)
+        -> c_int;
+
+    pub fn crypto_generichash_update(
+        state: *mut crypto_generichash_state,
+        in_: *const u8,
+        inlen: c_ulonglong)
+        -> c_int;
+
+    pub fn crypto_generichash_final(
+        state: *mut crypto_generichash_state,
+        out: *mut u8,
+        outlen: size_t)
+        -> c_int;
+
+    pub fn crypto_generichash_statebytes() -> size_t;
 }
 
 #[test]
