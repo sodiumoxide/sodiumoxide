@@ -1,6 +1,36 @@
 //! Libsodium utility functions
 use ffi;
 
+use std::mem;
+
+/// `malloc()` tries to securely allocate enough memory on the heap to
+/// store `len` bytes. The memory region is bounded on both sides by
+/// guard pages, and, when possible, prevented from being paged out to
+/// swap. It is not guaranteed to be aligned. Memory allocated this
+/// way must have `free()` called when it is no longer in use. Callers
+/// must ensure that a null pointer was not returned before using the
+/// result.
+pub unsafe fn malloc(len: usize) -> *mut u8 {
+    ffi::sodium_malloc(len) as *mut u8
+}
+
+/// `allocarray()` tries to securely allocate enough memory on the
+/// heap to store `count` objects of type `T`. It provides the same
+/// security guarantees as `malloc()`, and must also have `free()`
+/// called on its result when no longer used. Callers must ensure that
+/// a null pointer was not returned before using the result.
+pub unsafe fn allocarray<T>(count: usize) -> *mut T {
+    ffi::sodium_allocarray(count, mem::size_of::<T>()) as *mut T
+}
+
+/// `free()` frees memory allocated by this library's `malloc()` and
+/// `allocarray()` functions, zeroing out memory used in the
+/// process. In the event that an overflow or underflow write was
+/// detected, it will panic.
+pub unsafe fn free(ptr: *mut u8) {
+    ffi::sodium_free(ptr as *mut _);
+}
+
 /// `memzero()` tries to effectively zero out the data in `x` even if
 /// optimizations are being applied to the code.
 pub fn memzero(x: &mut [u8]) {
