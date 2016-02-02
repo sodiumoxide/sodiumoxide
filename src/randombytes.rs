@@ -2,7 +2,7 @@
 use ffi;
 use std::iter::repeat;
 
-/// `randombytes()` randomly generates size bytes of data.
+/// Generate `size` bytes of random data.
 ///
 /// THREAD SAFETY: `randombytes()` is thread-safe provided that you have
 /// called `sodiumoxide::init()` once before using any other function
