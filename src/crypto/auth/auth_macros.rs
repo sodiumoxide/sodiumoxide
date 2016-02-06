@@ -194,6 +194,7 @@ use ffi;
 ///
 /// NOTE: these functions are specific to `libsodium` and do not exist in `NaCl`.
 
+#[must_use]
 pub struct State($state_name);
 
 impl Drop for State {

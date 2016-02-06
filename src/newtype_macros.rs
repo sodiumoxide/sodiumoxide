@@ -201,6 +201,7 @@ macro_rules! new_type {
       secret $name:ident($bytes:expr);
       ) => (
         $(#[$meta])*
+        #[must_use]
         pub struct $name(pub [u8; $bytes]);
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
@@ -220,6 +221,7 @@ macro_rules! new_type {
       ) => (
         $(#[$meta])*
         #[derive(Copy)]
+        #[must_use]
         pub struct $name(pub [u8; $bytes]);
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
@@ -233,6 +235,7 @@ macro_rules! new_type {
       ) => (
         $(#[$meta])*
         #[derive(Copy)]
+        #[must_use]
         pub struct $name(pub [u8; $bytes]);
         newtype_clone!($name);
         newtype_traits!($name, $bytes);
