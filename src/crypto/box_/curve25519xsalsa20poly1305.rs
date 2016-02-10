@@ -25,6 +25,9 @@ pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly130
 const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES;
 const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
+/// Number of bytes by which encrypted message is bigger than plaintext.
+pub const MACBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_MACBYTES;
+
 new_type! {
     /// `SecretKey` for asymmetric authenticated encryption
     ///
