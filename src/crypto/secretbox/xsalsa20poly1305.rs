@@ -32,6 +32,11 @@ new_type! {
 const ZEROBYTES: usize = 32;
 const BOXZEROBYTES: usize = 16;
 
+/// Number of bytes in the authenticator tag of an encrypted message
+/// i.e. the number of bytes by which the ciphertext is larger than the
+/// plaintext.
+pub const MACBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_MACBYTES;
+
 /// `gen_key()` randomly generates a secret key
 ///
 /// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
