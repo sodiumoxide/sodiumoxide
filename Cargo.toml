@@ -10,12 +10,12 @@ repository = "https://github.com/dnaq/sodiumoxide"
 version = "0.0.9"
 
 [dependencies]
-libc = "0.2.1"
+libc = "0.2"
 libsodium-sys = "0.0.9"
-rustc-serialize = { version = "0.3.16", optional = true }
+rustc-serialize = { version = "0.3", optional = true }
 
 [dev-dependencies]
-rustc-serialize = "0.3.16"
+rustc-serialize = "0.3"
 
 [features]
 benchmarks = []
