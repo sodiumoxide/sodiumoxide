@@ -24,27 +24,4 @@ extern {
         smlen: c_ulonglong,
         pk: *const [u8; crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES]) ->
         c_int;
-    pub fn crypto_sign_edwards25519sha512batch_bytes() -> size_t;
-    pub fn crypto_sign_edwards25519sha512batch_publickeybytes() -> size_t;
-    pub fn crypto_sign_edwards25519sha512batch_secretkeybytes() -> size_t;
-}
-
-
-#[test]
-fn test_crypto_sign_edwards25519sha512batch_bytes() {
-    assert!(unsafe {
-        crypto_sign_edwards25519sha512batch_bytes() as usize
-    } == crypto_sign_edwards25519sha512batch_BYTES)
-}
-#[test]
-fn test_crypto_sign_edwards25519sha512batch_publickeybytes() {
-    assert!(unsafe {
-        crypto_sign_edwards25519sha512batch_publickeybytes() as usize
-    } == crypto_sign_edwards25519sha512batch_PUBLICKEYBYTES)
-}
-#[test]
-fn test_crypto_sign_edwards25519sha512batch_secretkeybytes() {
-    assert!(unsafe {
-        crypto_sign_edwards25519sha512batch_secretkeybytes() as usize
-    } == crypto_sign_edwards25519sha512batch_SECRETKEYBYTES)
 }
