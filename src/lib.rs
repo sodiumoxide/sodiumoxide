@@ -28,6 +28,9 @@
 //!
 //!  `crypto::sign`
 //!
+//! # Sealed boxes
+//!  `crypto::sealedox`
+//!
 //! # Secret-key cryptography
 //!  `crypto::secretbox`
 //!
@@ -77,6 +80,7 @@ mod test_utils;
 /// Cryptographic functions
 pub mod crypto {
     pub mod box_;
+    pub mod sealedbox;
     pub mod sign;
     pub mod scalarmult;
     pub mod auth;
