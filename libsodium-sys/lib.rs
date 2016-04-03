@@ -38,7 +38,6 @@ include!("src/crypto_scalarmult_curve25519.rs");
 include!("src/crypto_secretbox_xsalsa20poly1305.rs");
 include!("src/crypto_shorthash_siphash24.rs");
 include!("src/crypto_sign_ed25519.rs");
-include!("src/crypto_sign_edwards25519sha512batch.rs");
 
 include!("src/crypto_stream.rs");
 include!("src/crypto_stream_aes128ctr.rs");
