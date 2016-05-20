@@ -7,8 +7,6 @@
 use ffi;
 use marshal::marshal;
 use randombytes::randombytes_into;
-#[cfg(feature = "default")]
-use rustc_serialize;
 
 /// Number of bytes in `Key`.
 pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES;

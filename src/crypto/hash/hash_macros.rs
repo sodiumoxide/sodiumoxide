@@ -1,8 +1,6 @@
 macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
 
 use libc::c_ulonglong;
-#[cfg(feature = "default")]
-use rustc_serialize;
 
 /// Number of bytes in a `Digest`.
 pub const DIGESTBYTES: usize = $hashbytes;

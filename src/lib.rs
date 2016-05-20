@@ -56,6 +56,8 @@
 extern crate libsodium_sys as ffi;
 extern crate libc;
 #[cfg(any(test, feature = "default"))]
+extern crate serde;
+#[cfg(test)]
 extern crate rustc_serialize;
 
 /// `init()` initializes the sodium library and chooses faster versions of

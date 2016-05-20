@@ -5,8 +5,6 @@ macro_rules! auth_module (($auth_name:ident,
 
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
-#[cfg(feature = "default")]
-use rustc_serialize;
 
 /// Number of bytes in a `Key`.
 pub const KEYBYTES: usize = $keybytes;

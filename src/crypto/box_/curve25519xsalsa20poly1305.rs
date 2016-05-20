@@ -7,8 +7,6 @@
 use ffi;
 use marshal::marshal;
 use randombytes::randombytes_into;
-#[cfg(feature = "default")]
-use rustc_serialize;
 
 /// Number of bytes in a `PublicKey`.
 pub const PUBLICKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES;
