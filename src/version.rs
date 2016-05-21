@@ -10,6 +10,20 @@ pub fn version_string() -> &'static str {
     version.to_str().unwrap()
 }
 
+/// `version_major()` returns the major version from libsodium.
+pub fn version_major() -> i32 {
+    unsafe {
+        ffi::sodium_library_version_major()
+    }
+}
+
+/// `version_minor()` returns the minor version from libsodium.
+pub fn version_minor() -> i32 {
+    unsafe {
+        ffi::sodium_library_version_minor()
+    }
+}
+
 #[cfg(test)]
 mod test {
     #[test]
