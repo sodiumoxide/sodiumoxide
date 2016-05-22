@@ -11,16 +11,16 @@ pub fn version_string() -> &'static str {
 }
 
 /// `version_major()` returns the major version from libsodium.
-pub fn version_major() -> i32 {
+pub fn version_major() -> usize {
     unsafe {
-        ffi::sodium_library_version_major()
+        ffi::sodium_library_version_major() as usize
     }
 }
 
 /// `version_minor()` returns the minor version from libsodium.
-pub fn version_minor() -> i32 {
+pub fn version_minor() -> usize {
     unsafe {
-        ffi::sodium_library_version_minor()
+        ffi::sodium_library_version_minor() as usize
     }
 }
 
