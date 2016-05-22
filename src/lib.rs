@@ -75,6 +75,7 @@ mod marshal;
 mod newtype_macros;
 pub mod randombytes;
 pub mod utils;
+pub mod version;
 
 #[cfg(test)]
 mod test_utils;
