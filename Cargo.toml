@@ -17,7 +17,7 @@ serde = { version="0.7", optional = true }
 [dev-dependencies]
 serde = "0.7"
 serde_json = "0.7"
-rustc-serialize = "0.3"
+hex = "0.2"
 
 [features]
 benchmarks = []
