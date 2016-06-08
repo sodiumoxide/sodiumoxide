@@ -24,7 +24,7 @@ extern {
     pub fn crypto_aead_chacha20poly1305_decrypt(
         m: *mut u8,
         mlen: *mut c_ulonglong,
-        nsec: *mut [u8; crypto_aead_chacha20poly1305_NSECBYTES],
+        nsec: *const [u8; crypto_aead_chacha20poly1305_NSECBYTES],
         c: *const u8,
         clen: c_ulonglong,
         ad: *const u8,

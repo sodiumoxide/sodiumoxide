@@ -5,6 +5,7 @@ use libc::{c_void, c_int, c_ulonglong, c_char, size_t};
 
 include!("src/core.rs");
 
+include!("src/crypto_aead_aes256gcm.rs");
 include!("src/crypto_aead_chacha20poly1305.rs");
 
 include!("src/crypto_auth.rs");
