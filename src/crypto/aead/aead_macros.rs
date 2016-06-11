@@ -59,7 +59,7 @@ pub fn gen_nonce() -> Nonce {
 /// `encrypt()` encrypts the plaintext `m` using a secret
 /// key `k`, and a public nonce `n`, and emits a combined
 /// byte stream of ciphertext, and an authentication tag
-/// covering both `m` and the optional additional data in `ad` .
+/// authenticating both `m` and the optional additional data in `ad` .
 ///
 /// The public nonce should never be re-used with the same key.
 ///
@@ -84,6 +84,37 @@ pub fn encrypt(m: &[u8],
     }
 
     c
+}
+
+/// `encrypt()` encrypts the plaintext `in_out` of length `m_len`
+/// using a secret key `k`, and a public nonce `n`, and overwrites
+/// `in_out` with a combined byte stream of ciphertext, and an
+/// authentication tag authenticating both the plaintext and
+/// the optional additional data in `ad` .
+///
+/// The public nonce should never be re-used with the same key.
+///
+/// The encrypted length will be at most m_len + MACBYTES, so
+/// in_out.len() should be at least m_len + MACBYTES.
+pub fn encrypt_in_place(in_out: &mut [u8],
+                        m_len: usize,
+                        ad: &[u8],
+                        &Nonce(ref n): &Nonce,
+                        &Key(ref k): &Key) -> Result<usize, ()> {
+    if m_len + MACBYTES > in_out.len() {
+        return Err(());
+    }
+    let mut clen : c_ulonglong = 0;
+    unsafe {
+        $encrypt_name(
+            in_out.as_mut_ptr(), &mut clen,
+            in_out.as_ptr(), m_len as c_ulonglong,
+            ad.as_ptr(), ad.len() as c_ulonglong,
+            ptr::null(),
+            n,
+            k);
+    }
+    Ok(clen as usize)
 }
 
 /// `decrypt()` verifies the tagged ciphertext `c` and optional
@@ -120,6 +151,35 @@ pub fn decrypt(c: &[u8],
         Ok(m)
     } else {
         Err(())
+    }
+}
+
+/// `decrypt_in_place()` verifies the tagged ciphertext `in_out`
+/// and optional additional data `ad` using a secret key `k`, and
+/// a public nonce `n`. It overwrites in_out with the decrypted
+/// plaintext if successful and returns the size written, or
+/// an `Error` if authentication failed.
+///
+/// The decrypted length will be at most c.len() - MACBYTES.
+pub fn decrypt_in_place(in_out: &mut [u8],
+                        ad: &[u8],
+                        &Nonce(ref n): &Nonce,
+                        &Key(ref k): &Key) -> Result<usize, ()> {
+    let mut mlen : c_ulonglong = 0;
+
+    unsafe {
+        let ret = $decrypt_name(
+            in_out.as_mut_ptr(), &mut mlen,
+            ptr::null(),
+            in_out.as_ptr(), in_out.len() as c_ulonglong,
+            ad.as_ptr(), ad.len() as c_ulonglong,
+            n,
+            k);
+        if ret == 0 {
+            Ok(mlen as usize)
+        } else {
+            Err(())
+        }
     }
 }
 ));

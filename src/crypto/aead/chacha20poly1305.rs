@@ -44,9 +44,23 @@ mod test {
             let m = randombytes(i);
             let ad = [5; 10];
             let n = gen_nonce();
+
+            // Test the allocating versions first
             let c = encrypt(&m, &ad, &n, &k);
             let m_new = decrypt(&c, &ad, &n, &k);
             assert_eq!(m, m_new.unwrap());
+
+            // Now test the in-place versions
+            let mut in_out = Vec::with_capacity(i + MACBYTES);
+            in_out.resize(i + MACBYTES, 0);
+            for j in 0..m.len() {
+                in_out[j] = m[j];
+            }
+            let clen = encrypt_in_place(&mut in_out, i, &ad, &n, &k).unwrap();
+            assert_eq!(clen, in_out.len());
+            let mut in_out : Vec<u8> = in_out.iter().cloned().collect();
+            let mlen = decrypt_in_place(&mut in_out, &ad, &n, &k).unwrap();
+            assert_eq!(m[..], in_out[0..mlen]);
         }
 
         // Vary ad length
@@ -77,5 +91,17 @@ mod test {
                 assert_eq!(Err(()), m_new);
             }
         }
+    }
+
+    #[test]
+    fn test_buffer_too_small() {
+        let m_len = 10;
+        let k = gen_key();
+        let mut m = randombytes(m_len);
+        let ad = [0; 0];
+        let n = gen_nonce();
+
+        let result = encrypt_in_place(&mut m, m_len, &ad, &n, &k);
+        assert_eq!(Err(()), result);
     }
 }
