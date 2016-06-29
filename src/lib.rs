@@ -58,7 +58,7 @@ extern crate libc;
 #[cfg(any(test, feature = "default"))]
 extern crate serde;
 #[cfg(test)]
-extern crate hex;
+extern crate rustc_serialize;
 
 /// `init()` initializes the sodium library and chooses faster versions of
 /// the primitives if possible. `init()` also makes the random number generation
