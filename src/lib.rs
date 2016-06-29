@@ -64,6 +64,8 @@ extern crate rustc_serialize;
 /// the primitives if possible. `init()` also makes the random number generation
 /// functions (`gen_key`, `gen_keypair`, `gen_nonce`, `randombytes`, `randombytes_into`)
 /// thread-safe
+///
+/// `init()` returns `false` if initialization failed.
 pub fn init() -> bool {
     unsafe {
         ffi::sodium_init() != -1
