@@ -124,3 +124,85 @@ pub fn decrypt(c: &[u8],
 }
 
 ));
+
+
+macro_rules! aead_test_fns (($init:expr) => (
+
+#[test]
+fn test_encrypt_decrypt() {
+    use randombytes::randombytes;
+
+    $init;
+
+    // Vary input length
+    for i in 0..256usize {
+        let k = gen_key();
+        let m = randombytes(i);
+        let ad = [5; 10];
+        let n = gen_nonce();
+
+        let c = encrypt(&m, &ad, &n, &k);
+        let m_new = decrypt(&c, &ad, &n, &k);
+        assert_eq!(m, m_new.unwrap());
+    }
+
+    // Vary ad length
+    for i in 0..256usize {
+        let k = gen_key();
+        let m = randombytes(10);
+        let ad = vec![5; i];
+        let n = gen_nonce();
+        let c = encrypt(&m, &ad, &n, &k);
+        let m_new = decrypt(&c, &ad, &n, &k);
+        assert_eq!(m, m_new.unwrap());
+    }
+}
+
+#[test]
+fn test_encrypt_decrypt_tamper() {
+    use randombytes::randombytes;
+
+    $init;
+
+    for i in 0..256usize {
+        let k = gen_key();
+        let m = randombytes(i);
+        let ad = [5; 10];
+        let n = gen_nonce();
+        let c = encrypt(&m, &ad, &n, &k);
+
+        // Mangle ciphertext
+        for i in 0..c.len() {
+            let mut mangled_c = c.clone();
+            mangled_c[i] = mangled_c[i] ^ 255;
+            let m_new = decrypt(&mangled_c, &ad, &n, &k);
+            assert_eq!(Err(()), m_new);
+        }
+
+        // Mangle AD
+        for i in 0..ad.len() {
+            let mut mangled_ad = ad.clone();
+            mangled_ad[i] = mangled_ad[i] ^ 255;
+            let m_new = decrypt(&c, &mangled_ad, &n, &k);
+            assert_eq!(Err(()), m_new);
+        }
+
+        // Truncate ciphertext
+        for i in 0..c.len() {
+            let mut c_truncated = Vec::new();
+            c_truncated.extend_from_slice(&c[0..i]);
+            let m_result = decrypt(&c_truncated, &ad, &n, &k);
+            assert_eq!(Err(()), m_result);
+        }
+
+        // Truncate AD
+        for i in 0..ad.len() {
+            let mut ad_truncated = Vec::new();
+            ad_truncated.extend_from_slice(&ad[0..i]);
+            let m_result = decrypt(&c, &ad_truncated, &n, &k);
+            assert_eq!(Err(()), m_result);
+        }
+    }
+}
+
+));

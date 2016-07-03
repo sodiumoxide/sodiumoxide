@@ -34,49 +34,27 @@ aead_module!(
 #[cfg(test)]
 mod test {
     use super::*;
-    use randombytes::randombytes;
+
+    aead_test_fns!(());
 
     #[test]
-    fn test_encrypt_decrypt() {
-        // Vary input length
-        for i in 0..256usize {
-            let k = gen_key();
-            let m = randombytes(i);
-            let ad = [5; 10];
-            let n = gen_nonce();
+    fn test_canned_vector() {
+        let k = Key([
+            0x42, 0x90, 0xbc, 0xb1, 0x54, 0x17, 0x35, 0x31, 0xf3, 0x14, 0xaf,
+            0x57, 0xf3, 0xbe, 0x3b, 0x50, 0x06, 0xda, 0x37, 0x1e, 0xce, 0x27,
+            0x2a, 0xfa, 0x1b, 0x5d, 0xbd, 0xd1, 0x10, 0x0a, 0x10, 0x07]);
+        let m = vec![0x86, 0xd0, 0x99, 0x74, 0x84, 0x0b, 0xde, 0xd2, 0xa5, 0xca];
+        let n = Nonce([0xcd, 0x7c, 0xf6, 0x7b, 0xe3, 0x9c, 0x79, 0x4a]);
+        let ad = vec![0x87, 0xe2, 0x29, 0xd4, 0x50, 0x08, 0x45, 0xa0, 0x79, 0xc0];
 
-            let c = encrypt(&m, &ad, &n, &k);
-            let m_new = decrypt(&c, &ad, &n, &k);
-            assert_eq!(m, m_new.unwrap());
+        let c = encrypt(&m, &ad, &n, &k);
+
+        for i in 0..c.len() {
+            let mut mangled_c = c.clone();
+            mangled_c[i] = mangled_c[i] + 1;
+            let m_new = decrypt(&mangled_c, &ad, &n, &k);
+            assert_eq!(Err(()), m_new);
         }
 
-        // Vary ad length
-        for i in 0..256usize {
-            let k = gen_key();
-            let m = randombytes(10);
-            let ad = vec![5; i];
-            let n = gen_nonce();
-            let c = encrypt(&m, &ad, &n, &k);
-            let m_new = decrypt(&c, &ad, &n, &k);
-            assert_eq!(m, m_new.unwrap());
-        }
-    }
-
-    #[test]
-    fn test_encrypt_decrypt_tamper() {
-        for i in 0..256usize {
-            let k = gen_key();
-            let m = randombytes(i);
-            let ad = [5; 10];
-            let n = gen_nonce();
-            let c = encrypt(&m, &ad, &n, &k);
-
-            for i in 0..c.len() {
-                let mut mangled_c = c.clone();
-                mangled_c[i] = mangled_c[i] ^ 255;
-                let m_new = decrypt(&mangled_c, &ad, &n, &k);
-                assert_eq!(Err(()), m_new);
-            }
-        }
     }
 }

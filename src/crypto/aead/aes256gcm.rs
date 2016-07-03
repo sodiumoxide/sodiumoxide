@@ -87,74 +87,22 @@ pub fn is_available() -> bool {
 mod test {
     use super::*;
     use rustc_serialize::hex::FromHex;
-    use randombytes::randombytes;
-    
-    #[test]
-    fn test_encrypt_decrypt() {
+
+    aead_test_fns!({
         ::init();
         if !is_available() {
             return;
         }
-
-        // Vary input length
-        for i in 0..256usize {
-            let k = gen_key();
-            let m = randombytes(i);
-            let ad = [5; 10];
-            let n = gen_nonce();
-
-            let c = encrypt(&m, &ad, &n, &k);
-            let m_new = decrypt(&c, &ad, &n, &k);
-            assert_eq!(m, m_new.unwrap());
-        }
-
-        // Vary ad length
-        for i in 0..256usize {
-            let k = gen_key();
-            let m = randombytes(10);
-            let ad = vec![5; i];
-            let n = gen_nonce();
-            let c = encrypt(&m, &ad, &n, &k);
-            let m_new = decrypt(&c, &ad, &n, &k);
-            assert_eq!(m, m_new.unwrap());
-        }
-    }
+    });
 
     struct Vector {
-        key_hex: & 'static str,
-        nonce_hex: & 'static str,
-        message_hex: & 'static str,
-        ad_hex: & 'static str,
-        ciphertext_hex: & 'static str,
-        mac_hex: & 'static str,
+        key: [u8; 32],
+        nonce: [u8; 12],
+        message: Vec<u8>,
+        ad: Vec<u8>,
+        ciphertext: Vec<u8>,
+        mac: Vec<u8>,
     }
-
-    const VECTORS : [Vector; 3] = [
-        Vector{
-            key_hex: "b52c505a37d78eda5dd34f20c22540ea1b58963cf8e5bf8ffa85f9f2492505b4",
-            nonce_hex: "516c33929df5a3284ff463d7",
-            message_hex: "",
-            ad_hex: "",
-            ciphertext_hex: "",
-            mac_hex: "bdc1ac884d332457a1d2664f168c76f0"
-        },
-        Vector{
-            key_hex: "381873b5f9579d8241f0c61f0d9e327bb9f678691714aaa48ea7d92678d43fe7",
-            nonce_hex: "3fc8bec23603158e012d65e5",
-            message_hex: "7b622e9b408fe91f6fa800ecef838d36",
-            ad_hex: "",
-            ciphertext_hex: "8ca4de5b4e2ab22431a009f3ddd01bae",
-            mac_hex: "b3a7f80e3edf322622731550164cd747",
-        },
-        Vector{
-            key_hex: "92e11dcdaa866f5ce790fd24501f92509aacf4cb8b1339d50c9c1240935dd08b",
-            nonce_hex: "ac93a1a6145299bde902f21a",
-            message_hex: "2d71bcfa914e4ac045b2aa60955fad24",
-            ad_hex: "1e0889016f67601c8ebea4943bc23ad6",
-            ciphertext_hex: "8995ae2e6df3dbf96fac7b7137bae67f",
-            mac_hex: "eca5aa77d51d4a0a14d9c51e1da474ab",
-        },
-    ];
 
     #[test]
     fn test_premade_vectors() {
@@ -163,50 +111,62 @@ mod test {
             return;
         }
 
-        for vector in VECTORS.iter() {
-            let k = Key(hex_to_array32(vector.key_hex));
-            let n = Nonce(hex_to_array12(vector.nonce_hex));
-            let m = vector.message_hex.from_hex().unwrap();
-            let ad = vector.ad_hex.from_hex().unwrap();
-            let c = vector.ciphertext_hex.from_hex().unwrap();
-            let mac = vector.mac_hex.from_hex().unwrap();
+        for v in load_vectors() {
+            let k = Key(v.key);
+            let n = Nonce(v.nonce);
 
-            let mut combined = c.clone();
-            combined.append(&mut mac.to_owned());
+            let mut combined = v.ciphertext.clone();
+            combined.extend_from_slice(&v.mac);
 
-            let c_test = encrypt(&m, &ad, &n, &k);
-            assert_eq!(combined, c_test);
-            let m_test = decrypt(&c_test, &ad, &n, &k).unwrap();
-            assert_eq!(m, m_test);
-        }
-    }
+            // Test encrypt
+            let c_result = encrypt(&v.message, &v.ad, &n, &k);
+            assert_eq!(combined, c_result);
 
-    #[test]
-    fn test_premade_vectors_tamper() {
-        ::init();
-        if !is_available() {
-            return;
-        }
-
-        for vector in VECTORS.iter() {
-            let k = Key(hex_to_array32(vector.key_hex));
-            let n = Nonce(hex_to_array12(vector.nonce_hex));
-            let ad = vector.ad_hex.from_hex().unwrap();
-            let c = vector.ciphertext_hex.from_hex().unwrap();
-            let mac = vector.mac_hex.from_hex().unwrap();
-
-            for i in 0..(c.len() + mac.len()) {
-                let mut combined = c.clone();
-                combined.append(&mut mac.to_owned());
-
-                combined[i] = combined[i] ^ 255;
-
-                let m_test = decrypt(&combined, &ad, &n, &k);
-                assert_eq!(Err(()), m_test);
+            // Test decrypt w/ truncated ad
+            for i in 0..v.mac.len() {
+                let mut c_truncated_ad = v.ciphertext.clone();
+                c_truncated_ad.extend_from_slice(&v.mac[0..i]);
+                let m_result = decrypt(&c_truncated_ad, &v.ad, &n, &k);
+                assert_eq!(Err(()), m_result);
             }
+
+            // Test decrypt w/ truncated ciphertext
+            for i in 0..v.ciphertext.len() {
+                let mut c_truncated_c = Vec::new();
+                c_truncated_c.extend_from_slice(&v.ciphertext[0..i]);
+                c_truncated_c.extend_from_slice(&v.mac);
+                let m_result = decrypt(&c_truncated_c, &v.ad, &n, &k);
+                assert_eq!(Err(()), m_result);
+            }
+
+            // Finally, test normal decrypt
+            let m_result = decrypt(&combined, &v.ad, &n, &k);
+            assert_eq!(Ok(v.message), m_result);
         }
     }
 
+    fn load_vectors() -> Vec<Vector> {
+        use std::fs::File;
+        use rustc_serialize::json::Json;
+
+        let mut r = File::open("testvectors/aes256gcm.js").unwrap();
+        let json = Json::from_reader(&mut r).unwrap();
+        let json_array = json.as_array().unwrap();
+        let mut result = vec![];
+        for json_vec in json_array {
+            let json_vec = json_vec.as_array().unwrap();
+
+            result.push(Vector {
+                key: hex_to_array32(json_vec[0].as_string().unwrap()).to_owned(),
+                nonce: hex_to_array12(json_vec[1].as_string().unwrap()).to_owned(),
+                message: json_vec[2].as_string().unwrap().from_hex().unwrap().to_owned(),
+                ad: json_vec[3].as_string().unwrap().from_hex().unwrap().to_owned(),
+                ciphertext: json_vec[4].as_string().unwrap().from_hex().unwrap().to_owned(),
+                mac: json_vec[5].as_string().unwrap().from_hex().unwrap().to_owned()
+            });
+        }
+        result
+    }
 
     fn hex_to_array32(hex: &str) -> [u8; 32] {
         let bytes = hex.from_hex().unwrap();
