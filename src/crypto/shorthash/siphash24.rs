@@ -2,8 +2,6 @@
 use ffi;
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
-#[cfg(feature = "default")]
-use rustc_serialize;
 
 /// Number of bytes in a `Digest`.
 pub const DIGESTBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;

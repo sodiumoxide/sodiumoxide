@@ -56,12 +56,16 @@
 extern crate libsodium_sys as ffi;
 extern crate libc;
 #[cfg(any(test, feature = "default"))]
+extern crate serde;
+#[cfg(test)]
 extern crate rustc_serialize;
 
 /// `init()` initializes the sodium library and chooses faster versions of
 /// the primitives if possible. `init()` also makes the random number generation
 /// functions (`gen_key`, `gen_keypair`, `gen_nonce`, `randombytes`, `randombytes_into`)
 /// thread-safe
+///
+/// `init()` returns `false` if initialization failed.
 pub fn init() -> bool {
     unsafe {
         ffi::sodium_init() != -1

@@ -5,8 +5,6 @@
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
-#[cfg(feature = "default")]
-use rustc_serialize;
 
 /// Number of bytes in a `Seed`.
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;

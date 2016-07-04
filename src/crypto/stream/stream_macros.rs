@@ -6,8 +6,6 @@ macro_rules! stream_module (($stream_name:ident,
 use libc::c_ulonglong;
 use std::iter::repeat;
 use randombytes::randombytes_into;
-#[cfg(feature = "default")]
-use rustc_serialize;
 
 /// Number of bytes in a `Key`.
 pub const KEYBYTES: usize = $keybytes;

@@ -37,40 +37,45 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
         }
     }
     impl ::std::cmp::Eq for $newtype {}
+
     #[cfg(feature = "default")]
-    impl rustc_serialize::Encodable for $newtype {
-        fn encode<E: rustc_serialize::Encoder>(&self, encoder: &mut E)
-                -> Result<(), E::Error> {
-            encoder.emit_seq($len, |encoder| {
-                for (i, e) in self[..].iter().enumerate() {
-                    try!(encoder.emit_seq_elt(i, |encoder| e.encode(encoder)))
-                }
-                Ok(())
-            })
+    impl ::serde::Serialize for $newtype {
+        fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+            where S: ::serde::Serializer
+        {
+            serializer.serialize_bytes(&self[..])
         }
     }
+
     #[cfg(feature = "default")]
-    impl rustc_serialize::Decodable for $newtype {
-        fn decode<D: rustc_serialize::Decoder>(decoder: &mut D)
-                -> Result<$newtype, D::Error> {
-            decoder.read_seq(|decoder, len| {
-                if len != $len {
-                    return Err(decoder.error(
-                        &format!("Expecting array of length: {}, but found {}",
-                                 $len, len)));
-                }
-                let mut res = $newtype([0; $len]);
+    impl ::serde::Deserialize for $newtype {
+        fn deserialize<D>(deserializer: &mut D) -> Result<$newtype, D::Error>
+            where D: ::serde::Deserializer
+        {
+            struct NewtypeVisitor;
+            impl ::serde::de::Visitor for NewtypeVisitor {
+                type Value = $newtype;
+                fn visit_seq<V>(&mut self, mut _visitor: V) -> Result<Self::Value, V::Error>
+                    where V: ::serde::de::SeqVisitor
                 {
-                    let $newtype(ref mut arr) = res;
-                    for (i, val) in arr.iter_mut().enumerate() {
-                        *val = try!(decoder.read_seq_elt(i,
-                            |decoder| rustc_serialize::Decodable::decode(decoder)));
+                    let mut res = $newtype([0; $len]);
+                    {
+                        let $newtype(ref mut arr) = res;
+                        for r in arr.iter_mut() {
+                            match try!(_visitor.visit()) {
+                                None => return Err(::serde::de::Error::end_of_stream()),
+                                Some(value) => *r = value
+                            }
+                        }
                     }
+                    try!(_visitor.end());
+                    Ok(res)
                 }
-                Ok(res)
-            })
+            }
+            deserializer.deserialize_bytes(NewtypeVisitor)
         }
     }
+
     /// Allows a user to access the byte contents of an object as a slice.
     ///
     /// WARNING: it might be tempting to do comparisons on objects
