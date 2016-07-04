@@ -5,8 +5,6 @@ macro_rules! aead_module (($encrypt_name:path,
                            $macbytes:expr) => (
 
 use randombytes::randombytes_into;
-#[cfg(feature = "default")]
-use rustc_serialize;
 use libc::c_ulonglong;
 use std::ptr;
 
