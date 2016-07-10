@@ -8,7 +8,7 @@ license = "MIT OR Apache-2.0"
 links = "sodium"
 name = "libsodium-sys"
 repository = "https://github.com/dnaq/sodiumoxide.git"
-version = "0.0.11"
+version = "0.0.12"
 
 [build-dependencies]
 pkg-config = "0.3"
