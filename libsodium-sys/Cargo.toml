@@ -11,7 +11,11 @@ repository = "https://github.com/dnaq/sodiumoxide.git"
 version = "0.0.12"
 
 [build-dependencies]
-pkg-config = "0.3"
+pkg-config = { version = "0.3", optional = true }
+gcc = { version = "0.3", optional = true }
+flate2 = { version = "0.2", optional = true }
+tar = { version = "0.4", optional = true }
+unwrap = "1.1"
 
 [dependencies]
 libc = "0.2"
@@ -19,3 +23,7 @@ libc = "0.2"
 [lib]
 name = "libsodium_sys"
 path = "lib.rs"
+
+[features]
+default = ["pkg-config"]
+get-libsodium = ["gcc", "flate2", "tar"]
