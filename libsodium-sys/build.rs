@@ -142,7 +142,7 @@ fn main() {
     let basename = "libsodium-".to_string() + VERSION;
     let gz_filename = basename.clone() + ".tar.gz";
     let url = "https://download.libsodium.org/libsodium/releases/".to_string() + &gz_filename;
-    let install_dir = get_install_dir();
+    let install_dir = get_install_dir().replace(" ", "%20");
     let gz_path = install_dir.clone() + "/" + &gz_filename;
     unwrap!(fs::create_dir_all(&install_dir));
 
@@ -174,6 +174,7 @@ fn main() {
     let cc = format!("{}", gcc.get_compiler().path().display());
     let prefix_arg = format!("--prefix={}", install_dir);
     let target = unwrap!(env::var("TARGET"));
+    let host = unwrap!(env::var("HOST"));
     let host_arg = format!("--host={}", target);
 
     let configure_output = Command::new("./configure")
@@ -192,12 +193,17 @@ fn main() {
                String::from_utf8_lossy(&configure_output.stderr));
     }
 
-    // Run `make check`
+    // Run `make check`, or `make all` if we're cross-compiling
     let j_arg = format!("-j{}", unwrap!(env::var("NUM_JOBS")));
+    let make_arg = if target == host {
+        "check"
+    } else {
+        "all"
+    };
     let make_output = Command::new("make")
         .current_dir(&basename)
         .env("V", "1")
-        .arg("check")
+        .arg(make_arg)
         .arg(&j_arg)
         .output()
         .unwrap_or_else(|error| {
