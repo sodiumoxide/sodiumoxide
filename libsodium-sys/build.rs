@@ -142,8 +142,14 @@ fn main() {
     let basename = "libsodium-".to_string() + VERSION;
     let gz_filename = basename.clone() + ".tar.gz";
     let url = "https://download.libsodium.org/libsodium/releases/".to_string() + &gz_filename;
-    let install_dir = get_install_dir().replace(" ", "%20");
-    let mut source_dir = (unwrap!(env::var("OUT_DIR")) + "/source").replace(" ", "%20");
+    let mut install_dir = get_install_dir();
+    let mut source_dir = unwrap!(env::var("OUT_DIR")) + "/source";
+    // Avoid issues with paths containing spaces by falling back to using /tmp
+    let target = unwrap!(env::var("TARGET"));
+    if install_dir.contains(" ") {
+        install_dir = "/tmp/".to_string() + &basename + "/" + &target + "/installed";
+        source_dir = "/tmp/".to_string() + &basename + "/" + &target + "/source";
+    }
     let gz_path = source_dir.clone() + "/" + &gz_filename;
     unwrap!(fs::create_dir_all(&install_dir));
     unwrap!(fs::create_dir_all(&source_dir));
@@ -176,7 +182,6 @@ fn main() {
     let gcc = gcc::Config::new();
     let cc = format!("{}", gcc.get_compiler().path().display());
     let prefix_arg = format!("--prefix={}", install_dir);
-    let target = unwrap!(env::var("TARGET"));
     let host = unwrap!(env::var("HOST"));
     let host_arg = format!("--host={}", target);
 
