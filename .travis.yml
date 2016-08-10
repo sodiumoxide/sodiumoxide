@@ -11,6 +11,7 @@ script:
 - cargo build --verbose
 - cargo test --verbose
 - cargo test --verbose --no-default-features
+- cargo test --verbose --features get-libsodium
 - cargo doc
 after_script:
 - cd target/doc
