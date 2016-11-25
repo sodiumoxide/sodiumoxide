@@ -53,6 +53,14 @@ mod test {
     }
 
     #[test]
+    /// Make sure that not all random numbers are the same.
+    fn test_randombytes_uniform_not_stuck() {
+        let random_numbers = (2..100).map(|_| randombytes_uniform(100)).collect::<Vec<u32>>();
+        let first = random_numbers[0];
+        assert!(!random_numbers.iter().all(|n| *n == first));
+    }
+
+    #[test]
     fn test_randombytes_uniform_edge_cases() {
         assert_eq!(randombytes_uniform(0), 0);
         assert_eq!(randombytes_uniform(1), 0);
