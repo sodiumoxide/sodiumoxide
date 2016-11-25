@@ -45,19 +45,17 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_randombytes_uniform_lt1000() {
-        for _ in 0..100 {
-            let random = randombytes_uniform(1000);
-            assert!(random < 1000);
+    fn test_randombytes_uniform() {
+        for i in 2..300 {
+            let random = randombytes_uniform(i);
+            assert!(random < i);
         }
     }
 
     #[test]
-    fn test_randombytes_uniform_lt3() {
-        for _ in 0..100 {
-            let random = randombytes_uniform(3);
-            assert!(random < 3);
-        }
+    fn test_randombytes_uniform_edge_cases() {
+        assert_eq!(randombytes_uniform(0), 0);
+        assert_eq!(randombytes_uniform(1), 0);
     }
 
 }
