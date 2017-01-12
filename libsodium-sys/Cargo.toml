@@ -4,11 +4,11 @@ build = "build.rs"
 description = "FFI binding to libsodium"
 documentation = "https://dnaq.github.io/sodiumoxide"
 keywords = ["libsodium", "NaCl", "crypto"]
-license = "MIT"
+license = "MIT OR Apache-2.0"
 links = "sodium"
 name = "libsodium-sys"
 repository = "https://github.com/dnaq/sodiumoxide.git"
-version = "0.0.10"
+version = "0.0.13"
 
 [build-dependencies]
 pkg-config = "0.3"

@@ -50,9 +50,17 @@ Master git repository
 
 License
 -------
-MIT
 
-However the license will be changed to dual MIT/Apache-2.0 in the near future.
+Licensed under either of
 
-By contributing to the code you agree that the license of your contribution is
-MIT/Apache-2.0.
+ * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
+
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally
+submitted for inclusion in the work by you, as defined in the Apache-2.0
+license, shall be dual licensed as above, without any additional terms or
+conditions.
