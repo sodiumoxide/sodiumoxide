@@ -17,6 +17,20 @@ extern {
         clen: c_ulonglong,
         n: *const [u8; crypto_secretbox_NONCEBYTES],
         k: *const [u8; crypto_secretbox_KEYBYTES]) -> c_int;
+    pub fn crypto_secretbox_detached(
+        c: *mut u8,
+        mac: *mut [u8; crypto_secretbox_MACBYTES],
+        m: *const u8,
+        mlen: c_ulonglong,
+        n: *const [u8; crypto_secretbox_NONCEBYTES],
+        k: *const [u8; crypto_secretbox_KEYBYTES]) -> c_int;
+    pub fn crypto_secretbox_open_detached(
+        m: *mut u8,
+        c: *const u8,
+        mac: *const [u8; crypto_secretbox_MACBYTES],
+        clen: c_ulonglong,
+        n: *const [u8; crypto_secretbox_NONCEBYTES],
+        k: *const [u8; crypto_secretbox_KEYBYTES]) -> c_int;
     pub fn crypto_secretbox_keybytes() -> size_t;
     pub fn crypto_secretbox_noncebytes() -> size_t;
     pub fn crypto_secretbox_macbytes() -> size_t;
