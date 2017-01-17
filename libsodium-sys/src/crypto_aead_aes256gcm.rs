@@ -18,7 +18,7 @@ extern {
         mlen: c_ulonglong,
         ad: *const u8,
         adlen: c_ulonglong,
-        nsec: *mut [u8; crypto_aead_aes256gcm_NSECBYTES],
+        nsec: *const [u8; crypto_aead_aes256gcm_NSECBYTES],
         npub: *const [u8; crypto_aead_aes256gcm_NPUBBYTES],
         k: *const [u8; crypto_aead_aes256gcm_KEYBYTES]) -> c_int;
     pub fn crypto_aead_aes256gcm_decrypt(
@@ -39,7 +39,7 @@ extern {
         mlen: c_ulonglong,
         ad: *const u8,
         adlen: c_ulonglong,
-        nsec: *mut [u8; crypto_aead_aes256gcm_NSECBYTES],
+        nsec: *const [u8; crypto_aead_aes256gcm_NSECBYTES],
         npub: *const [u8; crypto_aead_aes256gcm_NPUBBYTES],
         k: *const [u8; crypto_aead_aes256gcm_KEYBYTES]) -> c_int;
     pub fn crypto_aead_aes256gcm_decrypt_detached(

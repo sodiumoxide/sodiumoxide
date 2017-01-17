@@ -18,7 +18,7 @@ extern {
         mlen: c_ulonglong,
         ad: *const u8,
         adlen: c_ulonglong,
-        nsec: *mut [u8; crypto_aead_chacha20poly1305_ietf_NSECBYTES],
+        nsec: *const [u8; crypto_aead_chacha20poly1305_ietf_NSECBYTES],
         npub: *const [u8; crypto_aead_chacha20poly1305_ietf_NPUBBYTES],
         k: *const [u8; crypto_aead_chacha20poly1305_ietf_KEYBYTES]) -> c_int;
     pub fn crypto_aead_chacha20poly1305_ietf_decrypt(
@@ -47,7 +47,7 @@ extern {
         nsec: *mut [u8; crypto_aead_aes256gcm_NSECBYTES],
         c: *const u8,
         clen: c_ulonglong,
-        mac: [u8; crypto_aead_aes256gcm_ABYTES],
+        mac: *const [u8; crypto_aead_aes256gcm_ABYTES],
         ad: *const u8,
         adlen: c_ulonglong,
         npub: *const [u8; crypto_aead_aes256gcm_NPUBBYTES],
