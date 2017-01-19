@@ -72,7 +72,6 @@ pub fn init() -> bool {
     }
 }
 
-mod marshal;
 #[macro_use]
 mod newtype_macros;
 pub mod randombytes;
