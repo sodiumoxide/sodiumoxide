@@ -40,7 +40,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
 
     #[cfg(feature = "default")]
     impl ::serde::Serialize for $newtype {
-        fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where S: ::serde::Serializer
         {
             serializer.serialize_bytes(&self[..])
@@ -49,26 +49,27 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
 
     #[cfg(feature = "default")]
     impl ::serde::Deserialize for $newtype {
-        fn deserialize<D>(deserializer: &mut D) -> Result<$newtype, D::Error>
+        fn deserialize<D>(deserializer: D) -> Result<$newtype, D::Error>
             where D: ::serde::Deserializer
         {
             struct NewtypeVisitor;
             impl ::serde::de::Visitor for NewtypeVisitor {
                 type Value = $newtype;
-                fn visit_seq<V>(&mut self, mut _visitor: V) -> Result<Self::Value, V::Error>
+                fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                    write!(formatter, "$newtype")
+                }
+                fn visit_seq<V>(self, mut visitor: V) -> Result<Self::Value, V::Error>
                     where V: ::serde::de::SeqVisitor
                 {
                     let mut res = $newtype([0; $len]);
                     {
                         let $newtype(ref mut arr) = res;
                         for r in arr.iter_mut() {
-                            match try!(_visitor.visit()) {
-                                None => return Err(::serde::de::Error::end_of_stream()),
-                                Some(value) => *r = value
+                            if let Some(value) = try!(visitor.visit()) {
+                                *r = value;
                             }
                         }
                     }
-                    try!(_visitor.end());
                     Ok(res)
                 }
             }
