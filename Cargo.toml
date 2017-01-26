@@ -12,11 +12,11 @@ version = "0.0.13"
 [dependencies]
 libc = "0.2"
 libsodium-sys = "0.0.13"
-serde = { version="0.8", optional = true }
+serde = { version="0.9", optional = true }
 
 [dev-dependencies]
-serde = "0.8"
-serde_json = "0.8"
+serde = "0.9"
+serde_json = "0.9"
 rustc-serialize = "0.3"
 
 [features]
