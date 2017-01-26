@@ -5,7 +5,6 @@
 //! This function is conjectured to meet the standard notions of privacy and
 //! third-party unforgeability.
 use ffi;
-use marshal::marshal;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `PublicKey`.
@@ -19,9 +18,6 @@ pub const NONCEBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_NONCEBY
 
 /// Number of bytes in a `PrecomputedKey`.
 pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES;
-
-const ZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_ZEROBYTES;
-const BOXZEROBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_BOXZEROBYTES;
 
 /// Number of bytes in the authenticator tag of an encrypted message
 /// i.e. the number of bytes by which the ciphertext is larger than the
@@ -79,16 +75,17 @@ pub fn seal(m: &[u8],
             &Nonce(ref n): &Nonce,
             &PublicKey(ref pk): &PublicKey,
             &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
-    let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
-        unsafe {
-            ffi::crypto_box_curve25519xsalsa20poly1305(dst,
-                                                       src,
-                                                       len,
-                                                       n,
-                                                       pk,
-                                                       sk);
-        }
-    });
+    let clen = m.len() + MACBYTES;
+    let mut c = Vec::with_capacity(clen);
+    unsafe {
+        c.set_len(clen);
+        ffi::crypto_box_easy(c.as_mut_ptr(),
+                             m.as_ptr(),
+                             m.len() as u64,
+                             n,
+                             pk,
+                             sk);
+    }
     c
 }
 
@@ -99,19 +96,20 @@ pub fn open(c: &[u8],
             &Nonce(ref n): &Nonce,
             &PublicKey(ref pk): &PublicKey,
             &SecretKey(ref sk): &SecretKey) -> Result<Vec<u8>, ()> {
-    if c.len() < BOXZEROBYTES {
+    if c.len() < MACBYTES {
         return Err(());
     }
-    let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
-        unsafe {
-            ffi::crypto_box_curve25519xsalsa20poly1305_open(dst,
-                                                            src,
-                                                            len,
-                                                            n,
-                                                            pk,
-                                                            sk)
-        }
-    });
+    let mlen = c.len() - MACBYTES;
+    let mut m = Vec::with_capacity(mlen);
+    let ret = unsafe {
+        m.set_len(mlen);
+        ffi::crypto_box_open_easy(m.as_mut_ptr(),
+                                  c.as_ptr(),
+                                  c.len() as u64,
+                                  n,
+                                  pk,
+                                  sk)
+    };
     if ret == 0 {
         Ok(m)
     } else {
@@ -147,15 +145,16 @@ pub fn precompute(&PublicKey(ref pk): &PublicKey,
 pub fn seal_precomputed(m: &[u8],
                         &Nonce(ref n): &Nonce,
                         &PrecomputedKey(ref k): &PrecomputedKey) -> Vec<u8> {
-    let (c, _) = marshal(m, ZEROBYTES, BOXZEROBYTES, |dst, src, len| {
-        unsafe {
-            ffi::crypto_box_curve25519xsalsa20poly1305_afternm(dst,
-                                                               src,
-                                                               len,
-                                                               n,
-                                                               k);
-        }
-    });
+    let clen = m.len() + MACBYTES;
+    let mut c = Vec::with_capacity(clen);
+    unsafe {
+        c.set_len(clen);
+        ffi::crypto_box_easy_afternm(c.as_mut_ptr(),
+                                     m.as_ptr(),
+                                     m.len() as u64,
+                                     n,
+                                     k);
+    }
     c
 }
 
@@ -165,18 +164,19 @@ pub fn seal_precomputed(m: &[u8],
 pub fn open_precomputed(c: &[u8],
                         &Nonce(ref n): &Nonce,
                         &PrecomputedKey(ref k): &PrecomputedKey) -> Result<Vec<u8>, ()> {
-    if c.len() < BOXZEROBYTES {
+    if c.len() < MACBYTES {
         return Err(());
     }
-    let (m, ret) = marshal(c, BOXZEROBYTES, ZEROBYTES, |dst, src, len| {
-        unsafe {
-            ffi::crypto_box_curve25519xsalsa20poly1305_open_afternm(dst,
-                                                                    src,
-                                                                    len,
-                                                                    n,
-                                                                    k)
-        }
-    });
+    let mlen = c.len() - MACBYTES;
+    let mut m = Vec::with_capacity(mlen);
+    let ret = unsafe {
+        m.set_len(mlen);
+        ffi::crypto_box_open_easy_afternm(m.as_mut_ptr(),
+                                          c.as_ptr(),
+                                          c.len() as u64,
+                                          n,
+                                          k)
+    };
     if ret == 0 {
         Ok(m)
     } else {
