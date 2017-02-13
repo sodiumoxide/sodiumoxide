@@ -18,6 +18,7 @@ serde = { version="0.9", optional = true }
 serde = "0.9"
 serde_json = "0.9"
 rustc-serialize = "0.3"
+rmp-serde = "0.12"
 
 [features]
 benchmarks = []
