@@ -56,7 +56,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
             impl ::serde::de::Visitor for NewtypeVisitor {
                 type Value = $newtype;
                 fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-                    write!(formatter, "$newtype")
+                    write!(formatter, stringify!($newtype))
                 }
                 fn visit_seq<V>(self, mut visitor: V) -> Result<Self::Value, V::Error>
                     where V: ::serde::de::SeqVisitor
@@ -71,6 +71,11 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
                         }
                     }
                     Ok(res)
+                }
+                fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
+                    where E: ::serde::de::Error
+                {
+                    $newtype::from_slice(v).ok_or(::serde::de::Error::invalid_length(v.len(), &self))
                 }
             }
             deserializer.deserialize_bytes(NewtypeVisitor)
