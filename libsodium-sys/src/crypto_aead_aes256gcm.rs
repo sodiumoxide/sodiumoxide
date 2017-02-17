@@ -47,7 +47,7 @@ extern {
         nsec: *mut [u8; crypto_aead_aes256gcm_NSECBYTES],
         c: *const u8,
         clen: c_ulonglong,
-        mac: [u8; crypto_aead_aes256gcm_ABYTES],
+        mac: *const [u8; crypto_aead_aes256gcm_ABYTES],
         ad: *const u8,
         adlen: c_ulonglong,
         npub: *const [u8; crypto_aead_aes256gcm_NPUBBYTES],
