@@ -12,7 +12,7 @@ macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
     /// `from_slice()` creates an object from a byte slice
     ///
     /// This function will fail and return `None` if the length of
-    /// the byte-s;ice isn't equal to the length of the object
+    /// the byte-slice isn't equal to the length of the object
     pub fn from_slice(bs: &[u8]) -> Option<$newtype> {
         if bs.len() != $len {
             return None;
