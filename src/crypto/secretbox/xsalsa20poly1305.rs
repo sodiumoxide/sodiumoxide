@@ -167,6 +167,26 @@ mod test {
     }
 
     #[test]
+    fn test_seal_open_tamper() {
+        use randombytes::randombytes;
+        for i in 0..32usize {
+            let k = gen_key();
+            let m = randombytes(i);
+            let n = gen_nonce();
+            let mut c = seal(&m, &n, &k);
+            for i in 0..c.len() {
+                c[i] ^= 0x20;
+                // Test the combined mode.
+                assert_eq!(Err(()), open(&mut c, &n, &k));
+                // Test the detached mode.
+                let tag = Tag::from_slice(&c[..MACBYTES]).unwrap();
+                assert_eq!(Err(()), open_detached(&mut c[MACBYTES..], &tag, &n, &k));
+                c[i] ^= 0x20;
+            }
+        }
+    }
+
+    #[test]
     fn test_seal_open_detached() {
         use randombytes::randombytes;
         for i in 0..256usize {
@@ -211,28 +231,30 @@ mod test {
         }
     }
 
+
     #[test]
-    fn test_seal_open_tamper() {
+    fn test_seal_open_detached_tamper() {
         use randombytes::randombytes;
         for i in 0..32usize {
             let k = gen_key();
-            let m = randombytes(i);
+            let mut m = randombytes(i);
             let n = gen_nonce();
-            let mut c = seal(&m, &n, &k);
-            for i in 0..c.len() {
-                c[i] ^= 0x20;
-                // Test the combined mode.
-                assert_eq!(Err(()), open(&mut c, &n, &k));
-                // Test the detached mode.
-                let tag = Tag::from_slice(&c[..MACBYTES]).unwrap();
-                assert_eq!(Err(()), open_detached(&mut c[MACBYTES..], &tag, &n, &k));
-                c[i] ^= 0x20;
+            let mut tag = seal_detached(&mut m, &n, &k);
+            for j in 0..m.len() {
+                m[j] ^= 0x20;
+                assert_eq!(Err(()), open_detached(&mut m, &tag, &n, &k));
+                m[j] ^= 0x20;
+            }
+            for j in 0..tag.0.len() {
+                tag.0[j] ^= 0x20;
+                assert_eq!(Err(()), open_detached(&mut m, &tag, &n, &k));
+                tag.0[j] ^= 0x20;
             }
         }
     }
 
     #[test]
-    fn test_open_inplace_failure_does_not_modify() {
+    fn test_open_detached_failure_does_not_modify() {
         let mut buf = b"hello world".to_vec();
         let k = gen_key();
         let n = gen_nonce();
