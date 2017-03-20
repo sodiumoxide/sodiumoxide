@@ -11,7 +11,7 @@ version = "0.0.14"
 
 [dependencies]
 libc = "0.2"
-libsodium-sys = "0.0.14"
+libsodium-sys = { version = "0.0.14", path = "libsodium-sys" }
 serde = { version="0.9", optional = true }
 
 [dev-dependencies]
