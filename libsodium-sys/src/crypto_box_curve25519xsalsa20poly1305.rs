@@ -13,6 +13,11 @@ pub const crypto_box_curve25519xsalsa20poly1305_MACBYTES: usize =
 
 
 extern {
+    pub fn crypto_box_curve25519xsalsa20poly1305_seed_keypair(
+        pk: *mut [u8; crypto_box_PUBLICKEYBYTES],
+        sk: *mut [u8; crypto_box_SECRETKEYBYTES],
+        seed: *const [u8; crypto_box_SEEDBYTES])
+        -> c_int;
     pub fn crypto_box_curve25519xsalsa20poly1305_keypair(
         pk: *mut [u8; crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES],
         sk: *mut [u8; crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES])
