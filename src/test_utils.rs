@@ -2,6 +2,7 @@
 extern crate serde_json;
 extern crate rmp_serde;
 extern crate core;
+#[cfg(feature = "no_std")] use prelude::*;
 use serde::{Serialize, Deserialize};
 
 // Encodes then decodes `value` using JSON

@@ -4,6 +4,7 @@
 //!
 //! This function is conjectured to meet the standard notions of privacy and
 //! third-party unforgeability.
+#[cfg(feature = "no_std")] use prelude::*;
 use ffi;
 use randombytes::randombytes_into;
 

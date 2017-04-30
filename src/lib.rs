@@ -53,12 +53,33 @@
 #![warn(non_camel_case_types)]
 #![warn(unused_qualifications)]
 
+#![cfg_attr(feature = "no_std", no_std)]
+#![cfg_attr(feature = "no_std", feature(alloc))]
+#![cfg_attr(feature = "no_std", feature(collections))]
+
 extern crate libsodium_sys as ffi;
 extern crate libc;
 #[cfg(any(test, feature = "default"))]
 extern crate serde;
 #[cfg(test)]
 extern crate rustc_serialize;
+#[cfg(feature = "no_std")]
+extern crate alloc;
+#[cfg(feature = "no_std")]
+#[macro_use]
+extern crate collections;
+#[cfg(all(test, feature = "no_std"))]
+extern crate std;
+
+#[cfg(all(not(test), feature = "no_std"))]
+mod std {
+    pub use core::{cmp, fmt, hash, iter, mem, ops, slice, str};
+}
+
+#[cfg(feature = "no_std")]
+mod prelude {
+    pub use collections::{Vec, String};
+}
 
 /// `init()` initializes the sodium library and chooses faster versions of
 /// the primitives if possible. `init()` also makes the random number generation

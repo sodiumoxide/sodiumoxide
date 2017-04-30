@@ -3,6 +3,7 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
+#[cfg(feature = "no_std")] use prelude::*;
 use libc::c_ulonglong;
 use std::iter::repeat;
 use randombytes::randombytes_into;

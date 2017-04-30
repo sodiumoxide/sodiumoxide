@@ -48,6 +48,7 @@ pub fn shorthash(m: &[u8],
 #[cfg(test)]
 mod test {
     use super::*;
+    #[cfg(feature = "no_std")] use prelude::*;
 
     #[test]
     fn test_vectors() {

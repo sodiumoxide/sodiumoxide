@@ -2,6 +2,7 @@
 //! [Ed25519](http://ed25519.cr.yp.to/). This function is conjectured to meet the
 //! standard notion of unforgeability for a public-key signature scheme under
 //! chosen-message attacks.
+#[cfg(feature = "no_std")] use prelude::*;
 use ffi;
 use libc::c_ulonglong;
 use std::iter::repeat;
