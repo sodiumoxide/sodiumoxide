@@ -5,15 +5,26 @@
 //! However, for the moment, there do not appear to be alternatives that
 //! inspire satisfactory levels of confidence. One can hope that NIST's
 //! SHA-3 competition will improve the situation.
-use ffi::{crypto_hash_sha512, crypto_hash_sha512_BYTES};
+use ffi::{crypto_hash_sha512, crypto_hash_sha512_BYTES, crypto_hash_sha512_state,
+          crypto_hash_sha512_init, crypto_hash_sha512_update, crypto_hash_sha512_final};
 
 hash_module!(crypto_hash_sha512,
              crypto_hash_sha512_BYTES,
-             128);
+             128,
+             crypto_hash_sha512_state,
+             crypto_hash_sha512_init,
+             crypto_hash_sha512_update,
+             crypto_hash_sha512_final);
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    fn streaming_hash(msg: &[u8]) -> Digest {
+        let mut s = State::init();
+        s.update(msg);
+        s.finalize()
+    }
 
     #[test]
     fn test_vector_1() {
@@ -29,7 +40,9 @@ mod test {
                          ,0x1d, 0x13, 0x8b, 0xc7, 0xaa, 0xd1, 0xaf, 0x3e
                          ,0xf7, 0xbf, 0xd5, 0xec, 0x64, 0x6d, 0x6c, 0x28];
         let Digest(h) = hash(&x);
+        let Digest(h1) = streaming_hash(&x);
         assert!(&h[..] == &h_expected[..]);
+        assert!(&h1[..] == &h_expected[..]);
     }
 
     fn test_nist_vector(filename: &str) {
@@ -56,7 +69,9 @@ mod test {
                 r.read_line(&mut line).unwrap();
                 let md = line[5..].from_hex().unwrap();
                 let Digest(digest) = hash(msg);
+                let Digest(digest1) = streaming_hash(msg);
                 assert!(&digest[..] == &md[..]);
+                assert!(&digest1[..] == &md[..]);
             }
         }
     }

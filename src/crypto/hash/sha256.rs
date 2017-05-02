@@ -5,15 +5,26 @@
 //! However, for the moment, there do not appear to be alternatives that
 //! inspire satisfactory levels of confidence. One can hope that NIST's
 //! SHA-3 competition will improve the situation.
-use ffi::{crypto_hash_sha256, crypto_hash_sha256_BYTES};
+use ffi::{crypto_hash_sha256, crypto_hash_sha256_BYTES, crypto_hash_sha256_state,
+          crypto_hash_sha256_init, crypto_hash_sha256_update, crypto_hash_sha256_final};
 
 hash_module!(crypto_hash_sha256,
              crypto_hash_sha256_BYTES,
-             64);
+             64,
+             crypto_hash_sha256_state,
+             crypto_hash_sha256_init,
+             crypto_hash_sha256_update,
+             crypto_hash_sha256_final);
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    fn streaming_hash(msg: &[u8]) -> Digest {
+        let mut s = State::init();
+        s.update(msg);
+        s.finalize()
+    }
 
     #[test]
     fn test_vector_1() {
@@ -24,7 +35,9 @@ mod test {
                           0x27, 0xae, 0x41, 0xe4, 0x64, 0x9b, 0x93, 0x4c,
                           0xa4, 0x95, 0x99, 0x1b, 0x78, 0x52, 0xb8, 0x55];
         let Digest(h) = hash(&x);
+        let Digest(h1) = streaming_hash(&x);
         assert!(h == h_expected);
+        assert!(h1 == h_expected);
     }
 
     #[test]
@@ -41,7 +54,9 @@ mod test {
                           0x8d, 0x56, 0x51, 0xe4, 0x6d, 0x3c, 0xdb, 0x76,
                           0x2d, 0x02, 0xd0, 0xbf, 0x37, 0xc9, 0xe5, 0x92];
         let Digest(h) = hash(&x);
+        let Digest(h1) = streaming_hash(&x);
         assert!(h == h_expected);
+        assert!(h1 == h_expected);
     }
 
     fn test_nist_vector(filename: &str) {
@@ -68,7 +83,9 @@ mod test {
                 r.read_line(&mut line).unwrap();
                 let md = line[5..].from_hex().unwrap();
                 let Digest(digest) = hash(msg);
+                let Digest(digest1) = streaming_hash(msg);
                 assert!(&digest[..] == &md[..]);
+                assert!(&digest1[..] == &md[..]);
             }
         }
     }
