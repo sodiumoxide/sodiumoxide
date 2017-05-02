@@ -48,24 +48,24 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     }
 
     #[cfg(feature = "default")]
-    impl ::serde::Deserialize for $newtype {
+    impl<'de> ::serde::Deserialize<'de> for $newtype {
         fn deserialize<D>(deserializer: D) -> Result<$newtype, D::Error>
-            where D: ::serde::Deserializer
+            where D: ::serde::Deserializer<'de>
         {
             struct NewtypeVisitor;
-            impl ::serde::de::Visitor for NewtypeVisitor {
+            impl<'de> ::serde::de::Visitor<'de> for NewtypeVisitor {
                 type Value = $newtype;
                 fn expecting(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                     write!(formatter, stringify!($newtype))
                 }
                 fn visit_seq<V>(self, mut visitor: V) -> Result<Self::Value, V::Error>
-                    where V: ::serde::de::SeqVisitor
+                    where V: ::serde::de::SeqAccess<'de>
                 {
                     let mut res = $newtype([0; $len]);
                     {
                         let $newtype(ref mut arr) = res;
                         for r in arr.iter_mut() {
-                            if let Some(value) = try!(visitor.visit()) {
+                            if let Some(value) = try!(visitor.next_element()) {
                                 *r = value;
                             }
                         }
@@ -183,18 +183,26 @@ macro_rules! public_newtype_traits (($newtype:ident) => (
 ///
 /// Usage:
 /// Generating secret datatypes, e.g. keys
+///
+/// ```
 /// new_type! {
 ///     /// This is some documentation for our type
 ///     secret Key(KEYBYTES);
 /// }
+/// ```
+///
 /// Generating public datatypes, e.g. public keys
+///
 /// ```
 /// new_type! {
 ///     /// This is some documentation for our type
 ///     public PublicKey(PUBLICKEYBYTES);
 /// }
+///
 /// ```
+///
 /// Generating nonce types
+///
 /// ```
 /// new_type! {
 ///     /// This is some documentation for our type
