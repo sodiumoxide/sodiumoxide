@@ -323,7 +323,7 @@ mod test {
         assert!(Ok(m) == m2);
     }
 
-    #[cfg(feature = "default")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use test_utils::round_trip;

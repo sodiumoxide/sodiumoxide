@@ -1,4 +1,4 @@
-#![cfg(all(test, feature = "default"))]
+#![cfg(all(test, feature = "serde"))]
 extern crate serde_json;
 extern crate rmp_serde;
 extern crate core;

@@ -660,7 +660,7 @@ mod test {
         assert!(m_pre == mexp);
     }
 
-    #[cfg(feature = "default")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use test_utils::round_trip;

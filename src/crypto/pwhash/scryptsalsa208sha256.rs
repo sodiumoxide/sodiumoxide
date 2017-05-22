@@ -208,7 +208,7 @@ mod test {
         }
     }
 
-    #[cfg(feature = "default")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
