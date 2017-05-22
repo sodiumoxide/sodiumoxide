@@ -1,5 +1,5 @@
 //! A particular combination of Curve25519, Blake2B, Salsa20 and Poly1305.
-#[cfg(feature = "no_std")] use prelude::*;
+#[cfg(not(feature = "std"))] use prelude::*;
 use ffi;
 
 use libc::c_ulonglong;

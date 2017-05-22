@@ -14,7 +14,7 @@ hash_module!(crypto_hash_sha256,
 #[cfg(test)]
 mod test {
     use super::*;
-    #[cfg(feature = "no_std")] use prelude::*;
+    #[cfg(not(feature = "std"))] use prelude::*;
 
     #[test]
     fn test_vector_1() {

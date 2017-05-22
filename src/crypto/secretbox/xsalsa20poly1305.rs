@@ -4,7 +4,7 @@
 //!
 //! This function is conjectured to meet the standard notions of privacy and
 //! authenticity.
-#[cfg(feature = "no_std")] use prelude::*;
+#[cfg(not(feature = "std"))] use prelude::*;
 use ffi;
 use randombytes::randombytes_into;
 

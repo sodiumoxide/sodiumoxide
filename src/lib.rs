@@ -53,9 +53,9 @@
 #![warn(non_camel_case_types)]
 #![warn(unused_qualifications)]
 
-#![cfg_attr(feature = "no_std", no_std)]
-#![cfg_attr(feature = "no_std", feature(alloc))]
-#![cfg_attr(feature = "no_std", feature(collections))]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(not(feature = "std"), feature(alloc))]
+#![cfg_attr(not(feature = "std"), feature(collections))]
 
 extern crate libsodium_sys as ffi;
 extern crate libc;
@@ -63,20 +63,20 @@ extern crate libc;
 extern crate serde;
 #[cfg(test)]
 extern crate rustc_serialize;
-#[cfg(feature = "no_std")]
+#[cfg(not(feature = "std"))]
 extern crate alloc;
-#[cfg(feature = "no_std")]
+#[cfg(not(feature = "std"))]
 #[macro_use]
 extern crate collections;
-#[cfg(all(test, feature = "no_std"))]
+#[cfg(all(test, not(feature = "std")))]
 extern crate std;
 
-#[cfg(all(not(test), feature = "no_std"))]
+#[cfg(all(not(test), not(feature = "std")))]
 mod std {
     pub use core::{cmp, fmt, hash, iter, mem, ops, slice, str};
 }
 
-#[cfg(feature = "no_std")]
+#[cfg(not(feature = "std"))]
 mod prelude {
     pub use collections::{Vec, String};
 }
