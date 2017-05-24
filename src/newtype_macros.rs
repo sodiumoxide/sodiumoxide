@@ -225,7 +225,7 @@ macro_rules! new_type {
             fn drop(&mut self) {
                 use utils::memzero;
                 let &mut $name(ref mut v) = self;
-                memzero(v);
+                unsafe { memzero(v) };
             }
         }
         impl ::std::fmt::Debug for $name {
@@ -292,7 +292,7 @@ macro_rules! new_type {
             pub fn increment_le_inplace(&mut self) {
                 use utils::increment_le;
                 let &mut $name(ref mut r) = self;
-                increment_le(r);
+                unsafe { increment_le(r) };
             }
 
         }

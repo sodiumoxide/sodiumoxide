@@ -3,10 +3,8 @@ use ffi;
 
 /// `memzero()` tries to effectively zero out the data in `x` even if
 /// optimizations are being applied to the code.
-pub fn memzero(x: &mut [u8]) {
-    unsafe {
-        ffi::sodium_memzero(x.as_mut_ptr(), x.len());
-    }
+pub unsafe fn memzero(x: &mut [u8]) {
+    ffi::sodium_memzero(x.as_mut_ptr(), x.len());
 }
 
 /// `memcmp()` returns true if `x[0]`, `x[1]`, ..., `x[len-1]` are the
@@ -34,10 +32,8 @@ pub fn memcmp(x: &[u8], y: &[u8]) -> bool {
 /// is only used once.
 /// If the caller does not do that the cryptographic primitives in sodiumoxide
 /// will not uphold any security guarantees (i.e. they will break)
-pub fn increment_le(x: &mut [u8]) {
-    unsafe {
-        ffi::sodium_increment(x.as_mut_ptr(), x.len());
-    }
+pub unsafe fn increment_le(x: &mut [u8]) {
+    ffi::sodium_increment(x.as_mut_ptr(), x.len());
 }
 
 #[cfg(test)]
