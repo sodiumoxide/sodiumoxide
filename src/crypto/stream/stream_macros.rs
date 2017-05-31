@@ -3,6 +3,7 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
+#[cfg(not(feature = "std"))] use prelude::*;
 use libc::c_ulonglong;
 use std::iter::repeat;
 use randombytes::randombytes_into;
@@ -155,7 +156,7 @@ mod test_m {
         }
     }
 
-    #[cfg(feature = "default")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use test_utils::round_trip;

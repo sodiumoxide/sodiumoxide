@@ -1,7 +1,8 @@
-#![cfg(all(test, feature = "default"))]
+#![cfg(all(test, feature = "serde"))]
 extern crate serde_json;
 extern crate rmp_serde;
 extern crate core;
+#[cfg(not(feature = "std"))] use prelude::*;
 use serde::{Serialize, Deserialize};
 use serde::de::DeserializeOwned;
 

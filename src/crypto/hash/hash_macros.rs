@@ -22,7 +22,7 @@ pub fn hash(m: &[u8]) -> Digest {
     }
 }
 
-#[cfg(feature = "default")]
+#[cfg(feature = "serde")]
 #[cfg(test)]
 mod test_encode {
     use super::*;

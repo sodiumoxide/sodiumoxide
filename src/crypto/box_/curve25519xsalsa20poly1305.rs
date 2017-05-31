@@ -4,6 +4,7 @@
 //!
 //! This function is conjectured to meet the standard notions of privacy and
 //! third-party unforgeability.
+#[cfg(not(feature = "std"))] use prelude::*;
 use ffi;
 use randombytes::randombytes_into;
 
@@ -730,7 +731,7 @@ mod test {
         assert!(m_pre == mexp);
     }
 
-    #[cfg(feature = "default")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use test_utils::round_trip;

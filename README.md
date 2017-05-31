@@ -36,6 +36,22 @@ differs between the C and Rust versions.
 Documentation for the latest build can be found at
 [gh-pages](https://dnaq.github.io/sodiumoxide).
 
+Optional features
+-----------------
+
+Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-products) are available:
+
+* `std` (default: **enabled**). When this feature is disabled,
+  sodiumoxide builds using `#![no_std]`. Some functionality may be lost.
+  Requires a nightly build of Rust.
+
+* `serde` (default: **enabled**). Allows serialization and deserialization of
+  keys, authentication tags, etc. using the
+  [serde library](https://crates.io/crates/serde).
+
+* `benchmarks` (default: **disabled**). Compile benchmark tests. Requires a
+  nightly build of Rust.
+
 Examples
 --------
 TBD

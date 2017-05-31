@@ -38,7 +38,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     }
     impl ::std::cmp::Eq for $newtype {}
 
-    #[cfg(feature = "default")]
+    #[cfg(feature = "serde")]
     impl ::serde::Serialize for $newtype {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where S: ::serde::Serializer
@@ -47,7 +47,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
         }
     }
 
-    #[cfg(feature = "default")]
+    #[cfg(feature = "serde")]
     impl<'de> ::serde::Deserialize<'de> for $newtype {
         fn deserialize<D>(deserializer: D) -> Result<$newtype, D::Error>
             where D: ::serde::Deserializer<'de>

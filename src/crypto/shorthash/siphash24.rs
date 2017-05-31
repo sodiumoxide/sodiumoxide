@@ -48,6 +48,7 @@ pub fn shorthash(m: &[u8],
 #[cfg(test)]
 mod test {
     use super::*;
+    #[cfg(not(feature = "std"))] use prelude::*;
 
     #[test]
     fn test_vectors() {
@@ -127,7 +128,7 @@ mod test {
         }
     }
 
-    #[cfg(feature = "default")]
+    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
