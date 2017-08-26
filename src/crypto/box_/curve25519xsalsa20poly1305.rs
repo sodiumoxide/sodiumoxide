@@ -66,6 +66,16 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     }
 }
 
+/// `public_key()` can be used to compute the public key given a secret key
+/// previously generated with gen_keypair().
+pub fn public_key(&SecretKey(ref sk): &SecretKey) -> PublicKey {
+    unsafe {
+        let mut pk = [0u8; PUBLICKEYBYTES];
+        ffi::crypto_scalarmult_base(&mut pk, sk);
+        PublicKey(pk)
+    }
+}
+
 /// `gen_nonce()` randomly generates a nonce
 ///
 /// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
@@ -290,6 +300,15 @@ pub fn open_detached_precomputed(c: &mut [u8],
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_public_key() {
+        for _ in 0..256usize {
+            let (pk1, sk) = gen_keypair();
+            let pk2 = public_key(&sk);
+            assert_eq!(pk1, pk2);
+        }
+    }
 
     #[test]
     fn test_seal_open() {
