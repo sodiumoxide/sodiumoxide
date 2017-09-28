@@ -38,6 +38,17 @@ new_type! {
     public PublicKey(PUBLICKEYBYTES);
 }
 
+impl SecretKey {
+    /// `public_key()` computes the corresponding public key for a given secret key
+    pub fn public_key(&self) -> PublicKey {
+        unsafe {
+            let mut pk = [0u8; PUBLICKEYBYTES];
+            ffi::crypto_scalarmult_base(&mut pk, &self.0);
+            PublicKey(pk)
+        }
+    }
+}
+
 new_type! {
     /// Authentication `Tag` for the detached encryption mode
     ///
@@ -658,6 +669,15 @@ mod test {
         let m_pre = open_precomputed(&c, &nonce, &pk);
         assert!(m == mexp);
         assert!(m_pre == mexp);
+    }
+
+    #[test]
+    fn test_public_key() {
+        for _ in 0..256usize {
+            let (pk1, sk) = gen_keypair();
+            let pk2 = sk.public_key();
+            assert_eq!(pk1, pk2);
+        }
     }
 
     #[cfg(feature = "serde")]
