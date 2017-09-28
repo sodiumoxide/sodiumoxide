@@ -1,7 +1,6 @@
 //! Cryptographic random number generation.
 #[cfg(not(feature = "std"))] use prelude::*;
 use ffi;
-use std::iter::repeat;
 
 /// `randombytes()` randomly generates size bytes of data.
 ///
@@ -10,7 +9,7 @@ use std::iter::repeat;
 /// from sodiumoxide.
 pub fn randombytes(size: usize) -> Vec<u8> {
     unsafe {
-        let mut buf: Vec<u8> = repeat(0u8).take(size).collect();
+        let mut buf = vec![0; size];
         let pbuf = buf.as_mut_ptr();
         ffi::randombytes_buf(pbuf, size);
         buf

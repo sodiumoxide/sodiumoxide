@@ -16,6 +16,13 @@ extern {
         mlen: c_ulonglong,
         n: *const [u8; crypto_stream_xsalsa20_NONCEBYTES],
         k: *const [u8; crypto_stream_xsalsa20_KEYBYTES]) -> c_int;
+    pub fn crypto_stream_xsalsa20_xor_ic(
+        c: *mut u8,
+        m: *const u8,
+        mlen: c_ulonglong,
+        n: *const [u8; crypto_stream_xsalsa20_NONCEBYTES],
+        ic: uint64_t,
+        k: *const [u8; crypto_stream_xsalsa20_KEYBYTES]) -> c_int;
     pub fn crypto_stream_xsalsa20_keybytes() -> size_t;
     pub fn crypto_stream_xsalsa20_noncebytes() -> size_t;
 }

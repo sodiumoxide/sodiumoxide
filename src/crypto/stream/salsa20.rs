@@ -3,6 +3,7 @@
 //! cipher is conjectured to meet the standard notion of unpredictability.
 use ffi::{crypto_stream_salsa20,
           crypto_stream_salsa20_xor,
+          crypto_stream_salsa20_xor_ic,
           crypto_stream_salsa20_KEYBYTES,
           crypto_stream_salsa20_NONCEBYTES};
 
@@ -10,6 +11,7 @@ stream_module!(crypto_stream_salsa20,
                crypto_stream_salsa20_xor,
                crypto_stream_salsa20_KEYBYTES,
                crypto_stream_salsa20_NONCEBYTES);
+stream_module_ic!(crypto_stream_salsa20_xor_ic);
 
 #[cfg(test)]
 mod test {

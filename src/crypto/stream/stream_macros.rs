@@ -5,7 +5,6 @@ macro_rules! stream_module (($stream_name:ident,
 
 #[cfg(not(feature = "std"))] use prelude::*;
 use libc::c_ulonglong;
-use std::iter::repeat;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
@@ -58,7 +57,7 @@ pub fn stream(len: usize,
               &Nonce(ref n): &Nonce,
               &Key(ref k): &Key) -> Vec<u8> {
     unsafe {
-        let mut c: Vec<u8> = repeat(0u8).take(len).collect();
+        let mut c = vec![0; len];
         $stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
                      n,
@@ -77,7 +76,7 @@ pub fn stream_xor(m: &[u8],
                   &Nonce(ref n): &Nonce,
                   &Key(ref k): &Key) -> Vec<u8> {
     unsafe {
-        let mut c: Vec<u8> = repeat(0u8).take(m.len()).collect();
+        let mut c = vec![0; m.len()];
         $xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
@@ -190,4 +189,48 @@ mod bench_m {
     }
 }
 
+));
+
+macro_rules! stream_module_ic (($ic_name:ident) => (
+
+/// The `stream_xor_ic()` function is similar to `stream_xor()`
+/// but adds the ability to set the initial value of the block counter to a non-zero value, `ic`.
+pub fn stream_xor_ic(m: &[u8],
+                  ic: u64,
+                  &Nonce(ref n): &Nonce,
+                  &Key(ref k): &Key) -> Vec<u8> {
+    unsafe {
+        let mut c = vec![0; m.len()];
+        $ic_name(c.as_mut_ptr(),
+                  m.as_ptr(),
+                  m.len() as c_ulonglong,
+                  n, ic as _,
+                  k);
+        c
+    }
+}
+
+#[cfg(test)]
+mod test_ic {
+    use super::*;
+
+    const CHACHA_BLOCK_SIZE: usize = 64;
+
+    #[test]
+    fn test_stream_xor_ic() {
+        use randombytes::randombytes;
+        for i in 0..1024usize {
+            let k = gen_key();
+            let n = gen_nonce();
+            let m = randombytes(i);
+            let mut c = m.clone();
+            let s = stream(c.len() + CHACHA_BLOCK_SIZE, &n, &k);
+            for (e, v) in c.iter_mut().zip(s.iter().skip(CHACHA_BLOCK_SIZE)) {
+                *e ^= *v;
+            }
+            let c2 = stream_xor_ic(&m, 1, &n, &k);
+            assert!(c == c2);
+        }
+    }
+}
 ));
