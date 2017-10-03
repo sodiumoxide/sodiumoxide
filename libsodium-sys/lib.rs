@@ -1,7 +1,7 @@
 #![allow(non_upper_case_globals)]
 
 extern crate libc;
-use libc::{c_void, c_int, c_ulonglong, c_char, size_t};
+use libc::{c_void, c_int, c_ulonglong, c_char, size_t, uint64_t};
 
 include!("src/core.rs");
 
@@ -26,6 +26,9 @@ include!("src/crypto_generichash_blake2b.rs");
 include!("src/crypto_hash.rs");
 include!("src/crypto_hash_sha256.rs");
 include!("src/crypto_hash_sha512.rs");
+
+include!("src/crypto_kdf.rs");
+include!("src/crypto_kdf_blake2b.rs");
 
 include!("src/crypto_onetimeauth.rs");
 include!("src/crypto_onetimeauth_poly1305.rs");
