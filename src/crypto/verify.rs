@@ -12,7 +12,7 @@ use ffi;
 /// timing attacks.
 pub fn verify_16(x: &[u8; 16], y: &[u8; 16]) -> bool {
     unsafe {
-        ffi::crypto_verify_16(x, y) == 0
+        ffi::crypto_verify_16(x.as_ptr(), y.as_ptr()) == 0
     }
 }
 
@@ -27,7 +27,7 @@ pub fn verify_16(x: &[u8; 16], y: &[u8; 16]) -> bool {
 /// timing attacks.
 pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
     unsafe {
-        ffi::crypto_verify_32(x, y) == 0
+        ffi::crypto_verify_32(x.as_ptr(), y.as_ptr()) == 0
     }
 }
 
@@ -42,7 +42,7 @@ pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
 /// timing attacks.
 pub fn verify_64(x: &[u8; 64], y: &[u8; 64]) -> bool {
     unsafe {
-        ffi::crypto_verify_64(x, y) == 0
+        ffi::crypto_verify_64(x.as_ptr(), y.as_ptr()) == 0
     }
 }
 

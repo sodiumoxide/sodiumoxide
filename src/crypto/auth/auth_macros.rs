@@ -7,10 +7,10 @@ use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes;
+pub const KEYBYTES: usize = $keybytes as usize;
 
 /// Number of bytes in a `Tag`.
-pub const TAGBYTES: usize = $tagbytes;
+pub const TAGBYTES: usize = $tagbytes as usize;
 
 new_type! {
     /// Authentication `Key`
@@ -45,10 +45,10 @@ pub fn authenticate(m: &[u8],
                     &Key(ref k): &Key) -> Tag {
     unsafe {
         let mut tag = [0; TAGBYTES];
-        $auth_name(&mut tag,
+        $auth_name(tag.as_mut_ptr(),
                    m.as_ptr(),
                    m.len() as c_ulonglong,
-                   k);
+                   k.as_ptr());
         Tag(tag)
     }
 }
@@ -58,10 +58,10 @@ pub fn authenticate(m: &[u8],
 pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
               &Key(ref k): &Key) -> bool {
     unsafe {
-        $verify_name(tag,
+        $verify_name(tag.as_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
-                     k) == 0
+                     k.as_ptr()) == 0
     }
 }
 
@@ -167,7 +167,8 @@ mod bench_m {
 ///              a state with a key.
 /// $update_name - A function `f(s: *mut $state_name, m: *u8, mlen: size_t)` that updates
 ///                a state with a message chunk.
-/// $final_name - A function `f(s: *mut $state_name, t: *u8)` that computes an authenticator                    tag of length $tagbytes from a $state_name.
+/// $final_name - A function `f(s: *mut $state_name, t: *u8)` that computes an authenticator
+///               tag of length $tagbytes from a $state_name.
 /// $tagbytes   - The number of bytes in an authenticator tag.
 macro_rules! auth_state (($state_name:ident,
                           $init_name:ident,
@@ -200,7 +201,7 @@ impl Drop for State {
         let &mut State(ref mut s) = self;
         unsafe {
             let sp: *mut $state_name = s;
-            ffi::sodium_memzero(sp as *mut u8, mem::size_of_val(s));
+            ffi::sodium_memzero(sp as (*const ::std::os::raw::c_void), mem::size_of_val(s));
         }
     }
 }
@@ -229,7 +230,7 @@ impl State {
         unsafe {
             let &mut State(ref mut state) = self;
             let mut tag = [0; $tagbytes as usize];
-            $final_name(state, &mut tag);
+            $final_name(state, tag.as_mut_ptr());
             Tag(tag)
         }
     }

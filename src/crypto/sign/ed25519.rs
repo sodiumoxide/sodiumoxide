@@ -7,16 +7,16 @@ use ffi;
 use libc::c_ulonglong;
 
 /// Number of bytes in a `Seed`.
-pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
+pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
 
 /// Number of bytes in a `SecretKey`.
-pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
+pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES as usize;
 
 /// Number of bytes in a `PublicKey`.
-pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
+pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as usize;
 
 /// Number of bytes in a `Signature`.
-pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
+pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES as usize;
 
 new_type! {
     /// `Seed` that can be used for keypair generation
@@ -57,7 +57,7 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
         let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_sign_ed25519_keypair(&mut pk, &mut sk);
+        ffi::crypto_sign_ed25519_keypair(pk.as_mut_ptr(), sk.as_mut_ptr());
         (PublicKey(pk), SecretKey(sk))
     }
 }
@@ -68,9 +68,9 @@ pub fn keypair_from_seed(&Seed(ref seed): &Seed) -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = [0u8; PUBLICKEYBYTES];
         let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_sign_ed25519_seed_keypair(&mut pk,
-                                              &mut sk,
-                                              seed);
+        ffi::crypto_sign_ed25519_seed_keypair(pk.as_mut_ptr(),
+                                              sk.as_mut_ptr(),
+                                              seed.as_ptr());
         (PublicKey(pk), SecretKey(sk))
     }
 }
@@ -86,7 +86,7 @@ pub fn sign(m: &[u8],
                                  &mut smlen,
                                  m.as_ptr(),
                                  m.len() as c_ulonglong,
-                                 sk);
+                                 sk.as_ptr());
         sm.truncate(smlen as usize);
         sm
     }
@@ -104,7 +104,7 @@ pub fn verify(sm: &[u8],
                                          &mut mlen,
                                          sm.as_ptr(),
                                          sm.len() as c_ulonglong,
-                                         pk) == 0 {
+                                         pk.as_ptr()) == 0 {
             m.truncate(mlen as usize);
             Ok(m)
         } else {
@@ -120,11 +120,11 @@ pub fn sign_detached(m: &[u8],
     unsafe {
         let mut sig = [0u8; SIGNATUREBYTES];
         let mut siglen: c_ulonglong = 0;
-        ffi::crypto_sign_ed25519_detached(&mut sig,
+        ffi::crypto_sign_ed25519_detached(sig.as_mut_ptr(),
                                           &mut siglen,
                                           m.as_ptr(),
                                           m.len() as c_ulonglong,
-                                          sk);
+                                          sk.as_ptr());
         assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
         Signature(sig)
     }
@@ -137,10 +137,10 @@ pub fn verify_detached(&Signature(ref sig): &Signature,
                        m: &[u8],
                        &PublicKey(ref pk): &PublicKey) -> bool {
     unsafe {
-        0 == ffi::crypto_sign_ed25519_verify_detached(sig,
+        0 == ffi::crypto_sign_ed25519_verify_detached(sig.as_ptr(),
                                                       m.as_ptr(),
                                                       m.len() as c_ulonglong,
-                                                      pk)
+                                                      pk.as_ptr())
     }
 }
 

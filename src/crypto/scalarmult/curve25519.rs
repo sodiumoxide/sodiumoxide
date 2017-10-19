@@ -6,10 +6,10 @@
 use ffi;
 
 /// Number of bytes in a `GroupElement`.
-pub const GROUPELEMENTBYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES;
+pub const GROUPELEMENTBYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES as usize;
 
 /// Number of bytes in a `Scalar`.
-pub const SCALARBYTES: usize = ffi::crypto_scalarmult_curve25519_SCALARBYTES;
+pub const SCALARBYTES: usize = ffi::crypto_scalarmult_curve25519_SCALARBYTES as usize;
 
 new_type! {
     /// `Scalar` value (integer in byte representation)
@@ -31,7 +31,7 @@ pub fn scalarmult(&Scalar(ref n): &Scalar,
                   -> Result<GroupElement, ()> {
     let mut q = [0; GROUPELEMENTBYTES];
     unsafe {
-        if ffi::crypto_scalarmult_curve25519(&mut q, n, p) != 0 {
+        if ffi::crypto_scalarmult_curve25519(q.as_mut_ptr(), n.as_ptr(), p.as_ptr()) != 0 {
             Err(())
         } else {
             Ok(GroupElement(q))
@@ -45,7 +45,7 @@ pub fn scalarmult(&Scalar(ref n): &Scalar,
 pub fn scalarmult_base(&Scalar(ref n): &Scalar) -> GroupElement {
     let mut q = [0; GROUPELEMENTBYTES];
     unsafe {
-        ffi::crypto_scalarmult_curve25519_base(&mut q, n);
+        ffi::crypto_scalarmult_curve25519_base(q.as_mut_ptr(), n.as_ptr());
     }
     GroupElement(q)
 }

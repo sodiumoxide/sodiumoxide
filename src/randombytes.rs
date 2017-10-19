@@ -10,8 +10,7 @@ use ffi;
 pub fn randombytes(size: usize) -> Vec<u8> {
     unsafe {
         let mut buf = vec![0u8; size];
-        let pbuf = buf.as_mut_ptr();
-        ffi::randombytes_buf(pbuf, size);
+        ffi::randombytes_buf(buf.as_mut_ptr() as (*const ::std::os::raw::c_void), size);
         buf
     }
 }
@@ -23,6 +22,6 @@ pub fn randombytes(size: usize) -> Vec<u8> {
 /// from sodiumoxide.
 pub fn randombytes_into(buf: &mut [u8]) {
     unsafe {
-        ffi::randombytes_buf(buf.as_mut_ptr(), buf.len());
+        ffi::randombytes_buf(buf.as_mut_ptr() as (*const ::std::os::raw::c_void), buf.len());
     }
 }

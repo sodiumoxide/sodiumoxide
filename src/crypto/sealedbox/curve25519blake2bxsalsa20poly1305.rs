@@ -8,7 +8,7 @@ use super::super::box_::curve25519xsalsa20poly1305 as box_;
 
 /// Number of additional bytes in a ciphertext compared to the corresponding
 /// plaintext.
-const SEALBYTES: usize = ffi::crypto_box_SEALBYTES;
+const SEALBYTES: usize = ffi::crypto_box_SEALBYTES as usize;
 
 /// The `seal()` function encrypts a message `m` for a recipient whose public key
 /// is `pk`. It returns the ciphertext whose length is `SEALBYTES + m.len()`.
@@ -22,7 +22,7 @@ pub fn seal(m: &[u8],
     unsafe {
         ffi::crypto_box_seal(c.as_mut_ptr(),
                              m.as_ptr(), m.len() as c_ulonglong,
-                             pk);
+                             pk.as_ptr());
     }
     c
 }
@@ -48,7 +48,7 @@ pub fn open(c: &[u8],
     let ret = unsafe {
         ffi::crypto_box_seal_open(m.as_mut_ptr(),
                                   c.as_ptr(), c.len() as c_ulonglong,
-                                  pk, sk)
+                                  pk.as_ptr(), sk.as_ptr())
     };
     if ret == 0 {
         Ok(m)
