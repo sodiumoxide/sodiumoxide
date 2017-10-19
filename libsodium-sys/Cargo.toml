@@ -13,3 +13,6 @@ version = "0.0.14"
 [build-dependencies]
 pkg-config = "0.3"
 bindgen = "0.30.0"
+
+[dev-dependencies]
+libc = "0.2"
