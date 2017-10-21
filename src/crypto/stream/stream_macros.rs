@@ -8,10 +8,10 @@ use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes;
+pub const KEYBYTES: usize = $keybytes as usize;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = $noncebytes;
+pub const NONCEBYTES: usize = $noncebytes as usize;
 
 new_type! {
     /// `Key` for symmetric encryption
@@ -60,8 +60,8 @@ pub fn stream(len: usize,
         let mut c = vec![0u8; len];
         $stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
-                     n,
-                     k);
+                     n.as_ptr(),
+                     k.as_ptr());
         c
     }
 }
@@ -80,8 +80,8 @@ pub fn stream_xor(m: &[u8],
         $xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
-                  n,
-                  k);
+                  n.as_ptr(),
+                  k.as_ptr());
         c
     }
 }
@@ -99,8 +99,8 @@ pub fn stream_xor_inplace(m: &mut [u8],
         $xor_name(m.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
-                  n,
-                  k);
+                  n.as_ptr(),
+                  k.as_ptr());
     }
 }
 

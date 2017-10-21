@@ -1,6 +1,5 @@
 [package]
 authors = ["dnaq"]
-build = "build.rs"
 description = "FFI binding to libsodium"
 documentation = "https://dnaq.github.io/sodiumoxide"
 keywords = ["libsodium", "NaCl", "crypto"]
@@ -13,10 +12,7 @@ version = "0.0.14"
 
 [build-dependencies]
 pkg-config = "0.3"
+bindgen = "0.30.0"
 
-[dependencies]
+[dev-dependencies]
 libc = "0.2"
-
-[lib]
-name = "libsodium_sys"
-path = "lib.rs"
