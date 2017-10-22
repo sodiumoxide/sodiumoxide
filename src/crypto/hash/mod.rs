@@ -35,6 +35,11 @@
 //!
 //! let data_to_hash = b"some data";
 //! let digest = hash::hash(data_to_hash);
+//!
+//! let mut hash_state = hash::HashState::new();
+//! hash_state.update(b"some ");
+//! hash_state.update(b"data!");
+//! let digest = hash_state.finish();
 //! ```
 pub use self::sha512::*;
 #[macro_use]
