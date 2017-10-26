@@ -49,6 +49,9 @@ Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-prod
   keys, authentication tags, etc. using the
   [serde library](https://crates.io/crates/serde).
 
+* `minimal` (default: **enabled**). Creates a minimal build, without deprecated functions.
+  Needs to be enabled when linking against libsodium, built with `--enable-minimal`.
+
 * `benchmarks` (default: **disabled**). Compile benchmark tests. Requires a
   nightly build of Rust.
 

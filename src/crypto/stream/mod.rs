@@ -89,6 +89,7 @@ pub use self::xsalsa20::*;
 #[macro_use]
 mod stream_macros;
 pub mod xsalsa20;
+#[cfg(not(feature = "minimal"))]
 pub mod aes128ctr;
 pub mod salsa208;
 pub mod salsa2012;
