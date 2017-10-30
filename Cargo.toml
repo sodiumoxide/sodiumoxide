@@ -24,4 +24,5 @@ rmp-serde = "0.13"
 [features]
 benchmarks = []
 std = []
-default = ["serde", "std"]
+minimal = []
+default = ["serde", "std", "minimal"]
