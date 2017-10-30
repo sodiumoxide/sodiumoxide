@@ -94,11 +94,11 @@ mod test {
                          ,0x4b, 0x62, 0x94, 0x52, 0xc3, 0x80, 0x26, 0xa8
                          ,0x1d, 0x13, 0x8b, 0xc7, 0xaa, 0xd1, 0xaf, 0x3e
                          ,0xf7, 0xbf, 0xd5, 0xec, 0x64, 0x6d, 0x6c, 0x28];
-        let mut hash_state = HashState::new();
+        let mut hash_state = State::new();
         for chunk in x.chunks(3) {
             hash_state.update(chunk);
         }
-        let Digest(h) = hash_state.finish();
+        let Digest(h) = hash_state.finalize();
         assert!(&h[..] == &h_expected[..]);
     }
 }

@@ -31,16 +31,15 @@ pub fn hash(m: &[u8]) -> Digest {
 
 /// State for multi-part (streaming) hash computation (Init-Update-Final). This method process a
 /// message as a sequence of multiple chunks.
-#[must_use]
-pub struct HashState($hash_state);
+pub struct State($hash_state);
 
-impl HashState {
-    /// Constructs and initializes a new `HashState`.
+impl State {
+    /// Constructs and initializes a new `State`.
     pub fn new() -> Self {
         unsafe {
             let mut st: $hash_state = mem::uninitialized();
             $hash_init(&mut st);
-            HashState(st)
+            State(st)
         }
     }
 
@@ -53,13 +52,33 @@ impl HashState {
         }
     }
 
-    /// Finalizes the hash and returns the digest value. `finish` consumes the `HashState` so it
+    /// Finalizes the hash and returns the digest value. `finish` consumes the `State` so it
     /// cannot be used after `finish` has been called.
-    pub fn finish(mut self) -> Digest {
+    pub fn finalize(mut self) -> Digest {
         unsafe {
             let mut digest = [0u8; DIGESTBYTES];
             $hash_final(&mut self.0, &mut digest);
             Digest(digest)
+        }
+    }
+}
+
+#[cfg(test)]
+mod test_m {
+    use super::*;
+
+    #[test]
+    fn test_hash_multipart() {
+        use randombytes::randombytes;
+        for i in 0..256usize {
+            let m = randombytes(i);
+            let h = hash(&m);
+            let mut state = State::new();
+            for b in m.chunks(3) {
+                state.update(b);
+            }
+            let h2 = state.finalize();
+            assert_eq!(h, h2);
         }
     }
 }

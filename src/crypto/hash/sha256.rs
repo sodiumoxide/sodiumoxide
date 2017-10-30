@@ -100,8 +100,8 @@ mod test {
                           0x9a, 0xfb, 0xf4, 0xc8, 0x99, 0x6f, 0xb9, 0x24,
                           0x27, 0xae, 0x41, 0xe4, 0x64, 0x9b, 0x93, 0x4c,
                           0xa4, 0x95, 0x99, 0x1b, 0x78, 0x52, 0xb8, 0x55];
-        let hash_state = HashState::new();
-        let Digest(h) = hash_state.finish();
+        let hash_state = State::new();
+        let Digest(h) = hash_state.finalize();
         assert!(h == h_expected);
     }
 
@@ -118,11 +118,11 @@ mod test {
                           0x69, 0xca, 0x9a, 0xbc, 0xb0, 0x08, 0x2e, 0x4f,
                           0x8d, 0x56, 0x51, 0xe4, 0x6d, 0x3c, 0xdb, 0x76,
                           0x2d, 0x02, 0xd0, 0xbf, 0x37, 0xc9, 0xe5, 0x92];
-        let mut hash_state = HashState::new();
+        let mut hash_state = State::new();
         for chunk in x.chunks(3) {
             hash_state.update(chunk);
         }
-        let Digest(h) = hash_state.finish();
+        let Digest(h) = hash_state.finalize();
         assert!(h == h_expected);
     }
 }
