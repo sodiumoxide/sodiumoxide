@@ -1,5 +1,12 @@
-macro_rules! hash_module (($hash_name:ident, $hashbytes:expr, $blockbytes:expr) => (
+macro_rules! hash_module (($hash_name:ident,
+                           $hash_state:ident,
+                           $hash_init:ident,
+                           $hash_update:ident,
+                           $hash_final:ident,
+                           $hashbytes:expr,
+                           $blockbytes:expr) => (
 
+use std::mem;
 use libc::c_ulonglong;
 
 /// Number of bytes in a `Digest`.
@@ -19,6 +26,59 @@ pub fn hash(m: &[u8]) -> Digest {
         let mut h = [0; DIGESTBYTES];
         $hash_name(&mut h, m.as_ptr(), m.len() as c_ulonglong);
         Digest(h)
+    }
+}
+
+/// `State` contains the state for multi-part (streaming) hash computations. This allows the caller
+/// to process a message as a sequence of multiple chunks.
+pub struct State($hash_state);
+
+impl State {
+    /// `new` constructs and initializes a new `State`.
+    pub fn new() -> Self {
+        unsafe {
+            let mut st: $hash_state = mem::uninitialized();
+            $hash_init(&mut st);
+            State(st)
+        }
+    }
+
+    /// `update` updates the `State` with `data`. `update` can be called multiple times in order
+    /// to compute the hash from sequential chunks of the message.
+    pub fn update(&mut self, data: &[u8]) {
+        unsafe {
+            $hash_update(&mut self.0, data.as_ptr(), data.len() as c_ulonglong);
+        }
+    }
+
+    /// `finalize` finalizes the state and returns the digest value. `finalize` consumes the
+    /// `State` so that it cannot be accidentally reused.
+    pub fn finalize(mut self) -> Digest {
+        unsafe {
+            let mut digest = [0u8; DIGESTBYTES];
+            $hash_final(&mut self.0, &mut digest);
+            Digest(digest)
+        }
+    }
+}
+
+#[cfg(test)]
+mod test_m {
+    use super::*;
+
+    #[test]
+    fn test_hash_multipart() {
+        use randombytes::randombytes;
+        for i in 0..256usize {
+            let m = randombytes(i);
+            let h = hash(&m);
+            let mut state = State::new();
+            for b in m.chunks(3) {
+                state.update(b);
+            }
+            let h2 = state.finalize();
+            assert_eq!(h, h2);
+        }
     }
 }
 
