@@ -29,12 +29,12 @@ pub fn hash(m: &[u8]) -> Digest {
     }
 }
 
-/// State for multi-part (streaming) hash computation (Init-Update-Final). This method process a
-/// message as a sequence of multiple chunks.
+/// `State` contains the state for multi-part (streaming) hash computations. This allows the caller
+/// to process a message as a sequence of multiple chunks.
 pub struct State($hash_state);
 
 impl State {
-    /// Constructs and initializes a new `State`.
+    /// `new` constructs and initializes a new `State`.
     pub fn new() -> Self {
         unsafe {
             let mut st: $hash_state = mem::uninitialized();
@@ -43,17 +43,16 @@ impl State {
         }
     }
 
-    /// Updates the hash with `data`. `update` can be called more than once in order to compute the
-    /// hash from sequential chunks of the message. It must not be called after `finish` has been
-    /// called.
+    /// `update` updates the `State` with `data`. `update` can be called multiple times in order
+    /// to compute the hash from sequential chunks of the message.
     pub fn update(&mut self, data: &[u8]) {
         unsafe {
             $hash_update(&mut self.0, data.as_ptr(), data.len() as c_ulonglong);
         }
     }
 
-    /// Finalizes the hash and returns the digest value. `finish` consumes the `State` so it
-    /// cannot be used after `finish` has been called.
+    /// `finalize` finalizes the state and returns the digest value. `finalize` consumes the
+    /// `State` so that it cannot be accidentally reused.
     pub fn finalize(mut self) -> Digest {
         unsafe {
             let mut digest = [0u8; DIGESTBYTES];
