@@ -62,6 +62,12 @@ impl State {
     }
 }
 
+impl Default for State {
+    fn default() -> State {
+        State::new()
+    }
+}
+
 #[cfg(test)]
 mod test_m {
     use super::*;
