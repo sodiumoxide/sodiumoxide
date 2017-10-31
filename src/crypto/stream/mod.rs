@@ -37,7 +37,6 @@
 //! ------------------------------------------------------------
 //! |crypto_stream           |primitive   |KEYBYTES |NONCEBYTES|
 //! |------------------------|------------|---------|----------|
-//! |crypto_stream_aes128ctr |AES-128-CTR |16       |16        |
 //! |crypto_stream_chacha20  |Chacha20/20 |32       |8         |
 //! |crypto_stream_salsa208  |Salsa20/8   |32       |8         |
 //! |crypto_stream_salsa2012 |Salsa20/12  |32       |8         |
@@ -89,7 +88,6 @@ pub use self::xsalsa20::*;
 #[macro_use]
 mod stream_macros;
 pub mod xsalsa20;
-pub mod aes128ctr;
 pub mod salsa208;
 pub mod salsa2012;
 pub mod salsa20;
