@@ -104,6 +104,7 @@ mod test_utils;
 
 /// Cryptographic functions
 pub mod crypto {
+    pub mod aead;
     pub mod box_;
     pub mod sealedbox;
     pub mod sign;
