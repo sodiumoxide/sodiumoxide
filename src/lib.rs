@@ -55,7 +55,6 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(not(feature = "std"), feature(alloc))]
-#![cfg_attr(not(feature = "std"), feature(collections))]
 
 extern crate libsodium_sys as ffi;
 extern crate libc;
@@ -64,10 +63,8 @@ extern crate serde;
 #[cfg(test)]
 extern crate rustc_serialize;
 #[cfg(not(feature = "std"))]
-extern crate alloc;
-#[cfg(not(feature = "std"))]
 #[macro_use]
-extern crate collections;
+extern crate alloc;
 #[cfg(all(test, not(feature = "std")))]
 extern crate std;
 
@@ -78,7 +75,8 @@ mod std {
 
 #[cfg(not(feature = "std"))]
 mod prelude {
-    pub use collections::{Vec, String};
+    pub use alloc::vec::Vec;
+    pub use alloc::string::String;
 }
 
 /// `init()` initializes the sodium library and chooses faster versions of
