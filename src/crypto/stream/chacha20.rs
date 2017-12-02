@@ -16,7 +16,7 @@ stream_module!(crypto_stream_chacha20,
 ///
 /// `stream_xor_ic_inplace()` guarantees that the ciphertext has the
 /// same length as the plaintext, and is the plaintext xor the output
-/// of `stream_inplace()`.  Consequently `stream_xor_inplace()` can
+/// of `stream_inplace()`.  Consequently `stream_xor_ic_inplace()` can
 /// also be used to decrypt.
 pub fn stream_xor_ic_inplace(m: &mut [u8],
                              &Nonce(ref n): &Nonce,
