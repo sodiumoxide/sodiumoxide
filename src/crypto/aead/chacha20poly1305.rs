@@ -5,7 +5,6 @@
 #[cfg(not(feature = "std"))] use prelude::*;
 use ffi;
 use libc::{c_ulonglong};
-use std;
 pub use crypto::stream::chacha20::{Key, Nonce, KEYBYTES, NONCEBYTES};
 
 /// Number of bytes in a `Tag`.
@@ -35,12 +34,12 @@ pub fn decrypt(decrypted: &mut [u8], ciphertext: &[u8], ad: Option<&[u8]>, nonce
         let (ad_p, ad_len) = if let Some(ad) = ad {
             (ad.as_ptr(), ad.len() as c_ulonglong)
         } else {
-            (std::ptr::null(), 0)
+            (0 as *const u8, 0)
         };
         if ffi::crypto_aead_chacha20poly1305_decrypt(
             decrypted.as_mut_ptr(),
             &mut mlen,
-            std::ptr::null_mut(),
+            0 as *mut [u8; 0],
             ciphertext.as_ptr(),
             ciphertext.len() as c_ulonglong,
             ad_p,
@@ -64,12 +63,12 @@ pub fn decrypt_in_place(ciphertext: &mut [u8], ad: Option<&[u8]>, nonce: &Nonce,
         let (ad_p, ad_len) = if let Some(ad) = ad {
             (ad.as_ptr(), ad.len() as c_ulonglong)
         } else {
-            (std::ptr::null(), 0)
+            (0 as *const u8, 0)
         };
         if ffi::crypto_aead_chacha20poly1305_decrypt(
             ciphertext.as_mut_ptr(),
             &mut mlen,
-            std::ptr::null_mut(),
+            0 as *mut [u8; 0],
             ciphertext.as_ptr(),
             ciphertext.len() as c_ulonglong,
             ad_p,
@@ -100,7 +99,7 @@ pub fn encrypt(ciphertext: &mut [u8], message: &[u8], ad: Option<&[u8]>, nonce: 
         let (ad_p, ad_len) = if let Some(ad) = ad {
             (ad.as_ptr(), ad.len() as c_ulonglong)
         } else {
-            (std::ptr::null(), 0)
+            (0 as *const u8, 0)
         };
         ffi::crypto_aead_chacha20poly1305_encrypt(
             ciphertext.as_mut_ptr(),
@@ -109,7 +108,7 @@ pub fn encrypt(ciphertext: &mut [u8], message: &[u8], ad: Option<&[u8]>, nonce: 
             message.len() as c_ulonglong,
             ad_p,
             ad_len,
-            std::ptr::null_mut(),
+            0 as *mut [u8; 0],
             &nonce.0,
             &key.0
         );
@@ -126,7 +125,7 @@ pub fn encrypt_in_place(message: &mut [u8], ad: Option<&[u8]>, nonce: &Nonce, ke
         let (ad_p, ad_len) = if let Some(ad) = ad {
             (ad.as_ptr(), ad.len() as c_ulonglong)
         } else {
-            (std::ptr::null(), 0)
+            (0 as *const u8, 0)
         };
         ffi::crypto_aead_chacha20poly1305_encrypt(
             message.as_mut_ptr(),
@@ -135,7 +134,7 @@ pub fn encrypt_in_place(message: &mut [u8], ad: Option<&[u8]>, nonce: &Nonce, ke
             message.len() as c_ulonglong,
             ad_p,
             ad_len,
-            std::ptr::null_mut(),
+            0 as *mut [u8; 0],
             &nonce.0,
             &key.0
         );
@@ -160,11 +159,11 @@ pub fn decrypt_detached(decrypted: &mut [u8], ciphertext: &[u8], mac: &Mac, ad: 
         let (ad_p, ad_len) = if let Some(ad) = ad {
             (ad.as_ptr(), ad.len() as c_ulonglong)
         } else {
-            (std::ptr::null(), 0)
+            (0 as *const u8, 0)
         };
         if ffi::crypto_aead_chacha20poly1305_decrypt_detached(
             decrypted.as_mut_ptr(),
-            std::ptr::null_mut(),
+            0 as *mut [u8; 0],
             ciphertext.as_ptr(),
             ciphertext.len() as c_ulonglong,
             mac.0.as_ptr(),
@@ -187,11 +186,11 @@ pub fn decrypt_detached_in_place(ciphertext: &mut [u8], mac: &Mac, ad: Option<&[
         let (ad_p, ad_len) = if let Some(ad) = ad {
             (ad.as_ptr(), ad.len() as c_ulonglong)
         } else {
-            (std::ptr::null(), 0)
+            (0 as *const u8, 0)
         };
         if ffi::crypto_aead_chacha20poly1305_decrypt_detached(
             ciphertext.as_mut_ptr(),
-            std::ptr::null_mut(),
+            0 as *mut [u8; 0],
             ciphertext.as_ptr(),
             ciphertext.len() as c_ulonglong,
             mac.0.as_ptr(),
@@ -225,7 +224,7 @@ pub fn encrypt_detached(ciphertext: &mut [u8], mac: &mut Mac, message: &[u8], ad
         let (ad_p, ad_len) = if let Some(ad) = ad {
             (ad.as_ptr(), ad.len() as c_ulonglong)
         } else {
-            (std::ptr::null(), 0)
+            (0 as *const u8, 0)
         };
         let mut maclen = ABYTES as c_ulonglong;
         ffi::crypto_aead_chacha20poly1305_encrypt_detached(
@@ -236,7 +235,7 @@ pub fn encrypt_detached(ciphertext: &mut [u8], mac: &mut Mac, message: &[u8], ad
             message.len() as c_ulonglong,
             ad_p,
             ad_len,
-            std::ptr::null_mut(),
+            0 as *mut [u8; 0],
             &nonce.0,
             &key.0
         );
@@ -250,7 +249,7 @@ pub fn encrypt_detached_in_place(message: &mut [u8], mac: &mut Mac, ad: Option<&
         let (ad_p, ad_len) = if let Some(ad) = ad {
             (ad.as_ptr(), ad.len() as c_ulonglong)
         } else {
-            (std::ptr::null(), 0)
+            (0 as *const u8, 0)
         };
         let mut maclen = ABYTES as c_ulonglong;
         ffi::crypto_aead_chacha20poly1305_encrypt_detached(
@@ -261,7 +260,7 @@ pub fn encrypt_detached_in_place(message: &mut [u8], mac: &mut Mac, ad: Option<&
             message.len() as c_ulonglong,
             ad_p,
             ad_len,
-            std::ptr::null_mut(),
+            0 as *mut [u8; 0],
             &nonce.0,
             &key.0
         );
