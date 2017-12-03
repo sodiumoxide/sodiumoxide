@@ -1,10 +1,11 @@
 macro_rules! stream_module (($stream_name:ident,
                              $xor_name:ident,
+                             $xor_ic_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
 #[cfg(not(feature = "std"))] use prelude::*;
-use libc::c_ulonglong;
+use libc::{c_ulonglong, uint64_t};
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
@@ -86,7 +87,7 @@ pub fn stream_xor(m: &[u8],
     }
 }
 
-/// `stream_xor_inplace` encrypts a message `m` using a secret key `k` and a nonce `n`.
+/// `stream_xor_inplace()` encrypts a message `m` using a secret key `k` and a nonce `n`.
 /// The `stream_xor_inplace()` function encrypts the message in place.
 ///
 /// `stream_xor_inplace()` guarantees that the ciphertext has the same length as
@@ -103,6 +104,52 @@ pub fn stream_xor_inplace(m: &mut [u8],
                   k);
     }
 }
+
+/// `stream_xor_ic()` encrypts a message `m` using a secret key `k` and a nonce `n`,
+/// it is similar to `stream_xor()` but allows the caller to set the value of the initial
+/// block counter `ic`.
+/// 
+/// `stream_xor()` guarantees that the ciphertext has the same length as the plaintext,
+/// and is the plaintext xor the output of `stream()`.
+/// Consequently `stream_xor()` can also be used to decrypt.
+pub fn stream_xor_ic(m: &[u8],
+                     &Nonce(ref n): &Nonce,
+                     ic: u64,
+                     &Key(ref k): &Key) -> Vec<u8> {
+    unsafe {
+        let mut c = vec![0u8; m.len()];
+        $xor_ic_name(c.as_mut_ptr(),
+                     m.as_ptr(),
+                     m.len() as c_ulonglong,
+                     n,
+                     ic as uint64_t,
+                     k);
+        c
+    }
+}
+
+/// `stream_xor_ic_inplace()` encrypts a message `m` using a secret key `k` and a nonce `n`,
+/// it is similar to `stream_xor_inplace()` but allows the caller to set the value of the initial
+/// block counter `ic`.
+/// The `stream_xor_ic_inplace()` function encrypts the message in place.
+///
+/// `stream_xor_ic_inplace()` guarantees that the ciphertext has the same length as
+/// the plaintext, and is the plaintext xor the output of `stream_inplace()`.
+/// Consequently `stream_xor_ic_inplace()` can also be used to decrypt.
+pub fn stream_xor_ic_inplace(m: &mut [u8],
+                             &Nonce(ref n): &Nonce,
+                             ic: u64,
+                             &Key(ref k): &Key) {
+    unsafe {
+        $xor_ic_name(m.as_mut_ptr(),
+                     m.as_ptr(),
+                     m.len() as c_ulonglong,
+                     n,
+                     ic as uint64_t,
+                     k);
+    }
+}
+
 
 #[cfg(test)]
 mod test_m {
@@ -152,6 +199,34 @@ mod test_m {
             }
             stream_xor_inplace(&mut m, &n, &k);
             assert!(c == m);
+        }
+    }
+
+    #[test]
+    fn test_stream_xor_ic_same() {
+        use randombytes::randombytes;
+        for i in 0..1024usize {
+            let k = gen_key();
+            let n = gen_nonce();
+            let m = randombytes(i);
+            let c = stream_xor(&m, &n, &k);
+            let c_ic = stream_xor_ic(&m, &n, 0, &k);
+            assert_eq!(c, c_ic);
+        }
+    }
+
+    #[test]
+    fn test_stream_xor_ic_inplace() {
+        use randombytes::randombytes;
+        for i in 0..1024usize {
+            let k = gen_key();
+            let n = gen_nonce();
+            for j in 0..10 {
+                let mut m = randombytes(i);
+                let c = stream_xor_ic(&m, &n, j, &k);
+                stream_xor_ic_inplace(&mut m, &n, j, &k);
+                assert_eq!(m, c);
+            }
         }
     }
 
