@@ -39,7 +39,7 @@ pub fn decrypt(decrypted: &mut [u8], ciphertext: &[u8], ad: Option<&[u8]>, nonce
         if ffi::crypto_aead_chacha20poly1305_decrypt(
             decrypted.as_mut_ptr(),
             &mut mlen,
-            0 as *mut [u8; 0],
+            0 as *mut _,
             ciphertext.as_ptr(),
             ciphertext.len() as c_ulonglong,
             ad_p,
@@ -68,7 +68,7 @@ pub fn decrypt_in_place(ciphertext: &mut [u8], ad: Option<&[u8]>, nonce: &Nonce,
         if ffi::crypto_aead_chacha20poly1305_decrypt(
             ciphertext.as_mut_ptr(),
             &mut mlen,
-            0 as *mut [u8; 0],
+            0 as *mut _,
             ciphertext.as_ptr(),
             ciphertext.len() as c_ulonglong,
             ad_p,
@@ -108,7 +108,7 @@ pub fn encrypt(ciphertext: &mut [u8], message: &[u8], ad: Option<&[u8]>, nonce: 
             message.len() as c_ulonglong,
             ad_p,
             ad_len,
-            0 as *mut [u8; 0],
+            0 as *mut _,
             &nonce.0,
             &key.0
         );
@@ -134,7 +134,7 @@ pub fn encrypt_in_place(message: &mut [u8], ad: Option<&[u8]>, nonce: &Nonce, ke
             message.len() as c_ulonglong,
             ad_p,
             ad_len,
-            0 as *mut [u8; 0],
+            0 as *mut _,
             &nonce.0,
             &key.0
         );
@@ -163,7 +163,7 @@ pub fn decrypt_detached(decrypted: &mut [u8], ciphertext: &[u8], mac: &Mac, ad: 
         };
         if ffi::crypto_aead_chacha20poly1305_decrypt_detached(
             decrypted.as_mut_ptr(),
-            0 as *mut [u8; 0],
+            0 as *mut _,
             ciphertext.as_ptr(),
             ciphertext.len() as c_ulonglong,
             mac.0.as_ptr(),
@@ -190,7 +190,7 @@ pub fn decrypt_detached_in_place(ciphertext: &mut [u8], mac: &Mac, ad: Option<&[
         };
         if ffi::crypto_aead_chacha20poly1305_decrypt_detached(
             ciphertext.as_mut_ptr(),
-            0 as *mut [u8; 0],
+            0 as *mut _,
             ciphertext.as_ptr(),
             ciphertext.len() as c_ulonglong,
             mac.0.as_ptr(),
@@ -235,7 +235,7 @@ pub fn encrypt_detached(ciphertext: &mut [u8], mac: &mut Mac, message: &[u8], ad
             message.len() as c_ulonglong,
             ad_p,
             ad_len,
-            0 as *mut [u8; 0],
+            0 as *mut _,
             &nonce.0,
             &key.0
         );
@@ -260,7 +260,7 @@ pub fn encrypt_detached_in_place(message: &mut [u8], mac: &mut Mac, ad: Option<&
             message.len() as c_ulonglong,
             ad_p,
             ad_len,
-            0 as *mut [u8; 0],
+            0 as *mut _,
             &nonce.0,
             &key.0
         );
