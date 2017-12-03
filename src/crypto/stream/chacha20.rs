@@ -1,6 +1,7 @@
 //! `crypto_stream_chacha20` (Chacha20)
 use ffi::{crypto_stream_chacha20,
           crypto_stream_chacha20_xor,
+          crypto_stream_chacha20_xor_ic,
           crypto_stream_chacha20_KEYBYTES,
           crypto_stream_chacha20_NONCEBYTES};
 
@@ -8,6 +9,30 @@ stream_module!(crypto_stream_chacha20,
                crypto_stream_chacha20_xor,
                crypto_stream_chacha20_KEYBYTES,
                crypto_stream_chacha20_NONCEBYTES);
+
+/// `stream_xor_ic_inplace` encrypts a message `m` using a secret key
+/// `k` and a nonce `n`, with the block counter set to `ic`.  The
+/// `stream_xor_ic_inplace()` function encrypts the message in place.
+///
+/// `stream_xor_ic_inplace()` guarantees that the ciphertext has the
+/// same length as the plaintext, and is the plaintext xor the output
+/// of `stream_inplace()`.  Consequently `stream_xor_ic_inplace()` can
+/// also be used to decrypt.
+pub fn stream_xor_ic_inplace(m: &mut [u8],
+                             &Nonce(ref n): &Nonce,
+                             ic: u64,
+                             &Key(ref k): &Key) {
+    unsafe {
+        crypto_stream_chacha20_xor_ic(
+            m.as_mut_ptr(),
+            m.as_ptr(),
+            m.len() as c_ulonglong,
+            n,
+            ic,
+            k
+        );
+    }
+}
 
 #[cfg(test)]
 mod test {
