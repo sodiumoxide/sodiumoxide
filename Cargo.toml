@@ -8,11 +8,11 @@ name = "sodiumoxide"
 readme = "README.md"
 repository = "https://github.com/dnaq/sodiumoxide"
 categories = ["cryptography"]
-version = "0.0.15"
+version = "0.0.16"
 
 [dependencies]
 libc = "0.2"
-libsodium-sys = { version = "0.0.15", path = "libsodium-sys" }
+libsodium-sys = { version = "0.0.16", path = "libsodium-sys" }
 serde = { version="1", optional = true }
 
 [dev-dependencies]
