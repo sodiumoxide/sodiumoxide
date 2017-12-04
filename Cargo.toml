@@ -10,6 +10,9 @@ repository = "https://github.com/dnaq/sodiumoxide"
 categories = ["cryptography"]
 version = "0.0.16"
 
+[badges]
+travis-ci = { repository = "dnaq/sodiumoxide" }
+
 [dependencies]
 libc = "0.2"
 libsodium-sys = { version = "0.0.16", path = "libsodium-sys" }
