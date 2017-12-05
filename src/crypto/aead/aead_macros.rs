@@ -29,7 +29,7 @@ new_type! {
 
 new_type! {
     /// `Nonce` for symmetric authenticated encryption with additional data.
-    public Nonce(NONCEBYTES);
+    nonce Nonce(NONCEBYTES);
 }
 
 new_type! {
