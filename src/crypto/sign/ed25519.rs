@@ -4,6 +4,7 @@
 //! chosen-message attacks.
 #[cfg(not(feature = "std"))] use prelude::*;
 use ffi;
+use std::mem;
 use libc::c_ulonglong;
 
 /// Number of bytes in a `Seed`.
@@ -45,6 +46,61 @@ new_type! {
 new_type! {
     /// Detached signature
     public Signature(SIGNATUREBYTES);
+}
+
+/// `State` contains the state for multi-part (streaming) signature
+/// computations. This allows the caller to process a message as a sequence of
+/// multiple chunks.
+pub struct State(ffi::crypto_sign_ed25519ph_state);
+
+impl State {
+    /// `new` constructs and initializes a new `State`.
+    pub fn new() -> Self {
+        unsafe {
+            let mut st: ffi::crypto_sign_ed25519ph_state = mem::uninitialized();
+            ffi::crypto_sign_ed25519ph_init(&mut st);
+            State(st)
+        }
+    }
+
+    /// `update` updates the `State` with `data`. `update` can be called
+    /// multiple times in order to compute the hash from sequential chunks of
+    /// the message.
+    pub fn update(&mut self, data: &[u8]) {
+        unsafe {
+            ffi::crypto_sign_ed25519ph_update(
+                &mut self.0,
+                data.as_ptr(),
+                data.len() as c_ulonglong,
+            );
+        }
+    }
+
+    /// `finalize_create()` finalizes the `State` and signs the previously
+    /// appended messages with `update()` using the signer's secret key `sk`.
+    /// `finalize_create()` returns the resulting signature.
+    pub fn finalize_create(mut self, &SecretKey(ref sk): &SecretKey) -> Signature {
+        unsafe {
+            let mut sig = [0u8; SIGNATUREBYTES];
+            let mut siglen: c_ulonglong = 0;
+            ffi::crypto_sign_ed25519ph_final_create(&mut self.0, &mut sig, &mut siglen, sk);
+            assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
+            Signature(sig)
+        }
+    }
+
+    /// `finalize_verify()` verifies the signature in `sig` against the
+    /// previously appended message with `update()` and the signer's public key
+    /// `pk`.
+    /// `finalize_verify()` returns true if the signature is valid, false
+    /// otherwise.
+    pub fn finalize_verify(
+        mut self,
+        &Signature(ref sig): &Signature,
+        &PublicKey(ref pk): &PublicKey,
+    ) -> bool {
+        unsafe { 0 == ffi::crypto_sign_ed25519ph_final_verify(&mut self.0, sig, pk) }
+    }
 }
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
@@ -183,6 +239,29 @@ mod test {
             let m = randombytes(i);
             let sig = sign_detached(&m, &sk);
             assert!(verify_detached(&sig, &m, &pk));
+        }
+    }
+
+    #[test]
+    fn test_sign_state_verify() {
+        use randombytes::randombytes;
+        for i in 0..256usize {
+            let (pk, sk) = gen_keypair();
+            let m1 = randombytes(i);
+            let m2 = randombytes(i);
+            let m3 = randombytes(i);
+
+            let mut state = State::new();
+            state.update(&m1);
+            state.update(&m2);
+            state.update(&m3);
+            let sm = state.finalize_create(&sk);
+
+            let mut state = State::new();
+            state.update(&m1);
+            state.update(&m2);
+            state.update(&m3);
+            assert!(state.finalize_verify(&sm, &pk));
         }
     }
 
