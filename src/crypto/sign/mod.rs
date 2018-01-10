@@ -43,3 +43,5 @@
 //! ```
 pub use self::ed25519::*;
 pub mod ed25519;
+pub use self::multipart::*;
+pub mod multipart;
