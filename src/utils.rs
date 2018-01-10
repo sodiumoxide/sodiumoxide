@@ -40,6 +40,62 @@ pub fn increment_le(x: &mut [u8]) {
     }
 }
 
+/// Tries to add padding to a sequence of bytes.
+/// If the block size is zero, or the padded buffer's length
+/// could overflow `usize`, this function returns `Err`.
+/// Otherwise, it returns `Ok` wrapping the padded byte array.
+pub fn pad(mut buf: Vec<u8>, blocksize: usize) -> Result<Vec<u8>, ()> {
+    let unpadded_buflen = buf.len();
+    let max_buflen = unpadded_buflen + blocksize;
+    let mut padded_buflen = 0;
+
+    if max_buflen <= unpadded_buflen {
+        return Err(());
+    }
+
+    // extend with zeroes
+    buf.resize(max_buflen, 0);
+
+    let error = unsafe {
+        ffi::sodium_pad(&mut padded_buflen,
+                        buf.as_mut_ptr(),
+                        unpadded_buflen,
+                        blocksize,
+                        max_buflen)
+    };
+
+    assert!(error == 0, "sodium_pad: unsatisfied precondition?!");
+    assert!(padded_buflen <= max_buflen, "math is broken?!");
+    assert!(padded_buflen > unpadded_buflen, "no padding added?!");
+
+    buf.truncate(padded_buflen);
+
+    Ok(buf)
+}
+
+/// Attempts to remove padding from a byte sequence created via `pad()`.
+/// If the padding is nonexistent, invalid, or the block size does not
+/// match the `blocksize` argument of `pad()`, this returns `Err`.
+pub fn unpad(buf: &[u8], blocksize: usize) -> Result<&[u8], ()> {
+    let padded_buflen = buf.len();
+    let mut unpadded_buflen = 0;
+
+    let error = unsafe {
+        ffi::sodium_unpad(&mut unpadded_buflen,
+                          buf.as_ptr(),
+                          padded_buflen,
+                          blocksize)
+    };
+
+    if error != 0 {
+        return Err(());
+    }
+
+    assert!(unpadded_buflen < padded_buflen, "no padding?!");
+
+    Ok(&buf[..unpadded_buflen])
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -114,5 +170,76 @@ mod test {
             increment_le(&mut x);
             assert!(x.iter().all(|xi| { *xi == 0 }));
         }
+    }
+
+    #[test]
+    fn test_padding_not_multiple_of_blocksize() {
+        let v = vec![1, 2, 3, 4, 5, 6, 7];
+        let p = pad(v.clone(), 5).unwrap();
+        let u = unpad(&p, 5).unwrap();
+
+        assert!(p.len() == 10);
+        assert!(u == &v[..]);
+    }
+
+    #[test]
+    fn test_padding_multiple_of_blocksize() {
+        let v = vec![1, 2, 3, 4, 5, 6];
+        let p = pad(v.clone(), 3).unwrap();
+        let u = unpad(&p, 3).unwrap();
+
+        assert!(p.len() == 9);
+        assert!(u == &v[..]);
+    }
+
+    #[test]
+    fn test_padding_not_multiple_of_blocksize_pow2() {
+        let v = vec![1, 2, 3, 4, 5, 6, 7];
+        let p = pad(v.clone(), 4).unwrap();
+        let u = unpad(&p, 4).unwrap();
+
+        assert!(p.len() == 8);
+        assert!(u == &v[..]);
+    }
+
+    #[test]
+    fn test_padding_multiple_of_blocksize_pow2() {
+        let v = vec![1, 2, 3, 4, 5, 6, 7, 8];
+        let p = pad(v.clone(), 4).unwrap();
+        let u = unpad(&p, 4).unwrap();
+
+        assert!(p.len() == 12);
+        assert!(u == &v[..]);
+    }
+
+    #[test]
+    fn test_padding_invalid_block_size() {
+        // invalid block size
+        pad(Vec::new(), 0).unwrap_err();
+        let v = vec![0x80];
+        unpad(&v, 0).unwrap_err();
+
+        // mismatching block size
+        let v = pad(Vec::new(), 8).unwrap();
+        unpad(&v, 4).unwrap_err();
+    }
+
+    #[test]
+    fn test_padding_invalid_padded_size() {
+        // An empty array couldn't possibly have been created by `pad()`.
+        unpad(&[], 1).unwrap_err();
+
+        // Padded scheme is of incorrect length (not a multiple of block size)
+        let mut v = pad(vec![42], 1337).unwrap();
+        v.pop();
+        unpad(&v, 1337).unwrap_err();
+    }
+
+    #[test]
+    fn test_padding_invalid_padded_data() {
+        // A trailing padding byte is incorrect
+        let mut v = pad(vec![42], 128).unwrap();
+        *v.last_mut().expect("non-empty") = 99;
+        unpad(&v, 128).unwrap_err();
     }
 }
