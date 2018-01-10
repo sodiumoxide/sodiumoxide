@@ -187,7 +187,7 @@ mod test {
         let (client_rx, client_tx) = client_session_keys(&client_pk, &client_sk, &server_pk).unwrap();
 
         assert_eq!(server_session_keys(&server_pk, &server_sk, &small_order_p), Err(()));
-        let (server_rx, server_tx) = server_session_keys(&server_pk, &server_sk, &client_pk).unwrap();
+        server_session_keys(&server_pk, &server_sk, &client_pk).unwrap();
 
         client_pk.0[0] += 1;
 
@@ -196,7 +196,7 @@ mod test {
         assert_ne!(server_rx.0, client_tx.0);
         assert_ne!(server_tx.0, client_rx.0);
 
-        let (client_pk, client_sk) = gen_keypair();
+        let (client_pk, _) = gen_keypair();
         let (server_rx, server_tx) = server_session_keys(&server_pk, &server_sk, &client_pk).unwrap();
 
         assert_ne!(server_rx.0, client_tx.0);
