@@ -84,10 +84,12 @@ mod prelude {
 /// functions (`gen_key`, `gen_keypair`, `gen_nonce`, `randombytes`, `randombytes_into`)
 /// thread-safe
 ///
-/// `init()` returns `false` if initialization failed.
-pub fn init() -> bool {
-    unsafe {
-        ffi::sodium_init() != -1
+/// `init()` returns `Ok` if initialization succeeded and `Err` if it failed.
+pub fn init() -> Result<(), ()> {
+    if unsafe { ffi::sodium_init() } >= 0 {
+        Ok(())
+    } else {
+        Err(())
     }
 }
 
