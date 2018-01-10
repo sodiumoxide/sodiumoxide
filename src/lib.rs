@@ -115,4 +115,5 @@ pub mod crypto {
     pub mod stream;
     pub mod shorthash;
     pub mod verify;
+    pub mod kx;
 }
