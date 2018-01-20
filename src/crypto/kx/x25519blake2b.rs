@@ -1,8 +1,5 @@
 //! `x25519blake2b` is the current default key exchange scheme of `libsodium`.
 
-#[cfg(not(feature = "std"))]
-use prelude::*;
-
 use ffi;
 
 /// Number of bytes in a `PublicKey`.
@@ -110,7 +107,6 @@ pub fn client_session_keys(
         let r =
             ffi::crypto_kx_client_session_keys(&mut rx, &mut tx, client_pk, client_sk, server_pk);
 
-        println!("{}", r);
         if r != 0 {
             Err(())
         } else {
