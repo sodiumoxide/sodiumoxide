@@ -66,3 +66,4 @@
 //! ```
 pub use self::scryptsalsa208sha256::*;
 pub mod scryptsalsa208sha256;
+pub mod argon2;
