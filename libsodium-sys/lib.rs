@@ -31,6 +31,8 @@ include!("src/crypto_onetimeauth.rs");
 include!("src/crypto_onetimeauth_poly1305.rs");
 
 include!("src/crypto_pwhash_scryptsalsa208sha256.rs");
+include!("src/crypto_pwhash_argon2id.rs");
+include!("src/crypto_pwhash_argon2i.rs");
 
 include!("src/crypto_scalarmult.rs");
 include!("src/crypto_scalarmult_curve25519.rs");
