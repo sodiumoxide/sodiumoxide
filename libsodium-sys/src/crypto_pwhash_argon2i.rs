@@ -1,19 +1,19 @@
 // crypto_pwhash_argon2i.h
 
-pub const crypto_pwhash_argon2i_ALG_argon2i13: i32 = 1;
+pub const crypto_pwhash_argon2i_ALG_ARGON2I13: i32 = 1;
 pub const crypto_pwhash_argon2i_SALTBYTES: usize = 16;
 pub const crypto_pwhash_argon2i_STRBYTES: usize = 128;
 pub const crypto_pwhash_argon2i_STRPREFIX: &'static str =
     "$argon2i$";
-pub const crypto_pwhash_argon2i_OPSLIMIT_INTERACTIVE: usize = 2;
+pub const crypto_pwhash_argon2i_OPSLIMIT_INTERACTIVE: usize = 4;
 pub const crypto_pwhash_argon2i_MEMLIMIT_INTERACTIVE: usize =
-    67108864;
-pub const crypto_pwhash_argon2i_OPSLIMIT_MODERATE: usize = 3;
+    33554432;
+pub const crypto_pwhash_argon2i_OPSLIMIT_MODERATE: usize = 6;
 pub const crypto_pwhash_argon2i_MEMLIMIT_MODERATE: usize =
-    268435456;
-pub const crypto_pwhash_argon2i_OPSLIMIT_SENSITIVE: usize = 4;
+    134217728;
+pub const crypto_pwhash_argon2i_OPSLIMIT_SENSITIVE: usize = 8;
 pub const crypto_pwhash_argon2i_MEMLIMIT_SENSITIVE: usize =
-    1073741824;
+    536870912;
 
 
 extern {
@@ -36,7 +36,8 @@ extern {
         passwdlen: c_ulonglong,
         salt: *const [u8; crypto_pwhash_argon2i_SALTBYTES],
         opslimit: c_ulonglong,
-        memlimit: size_t) -> c_int;
+        memlimit: size_t,
+        alg: c_int) -> c_int;
     pub fn crypto_pwhash_argon2i_str(
         out: *mut [u8; crypto_pwhash_argon2i_STRBYTES],
         passwd: *const u8,
@@ -54,7 +55,7 @@ extern {
 fn test_crypto_pwhash_argon2i_alg_argon2i13() {
     assert!(unsafe {
         crypto_pwhash_argon2i_alg_argon2i13() as i32
-    } == crypto_pwhash_argon2i_ALG_argon2i13)
+    } == crypto_pwhash_argon2i_ALG_ARGON2I13)
 }
 #[test]
 fn test_crypto_pwhash_argon2i_saltbytes() {
