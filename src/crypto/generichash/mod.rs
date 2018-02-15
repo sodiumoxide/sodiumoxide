@@ -1,3 +1,5 @@
+//! `GenericHash`.
+//!
 use ffi::{crypto_generichash_final, crypto_generichash_init,
           crypto_generichash_statebytes, crypto_generichash_update,
           crypto_generichash_BYTES_MAX, crypto_generichash_BYTES_MIN,
@@ -9,24 +11,42 @@ use std::ptr;
 mod digest;
 pub use self::digest::Digest;
 
+/// Minimium of allowed bytes in a `Digest`
+pub const DIGEST_MIN: usize = crypto_generichash_BYTES_MIN;
+
+/// Maximum of allowed bytes in a `Digest`
+pub const DIGEST_MAX: usize = crypto_generichash_BYTES_MAX;
+
+/// Minimium of allowed bytes in a key
+pub const KEY_MIN: usize = crypto_generichash_KEYBYTES_MIN;
+
+/// Maximum of allowed bytes in a key
+pub const KEY_MAX: usize = crypto_generichash_KEYBYTES_MAX;
+
+/// `State` contains the state for multi-part (streaming) hash computations. This allows the caller
+/// to process a message as a sequence of multiple chunks.
 pub struct State {
     out_len: usize,
     state: Vec<u8>,
 }
 
 impl State {
-    fn new(out_len: usize, key: Option<&[u8]>) -> Option<State> {
-        if out_len < crypto_generichash_BYTES_MIN
-            || out_len > crypto_generichash_BYTES_MAX
-        {
+    /// `new` constructs and initializes a new `State` with the given parameters.
+    ///
+    /// `out_len` specifies the resulting hash size.
+    /// Only values in the interval [`DIGEST_MIN`, `DIGEST_MAX`] are allowed.
+    ///
+    /// `key` is an optional parameter, which when given,
+    /// a custom key can be used for the computation of the hash.
+    /// The size of the key must be in the interval [`KEY_MIN`, `KEY_MAX`].
+    pub fn new(out_len: usize, key: Option<&[u8]>) -> Option<State> {
+        if out_len < DIGEST_MIN || out_len > DIGEST_MAX {
             return None;
         }
 
         if let Some(key) = key {
             let len = key.len();
-            if len < crypto_generichash_KEYBYTES_MIN
-                || len > crypto_generichash_KEYBYTES_MAX
-            {
+            if len < KEY_MIN || len > KEY_MAX {
                 return None;
             }
         }
@@ -57,6 +77,8 @@ impl State {
         }
     }
 
+    /// `update` updates the `State` with `data`. `update` can be called multiple times in order
+    /// to compute the hash from sequential chunks of the message.
     pub fn update(&mut self, data: &[u8]) {
         unsafe {
             let state_ptr = self.state.as_mut_slice().as_mut_ptr() as *mut _;
@@ -68,6 +90,8 @@ impl State {
         }
     }
 
+    /// `finalize` finalizes the state and returns the digest value. `finalize` consumes the
+    /// `State` so that it cannot be accidentally reused.
     pub fn finalize(mut self) -> Digest {
         let state_ptr = self.state.as_mut_slice().as_mut_ptr() as *mut _;
         let mut result = Digest {
