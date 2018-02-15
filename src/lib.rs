@@ -112,6 +112,7 @@ pub mod crypto {
     pub mod scalarmult;
     pub mod auth;
     pub mod hash;
+    pub mod generichash;
     pub mod secretbox;
     pub mod onetimeauth;
     pub mod pwhash;
