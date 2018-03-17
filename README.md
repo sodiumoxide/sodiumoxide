@@ -14,7 +14,7 @@ as easy to use.
 Dependencies
 ------------
 
-[Sodium](https://github.com/jedisct1/libsodium)
+[Sodium](https://github.com/jedisct1/libsodium) ([installation](https://download.libsodium.org/doc/installation/index.html))
 
 Building
 --------
