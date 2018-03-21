@@ -1,5 +1,7 @@
 //! `GenericHash`.
 //!
+#[cfg(not(feature = "std"))] use prelude::Vec;
+
 use ffi::{crypto_generichash_final, crypto_generichash_init,
           crypto_generichash_statebytes, crypto_generichash_update,
           crypto_generichash_BYTES_MAX, crypto_generichash_BYTES_MIN,
