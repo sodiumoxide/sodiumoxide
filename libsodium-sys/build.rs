@@ -1,6 +1,9 @@
 use std::env;
 extern crate pkg_config;
 
+#[cfg(target_env = "msvc")]
+extern crate vcpkg;
+
 fn main() {
 
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
@@ -16,9 +19,26 @@ fn main() {
         println!("cargo:rustc-link-lib={0}=sodium", mode);
 
     } else {
-
-        pkg_config::find_library("libsodium").unwrap();
-
+        if pkg_config::probe_library("libsodium").is_ok() {
+            // pkg_config did everything for us
+            return
+        } else if try_vcpkg() {
+            return;
+        }
     }
+}
 
+#[cfg(target_env = "msvc")]
+fn try_vcpkg() -> bool {
+    if vcpkg::Config::new()
+        .lib_name("libsodium")
+        .probe("libsodium")
+        .is_ok() {
+        // found the static library - vcpkg did everything for us
+        return true;
+    } else if vcpkg::probe_package("libsodium").is_ok() {
+        // found the dynamic library - vcpkg did everything for us
+        return true;
+    }
+    false
 }
