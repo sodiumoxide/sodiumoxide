@@ -42,3 +42,8 @@ fn try_vcpkg() -> bool {
     }
     false
 }
+
+#[cfg(not(target_env = "msvc"))]
+fn try_vcpkg() -> bool {
+    false
+}
