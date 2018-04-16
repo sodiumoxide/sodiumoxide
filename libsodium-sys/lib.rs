@@ -49,6 +49,8 @@ include!("src/crypto_stream_salsa208.rs");
 include!("src/crypto_stream_xsalsa20.rs");
 include!("src/crypto_stream_xchacha20.rs");
 
+include!("src/crypto_secretstream_xchacha20poly1305.rs");
+
 include!("src/crypto_verify_16.rs");
 include!("src/crypto_verify_32.rs");
 include!("src/crypto_verify_64.rs");
