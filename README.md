@@ -34,7 +34,7 @@ Most documentation is taken from NaCl, with minor modification where the API
 differs between the C and Rust versions.
 
 Documentation for the latest build can be found at
-[gh-pages](https://dnaq.github.io/sodiumoxide).
+[gh-pages](https://sodiumoxide.github.io/sodiumoxide).
 
 Optional features
 -----------------
@@ -62,7 +62,7 @@ File bugs in the issue tracker
 
 Master git repository
 
-    git clone https://github.com/dnaq/sodiumoxide.git
+    git clone https://github.com/sodiumoxide/sodiumoxide.git
 
 License
 -------
