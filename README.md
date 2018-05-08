@@ -1,7 +1,7 @@
 sodiumoxide
 ===========
 
-[![Build Status](https://travis-ci.org/dnaq/sodiumoxide.svg?branch=master)](https://travis-ci.org/dnaq/sodiumoxide)
+[![Build Status](https://travis-ci.org/sodiumoxide/sodiumoxide.svg?branch=master)](https://travis-ci.org/dnaq/sodiumoxide)
 
 > [NaCl](http://nacl.cr.yp.to) (pronounced "salt") is a new easy-to-use high-speed software library for network communication, encryption, decryption, signatures, etc. NaCl's goal is to provide all of the core operations needed to build higher-level cryptographic tools.
 > Of course, other libraries already exist for these core operations. NaCl advances the state of the art by improving security, by improving usability, and by improving speed.
