@@ -1,7 +1,7 @@
 sodiumoxide
 ===========
 
-[![Build Status](https://travis-ci.org/dnaq/sodiumoxide.svg?branch=master)](https://travis-ci.org/dnaq/sodiumoxide)
+[![Build Status](https://travis-ci.org/sodiumoxide/sodiumoxide.svg?branch=master)](https://travis-ci.org/dnaq/sodiumoxide)
 
 > [NaCl](http://nacl.cr.yp.to) (pronounced "salt") is a new easy-to-use high-speed software library for network communication, encryption, decryption, signatures, etc. NaCl's goal is to provide all of the core operations needed to build higher-level cryptographic tools.
 > Of course, other libraries already exist for these core operations. NaCl advances the state of the art by improving security, by improving usability, and by improving speed.
@@ -14,7 +14,7 @@ as easy to use.
 Dependencies
 ------------
 
-[Sodium](https://github.com/jedisct1/libsodium)
+[Sodium](https://github.com/jedisct1/libsodium) ([installation](https://download.libsodium.org/doc/installation/index.html))
 
 Building
 --------
@@ -34,7 +34,7 @@ Most documentation is taken from NaCl, with minor modification where the API
 differs between the C and Rust versions.
 
 Documentation for the latest build can be found at
-[gh-pages](https://dnaq.github.io/sodiumoxide).
+[gh-pages](https://sodiumoxide.github.io/sodiumoxide).
 
 Optional features
 -----------------
@@ -62,7 +62,7 @@ File bugs in the issue tracker
 
 Master git repository
 
-    git clone https://github.com/dnaq/sodiumoxide.git
+    git clone https://github.com/sodiumoxide/sodiumoxide.git
 
 License
 -------

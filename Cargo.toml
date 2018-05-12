@@ -1,12 +1,12 @@
 [package]
 authors = ["dnaq"]
 description = "Fast cryptographic library for Rust (bindings to libsodium)"
-documentation = "https://dnaq.github.io/sodiumoxide"
+documentation = "https://docs.rs/sodiumoxide"
 keywords = ["crypto", "NaCl", "libsodium"]
 license = "MIT OR Apache-2.0"
 name = "sodiumoxide"
 readme = "README.md"
-repository = "https://github.com/dnaq/sodiumoxide"
+repository = "https://github.com/sodiumoxide/sodiumoxide"
 categories = ["cryptography"]
 version = "0.0.16"
 
