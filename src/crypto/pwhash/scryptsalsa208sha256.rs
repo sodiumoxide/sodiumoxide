@@ -176,8 +176,10 @@ mod test {
         //       mismatch (and the issue of converting it to a str in
         //       a constant expression):
         //       &'static [u8; 4usize] != &'static str
+        let tmp = ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX;
         assert_eq!(
-            ::std::str::from_utf8(ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX).unwrap(),
+            // Trim null byte and convert to an str
+            ::std::str::from_utf8(&tmp[..tmp.len() - 1]).unwrap(),
             STRPREFIX
         );
     }
