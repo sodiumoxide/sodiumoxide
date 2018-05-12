@@ -24,11 +24,12 @@ fn main() {
     let include_dir = pkg_config::get_variable("libsodium", "includedir").unwrap();
 
     let bindings = bindgen::Builder::default()
-        .clang_arg(format!("-I\"{}\"", include_dir))
         .header("sodium_wrapper.h")
         .whitelist_function("(sodium|crypto|randombytes)_.*")
         .whitelist_type("(sodium|crypto|randombytes)_.*")
         .whitelist_var("(sodium|crypto|randombytes)_.*")
+        .clang_arg("-isystem")
+        .clang_arg(include_dir)
         .generate()
         .expect("Unable to generate bindings");
 
