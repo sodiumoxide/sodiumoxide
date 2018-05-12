@@ -3,16 +3,16 @@
 #[test]
 fn test_crypto_scalarmult_bytes() {
     assert_eq!(
-        unsafe { crypto_scalarmult_bytes() as usize },
-        crypto_scalarmult_BYTES
+        unsafe { crypto_scalarmult_bytes() },
+        crypto_scalarmult_BYTES as usize
     );
 }
 
 #[test]
 fn test_crypto_scalarmult_scalarbytes() {
     assert_eq!(
-        unsafe { crypto_scalarmult_scalarbytes() as usize },
-        crypto_scalarmult_SCALARBYTES
+        unsafe { crypto_scalarmult_scalarbytes() },
+        crypto_scalarmult_SCALARBYTES as usize
     );
 }
 
@@ -20,7 +20,8 @@ fn test_crypto_scalarmult_scalarbytes() {
 fn test_crypto_scalarmult_primitive() {
     unsafe {
         let s = crypto_scalarmult_primitive();
-        let s = std::ffi::CStr::from_ptr(s).to_bytes();
-        assert_eq!(s, crypto_scalarmult_PRIMITIVE.as_bytes());
+        let s = std::ffi::CStr::from_ptr(s);
+        let p = std::ffi::CStr::from_bytes_with_nul(crypto_scalarmult_PRIMITIVE).unwrap();
+        assert_eq!(s, p);
     }
 }

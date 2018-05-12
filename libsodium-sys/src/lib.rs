@@ -6,6 +6,9 @@ include!(concat!(env!("OUT_DIR"), "/sodium_bindings.rs"));
 
 // Tests
 
+extern crate libc;
+use libc::{c_ulonglong, size_t};
+
 include!("crypto_aead_chacha20poly1305.rs");
 
 include!("crypto_auth.rs");

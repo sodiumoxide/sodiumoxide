@@ -3,39 +3,39 @@
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_keybytes() {
     assert!(
-        unsafe { crypto_secretbox_xsalsa20poly1305_keybytes() as usize }
-            == crypto_secretbox_xsalsa20poly1305_KEYBYTES
+        unsafe { crypto_secretbox_xsalsa20poly1305_keybytes() }
+            == crypto_secretbox_xsalsa20poly1305_KEYBYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_noncebytes() {
     assert!(
-        unsafe { crypto_secretbox_xsalsa20poly1305_noncebytes() as usize }
-            == crypto_secretbox_xsalsa20poly1305_NONCEBYTES
+        unsafe { crypto_secretbox_xsalsa20poly1305_noncebytes() }
+            == crypto_secretbox_xsalsa20poly1305_NONCEBYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_zerobytes() {
     assert!(
-        unsafe { crypto_secretbox_xsalsa20poly1305_zerobytes() as usize }
-            == crypto_secretbox_xsalsa20poly1305_ZEROBYTES
+        unsafe { crypto_secretbox_xsalsa20poly1305_zerobytes() }
+            == crypto_secretbox_xsalsa20poly1305_ZEROBYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_boxzerobytes() {
     assert!(
-        unsafe { crypto_secretbox_xsalsa20poly1305_boxzerobytes() as usize }
-            == crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES
+        unsafe { crypto_secretbox_xsalsa20poly1305_boxzerobytes() }
+            == crypto_secretbox_xsalsa20poly1305_BOXZEROBYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_secretbox_xsalsa20poly1305_macbytes() {
     assert!(
-        unsafe { crypto_secretbox_xsalsa20poly1305_macbytes() as usize }
-            == crypto_secretbox_xsalsa20poly1305_MACBYTES
+        unsafe { crypto_secretbox_xsalsa20poly1305_macbytes() }
+            == crypto_secretbox_xsalsa20poly1305_MACBYTES as usize
     )
 }

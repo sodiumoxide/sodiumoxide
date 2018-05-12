@@ -3,14 +3,14 @@
 #[test]
 fn test_crypto_auth_hmacsha512256_bytes() {
     assert!(
-        unsafe { crypto_auth_hmacsha512256_bytes() as usize } == crypto_auth_hmacsha512256_BYTES
+        unsafe { crypto_auth_hmacsha512256_bytes() } == crypto_auth_hmacsha512256_BYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_auth_hmacsha512256_keybytes() {
     assert!(
-        unsafe { crypto_auth_hmacsha512256_keybytes() as usize }
-            == crypto_auth_hmacsha512256_KEYBYTES
+        unsafe { crypto_auth_hmacsha512256_keybytes() }
+            == crypto_auth_hmacsha512256_KEYBYTES as usize
     )
 }

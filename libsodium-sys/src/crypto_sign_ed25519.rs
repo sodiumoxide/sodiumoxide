@@ -2,26 +2,26 @@
 
 #[test]
 fn test_crypto_sign_ed25519_bytes() {
-    assert!(unsafe { crypto_sign_ed25519_bytes() as usize } == crypto_sign_ed25519_BYTES)
+    assert!(unsafe { crypto_sign_ed25519_bytes() } == crypto_sign_ed25519_BYTES as usize)
 }
 
 #[test]
 fn test_crypto_sign_ed25519_seedbytes() {
-    assert!(unsafe { crypto_sign_ed25519_seedbytes() as usize } == crypto_sign_ed25519_SEEDBYTES)
+    assert!(unsafe { crypto_sign_ed25519_seedbytes() } == crypto_sign_ed25519_SEEDBYTES as usize)
 }
 
 #[test]
 fn test_crypto_sign_ed25519_publickeybytes() {
     assert!(
-        unsafe { crypto_sign_ed25519_publickeybytes() as usize }
-            == crypto_sign_ed25519_PUBLICKEYBYTES
+        unsafe { crypto_sign_ed25519_publickeybytes() }
+            == crypto_sign_ed25519_PUBLICKEYBYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_sign_ed25519_secretkeybytes() {
     assert!(
-        unsafe { crypto_sign_ed25519_secretkeybytes() as usize }
-            == crypto_sign_ed25519_SECRETKEYBYTES
+        unsafe { crypto_sign_ed25519_secretkeybytes() }
+            == crypto_sign_ed25519_SECRETKEYBYTES as usize
     )
 }

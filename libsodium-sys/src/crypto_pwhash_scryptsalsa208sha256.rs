@@ -3,48 +3,48 @@
 #[test]
 fn test_crypto_pwhash_scryptsalsa208sha256_saltbytes() {
     assert!(
-        unsafe { crypto_pwhash_scryptsalsa208sha256_saltbytes() as usize }
-            == crypto_pwhash_scryptsalsa208sha256_SALTBYTES
+        unsafe { crypto_pwhash_scryptsalsa208sha256_saltbytes() }
+            == crypto_pwhash_scryptsalsa208sha256_SALTBYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_pwhash_scryptsalsa208sha256_strbytes() {
     assert!(
-        unsafe { crypto_pwhash_scryptsalsa208sha256_strbytes() as usize }
-            == crypto_pwhash_scryptsalsa208sha256_STRBYTES
+        unsafe { crypto_pwhash_scryptsalsa208sha256_strbytes() }
+            == crypto_pwhash_scryptsalsa208sha256_STRBYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_pwhash_scryptsalsa208sha256_opslimit_interactive() {
     assert!(
-        unsafe { crypto_pwhash_scryptsalsa208sha256_opslimit_interactive() as usize }
-            == crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE
+        unsafe { crypto_pwhash_scryptsalsa208sha256_opslimit_interactive() }
+            == crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE as usize
     )
 }
 
 #[test]
 fn test_crypto_pwhash_scryptsalsa208sha256_memlimit_interactive() {
     assert!(
-        unsafe { crypto_pwhash_scryptsalsa208sha256_memlimit_interactive() as usize }
-            == crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE
+        unsafe { crypto_pwhash_scryptsalsa208sha256_memlimit_interactive() }
+            == crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE as usize
     )
 }
 
 #[test]
 fn test_crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive() {
     assert!(
-        unsafe { crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive() as usize }
-            == crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE
+        unsafe { crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive() }
+            == crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE as usize
     )
 }
 
 #[test]
 fn test_crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive() {
     assert!(
-        unsafe { crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive() as usize }
-            == crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE
+        unsafe { crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive() }
+            == crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE as usize
     )
 }
 
@@ -52,19 +52,21 @@ fn test_crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive() {
 fn test_crypto_pwhash_scryptsalsa208sha256_strprefix() {
     unsafe {
         let s = crypto_pwhash_scryptsalsa208sha256_strprefix();
-        let s = std::ffi::CStr::from_ptr(s).to_bytes();
-        assert!(s == crypto_pwhash_scryptsalsa208sha256_STRPREFIX.as_bytes());
+        let s = std::ffi::CStr::from_ptr(s);
+        let p = std::ffi::CStr::from_bytes_with_nul(crypto_pwhash_scryptsalsa208sha256_STRPREFIX)
+            .unwrap();
+        assert_eq!(s, p);
     }
 }
 
 #[test]
 fn test_crypto_pwhash_scryptsalsa208sha256_str() {
     let password = "Correct Horse Battery Staple";
-    let mut hashed_password = [0; crypto_pwhash_scryptsalsa208sha256_STRBYTES];
+    let mut hashed_password = [0; crypto_pwhash_scryptsalsa208sha256_STRBYTES as usize];
     let ret_hash = unsafe {
         crypto_pwhash_scryptsalsa208sha256_str(
-            &mut hashed_password,
-            password.as_ptr(),
+            hashed_password.as_mut_ptr(),
+            password.as_ptr() as *const _,
             password.len() as c_ulonglong,
             crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE as c_ulonglong,
             crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE as size_t,
@@ -73,8 +75,8 @@ fn test_crypto_pwhash_scryptsalsa208sha256_str() {
     assert!(ret_hash == 0);
     let ret_verify = unsafe {
         crypto_pwhash_scryptsalsa208sha256_str_verify(
-            &hashed_password,
-            password.as_ptr(),
+            hashed_password.as_ptr(),
+            password.as_ptr() as *const _,
             password.len() as c_ulonglong,
         )
     };

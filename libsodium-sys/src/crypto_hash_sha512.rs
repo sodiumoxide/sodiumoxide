@@ -2,5 +2,5 @@
 
 #[test]
 fn test_crypto_hash_sha512_bytes() {
-    assert!(unsafe { crypto_hash_sha512_bytes() as usize } == crypto_hash_sha512_BYTES)
+    assert!(unsafe { crypto_hash_sha512_bytes() } == crypto_hash_sha512_BYTES as usize)
 }

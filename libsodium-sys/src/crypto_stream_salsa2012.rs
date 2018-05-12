@@ -3,14 +3,14 @@
 #[test]
 fn test_crypto_stream_salsa2012_keybytes() {
     assert!(
-        unsafe { crypto_stream_salsa2012_keybytes() as usize } == crypto_stream_salsa2012_KEYBYTES
+        unsafe { crypto_stream_salsa2012_keybytes() } == crypto_stream_salsa2012_KEYBYTES as usize
     )
 }
 
 #[test]
 fn test_crypto_stream_salsa2012_noncebytes() {
     assert!(
-        unsafe { crypto_stream_salsa2012_noncebytes() as usize }
-            == crypto_stream_salsa2012_NONCEBYTES
+        unsafe { crypto_stream_salsa2012_noncebytes() }
+            == crypto_stream_salsa2012_NONCEBYTES as usize
     )
 }
