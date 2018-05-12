@@ -5,29 +5,29 @@ use randombytes::randombytes_into;
 use libc::c_ulonglong;
 
 /// Number of bytes in a `Salt`.
-pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES;
+pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES as usize;
 
 /// Number of bytes in a `HashedPassword`.
-pub const HASHEDPASSWORDBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES;
+pub const HASHEDPASSWORDBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES as usize;
 
 /// All `HashedPasswords` start with this string.
-pub const STRPREFIX: &'static str = ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX;
+pub const STRPREFIX: &'static str = "$7$";
 
 /// Safe base line for `OpsLimit` for interactive password hashing.
 pub const OPSLIMIT_INTERACTIVE: OpsLimit =
-    OpsLimit(ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE);
+    OpsLimit(ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE as usize);
 
 /// Safe base line for `MemLimit` for interactive password hashing.
 pub const MEMLIMIT_INTERACTIVE: MemLimit =
-    MemLimit(ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE);
+    MemLimit(ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE as usize);
 
 /// `OpsLimit` for highly sensitive data.
 pub const OPSLIMIT_SENSITIVE: OpsLimit =
-    OpsLimit(ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE);
+    OpsLimit(ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE as usize);
 
 /// `MemLimit` for highly sensitive data.
 pub const MEMLIMIT_SENSITIVE: MemLimit =
-    MemLimit(ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE);
+    MemLimit(ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE as usize);
 
 /// `OpsLimit` represents the maximum number of computations to perform when
 /// using the functions in this module.
@@ -107,9 +107,9 @@ pub fn derive_key<'a>(key: &'a mut [u8], passwd: &[u8], &Salt(ref sb): &Salt,
     if unsafe {
         ffi::crypto_pwhash_scryptsalsa208sha256(key.as_mut_ptr(),
                                                 key.len() as c_ulonglong,
-                                                passwd.as_ptr(),
+                                                passwd.as_ptr() as *const _,
                                                 passwd.len() as c_ulonglong,
-                                                sb,
+                                                sb.as_ptr(),
                                                 opslimit as c_ulonglong,
                                                 memlimit)
     } == 0 {
@@ -138,8 +138,8 @@ pub fn pwhash(passwd: &[u8], OpsLimit(opslimit): OpsLimit,
     let mut out = HashedPassword([0; HASHEDPASSWORDBYTES]);
     if unsafe {
         let HashedPassword(ref mut str_) = out;
-        ffi::crypto_pwhash_scryptsalsa208sha256_str(str_,
-                                                    passwd.as_ptr(),
+        ffi::crypto_pwhash_scryptsalsa208sha256_str(str_.as_mut_ptr() as *mut _,
+                                                    passwd.as_ptr() as *const _,
                                                     passwd.len() as c_ulonglong,
                                                     opslimit as c_ulonglong,
                                                     memlimit)
@@ -157,8 +157,8 @@ pub fn pwhash(passwd: &[u8], OpsLimit(opslimit): OpsLimit,
 pub fn pwhash_verify(&HashedPassword(ref str_): &HashedPassword,
                      passwd: &[u8]) -> bool {
     unsafe {
-        ffi::crypto_pwhash_scryptsalsa208sha256_str_verify(str_,
-                                                           passwd.as_ptr(),
+        ffi::crypto_pwhash_scryptsalsa208sha256_str_verify(str_.as_ptr() as *const _,
+                                                           passwd.as_ptr() as * const _,
                                                            passwd.len() as c_ulonglong)
             == 0
     }
@@ -167,6 +167,20 @@ pub fn pwhash_verify(&HashedPassword(ref str_): &HashedPassword,
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_match_strprefix() {
+        // Make sure that the hardcoded STRPREFIX matches with the prefix provided by
+        // the libsodium bindings.
+        // Note: The reason why we have to hardcode the STRPREFIX is because of a type
+        //       mismatch (and the issue of converting it to a str in
+        //       a constant expression):
+        //       &'static [u8; 4usize] != &'static str
+        assert_eq!(
+            ::std::str::from_utf8(ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX).unwrap(),
+            STRPREFIX
+        );
+    }
 
     #[test]
     fn test_derive_key() {

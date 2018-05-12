@@ -53,10 +53,13 @@
 #![warn(non_camel_case_types)]
 #![warn(unused_qualifications)]
 
+#![feature(test)]
+
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(not(feature = "std"), feature(alloc))]
 
 extern crate libsodium_sys as ffi;
+
 extern crate libc;
 #[cfg(any(test, feature = "serde"))]
 extern crate serde;

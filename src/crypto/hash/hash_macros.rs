@@ -10,10 +10,10 @@ use std::mem;
 use libc::c_ulonglong;
 
 /// Number of bytes in a `Digest`.
-pub const DIGESTBYTES: usize = $hashbytes;
+pub const DIGESTBYTES: usize = $hashbytes as usize;
 
 /// Block size of the hash function.
-pub const BLOCKBYTES: usize = $blockbytes;
+pub const BLOCKBYTES: usize = $blockbytes as usize;
 
 new_type! {
     /// Digest-structure
@@ -24,7 +24,7 @@ new_type! {
 pub fn hash(m: &[u8]) -> Digest {
     unsafe {
         let mut h = [0; DIGESTBYTES];
-        $hash_name(&mut h, m.as_ptr(), m.len() as c_ulonglong);
+        $hash_name(h.as_mut_ptr(), m.as_ptr(), m.len() as c_ulonglong);
         Digest(h)
     }
 }
@@ -56,7 +56,7 @@ impl State {
     pub fn finalize(mut self) -> Digest {
         unsafe {
             let mut digest = [0u8; DIGESTBYTES];
-            $hash_final(&mut self.0, &mut digest);
+            $hash_final(&mut self.0, digest.as_mut_ptr());
             Digest(digest)
         }
     }

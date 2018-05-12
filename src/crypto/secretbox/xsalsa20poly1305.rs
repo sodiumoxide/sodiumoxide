@@ -9,10 +9,10 @@ use ffi;
 use randombytes::randombytes_into;
 
 /// Number of bytes in `Key`.
-pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES;
+pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES as usize;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
+pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES as usize;
 
 new_type! {
     /// `Key` for symmetric authenticated encryption
@@ -37,7 +37,7 @@ new_type! {
 /// Number of bytes in the authenticator tag of an encrypted message
 /// i.e. the number of bytes by which the ciphertext is larger than the
 /// plaintext.
-pub const MACBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_MACBYTES;
+pub const MACBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_MACBYTES as usize;
 
 /// `gen_key()` randomly generates a secret key
 ///
@@ -73,8 +73,8 @@ pub fn seal(m: &[u8],
         ffi::crypto_secretbox_easy(c.as_mut_ptr(),
                                    m.as_ptr(),
                                    m.len() as u64,
-                                   n,
-                                   k);
+                                   n.as_ptr(),
+                                   k.as_ptr());
     }
     c
 }
@@ -89,11 +89,11 @@ pub fn seal_detached(m: &mut[u8],
     unsafe {
         ffi::crypto_secretbox_detached(
             m.as_mut_ptr(),
-            &mut tag,
+            tag.as_mut_ptr(),
             m.as_ptr(),
             m.len() as u64,
-            n,
-            k,
+            n.as_ptr(),
+            k.as_ptr(),
         );
     };
     Tag(tag)
@@ -115,8 +115,8 @@ pub fn open(c: &[u8],
         ffi::crypto_secretbox_open_easy(m.as_mut_ptr(),
                                         c.as_ptr(),
                                         c.len() as u64,
-                                        n,
-                                        k)
+                                        n.as_ptr(),
+                                        k.as_ptr())
     };
     if ret == 0 {
         Ok(m)
@@ -137,10 +137,10 @@ pub fn open_detached(c: &mut[u8],
         ffi::crypto_secretbox_open_detached(
             c.as_mut_ptr(),
             c.as_ptr(),
-            &tag.0,
+            tag.0.as_ptr(),
             c.len() as u64,
-            n,
-            k,
+            n.as_ptr(),
+            k.as_ptr(),
         )
     };
     if ret == 0 {
