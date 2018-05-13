@@ -1,11 +1,13 @@
-*~
-*.sw*
-*.o
-*.so
-/doc
-.rust
+### IntelliJ ###
+.idea
+*.iws
+*.iml
+*.ipr
 
-# Cargo files
+### CLion ###
+# CMake
+cmake-build-debug/
+
+### Rust ###
+/target/
 Cargo.lock
-/target
-libsodium-sys/target
