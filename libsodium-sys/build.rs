@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
+    println!("cargo:rerun-if-env-changed=SODIUM_INC_DIR");
     println!("cargo:rerun-if-env-changed=SODIUM_STATIC");
 
     if let Ok(lib_dir) = env::var("SODIUM_LIB_DIR") {
@@ -21,7 +22,10 @@ fn main() {
         pkg_config::find_library("libsodium").unwrap();
     }
 
-    let include_dir = pkg_config::get_variable("libsodium", "includedir").unwrap();
+    let include_dir = match env::var("SODIUM_INC_DIR") {
+        Ok(dir) => dir,
+        Err(_) => pkg_config::get_variable("libsodium", "includedir").unwrap()
+    };
 
     let bindings = bindgen::Builder::default()
         .header("sodium_wrapper.h")
