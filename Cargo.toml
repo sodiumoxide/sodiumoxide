@@ -9,6 +9,11 @@ readme = "README.md"
 repository = "https://github.com/sodiumoxide/sodiumoxide"
 categories = ["cryptography"]
 version = "0.0.16"
+exclude = [
+    "**/.gitignore",
+    ".travis.yml",
+    "bors.toml"
+]
 
 [badges]
 travis-ci = { repository = "dnaq/sodiumoxide" }
