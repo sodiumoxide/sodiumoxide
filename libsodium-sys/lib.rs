@@ -1,4 +1,5 @@
 #![allow(non_upper_case_globals)]
+#![no_std]
 
 extern crate libc;
 use libc::{c_void, c_int, c_ulonglong, c_char, size_t, uint64_t};
