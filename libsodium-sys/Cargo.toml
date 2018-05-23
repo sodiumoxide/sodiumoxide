@@ -1,7 +1,7 @@
 [package]
 authors = ["dnaq"]
 build = "build.rs"
-description = "FFI binding to libsodium generated with bindgen"
+description = "FFI binding to libsodium"
 documentation = "https://sodiumoxide.github.io/sodiumoxide"
 keywords = ["libsodium", "NaCl", "crypto"]
 license = "MIT OR Apache-2.0"
@@ -13,9 +13,6 @@ version = "0.0.16"
 
 [badges]
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
-
-[badges]
-travis-ci = { repository = "dnaq/sodiumoxide" }
 
 [build-dependencies]
 pkg-config = "^0.3.11"
