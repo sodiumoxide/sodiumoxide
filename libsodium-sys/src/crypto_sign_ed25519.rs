@@ -5,6 +5,11 @@ pub const crypto_sign_ed25519_SEEDBYTES: usize = 32;
 pub const crypto_sign_ed25519_PUBLICKEYBYTES: usize = 32;
 pub const crypto_sign_ed25519_SECRETKEYBYTES: usize = 64;
 
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct crypto_sign_ed25519ph_state {
+    state: crypto_hash_sha512_state,
+}
 
 extern {
     pub fn crypto_sign_ed25519_keypair(
@@ -41,6 +46,23 @@ extern {
     pub fn crypto_sign_ed25519_seedbytes() -> size_t;
     pub fn crypto_sign_ed25519_publickeybytes() -> size_t;
     pub fn crypto_sign_ed25519_secretkeybytes() -> size_t;
+    pub fn crypto_sign_ed25519ph_init(state: *mut crypto_sign_ed25519ph_state) -> c_int;
+    pub fn crypto_sign_ed25519ph_update(
+        state: *mut crypto_sign_ed25519ph_state,
+        m: *const u8,
+        mlen: c_ulonglong,
+    ) -> c_int;
+    pub fn crypto_sign_ed25519ph_final_create(
+        state: *mut crypto_sign_ed25519ph_state,
+        sig: *mut [u8; crypto_sign_ed25519_BYTES],
+        siglen: *mut c_ulonglong,
+        sk: *const [u8; crypto_sign_ed25519_SECRETKEYBYTES],
+    ) -> c_int;
+    pub fn crypto_sign_ed25519ph_final_verify(
+        state: *mut crypto_sign_ed25519ph_state,
+        sig: *const [u8; crypto_sign_ed25519_BYTES],
+        pk: *const [u8; crypto_sign_ed25519_PUBLICKEYBYTES],
+    ) -> c_int;
 }
 
 
