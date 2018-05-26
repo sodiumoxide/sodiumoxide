@@ -7,6 +7,7 @@ use libc::{c_void, c_int, c_ulonglong, c_char, size_t, uint64_t};
 include!("src/core.rs");
 
 include!("src/crypto_aead_chacha20poly1305.rs");
+include!("src/crypto_aead_xchacha20poly1305.rs");
 
 include!("src/crypto_auth.rs");
 include!("src/crypto_auth_hmacsha256.rs");
@@ -48,6 +49,8 @@ include!("src/crypto_stream_salsa2012.rs");
 include!("src/crypto_stream_salsa208.rs");
 include!("src/crypto_stream_xsalsa20.rs");
 include!("src/crypto_stream_xchacha20.rs");
+
+include!("src/crypto_secretstream_xchacha20poly1305.rs");
 
 include!("src/crypto_verify_16.rs");
 include!("src/crypto_verify_32.rs");

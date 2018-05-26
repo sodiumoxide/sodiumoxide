@@ -115,6 +115,7 @@ pub mod crypto {
     pub mod onetimeauth;
     pub mod pwhash;
     pub mod stream;
+    pub mod secretstream;
     pub mod shorthash;
     pub mod verify;
     pub mod kx;
