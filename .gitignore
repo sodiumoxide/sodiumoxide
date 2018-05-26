@@ -1,11 +1,45 @@
-*~
-*.sw*
-*.o
-*.so
-/doc
-.rust
+#### Binary ####
+### Archive ###
+*.a
+*.lib
 
-# Cargo files
+### Object ###
+*.o
+*.obj
+
+### Shared Object ###
+*.dll
+*.dylib
+*.so
+*.so.*
+
+#### IDEs ####
+### CLion ###
+# CMake
+cmake-build-debug/
+
+### IntelliJ ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### Vim ###
+.sw[a-p]
+.*.sw[a-p]
+Session.vim
+.netrwhist
+*~
+
+### Visual Studio Code ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+
+#### Languages ####
+### Rust ###
+/target/
 Cargo.lock
-/target
-libsodium-sys/target

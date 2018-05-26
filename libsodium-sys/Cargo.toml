@@ -2,23 +2,23 @@
 authors = ["dnaq"]
 build = "build.rs"
 description = "FFI binding to libsodium"
-documentation = "https://dnaq.github.io/sodiumoxide"
+documentation = "https://sodiumoxide.github.io/sodiumoxide"
 keywords = ["libsodium", "NaCl", "crypto"]
 license = "MIT OR Apache-2.0"
 links = "sodium"
 name = "libsodium-sys"
-repository = "https://github.com/dnaq/sodiumoxide.git"
+repository = "https://github.com/sodiumoxide/sodiumoxide.git"
 categories = ["cryptography", "api-bindings"]
 version = "0.0.16"
 
 [badges]
-travis-ci = { repository = "dnaq/sodiumoxide" }
+travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 
 [build-dependencies]
-pkg-config = "0.3"
+pkg-config = "^0.3.11"
 
 [dependencies]
-libc = "0.2"
+libc = { version = "^0.2.41" , default-features = false }
 
 [lib]
 name = "libsodium_sys"

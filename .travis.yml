@@ -30,3 +30,7 @@ env:
   global:
     - GH_REF: github.com/dnaq/sodiumoxide.git
     - secure: LFhOKKRNMdfsU4bUKLi+9ly5l0mrvnL9rS0M33aEyvCoeTiptuHsOCoSxZMk4iH5dA3IGQX+q6BjQlB5o/W4svSeOFfTvvXQ7QgqIoWqO0a9kAstVDZFTFM7xGMbI9jrihH4mHeT4dZdN779Mbnhg3tynbNapB+0ewA+cz3Wb5s=
+
+branches:
+    except:
+    - /.*(.tmp)$/
