@@ -17,13 +17,13 @@ pub const SEALBYTES: usize = ffi::crypto_box_SEALBYTES as usize;
 /// key to the ciphertext. The secret key is overwritten and is not accessible
 /// after this function returns.
 pub fn seal(m: &[u8],
-            &box_::PublicKey(ref pk): &box_::PublicKey) -> Vec<u8> {
+            pk: &box_::PublicKey) -> Vec<u8> {
     let mut c = vec![0u8; m.len() + SEALBYTES];
     unsafe {
         ffi::crypto_box_seal(c.as_mut_ptr(),
                              m.as_ptr(),
                              m.len() as c_ulonglong,
-                             pk.as_ptr());
+                             pk.0.as_ptr());
     }
     c
 }
@@ -40,8 +40,8 @@ pub fn seal(m: &[u8],
 ///
 /// If decryption fails it returns `Err(())`.
 pub fn open(c: &[u8],
-            &box_::PublicKey(ref pk): &box_::PublicKey,
-            &box_::SecretKey(ref sk): &box_::SecretKey) -> Result<Vec<u8>, ()> {
+            pk: &box_::PublicKey,
+            sk: &box_::SecretKey) -> Result<Vec<u8>, ()> {
     if c.len() < SEALBYTES {
         return Err(());
     }
@@ -50,8 +50,8 @@ pub fn open(c: &[u8],
         ffi::crypto_box_seal_open(m.as_mut_ptr(),
                                   c.as_ptr(),
                                   c.len() as c_ulonglong,
-                                  pk.as_ptr(),
-                                  sk.as_ptr())
+                                  pk.0.as_ptr(),
+                                  sk.0.as_ptr())
     };
     if ret == 0 {
         Ok(m)

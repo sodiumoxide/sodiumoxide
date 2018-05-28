@@ -35,12 +35,12 @@ pub fn gen_key() -> Key {
 /// `shorthash` hashes a message `m` under a key `k`. It
 /// returns a hash `h`.
 pub fn shorthash(m: &[u8],
-                 &Key(ref k): &Key) -> Digest {
+                 k: &Key) -> Digest {
     unsafe {
         let mut h = [0; DIGESTBYTES];
         ffi::crypto_shorthash_siphash24(h.as_mut_ptr(), m.as_ptr(),
                                         m.len() as c_ulonglong,
-                                        k.as_ptr());
+                                        k.0.as_ptr());
         Digest(h)
     }
 }

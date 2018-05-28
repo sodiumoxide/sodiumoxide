@@ -42,9 +42,9 @@ impl SecretKey {
     /// `public_key()` computes the corresponding public key for a given secret key
     pub fn public_key(&self) -> PublicKey {
         unsafe {
-            let mut pk = [0u8; PUBLICKEYBYTES];
-            ffi::crypto_scalarmult_base(pk.as_mut_ptr(), self.0.as_ptr());
-            PublicKey(pk)
+            let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+            ffi::crypto_scalarmult_base(pk.0.as_mut_ptr(), self.0.as_ptr());
+            pk
         }
     }
 }
@@ -68,12 +68,12 @@ new_type! {
 /// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8; PUBLICKEYBYTES];
-        let mut sk = [0u8; SECRETKEYBYTES];
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
         ffi::crypto_box_curve25519xsalsa20poly1305_keypair(
-            pk.as_mut_ptr(),
-            sk.as_mut_ptr());
-        (PublicKey(pk), SecretKey(sk))
+            pk.0.as_mut_ptr(),
+            sk.0.as_mut_ptr());
+        (pk, sk)
     }
 }
 
@@ -91,9 +91,9 @@ pub fn gen_nonce() -> Nonce {
 /// `seal()` encrypts and authenticates a message `m` using the senders secret key `sk`,
 /// the receivers public key `pk` and a nonce `n`. It returns a ciphertext `c`.
 pub fn seal(m: &[u8],
-            &Nonce(ref n): &Nonce,
-            &PublicKey(ref pk): &PublicKey,
-            &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
+            n: &Nonce,
+            pk: &PublicKey,
+            sk: &SecretKey) -> Vec<u8> {
     let clen = m.len() + MACBYTES;
     let mut c = Vec::with_capacity(clen);
     unsafe {
@@ -101,9 +101,9 @@ pub fn seal(m: &[u8],
         ffi::crypto_box_easy(c.as_mut_ptr(),
                              m.as_ptr(),
                              m.len() as u64,
-                             n.as_ptr(),
-                             pk.as_ptr(),
-                             sk.as_ptr());
+                             n.0.as_ptr(),
+                             pk.0.as_ptr(),
+                             sk.0.as_ptr());
     }
     c
 }
@@ -113,9 +113,9 @@ pub fn seal(m: &[u8],
 /// function returns it will contain the ciphertext. The detached authentication tag is returned by
 /// value.
 pub fn seal_detached(m: &mut [u8],
-                     &Nonce(ref n): &Nonce,
-                     &PublicKey(ref pk): &PublicKey,
-                     &SecretKey(ref sk): &SecretKey) -> Tag {
+                     n: &Nonce,
+                     pk: &PublicKey,
+                     sk: &SecretKey) -> Tag {
     let mut tag = [0; MACBYTES];
     unsafe {
         ffi::crypto_box_detached(
@@ -123,9 +123,9 @@ pub fn seal_detached(m: &mut [u8],
             tag.as_mut_ptr(),
             m.as_ptr(),
             m.len() as u64,
-            n.as_ptr(),
-            pk.as_ptr(),
-            sk.as_ptr(),
+            n.0.as_ptr(),
+            pk.0.as_ptr(),
+            sk.0.as_ptr(),
         );
     };
     Tag(tag)
@@ -135,9 +135,9 @@ pub fn seal_detached(m: &mut [u8],
 /// the senders public key `pk`, and a nonce `n`. It returns a plaintext `Ok(m)`.
 /// If the ciphertext fails verification, `open()` returns `Err(())`.
 pub fn open(c: &[u8],
-            &Nonce(ref n): &Nonce,
-            &PublicKey(ref pk): &PublicKey,
-            &SecretKey(ref sk): &SecretKey) -> Result<Vec<u8>, ()> {
+            n: &Nonce,
+            pk: &PublicKey,
+            sk: &SecretKey) -> Result<Vec<u8>, ()> {
     if c.len() < MACBYTES {
         return Err(());
     }
@@ -148,9 +148,9 @@ pub fn open(c: &[u8],
         ffi::crypto_box_open_easy(m.as_mut_ptr(),
                                   c.as_ptr(),
                                   c.len() as u64,
-                                  n.as_ptr(),
-                                  pk.as_ptr(),
-                                  sk.as_ptr())
+                                  n.0.as_ptr(),
+                                  pk.0.as_ptr(),
+                                  sk.0.as_ptr())
     };
     if ret == 0 {
         Ok(m)
@@ -165,18 +165,18 @@ pub fn open(c: &[u8],
 /// `open_detached()` returns `Err(())`, and the ciphertext is not modified.
 pub fn open_detached(c: &mut [u8],
                      mac: &Tag,
-                     &Nonce(ref n): &Nonce,
-                     &PublicKey(ref pk): &PublicKey,
-                     &SecretKey(ref sk): &SecretKey) -> Result<(), ()> {
+                     n: &Nonce,
+                     pk: &PublicKey,
+                     sk: &SecretKey) -> Result<(), ()> {
     let ret = unsafe {
         ffi::crypto_box_open_detached(
             c.as_mut_ptr(),
             c.as_ptr(),
             mac.0.as_ptr(),
             c.len() as u64,
-            n.as_ptr(),
-            pk.as_ptr(),
-            sk.as_ptr(),
+            n.0.as_ptr(),
+            pk.0.as_ptr(),
+            sk.0.as_ptr(),
         )
     };
     if ret == 0 {
@@ -198,22 +198,22 @@ new_type! {
 
 /// `precompute()` computes an intermediate key that can be used by `seal_precomputed()`
 /// and `open_precomputed()`
-pub fn precompute(&PublicKey(ref pk): &PublicKey,
-                  &SecretKey(ref sk): &SecretKey) -> PrecomputedKey {
-    let mut k = [0u8; PRECOMPUTEDKEYBYTES];
+pub fn precompute(pk: &PublicKey,
+                  sk: &SecretKey) -> PrecomputedKey {
+    let mut k = PrecomputedKey([0u8; PRECOMPUTEDKEYBYTES]);
     unsafe {
-        ffi::crypto_box_curve25519xsalsa20poly1305_beforenm(k.as_mut_ptr(),
-                                                            pk.as_ptr(),
-                                                            sk.as_ptr());
+        ffi::crypto_box_curve25519xsalsa20poly1305_beforenm(k.0.as_mut_ptr(),
+                                                            pk.0.as_ptr(),
+                                                            sk.0.as_ptr());
     }
-    PrecomputedKey(k)
+    k
 }
 
 /// `seal_precomputed()` encrypts and authenticates a message `m` using a precomputed key `k`,
 /// and a nonce `n`. It returns a ciphertext `c`.
 pub fn seal_precomputed(m: &[u8],
-                        &Nonce(ref n): &Nonce,
-                        &PrecomputedKey(ref k): &PrecomputedKey) -> Vec<u8> {
+                        n: &Nonce,
+                        k: &PrecomputedKey) -> Vec<u8> {
     let clen = m.len() + MACBYTES;
     let mut c = Vec::with_capacity(clen);
     unsafe {
@@ -221,8 +221,8 @@ pub fn seal_precomputed(m: &[u8],
         ffi::crypto_box_easy_afternm(c.as_mut_ptr(),
                                      m.as_ptr(),
                                      m.len() as u64,
-                                     n.as_ptr(),
-                                     k.as_ptr());
+                                     n.0.as_ptr(),
+                                     k.0.as_ptr());
     }
     c
 }
@@ -231,8 +231,8 @@ pub fn seal_precomputed(m: &[u8],
 /// `k` and a nonce `n`. `m` is encrypted in place, so after this function returns it will contain
 /// the ciphertext. The detached authentication tag is returned by value.
 pub fn seal_detached_precomputed(m: &mut [u8],
-                                 &Nonce(ref n): &Nonce,
-                                 &PrecomputedKey(ref k): &PrecomputedKey) -> Tag {
+                                 n: &Nonce,
+                                 k: &PrecomputedKey) -> Tag {
     let mut tag = [0; MACBYTES];
     unsafe {
         ffi::crypto_box_detached_afternm(
@@ -240,8 +240,8 @@ pub fn seal_detached_precomputed(m: &mut [u8],
             tag.as_mut_ptr(),
             m.as_ptr(),
             m.len() as u64,
-            n.as_ptr(),
-            k.as_ptr(),
+            n.0.as_ptr(),
+            k.0.as_ptr(),
         );
     };
     Tag(tag)
@@ -251,8 +251,8 @@ pub fn seal_detached_precomputed(m: &mut [u8],
 /// key `k` and a nonce `n`. It returns a plaintext `Ok(m)`.
 /// If the ciphertext fails verification, `open_precomputed()` returns `Err(())`.
 pub fn open_precomputed(c: &[u8],
-                        &Nonce(ref n): &Nonce,
-                        &PrecomputedKey(ref k): &PrecomputedKey) -> Result<Vec<u8>, ()> {
+                        n: &Nonce,
+                        k: &PrecomputedKey) -> Result<Vec<u8>, ()> {
     if c.len() < MACBYTES {
         return Err(());
     }
@@ -263,8 +263,8 @@ pub fn open_precomputed(c: &[u8],
         ffi::crypto_box_open_easy_afternm(m.as_mut_ptr(),
                                           c.as_ptr(),
                                           c.len() as u64,
-                                          n.as_ptr(),
-                                          k.as_ptr())
+                                          n.0.as_ptr(),
+                                          k.0.as_ptr())
     };
     if ret == 0 {
         Ok(m)
@@ -279,16 +279,16 @@ pub fn open_precomputed(c: &[u8],
 /// `Err(())`, and the ciphertext is not modified.
 pub fn open_detached_precomputed(c: &mut [u8],
                                  mac: &Tag,
-                                 &Nonce(ref n): &Nonce,
-                                 &PrecomputedKey(ref k): &PrecomputedKey) -> Result<(), ()> {
+                                 n: &Nonce,
+                                 k: &PrecomputedKey) -> Result<(), ()> {
     let ret = unsafe {
         ffi::crypto_box_open_detached_afternm(
             c.as_mut_ptr(),
             c.as_ptr(),
             mac.0.as_ptr(),
             c.len() as u64,
-            n.as_ptr(),
-            k.as_ptr(),
+            n.0.as_ptr(),
+            k.0.as_ptr(),
         )
     };
     if ret == 0 {

@@ -27,12 +27,12 @@ new_type! {
 /// If the the `GroupElement` is all zero, `scalarmult()` returns `Err(())` since
 /// the resulting `GroupElement` would be all zero, no matter the `Scalar`.
 pub fn scalarmult(
-    &Scalar(ref n): &Scalar,
-    &GroupElement(ref p): &GroupElement,
+    n: &Scalar,
+    p: &GroupElement,
 ) -> Result<GroupElement, ()> {
     let mut q = [0; GROUPELEMENTBYTES];
     unsafe {
-        if ffi::crypto_scalarmult_curve25519(q.as_mut_ptr(), n.as_ptr(), p.as_ptr()) != 0 {
+        if ffi::crypto_scalarmult_curve25519(q.as_mut_ptr(), n.0.as_ptr(), p.0.as_ptr()) != 0 {
             Err(())
         } else {
             Ok(GroupElement(q))
@@ -43,10 +43,10 @@ pub fn scalarmult(
 /// `scalarmult_base()` computes the scalar product of a standard
 /// group element and an integer `n`. It returns the resulting
 /// group element `q`/
-pub fn scalarmult_base(&Scalar(ref n): &Scalar) -> GroupElement {
+pub fn scalarmult_base(n: &Scalar) -> GroupElement {
     let mut q = [0; GROUPELEMENTBYTES];
     unsafe {
-        ffi::crypto_scalarmult_curve25519_base(q.as_mut_ptr(), n.as_ptr());
+        ffi::crypto_scalarmult_curve25519_base(q.as_mut_ptr(), n.0.as_ptr());
     }
     GroupElement(q)
 }
@@ -154,12 +154,10 @@ mod bench {
 
     #[bench]
     fn bench_scalarmult(b: &mut test::Bencher) {
-        let mut gbs = [0u8; GROUPELEMENTBYTES];
-        let mut sbs = [0u8; SCALARBYTES];
-        randombytes_into(&mut gbs);
-        randombytes_into(&mut sbs);
-        let g = GroupElement(gbs);
-        let s = Scalar(sbs);
+        let mut g = GroupElement([0u8; GROUPELEMENTBYTES]);
+        let mut s = Scalar([0u8; SCALARBYTES]);
+        randombytes_into(&mut g.0);
+        randombytes_into(&mut s.0);
         b.iter(|| {
             scalarmult(&s, &g);
         });
@@ -167,9 +165,8 @@ mod bench {
 
     #[bench]
     fn bench_scalarmult_base(b: &mut test::Bencher) {
-        let mut sbs = [0u8; SCALARBYTES];
-        randombytes_into(&mut sbs);
-        let s = Scalar(sbs);
+        let mut s = Scalar([0u8; SCALARBYTES]);
+        randombytes_into(&mut s.0);
         b.iter(|| {
             scalarmult_base(&s);
         });

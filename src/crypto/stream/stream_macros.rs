@@ -55,14 +55,14 @@ pub fn gen_nonce() -> Nonce {
 /// `stream()` produces a `len`-byte stream `c` as a function of a
 /// secret key `k` and a nonce `n`.
 pub fn stream(len: usize,
-              &Nonce(ref n): &Nonce,
-              &Key(ref k): &Key) -> Vec<u8> {
+              n: &Nonce,
+              k: &Key) -> Vec<u8> {
     unsafe {
         let mut c = vec![0u8; len];
         $stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
-                     n.as_ptr(),
-                     k.as_ptr());
+                     n.0.as_ptr(),
+                     k.0.as_ptr());
         c
     }
 }
@@ -74,15 +74,15 @@ pub fn stream(len: usize,
 /// and is the plaintext xor the output of `stream()`.
 /// Consequently `stream_xor()` can also be used to decrypt.
 pub fn stream_xor(m: &[u8],
-                  &Nonce(ref n): &Nonce,
-                  &Key(ref k): &Key) -> Vec<u8> {
+                  n: &Nonce,
+                  k: &Key) -> Vec<u8> {
     unsafe {
         let mut c = vec![0u8; m.len()];
         $xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
-                  n.as_ptr(),
-                  k.as_ptr());
+                  n.0.as_ptr(),
+                  k.0.as_ptr());
         c
     }
 }
@@ -94,14 +94,14 @@ pub fn stream_xor(m: &[u8],
 /// the plaintext, and is the plaintext xor the output of `stream_inplace()`.
 /// Consequently `stream_xor_inplace()` can also be used to decrypt.
 pub fn stream_xor_inplace(m: &mut [u8],
-                          &Nonce(ref n): &Nonce,
-                          &Key(ref k): &Key) {
+                          n: &Nonce,
+                          k: &Key) {
     unsafe {
         $xor_name(m.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
-                  n.as_ptr(),
-                  k.as_ptr());
+                  n.0.as_ptr(),
+                  k.0.as_ptr());
     }
 }
 
@@ -113,17 +113,17 @@ pub fn stream_xor_inplace(m: &mut [u8],
 /// and is the plaintext xor the output of `stream()`.
 /// Consequently `stream_xor()` can also be used to decrypt.
 pub fn stream_xor_ic(m: &[u8],
-                     &Nonce(ref n): &Nonce,
+                     n: &Nonce,
                      ic: u64,
-                     &Key(ref k): &Key) -> Vec<u8> {
+                     k: &Key) -> Vec<u8> {
     unsafe {
         let mut c = vec![0u8; m.len()];
         $xor_ic_name(c.as_mut_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
-                     n.as_ptr(),
+                     n.0.as_ptr(),
                      ic as uint64_t,
-                     k.as_ptr());
+                     k.0.as_ptr());
         c
     }
 }
@@ -137,16 +137,16 @@ pub fn stream_xor_ic(m: &[u8],
 /// the plaintext, and is the plaintext xor the output of `stream_inplace()`.
 /// Consequently `stream_xor_ic_inplace()` can also be used to decrypt.
 pub fn stream_xor_ic_inplace(m: &mut [u8],
-                             &Nonce(ref n): &Nonce,
+                             n: &Nonce,
                              ic: u64,
-                             &Key(ref k): &Key) {
+                             k: &Key) {
     unsafe {
         $xor_ic_name(m.as_mut_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
-                     n.as_ptr(),
+                     n.0.as_ptr(),
                      ic as uint64_t,
-                     k.as_ptr());
+                     k.0.as_ptr());
     }
 }
 
