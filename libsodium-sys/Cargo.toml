@@ -16,10 +16,10 @@ travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 
 [build-dependencies]
 pkg-config = "^0.3.11"
+bindgen = "0.37.0"
 
 [dependencies]
 libc = { version = "^0.2.41" , default-features = false }
 
 [lib]
 name = "libsodium_sys"
-path = "lib.rs"

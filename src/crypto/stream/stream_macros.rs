@@ -9,10 +9,10 @@ use libc::{c_ulonglong, uint64_t};
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes;
+pub const KEYBYTES: usize = $keybytes as usize;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = $noncebytes;
+pub const NONCEBYTES: usize = $noncebytes as usize;
 
 new_type! {
     /// `Key` for symmetric encryption
@@ -61,8 +61,8 @@ pub fn stream(len: usize,
         let mut c = vec![0u8; len];
         $stream_name(c.as_mut_ptr(),
                      c.len() as c_ulonglong,
-                     n,
-                     k);
+                     n.as_ptr(),
+                     k.as_ptr());
         c
     }
 }
@@ -81,8 +81,8 @@ pub fn stream_xor(m: &[u8],
         $xor_name(c.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
-                  n,
-                  k);
+                  n.as_ptr(),
+                  k.as_ptr());
         c
     }
 }
@@ -100,15 +100,15 @@ pub fn stream_xor_inplace(m: &mut [u8],
         $xor_name(m.as_mut_ptr(),
                   m.as_ptr(),
                   m.len() as c_ulonglong,
-                  n,
-                  k);
+                  n.as_ptr(),
+                  k.as_ptr());
     }
 }
 
 /// `stream_xor_ic()` encrypts a message `m` using a secret key `k` and a nonce `n`,
 /// it is similar to `stream_xor()` but allows the caller to set the value of the initial
 /// block counter `ic`.
-/// 
+///
 /// `stream_xor()` guarantees that the ciphertext has the same length as the plaintext,
 /// and is the plaintext xor the output of `stream()`.
 /// Consequently `stream_xor()` can also be used to decrypt.
@@ -121,9 +121,9 @@ pub fn stream_xor_ic(m: &[u8],
         $xor_ic_name(c.as_mut_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
-                     n,
+                     n.as_ptr(),
                      ic as uint64_t,
-                     k);
+                     k.as_ptr());
         c
     }
 }
@@ -144,9 +144,9 @@ pub fn stream_xor_ic_inplace(m: &mut [u8],
         $xor_ic_name(m.as_mut_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
-                     n,
+                     n.as_ptr(),
                      ic as uint64_t,
-                     k);
+                     k.as_ptr());
     }
 }
 
