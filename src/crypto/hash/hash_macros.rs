@@ -55,9 +55,9 @@ impl State {
     /// `State` so that it cannot be accidentally reused.
     pub fn finalize(mut self) -> Digest {
         unsafe {
-            let mut digest = [0u8; DIGESTBYTES];
-            $hash_final(&mut self.0, digest.as_mut_ptr());
-            Digest(digest)
+            let mut digest = Digest([0u8; DIGESTBYTES]);
+            $hash_final(&mut self.0, digest.0.as_mut_ptr());
+            digest
         }
     }
 }

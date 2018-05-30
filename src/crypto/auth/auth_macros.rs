@@ -42,26 +42,26 @@ pub fn gen_key() -> Key {
 /// `authenticate()` authenticates a message `m` using a secret key `k`.
 /// The function returns an authenticator tag.
 pub fn authenticate(m: &[u8],
-                    &Key(ref k): &Key) -> Tag {
+                    k: &Key) -> Tag {
     unsafe {
         let mut tag = [0; TAGBYTES];
         $auth_name(tag.as_mut_ptr(),
                    m.as_ptr(),
                    m.len() as c_ulonglong,
-                   k.as_ptr());
+                   k.0.as_ptr());
         Tag(tag)
     }
 }
 
 /// `verify()` returns `true` if `tag` is a correct authenticator of message `m`
 /// under a secret key `k`. Otherwise it returns false.
-pub fn verify(&Tag(ref tag): &Tag, m: &[u8],
-              &Key(ref k): &Key) -> bool {
+pub fn verify(tag: &Tag, m: &[u8],
+              k: &Key) -> bool {
     unsafe {
-        $verify_name(tag.as_ptr(),
+        $verify_name(tag.0.as_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
-                     k.as_ptr()) == 0
+                     k.0.as_ptr()) == 0
     }
 }
 
@@ -197,10 +197,8 @@ pub struct State($state_name);
 
 impl Drop for State {
     fn drop(&mut self) {
-        let &mut State(ref mut s) = self;
         unsafe {
-            let sp: *mut $state_name = s;
-            ffi::sodium_memzero(sp as *mut _, mem::size_of_val(s));
+            ffi::sodium_memzero(&mut self.0 as *mut $state_name as *mut _, mem::size_of_val(&self.0));
         }
     }
 }
