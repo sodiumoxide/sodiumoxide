@@ -14,16 +14,16 @@ mod digest;
 pub use self::digest::Digest;
 
 /// Minimium of allowed bytes in a `Digest`
-pub const DIGEST_MIN: usize = crypto_generichash_BYTES_MIN;
+pub const DIGEST_MIN: usize = crypto_generichash_BYTES_MIN as usize;
 
 /// Maximum of allowed bytes in a `Digest`
-pub const DIGEST_MAX: usize = crypto_generichash_BYTES_MAX;
+pub const DIGEST_MAX: usize = crypto_generichash_BYTES_MAX as usize;
 
 /// Minimium of allowed bytes in a key
-pub const KEY_MIN: usize = crypto_generichash_KEYBYTES_MIN;
+pub const KEY_MIN: usize = crypto_generichash_KEYBYTES_MIN as usize;
 
 /// Maximum of allowed bytes in a key
-pub const KEY_MAX: usize = crypto_generichash_KEYBYTES_MAX;
+pub const KEY_MAX: usize = crypto_generichash_KEYBYTES_MAX as usize;
 
 /// `State` contains the state for multi-part (streaming) hash computations. This allows the caller
 /// to process a message as a sequence of multiple chunks.
@@ -98,7 +98,7 @@ impl State {
         let state_ptr = self.state.as_mut_slice().as_mut_ptr() as *mut _;
         let mut result = Digest {
             len: self.out_len,
-            data: [0u8; crypto_generichash_BYTES_MAX],
+            data: [0u8; crypto_generichash_BYTES_MAX as usize],
         };
         unsafe {
             crypto_generichash_final(

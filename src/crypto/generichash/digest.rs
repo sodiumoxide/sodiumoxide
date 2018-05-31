@@ -7,7 +7,7 @@ use ffi::crypto_generichash_BYTES_MAX;
 #[derive(Clone)]
 pub struct Digest {
     pub(super) len: usize,
-    pub(super) data: [u8; crypto_generichash_BYTES_MAX],
+    pub(super) data: [u8; crypto_generichash_BYTES_MAX as usize],
 }
 
 impl ::std::cmp::PartialEq for Digest {
