@@ -1,13 +1,14 @@
 //! `GenericHash`.
 //!
-#[cfg(not(feature = "std"))] use prelude::Vec;
-
-use ffi::{crypto_generichash_final, crypto_generichash_init,
-          crypto_generichash_statebytes, crypto_generichash_update,
-          crypto_generichash_BYTES_MAX, crypto_generichash_BYTES_MIN,
-          crypto_generichash_KEYBYTES_MAX, crypto_generichash_KEYBYTES_MIN};
+use ffi::{
+    crypto_generichash_BYTES_MAX, crypto_generichash_BYTES_MIN,
+    crypto_generichash_KEYBYTES_MAX, crypto_generichash_KEYBYTES_MIN,
+    crypto_generichash_final, crypto_generichash_init,
+    crypto_generichash_state, crypto_generichash_update,
+};
 
 use libc::c_ulonglong;
+use std::mem;
 use std::ptr;
 
 mod digest;
@@ -29,7 +30,7 @@ pub const KEY_MAX: usize = crypto_generichash_KEYBYTES_MAX as usize;
 /// to process a message as a sequence of multiple chunks.
 pub struct State {
     out_len: usize,
-    state: Vec<u8>,
+    state: crypto_generichash_state,
 }
 
 impl State {
@@ -53,10 +54,11 @@ impl State {
             }
         }
 
-        let mut state = Vec::<u8>::new();
+        let mut state: crypto_generichash_state;
+
         let result = unsafe {
-            state.reserve_exact(crypto_generichash_statebytes());
-            let state_ptr = state.as_mut_slice().as_mut_ptr() as *mut _;
+            state = mem::uninitialized();
+            let state_ptr = &mut state as *mut _;
             if let Some(key) = key {
                 crypto_generichash_init(
                     state_ptr,
@@ -72,7 +74,7 @@ impl State {
         if result == 0 {
             Some(State {
                 out_len: out_len,
-                state: state,
+                state,
             })
         } else {
             None
@@ -83,7 +85,7 @@ impl State {
     /// to compute the hash from sequential chunks of the message.
     pub fn update(&mut self, data: &[u8]) {
         unsafe {
-            let state_ptr = self.state.as_mut_slice().as_mut_ptr() as *mut _;
+            let state_ptr = &mut self.state as *mut _;
             crypto_generichash_update(
                 state_ptr,
                 data.as_ptr(),
@@ -95,7 +97,7 @@ impl State {
     /// `finalize` finalizes the state and returns the digest value. `finalize` consumes the
     /// `State` so that it cannot be accidentally reused.
     pub fn finalize(mut self) -> Digest {
-        let state_ptr = self.state.as_mut_slice().as_mut_ptr() as *mut _;
+        let state_ptr = &mut self.state as *mut _;
         let mut result = Digest {
             len: self.out_len,
             data: [0u8; crypto_generichash_BYTES_MAX as usize],
