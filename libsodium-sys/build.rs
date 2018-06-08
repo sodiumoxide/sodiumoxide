@@ -75,7 +75,7 @@ fn try_vcpkg() -> bool {
 fn get_vcpkg_include_path() -> Option<String> {
     let lib = vcpkg::probe_package("libsodium");
     match lib {
-        Ok(lib) => lib.include_paths.get(0).and_then(|path| path.to_str().to_owned()),
+        Ok(lib) => lib.include_paths.get(0).and_then(|path| path.into_os_string().into_string().ok()),
         _ => None,
     }
 
