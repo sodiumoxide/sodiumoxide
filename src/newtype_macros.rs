@@ -18,11 +18,8 @@ macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
             return None;
         }
         let mut n = $newtype([0; $len]);
-        {
-            let $newtype(ref mut b) = n;
-            for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
-                *bi = bsi
-            }
+        for (ni, &bsi) in n.0.iter_mut().zip(bs.iter()) {
+            *ni = bsi
         }
         Some(n)
     }
@@ -30,10 +27,9 @@ macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
 
 macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::cmp::PartialEq for $newtype {
-        fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
+        fn eq(&self, other: &$newtype) -> bool {
             use utils::memcmp;
-            let &$newtype(ref this) = self;
-            memcmp(this, other)
+            memcmp(&self.0, &other.0)
         }
     }
     impl ::std::cmp::Eq for $newtype {}
@@ -62,12 +58,9 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
                     where V: ::serde::de::SeqAccess<'de>
                 {
                     let mut res = $newtype([0; $len]);
-                    {
-                        let $newtype(ref mut arr) = res;
-                        for r in arr.iter_mut() {
-                            if let Some(value) = try!(visitor.next_element()) {
-                                *r = value;
-                            }
+                    for r in res.0.iter_mut() {
+                        if let Some(value) = try!(visitor.next_element()) {
+                            *r = value;
                         }
                     }
                     Ok(res)
@@ -91,8 +84,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::ops::Index<::std::ops::Range<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::Range<usize>) -> &[u8] {
-            let &$newtype(ref b) = self;
-            b.index(_index)
+            self.0.index(_index)
         }
     }
     /// Allows a user to access the byte contents of an object as a slice.
@@ -104,8 +96,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::ops::Index<::std::ops::RangeTo<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeTo<usize>) -> &[u8] {
-            let &$newtype(ref b) = self;
-            b.index(_index)
+            self.0.index(_index)
         }
     }
     /// Allows a user to access the byte contents of an object as a slice.
@@ -117,8 +108,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::ops::Index<::std::ops::RangeFrom<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeFrom<usize>) -> &[u8] {
-            let &$newtype(ref b) = self;
-            b.index(_index)
+            self.0.index(_index)
         }
     }
     /// Allows a user to access the byte contents of an object as a slice.
@@ -130,8 +120,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::ops::Index<::std::ops::RangeFull> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeFull) -> &[u8] {
-            let &$newtype(ref b) = self;
-            b.index(_index)
+            self.0.index(_index)
         }
     }
     ));
@@ -224,8 +213,7 @@ macro_rules! new_type {
         impl Drop for $name {
             fn drop(&mut self) {
                 use utils::memzero;
-                let &mut $name(ref mut v) = self;
-                memzero(v);
+                memzero(&mut self.0);
             }
         }
         impl ::std::fmt::Debug for $name {
@@ -291,8 +279,7 @@ macro_rules! new_type {
             /// will not uphold any security guarantees.
             pub fn increment_le_inplace(&mut self) {
                 use utils::increment_le;
-                let &mut $name(ref mut r) = self;
-                increment_le(r);
+                increment_le(&mut self.0);
             }
 
         }

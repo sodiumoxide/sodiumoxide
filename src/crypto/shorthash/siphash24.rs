@@ -4,10 +4,10 @@ use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Digest`.
-pub const DIGESTBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES;
+pub const DIGESTBYTES: usize = ffi::crypto_shorthash_siphash24_BYTES as usize;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES;
+pub const KEYBYTES: usize = ffi::crypto_shorthash_siphash24_KEYBYTES as usize;
 
 new_type! {
     /// `Digest` structure
@@ -35,12 +35,12 @@ pub fn gen_key() -> Key {
 /// `shorthash` hashes a message `m` under a key `k`. It
 /// returns a hash `h`.
 pub fn shorthash(m: &[u8],
-                 &Key(ref k): &Key) -> Digest {
+                 k: &Key) -> Digest {
     unsafe {
         let mut h = [0; DIGESTBYTES];
-        ffi::crypto_shorthash_siphash24(&mut h, m.as_ptr(),
+        ffi::crypto_shorthash_siphash24(h.as_mut_ptr(), m.as_ptr(),
                                         m.len() as c_ulonglong,
-                                        k);
+                                        k.0.as_ptr());
         Digest(h)
     }
 }

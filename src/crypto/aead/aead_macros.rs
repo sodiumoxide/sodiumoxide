@@ -11,17 +11,17 @@ use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes;
+pub const KEYBYTES: usize = $keybytes as usize;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = $noncebytes;
+pub const NONCEBYTES: usize = $noncebytes as usize;
 
 /// Number of bytes in an authentication `Tag`.
-pub const TAGBYTES: usize = $tagbytes;
+pub const TAGBYTES: usize = $tagbytes as usize;
 
 new_type! {
     /// `Key` for symmetric authenticated encryption with additional data.
-    /// 
+    ///
     /// When a `Key` goes out of scope its contents will
     /// be zeroed out
     secret Key(KEYBYTES);
@@ -39,7 +39,7 @@ new_type! {
 }
 
 /// `gen_key()` randomly generates a secret key
-/// 
+///
 /// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
@@ -60,7 +60,7 @@ pub fn gen_nonce() -> Nonce {
     n
 }
 
-/// `seal()` encrypts and authenticates a message `m` together with optional plaintext data `ad` 
+/// `seal()` encrypts and authenticates a message `m` together with optional plaintext data `ad`
 /// using a secret key `k` and a nonce `n`. It returns a ciphertext `c`.
 pub fn seal(m: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Vec<u8> {
     let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
@@ -76,16 +76,16 @@ pub fn seal(m: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Vec<u8> {
             ad_p,
             ad_len,
             0 as *mut _,
-            &n.0,
-            &k.0
+            n.0.as_ptr(),
+            k.0.as_ptr()
         );
         c.set_len(clen as usize);
     }
     c
 }
 
-/// `seal_detached()` encrypts and authenticates a message `m` together with optional plaintext data `ad` 
-/// using a secret key `k` and a nonce `n`. 
+/// `seal_detached()` encrypts and authenticates a message `m` together with optional plaintext data `ad`
+/// using a secret key `k` and a nonce `n`.
 /// `m` is encrypted in place, so after this function returns it will contain the ciphertext.
 /// The detached authentication tag is returned by value.
 pub fn seal_detached(m: &mut [u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Tag {
@@ -102,8 +102,8 @@ pub fn seal_detached(m: &mut [u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Tag
             ad_p,
             ad_len,
             0 as *mut _,
-            &n.0,
-            &k.0
+            n.0.as_ptr(),
+            k.0.as_ptr()
         );
     }
     tag
@@ -131,8 +131,8 @@ pub fn open(c: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Result<Vec<u8>, 
                 c.len() as c_ulonglong,
                 ad_p,
                 ad_len,
-                &n.0,
-                &k.0
+                n.0.as_ptr(),
+                k.0.as_ptr()
             );
         if ret != 0 {
             return Err(());
@@ -157,8 +157,8 @@ pub fn open_detached(c: &mut [u8], ad: Option<&[u8]>, t: &Tag, n: &Nonce, k: &Ke
             t.0.as_ptr(),
             ad_p,
             ad_len,
-            &n.0,
-            &k.0
+            n.0.as_ptr(),
+            k.0.as_ptr()
         )
     };
     if ret == 0 {

@@ -7,16 +7,16 @@ use ffi;
 use libc::c_ulonglong;
 
 /// Number of bytes in a `Seed`.
-pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES;
+pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
 
 /// Number of bytes in a `SecretKey`.
-pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES;
+pub const SECRETKEYBYTES: usize = ffi::crypto_sign_ed25519_SECRETKEYBYTES as usize;
 
 /// Number of bytes in a `PublicKey`.
-pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES;
+pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as usize;
 
 /// Number of bytes in a `Signature`.
-pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES;
+pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES as usize;
 
 new_type! {
     /// `Seed` that can be used for keypair generation
@@ -55,30 +55,30 @@ new_type! {
 /// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8; PUBLICKEYBYTES];
-        let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_sign_ed25519_keypair(&mut pk, &mut sk);
-        (PublicKey(pk), SecretKey(sk))
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
+        ffi::crypto_sign_ed25519_keypair(pk.0.as_mut_ptr(), sk.0.as_mut_ptr());
+        (pk, sk)
     }
 }
 
 /// `keypair_from_seed()` computes a secret key and a corresponding public key
 /// from a `Seed`.
-pub fn keypair_from_seed(&Seed(ref seed): &Seed) -> (PublicKey, SecretKey) {
+pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8; PUBLICKEYBYTES];
-        let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_sign_ed25519_seed_keypair(&mut pk,
-                                              &mut sk,
-                                              seed);
-        (PublicKey(pk), SecretKey(sk))
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
+        ffi::crypto_sign_ed25519_seed_keypair(pk.0.as_mut_ptr(),
+                                              sk.0.as_mut_ptr(),
+                                              seed.0.as_ptr());
+        (pk, sk)
     }
 }
 
 /// `sign()` signs a message `m` using the signer's secret key `sk`.
 /// `sign()` returns the resulting signed message `sm`.
 pub fn sign(m: &[u8],
-            &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
+            sk: &SecretKey) -> Vec<u8> {
     unsafe {
         let mut sm = vec![0u8; m.len() + SIGNATUREBYTES];
         let mut smlen = 0;
@@ -86,7 +86,7 @@ pub fn sign(m: &[u8],
                                  &mut smlen,
                                  m.as_ptr(),
                                  m.len() as c_ulonglong,
-                                 sk);
+                                 sk.0.as_ptr());
         sm.truncate(smlen as usize);
         sm
     }
@@ -96,7 +96,7 @@ pub fn sign(m: &[u8],
 /// `verify()` returns the message `Ok(m)`.
 /// If the signature fails verification, `verify()` returns `Err(())`.
 pub fn verify(sm: &[u8],
-              &PublicKey(ref pk): &PublicKey) -> Result<Vec<u8>, ()> {
+              pk: &PublicKey) -> Result<Vec<u8>, ()> {
     unsafe {
         let mut m = vec![0u8; sm.len()];
         let mut mlen = 0;
@@ -104,7 +104,7 @@ pub fn verify(sm: &[u8],
                                          &mut mlen,
                                          sm.as_ptr(),
                                          sm.len() as c_ulonglong,
-                                         pk) == 0 {
+                                         pk.0.as_ptr()) == 0 {
             m.truncate(mlen as usize);
             Ok(m)
         } else {
@@ -116,31 +116,31 @@ pub fn verify(sm: &[u8],
 /// `sign_detached()` signs a message `m` using the signer's secret key `sk`.
 /// `sign_detached()` returns the resulting signature `sig`.
 pub fn sign_detached(m: &[u8],
-                     &SecretKey(ref sk): &SecretKey) -> Signature {
+                     sk: &SecretKey) -> Signature {
     unsafe {
-        let mut sig = [0u8; SIGNATUREBYTES];
+        let mut sig = Signature([0u8; SIGNATUREBYTES]);
         let mut siglen: c_ulonglong = 0;
-        ffi::crypto_sign_ed25519_detached(&mut sig,
+        ffi::crypto_sign_ed25519_detached(sig.0.as_mut_ptr(),
                                           &mut siglen,
                                           m.as_ptr(),
                                           m.len() as c_ulonglong,
-                                          sk);
+                                          sk.0.as_ptr());
         assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
-        Signature(sig)
+        sig
     }
 }
 
 /// `verify_detached()` verifies the signature in `sig` against the message `m`
 /// and the signer's public key `pk`.
 /// `verify_detached()` returns true if the signature is valid, false otherwise.
-pub fn verify_detached(&Signature(ref sig): &Signature,
+pub fn verify_detached(sig: &Signature,
                        m: &[u8],
-                       &PublicKey(ref pk): &PublicKey) -> bool {
+                       pk: &PublicKey) -> bool {
     unsafe {
-        0 == ffi::crypto_sign_ed25519_verify_detached(sig,
+        0 == ffi::crypto_sign_ed25519_verify_detached(sig.0.as_ptr(),
                                                       m.as_ptr(),
                                                       m.len() as c_ulonglong,
-                                                      pk)
+                                                      pk.0.as_ptr())
     }
 }
 
@@ -252,11 +252,10 @@ mod test {
             let x3 = x.next().unwrap();
             let seed_bytes = x0[..64].from_hex().unwrap();
             assert!(seed_bytes.len() == SEEDBYTES);
-            let mut seedbuf = [0u8; SEEDBYTES];
-            for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
+            let mut seed = Seed([0u8; SEEDBYTES]);
+            for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
             }
-            let seed = Seed(seedbuf);
             let (pk, sk) = keypair_from_seed(&seed);
             let m = x2.from_hex().unwrap();
             let sm = sign(&m, &sk);
@@ -284,11 +283,10 @@ mod test {
             let x3 = x.next().unwrap();
             let seed_bytes = x0[..64].from_hex().unwrap();
             assert!(seed_bytes.len() == SEEDBYTES);
-            let mut seedbuf = [0u8; SEEDBYTES];
-            for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
+            let mut seed = Seed([0u8; SEEDBYTES]);
+            for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
             }
-            let seed = Seed(seedbuf);
             let (pk, sk) = keypair_from_seed(&seed);
             let m = x2.from_hex().unwrap();
             let sig = sign_detached(&m, &sk);

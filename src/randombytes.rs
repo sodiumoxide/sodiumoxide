@@ -1,6 +1,7 @@
 //! Cryptographic random number generation.
-#[cfg(not(feature = "std"))] use prelude::*;
 use ffi;
+#[cfg(not(feature = "std"))]
+use prelude::*;
 
 /// `randombytes()` randomly generates size bytes of data.
 ///
@@ -10,8 +11,7 @@ use ffi;
 pub fn randombytes(size: usize) -> Vec<u8> {
     unsafe {
         let mut buf = vec![0u8; size];
-        let pbuf = buf.as_mut_ptr();
-        ffi::randombytes_buf(pbuf, size);
+        ffi::randombytes_buf(buf.as_mut_ptr() as *mut _, size);
         buf
     }
 }
@@ -23,6 +23,6 @@ pub fn randombytes(size: usize) -> Vec<u8> {
 /// from sodiumoxide.
 pub fn randombytes_into(buf: &mut [u8]) {
     unsafe {
-        ffi::randombytes_buf(buf.as_mut_ptr(), buf.len());
+        ffi::randombytes_buf(buf.as_mut_ptr() as *mut _, buf.len());
     }
 }

@@ -9,10 +9,10 @@ use ffi;
 use randombytes::randombytes_into;
 
 /// Number of bytes in `Key`.
-pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES;
+pub const KEYBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_KEYBYTES as usize;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES;
+pub const NONCEBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_NONCEBYTES as usize;
 
 new_type! {
     /// `Key` for symmetric authenticated encryption
@@ -37,7 +37,7 @@ new_type! {
 /// Number of bytes in the authenticator tag of an encrypted message
 /// i.e. the number of bytes by which the ciphertext is larger than the
 /// plaintext.
-pub const MACBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_MACBYTES;
+pub const MACBYTES: usize = ffi::crypto_secretbox_xsalsa20poly1305_MACBYTES as usize;
 
 /// `gen_key()` randomly generates a secret key
 ///
@@ -64,8 +64,8 @@ pub fn gen_nonce() -> Nonce {
 /// `seal()` encrypts and authenticates a message `m` using a secret key `k` and a
 /// nonce `n`.  It returns a ciphertext `c`.
 pub fn seal(m: &[u8],
-            &Nonce(ref n): &Nonce,
-            &Key(ref k): &Key) -> Vec<u8> {
+            n: &Nonce,
+            k: &Key) -> Vec<u8> {
     let clen = m.len() + MACBYTES;
     let mut c = Vec::with_capacity(clen);
     unsafe {
@@ -73,8 +73,8 @@ pub fn seal(m: &[u8],
         ffi::crypto_secretbox_easy(c.as_mut_ptr(),
                                    m.as_ptr(),
                                    m.len() as u64,
-                                   n,
-                                   k);
+                                   n.0.as_ptr(),
+                                   k.0.as_ptr());
     }
     c
 }
@@ -83,17 +83,17 @@ pub fn seal(m: &[u8],
 /// `n`.  `m` is encrypted in place, so after this function returns it will contain the ciphertext.
 /// The detached authentication tag is returned by value.
 pub fn seal_detached(m: &mut[u8],
-                     &Nonce(ref n): &Nonce,
-                     &Key(ref k): &Key) -> Tag {
+                     n: &Nonce,
+                     k: &Key) -> Tag {
     let mut tag = [0; MACBYTES];
     unsafe {
         ffi::crypto_secretbox_detached(
             m.as_mut_ptr(),
-            &mut tag,
+            tag.as_mut_ptr(),
             m.as_ptr(),
             m.len() as u64,
-            n,
-            k,
+            n.0.as_ptr(),
+            k.0.as_ptr(),
         );
     };
     Tag(tag)
@@ -103,8 +103,8 @@ pub fn seal_detached(m: &mut[u8],
 /// It returns a plaintext `Ok(m)`.
 /// If the ciphertext fails verification, `open()` returns `Err(())`.
 pub fn open(c: &[u8],
-            &Nonce(ref n): &Nonce,
-            &Key(ref k): &Key) -> Result<Vec<u8>, ()> {
+            n: &Nonce,
+            k: &Key) -> Result<Vec<u8>, ()> {
     if c.len() < MACBYTES {
         return Err(());
     }
@@ -115,8 +115,8 @@ pub fn open(c: &[u8],
         ffi::crypto_secretbox_open_easy(m.as_mut_ptr(),
                                         c.as_ptr(),
                                         c.len() as u64,
-                                        n,
-                                        k)
+                                        n.0.as_ptr(),
+                                        k.0.as_ptr())
     };
     if ret == 0 {
         Ok(m)
@@ -131,16 +131,16 @@ pub fn open(c: &[u8],
 /// `open_detached()` returns `Err(())`, and the ciphertext is not modified.
 pub fn open_detached(c: &mut[u8],
                      tag: &Tag,
-                     &Nonce(ref n): &Nonce,
-                     &Key(ref k): &Key) -> Result<(), ()> {
+                     n: &Nonce,
+                     k: &Key) -> Result<(), ()> {
     let ret = unsafe {
         ffi::crypto_secretbox_open_detached(
             c.as_mut_ptr(),
             c.as_ptr(),
-            &tag.0,
+            tag.0.as_ptr(),
             c.len() as u64,
-            n,
-            k,
+            n.0.as_ptr(),
+            k.0.as_ptr(),
         )
     };
     if ret == 0 {

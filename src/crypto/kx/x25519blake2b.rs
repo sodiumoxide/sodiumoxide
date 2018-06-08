@@ -3,16 +3,16 @@
 use ffi;
 
 /// Number of bytes in a `PublicKey`.
-pub const PUBLICKEYBYTES: usize = ffi::crypto_kx_PUBLICKEYBYTES;
+pub const PUBLICKEYBYTES: usize = ffi::crypto_kx_PUBLICKEYBYTES as usize;
 
 /// Number of bytes in a `SecretKey`.
-pub const SECRETKEYBYTES: usize = ffi::crypto_kx_SECRETKEYBYTES;
+pub const SECRETKEYBYTES: usize = ffi::crypto_kx_SECRETKEYBYTES as usize;
 
 /// NUmber of bytes in a `Seed`.
-pub const SEEDBYTES: usize = ffi::crypto_kx_SEEDBYTES;
+pub const SEEDBYTES: usize = ffi::crypto_kx_SEEDBYTES as usize;
 
 /// Number of bytes in a `SessionKey`.
-pub const SESSIONKEYBYTES: usize = ffi::crypto_kx_SESSIONKEYBYTES;
+pub const SESSIONKEYBYTES: usize = ffi::crypto_kx_SESSIONKEYBYTES as usize;
 
 new_type! {
     /// `PublicKey` for key exchanges.
@@ -50,22 +50,21 @@ new_type! {
 /// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8; PUBLICKEYBYTES];
-        let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_kx_keypair(&mut pk, &mut sk);
-        (PublicKey(pk), SecretKey(sk))
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
+        ffi::crypto_kx_keypair(pk.0.as_mut_ptr(), sk.0.as_mut_ptr());
+        (pk, sk)
     }
 }
 
 /// `keypair_from_seed()` computes a secret key and a corresponding public key
 /// from a `Seed`.
-pub fn keypair_from_seed(&Seed(ref seed): &Seed) -> (PublicKey, SecretKey) {
+pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = [0u8; PUBLICKEYBYTES];
-        let mut sk = [0u8; SECRETKEYBYTES];
-        ffi::crypto_kx_seed_keypair(&mut pk, &mut sk, seed);
-        (PublicKey(pk), SecretKey(sk))
-
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
+        ffi::crypto_kx_seed_keypair(pk.0.as_mut_ptr(), sk.0.as_mut_ptr(), seed.0.as_ptr());
+        (pk, sk)
     }
 }
 
@@ -74,20 +73,25 @@ pub fn keypair_from_seed(&Seed(ref seed): &Seed) -> (PublicKey, SecretKey) {
 /// If the client's public key is acceptable, it returns the two shared keys, the first for `rx`
 /// and the second for `tx`. Otherwise, it returns `None`.
 pub fn server_session_keys(
-    &PublicKey(ref server_pk): &PublicKey,
-    &SecretKey(ref server_sk): &SecretKey,
-    &PublicKey(ref client_pk): &PublicKey,
+    server_pk: &PublicKey,
+    server_sk: &SecretKey,
+    client_pk: &PublicKey
 ) -> Result<(SessionKey, SessionKey), ()> {
     unsafe {
-        let mut rx = [0u8; SESSIONKEYBYTES];
-        let mut tx = [0u8; SESSIONKEYBYTES];
+        let mut rx = SessionKey([0u8; SESSIONKEYBYTES]);
+        let mut tx = SessionKey([0u8; SESSIONKEYBYTES]);
         let r =
-            ffi::crypto_kx_server_session_keys(&mut rx, &mut tx, server_pk, server_sk, client_pk);
-
+            ffi::crypto_kx_server_session_keys(
+                rx.0.as_mut_ptr(),
+                tx.0.as_mut_ptr(),
+                server_pk.0.as_ptr(),
+                server_sk.0.as_ptr(),
+                client_pk.0.as_ptr()
+            );
         if r != 0 {
             Err(())
         } else {
-            Ok((SessionKey(rx), SessionKey(tx)))
+            Ok((rx, tx))
         }
     }
 }
@@ -97,20 +101,25 @@ pub fn server_session_keys(
 /// If the server's public key is acceptable, it returns the two shared keys, the first for `rx`
 /// and the second for `tx`. Otherwise, it returns `None`.
 pub fn client_session_keys(
-    &PublicKey(ref client_pk): &PublicKey,
-    &SecretKey(ref client_sk): &SecretKey,
-    &PublicKey(ref server_pk): &PublicKey,
+    client_pk: &PublicKey,
+    client_sk: &SecretKey,
+    server_pk: &PublicKey
 ) -> Result<(SessionKey, SessionKey), ()> {
     unsafe {
-        let mut rx = [0u8; SESSIONKEYBYTES];
-        let mut tx = [0u8; SESSIONKEYBYTES];
+        let mut rx = SessionKey([0u8; SESSIONKEYBYTES]);
+        let mut tx = SessionKey([0u8; SESSIONKEYBYTES]);
         let r =
-            ffi::crypto_kx_client_session_keys(&mut rx, &mut tx, client_pk, client_sk, server_pk);
+            ffi::crypto_kx_client_session_keys(
+                rx.0.as_mut_ptr(),
+                tx.0.as_mut_ptr(),
+                client_pk.0.as_ptr(),
+                client_sk.0.as_ptr(),
+                server_pk.0.as_ptr());
 
         if r != 0 {
             Err(())
         } else {
-            Ok((SessionKey(rx), SessionKey(tx)))
+            Ok((rx, tx))
         }
     }
 }
@@ -157,11 +166,10 @@ mod test {
             0xda, 0x09, 0x8d, 0xeb, 0x9c, 0x32, 0xb1, 0xfd,
             0x86, 0x62, 0x05, 0x16, 0x5f, 0x49, 0xb8, 0x00]);
 
-        let mut seed = [0u8; SEEDBYTES];
-        for i in 0..seed.len() {
-            seed[i] = i as u8;
+        let mut seed = Seed([0u8; SEEDBYTES]);
+        for i in 0..seed.0.len() {
+            seed.0[i] = i as u8;
         }
-        let mut seed = Seed(seed);
         let (mut client_pk, client_sk) = keypair_from_seed(&seed);
 
         let client_pk_expected = PublicKey([
