@@ -30,7 +30,7 @@ fn main() {
     let include_dir = match env::var("SODIUM_INC_DIR") {
         Ok(dir) => dir,
         Err(_) => pkg_config::get_variable("libsodium", "includedir").or_else(|| {
-            vcpkg::probe_package("libsodium").and_then(|lib| lib.include_paths.get(0))
+            vcpkg::probe_package("libsodium").and_then(|lib| lib.include_paths.get(0).unwrap())
         })
     };
 
