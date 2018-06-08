@@ -29,8 +29,8 @@ fn main() {
 
     let include_dir = match env::var("SODIUM_INC_DIR") {
         Ok(dir) => dir,
-        Err(_) => pkg_config::get_variable("libsodium", "includedir").or_else(|| {
-            vcpkg::probe_package("libsodium").and_then(|lib| lib.include_paths.get(0).unwrap())
+        Err(_) => pkg_config::get_variable("libsodium", "includedir").unwrap_or_else(|_| {
+            get_vcpkg_include_path().unwrap()
         })
     };
 
@@ -68,4 +68,17 @@ fn try_vcpkg() -> bool {
 #[cfg(not(target_env = "msvc"))]
 fn try_vcpkg() -> bool {
     false
+}
+
+
+#[cfg(target_env = "msvc")]
+fn get_vcpkg_include_path() -> Option<String> {
+    vcpkg::probe_package("libsodium").and_then(|lib| {
+        lib.include_paths.get(0).unwrap().to_str()
+    }).into_result()
+}
+
+#[cfg(not(target_env = "msvc"))]
+fn get_vcpkg_include_path() -> Option<String> {
+    None
 }
