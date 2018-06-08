@@ -73,9 +73,12 @@ fn try_vcpkg() -> bool {
 
 #[cfg(target_env = "msvc")]
 fn get_vcpkg_include_path() -> Option<String> {
-    vcpkg::probe_package("libsodium").and_then(|lib| {
-        lib.include_paths.get(0).unwrap().to_str()
-    }).into_result()
+    let lib = vcpkg::probe_package("libsodium");
+    match lib {
+        Ok(lib) => lib.include_paths.get(0).and_then(|path| path.to_str()),
+        _ => None,
+    }
+
 }
 
 #[cfg(not(target_env = "msvc"))]
