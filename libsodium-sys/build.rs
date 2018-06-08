@@ -22,17 +22,16 @@ fn main() {
 
         println!("cargo:rustc-link-lib={0}=sodium", mode);
     } else {
-        if pkg_config::probe_library("libsodium").is_ok() {
-            // pkg_config did everything for us
-            return
-        } else if try_vcpkg() {
-            return;
+        if !pkg_config::probe_library("libsodium").is_ok() && !try_vcpkg() {
+            panic!("Could not find libsodium on this system!")
         }
     }
 
     let include_dir = match env::var("SODIUM_INC_DIR") {
         Ok(dir) => dir,
-        Err(_) => pkg_config::get_variable("libsodium", "includedir").unwrap()
+        Err(_) => pkg_config::get_variable("libsodium", "includedir").or_else(|| {
+            vcpkg::probe_package("libsodium").and_then(|lib| lib.include_paths.get(0))
+        })
     };
 
     let bindings = bindgen::Builder::default()
