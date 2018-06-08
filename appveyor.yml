@@ -11,18 +11,21 @@ environment:
     VCPKG_TARGET: x64-windows
   - TARGET: i686-pc-windows-msvc
     VCPKG_TARGET: x86-windows
+    LIBCLANG_PATH: C:\Program Files (x86)\LLVM\bin\
   - TARGET: x86_64-pc-windows-msvc
     VCPKG_TARGET: x64-windows
     RUST_VERSION: beta
   - TARGET: i686-pc-windows-msvc
     VCPKG_TARGET: x86-windows
     RUST_VERSION: beta
+    LIBCLANG_PATH: C:\Program Files (x86)\LLVM\bin\
   - TARGET: x86_64-pc-windows-msvc
     VCPKG_TARGET: x64-windows
     RUST_VERSION: nightly
   - TARGET: i686-pc-windows-msvc
     VCPKG_TARGET: x86-windows
     RUST_VERSION: nightly
+    LIBCLANG_PATH: C:\Program Files (x86)\LLVM\bin\
 install:
 - cmd: >-
     curl -sSf -o rustup-init.exe https://win.rustup.rs/
