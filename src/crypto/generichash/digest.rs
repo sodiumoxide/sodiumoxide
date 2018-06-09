@@ -1,4 +1,9 @@
 use ffi::crypto_generichash_BYTES_MAX;
+use std::cmp::{Eq, Ordering, PartialEq, PartialOrd};
+use std::fmt::{Debug, Formatter};
+use std::hash::Hash;
+use std::hash::Hasher;
+use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
 
 /// Digest-structure
 ///
@@ -10,7 +15,13 @@ pub struct Digest {
     pub(super) data: [u8; crypto_generichash_BYTES_MAX as usize],
 }
 
-impl ::std::cmp::PartialEq for Digest {
+impl Debug for Digest {
+    fn fmt(&self, formatter: &mut Formatter) -> ::std::fmt::Result {
+        write!(formatter, "Digest({:?})", &self[..])
+    }
+}
+
+impl PartialEq for Digest {
     fn eq(&self, other: &Digest) -> bool {
         use utils::memcmp;
         if other.len != self.len {
@@ -20,7 +31,7 @@ impl ::std::cmp::PartialEq for Digest {
     }
 }
 
-impl ::std::cmp::Eq for Digest {}
+impl Eq for Digest {}
 
 impl AsRef<[u8]> for Digest {
     #[inline]
@@ -29,43 +40,43 @@ impl AsRef<[u8]> for Digest {
     }
 }
 
-impl ::std::cmp::PartialOrd for Digest {
+impl PartialOrd for Digest {
     #[inline]
-    fn partial_cmp(&self, other: &Digest) -> Option<::std::cmp::Ordering> {
-        ::std::cmp::PartialOrd::partial_cmp(self.as_ref(), other.as_ref())
+    fn partial_cmp(&self, other: &Digest) -> Option<Ordering> {
+        PartialOrd::partial_cmp(self.as_ref(), other.as_ref())
     }
 
     #[inline]
     fn lt(&self, other: &Digest) -> bool {
-        ::std::cmp::PartialOrd::lt(self.as_ref(), other.as_ref())
+        PartialOrd::lt(self.as_ref(), other.as_ref())
     }
 
     #[inline]
     fn le(&self, other: &Digest) -> bool {
-        ::std::cmp::PartialOrd::le(self.as_ref(), other.as_ref())
+        PartialOrd::le(self.as_ref(), other.as_ref())
     }
 
     #[inline]
     fn ge(&self, other: &Digest) -> bool {
-        ::std::cmp::PartialOrd::ge(self.as_ref(), other.as_ref())
+        PartialOrd::ge(self.as_ref(), other.as_ref())
     }
 
     #[inline]
     fn gt(&self, other: &Digest) -> bool {
-        ::std::cmp::PartialOrd::gt(self.as_ref(), other.as_ref())
+        PartialOrd::gt(self.as_ref(), other.as_ref())
     }
 }
 
-impl ::std::cmp::Ord for Digest {
+impl Ord for Digest {
     #[inline]
-    fn cmp(&self, other: &Digest) -> ::std::cmp::Ordering {
-        ::std::cmp::Ord::cmp(self.as_ref(), other.as_ref())
+    fn cmp(&self, other: &Digest) -> Ordering {
+        Ord::cmp(self.as_ref(), other.as_ref())
     }
 }
 
-impl ::std::hash::Hash for Digest {
-    fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
-        ::std::hash::Hash::hash(self.as_ref(), state)
+impl Hash for Digest {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        Hash::hash(self.as_ref(), state)
     }
 }
 
@@ -75,10 +86,10 @@ impl ::std::hash::Hash for Digest {
 /// by using `x[a..b] == y[a..b]`. This will open up for timing attacks
 /// when comparing for example authenticator tags. Because of this only
 /// use the comparison functions exposed by the sodiumoxide API.
-impl ::std::ops::Index<::std::ops::Range<usize>> for Digest {
+impl Index<Range<usize>> for Digest {
     type Output = [u8];
-    fn index(&self, _index: ::std::ops::Range<usize>) -> &[u8] {
-        self.as_ref().index(_index)
+    fn index(&self, index: Range<usize>) -> &[u8] {
+        self.as_ref().index(index)
     }
 }
 
@@ -88,10 +99,10 @@ impl ::std::ops::Index<::std::ops::Range<usize>> for Digest {
 /// by using `x[..b] == y[..b]`. This will open up for timing attacks
 /// when comparing for example authenticator tags. Because of this only
 /// use the comparison functions exposed by the sodiumoxide API.
-impl ::std::ops::Index<::std::ops::RangeTo<usize>> for Digest {
+impl Index<RangeTo<usize>> for Digest {
     type Output = [u8];
-    fn index(&self, _index: ::std::ops::RangeTo<usize>) -> &[u8] {
-        self.as_ref().index(_index)
+    fn index(&self, index: RangeTo<usize>) -> &[u8] {
+        self.as_ref().index(index)
     }
 }
 
@@ -101,10 +112,10 @@ impl ::std::ops::Index<::std::ops::RangeTo<usize>> for Digest {
 /// by using `x[a..] == y[a..]`. This will open up for timing attacks
 /// when comparing for example authenticator tags. Because of this only
 /// use the comparison functions exposed by the sodiumoxide API.
-impl ::std::ops::Index<::std::ops::RangeFrom<usize>> for Digest {
+impl Index<RangeFrom<usize>> for Digest {
     type Output = [u8];
-    fn index(&self, _index: ::std::ops::RangeFrom<usize>) -> &[u8] {
-        self.as_ref().index(_index)
+    fn index(&self, index: RangeFrom<usize>) -> &[u8] {
+        self.as_ref().index(index)
     }
 }
 
@@ -114,15 +125,9 @@ impl ::std::ops::Index<::std::ops::RangeFrom<usize>> for Digest {
 /// by using `x[] == y[]`. This will open up for timing attacks
 /// when comparing for example authenticator tags. Because of this only
 /// use the comparison functions exposed by the sodiumoxide API.
-impl ::std::ops::Index<::std::ops::RangeFull> for Digest {
+impl Index<RangeFull> for Digest {
     type Output = [u8];
-    fn index(&self, _index: ::std::ops::RangeFull) -> &[u8] {
-        self.as_ref().index(_index)
-    }
-}
-
-impl ::std::fmt::Debug for Digest {
-    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
-        write!(formatter, "Digest({:?})", &self[..])
+    fn index(&self, index: RangeFull) -> &[u8] {
+        self.as_ref().index(index)
     }
 }
