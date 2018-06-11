@@ -31,16 +31,37 @@ pub fn memcmp(x: &[u8], y: &[u8]) -> bool {
     }
 }
 
-/// `increment_le()` treats `x` as an unsigned little-endian number and increments it.
+/// `increment_le()` treats `x` as an unsigned little-endian number and increments it in
+/// constant time.
 ///
 /// WARNING: this method does not check for arithmetic overflow. When used for incrementing
-/// nonces it is the callers responsibility to ensure that any given nonce value
-/// is only used once.
+/// nonces it is the caller's responsibility to ensure that any given nonce value
+/// is used only once.
 /// If the caller does not do that the cryptographic primitives in sodiumoxide
-/// will not uphold any security guarantees (i.e. they will break)
+/// will not uphold any security guarantees (i.e. they may break)
 pub fn increment_le(x: &mut [u8]) {
     unsafe {
         ffi::sodium_increment(x.as_mut_ptr(), x.len());
+    }
+}
+
+/// `add_le()` treats `x` and `y` as unsigned little-endian numbers and adds `y` to `x`
+/// modulo 2^(8*len) in constant time.
+///
+/// `add_le()` will return Err<()> if the length of `x` is not equal to the length of `y`.
+///
+/// WARNING: When used for incrementing nonces it is the caller's responsibility to ensure
+/// that any given nonce value is used only once.
+/// If the caller does not do that the cryptographic primitives in sodiumoxide
+/// will not uphold any security guarantees (i.e. they may break)
+pub fn add_le(x: &mut [u8], y: &[u8]) -> Result<(), ()> {
+    if x.len() == y.len() {
+        unsafe {
+            ffi::sodium_add(x.as_mut_ptr(), y.as_ptr(), x.len());
+        }
+        Ok(())
+    } else  {
+        Err(())
     }
 }
 
@@ -52,7 +73,7 @@ mod test {
     fn test_memcmp() {
         use randombytes::randombytes;
 
-        for i in 0usize..256 {
+        for i in 0..256 {
             let x = randombytes(i);
             assert!(memcmp(&x, &x));
             let mut y = x.clone();
@@ -72,7 +93,7 @@ mod test {
 
     #[test]
     fn test_increment_le_zero() {
-        for i in 1usize..256 {
+        for i in 1..256 {
             let mut x = vec![0u8; i];
             increment_le(&mut x);
             assert!(!x.iter().all(|x| *x == 0));
@@ -113,10 +134,78 @@ mod test {
 
     #[test]
     fn test_increment_le_overflow() {
-        for i in 1usize..256 {
+        for i in 1..256 {
             let mut x = vec![255u8; i];
             increment_le(&mut x);
             assert!(x.iter().all(|xi| *xi == 0));
+        }
+    }
+
+    #[test]
+    fn test_add_le_zero() {
+        for i in 1..256 {
+            let mut x = vec!(0u8; i);
+            let mut y = vec!(0u8; i);
+            y[0] = 42;
+            assert!(add_le(&mut x, &y).is_ok());
+            assert!(!x.iter().all(|x| { *x == 0 }));
+            assert_eq!(x, y);
+        }
+    }
+
+    #[test]
+    fn test_add_le_vectors() {
+        let mut x = [255, 2, 3, 4, 5];
+        let y = [42, 0, 0, 0, 0];
+        let z = [41, 3, 3, 4, 5];
+        assert!(add_le(&mut x, &y).is_ok());
+        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert_eq!(x, z);
+        let mut x = [255, 255, 3, 4, 5];
+        let z = [41, 0, 4, 4, 5];
+        assert!(add_le(&mut x, &y).is_ok());
+        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert_eq!(x, z);
+        let mut x = [255, 255, 255, 4, 5];
+        let z = [41, 0, 0, 5, 5];
+        assert!(add_le(&mut x, &y).is_ok());
+        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert_eq!(x, z);
+        let mut x = [255, 255, 255, 255, 5];
+        let z = [41, 0, 0, 0, 6];
+        assert!(add_le(&mut x, &y).is_ok());
+        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert_eq!(x, z);
+        let mut x = [255, 255, 255, 255, 255];
+        let z = [41, 0, 0, 0, 0];
+        assert!(add_le(&mut x, &y).is_ok());
+        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert_eq!(x, z);
+    }
+
+    #[test]
+    fn test_add_le_overflow() {
+        for i in 1..256 {
+            let mut x = vec!(255u8; i);
+            let mut y = vec!(0u8; i);
+            y[0] = 42;
+            assert!(add_le(&mut x, &y).is_ok());
+            assert!(!x.iter().all(|x| { *x == 0 }));
+            y[0] -= 1;
+            assert_eq!(x, y);
+        }
+    }
+
+    #[test]
+    fn test_add_le_different_lengths() {
+        for i in 1..256 {
+            let mut x = vec!(1u8; i);
+            let y = vec!(42u8; i + 1);
+            let z = vec!(42u8; i - 1);
+            assert!(add_le(&mut x, &y).is_err());
+            assert_eq!(x, vec!(1u8; i));
+            assert!(add_le(&mut x, &z).is_err());
+            assert_eq!(x, vec!(1u8; i));
         }
     }
 }
