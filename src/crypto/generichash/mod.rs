@@ -104,14 +104,14 @@ impl State {
             len: self.out_len,
             data: [0u8; crypto_generichash_BYTES_MAX as usize],
         };
-        if unsafe {
+        let rc = unsafe {
             crypto_generichash_final(
                 &mut self.state,
                 result.data.as_mut_ptr(),
                 result.len,
             )
-        } == 0
-        {
+        };
+        if rc == 0 {
             Ok(result)
         } else {
             Err(())
