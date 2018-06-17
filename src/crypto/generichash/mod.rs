@@ -42,15 +42,15 @@ impl State {
     /// `key` is an optional parameter, which when given,
     /// a custom key can be used for the computation of the hash.
     /// The size of the key must be in the interval [`KEY_MIN`, `KEY_MAX`].
-    pub fn new(out_len: usize, key: Option<&[u8]>) -> Option<State> {
+    pub fn new(out_len: usize, key: Option<&[u8]>) -> Result<State, ()> {
         if out_len < DIGEST_MIN || out_len > DIGEST_MAX {
-            return None;
+            return Err(());
         }
 
         if let Some(key) = key {
             let len = key.len();
             if len < KEY_MIN || len > KEY_MAX {
-                return None;
+                return Err(());
             }
         }
 
@@ -58,58 +58,64 @@ impl State {
 
         let result = unsafe {
             state = mem::uninitialized();
-            let state_ptr = &mut state as *mut _;
             if let Some(key) = key {
                 crypto_generichash_init(
-                    state_ptr,
+                    &mut state,
                     key.as_ptr(),
                     key.len(),
                     out_len,
                 )
             } else {
-                crypto_generichash_init(state_ptr, ptr::null(), 0, out_len)
+                crypto_generichash_init(&mut state, ptr::null(), 0, out_len)
             }
         };
 
         if result == 0 {
-            Some(State {
+            Ok(State {
                 out_len: out_len,
                 state,
             })
         } else {
-            None
+            Err(())
         }
     }
 
     /// `update` updates the `State` with `data`. `update` can be called multiple times in order
     /// to compute the hash from sequential chunks of the message.
-    pub fn update(&mut self, data: &[u8]) {
-        unsafe {
-            let state_ptr = &mut self.state as *mut _;
+    pub fn update(&mut self, data: &[u8]) -> Result<(), ()> {
+        if unsafe {
             crypto_generichash_update(
-                state_ptr,
+                &mut self.state,
                 data.as_ptr(),
                 data.len() as c_ulonglong,
-            );
+            )
+        } == 0
+        {
+            Ok(())
+        } else {
+            Err(())
         }
     }
 
     /// `finalize` finalizes the state and returns the digest value. `finalize` consumes the
     /// `State` so that it cannot be accidentally reused.
-    pub fn finalize(mut self) -> Digest {
-        let state_ptr = &mut self.state as *mut _;
+    pub fn finalize(mut self) -> Result<Digest, ()> {
         let mut result = Digest {
             len: self.out_len,
             data: [0u8; crypto_generichash_BYTES_MAX as usize],
         };
-        unsafe {
+        if unsafe {
             crypto_generichash_final(
-                state_ptr,
+                &mut self.state,
                 result.data.as_mut_ptr(),
                 result.len,
-            );
+            )
+        } == 0
+        {
+            Ok(result)
+        } else {
+            Err(())
         }
-        result
     }
 }
 
@@ -129,8 +135,8 @@ mod test {
             0x77, 0x87, 0xfa, 0xab, 0x45, 0xcd, 0xf1, 0x2f, 0xe3, 0xa8,
         ];
         let mut hasher = State::new(32, None).unwrap();
-        hasher.update(&x);
-        let h = hasher.finalize();
+        hasher.update(&x).unwrap();
+        let h = hasher.finalize().unwrap();
         assert!(h.as_ref() == h_expected);
     }
 
@@ -149,8 +155,8 @@ mod test {
             0x3b, 0x75, 0xef, 0xf2, 0x9c, 0x0f, 0xfa, 0x2e, 0x58, 0xa9,
         ];
         let mut hasher = State::new(32, None).unwrap();
-        hasher.update(&x);
-        let h = hasher.finalize();
+        hasher.update(&x).unwrap();
+        let h = hasher.finalize().unwrap();
         assert!(h.as_ref() == h_expected);
     }
 
@@ -196,9 +202,9 @@ mod test {
             };
 
             let mut hasher = State::new(64, Some(&key)).unwrap();
-            hasher.update(&msg);
+            hasher.update(&msg).unwrap();
 
-            let result_hash = hasher.finalize();
+            let result_hash = hasher.finalize().unwrap();
             assert!(result_hash.as_ref() == expected_hash.as_slice());
         }
     }
