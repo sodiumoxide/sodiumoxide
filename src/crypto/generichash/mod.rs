@@ -83,14 +83,14 @@ impl State {
     /// `update` updates the `State` with `data`. `update` can be called multiple times in order
     /// to compute the hash from sequential chunks of the message.
     pub fn update(&mut self, data: &[u8]) -> Result<(), ()> {
-        if unsafe {
+        let rc = unsafe {
             crypto_generichash_update(
                 &mut self.state,
                 data.as_ptr(),
                 data.len() as c_ulonglong,
             )
-        } == 0
-        {
+        };
+        if rc == 0 {
             Ok(())
         } else {
             Err(())
