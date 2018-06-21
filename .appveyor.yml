@@ -20,6 +20,7 @@ install:
   - 7z x libsodium.tar.gz -so | 7z x -si -ttar > nul
   - set SODIUM_STATIC=1
   - set SODIUM_LIB_DIR=C:\projects\sodiumoxide\deps\libsodium-win64\lib
+  - set SODIUM_INC_DIR=C:\projects\sodiumoxide\deps\libsodium-win64\include
   - cd C:\projects\sodiumoxide
   # install rustc & cargo
   - appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
