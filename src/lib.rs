@@ -71,7 +71,7 @@ extern crate std;
 
 #[cfg(all(not(test), not(feature = "std")))]
 mod std {
-    pub use core::{cmp, fmt, hash, iter, mem, ops, slice, str};
+    pub use core::{cmp, fmt, hash, iter, mem, ops, ptr, slice, str};
 }
 
 #[cfg(not(feature = "std"))]
@@ -112,6 +112,7 @@ pub mod crypto {
     pub mod scalarmult;
     pub mod auth;
     pub mod hash;
+    pub mod generichash;
     pub mod secretbox;
     pub mod onetimeauth;
     pub mod pwhash;
