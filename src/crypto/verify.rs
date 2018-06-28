@@ -121,6 +121,41 @@ mod test {
         }
     }
 
+    quickcheck! {
+        fn qc_verify_32(diff: Vec<usize>) -> bool {
+            use randombytes::randombytes_into;
+
+            ({ // no diff
+                let mut x = [0; 32];
+                let mut y = [0; 32];
+
+                randombytes_into(&mut x);
+                y = x;
+
+                verify_32(&x, &y) && verify_32(&y, &x)
+            })
+                &&
+                ({ // add diff according to provided vector
+                    let mut x = [0; 32];
+                    let mut y = [0; 32];
+
+                    randombytes_into(&mut x);
+                    y = x;
+
+                    for i in &diff[..] {
+                        let i = i % 32;
+                        y[i] = y[i].wrapping_add(1);
+                    }
+
+                    if x == y {
+                        verify_32(&x, &y) && verify_32(&y, &x)
+                    } else {
+                        !verify_32(&x, &y) && !verify_32(&y, &x)
+                    }
+                })
+        }
+    }
+
     #[test]
     fn test_verify_64() {
         use randombytes::randombytes_into;
