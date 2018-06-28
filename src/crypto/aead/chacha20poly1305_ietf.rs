@@ -157,9 +157,11 @@ mod test {
 
     #[test]
     fn test_vector_3() {
+        // Test vector from https://tools.ietf.org/html/rfc7634#appendix-A
     }
 
     #[test]
     fn test_vector_4() {
+        // Test vector from https://tools.ietf.org/html/rfc7634#appendix-B
     }
 }
