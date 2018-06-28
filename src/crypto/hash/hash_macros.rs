@@ -31,7 +31,7 @@ pub fn hash(m: &[u8]) -> Digest {
 
 /// `State` contains the state for multi-part (streaming) hash computations. This allows the caller
 /// to process a message as a sequence of multiple chunks.
-#[derive(Clone)]
+#[derive(Copy, Clone)]
 pub struct State($hash_state);
 
 impl State {
