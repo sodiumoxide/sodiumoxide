@@ -68,6 +68,41 @@ mod test {
         }
     }
 
+    quickcheck! {
+        fn qc_verify_16(diff: Vec<usize>) -> bool {
+            use randombytes::randombytes_into;
+
+            ({ // no diff
+                let mut x = [0; 16];
+                let mut y = [0; 16];
+
+                randombytes_into(&mut x);
+                y = x;
+
+                verify_16(&x, &y) && verify_16(&y, &x)
+            })
+                &&
+                ({ // add diff according to provided vector
+                    let mut x = [0; 16];
+                    let mut y = [0; 16];
+
+                    randombytes_into(&mut x);
+                    y = x;
+
+                    for i in &diff[..] {
+                        let i = i % 16;
+                        y[i] = y[i].wrapping_add(1);
+                    }
+
+                    if x == y {
+                        verify_16(&x, &y) && verify_16(&y, &x)
+                    } else {
+                        !verify_16(&x, &y) && !verify_16(&y, &x)
+                    }
+                })
+        }
+    }
+
     #[test]
     fn test_verify_32() {
         use randombytes::randombytes_into;
