@@ -8,6 +8,9 @@
 use ffi;
 use randombytes::randombytes_into;
 
+/// Number of bytes in a `Seed`.
+pub const SEEDBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_SEEDBYTES as usize;
+
 /// Number of bytes in a `PublicKey`.
 pub const PUBLICKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES as usize;
 
@@ -24,6 +27,17 @@ pub const PRECOMPUTEDKEYBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly130
 /// i.e. the number of bytes by which the ciphertext is larger than the
 /// plaintext.
 pub const MACBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_MACBYTES as usize;
+
+new_type! {
+    /// `Seed` that can be used for keypair generation
+    ///
+    /// The `Seed` is used by `keypair_from_seed()` to generate
+    /// a secret and public authenticated encryption key.
+    ///
+    /// When a `Seed` goes out of scope its contents
+    /// will be zeroed out
+    secret Seed(SEEDBYTES);
+}
 
 new_type! {
     /// `SecretKey` for asymmetric authenticated encryption
@@ -76,6 +90,25 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
         (pk, sk)
     }
 }
+
+/// `key_pair_from_seed()` deterministically derives a key pair from a single key seed (crypto_box_SEEDBYTES bytes).
+///
+/// THREAD SAFETY: `key_pair_from_seed()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
+pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
+    unsafe {
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
+        ffi::crypto_box_curve25519xsalsa20poly1305_seed_keypair(
+            pk.0.as_mut_ptr(),
+            sk.0.as_mut_ptr(),
+            seed.0.as_ptr(),
+        );
+        (pk, sk)
+    }
+}
+
 
 /// `gen_nonce()` randomly generates a nonce
 ///
@@ -366,6 +399,43 @@ mod test {
             for j in 0..c.len() {
                 c[j] ^= 0x20;
                 assert!(Err(()) == open_precomputed(&mut c, &n, &k2));
+                c[j] ^= 0x20;
+            }
+        }
+    }
+
+    #[test]
+    fn test_seal_open_seed() {
+        use randombytes::{randombytes, randombytes_into};
+        for i in 0..256usize {
+            let mut seedbuf = [0; 32];
+            randombytes_into(&mut seedbuf);
+            let seed = Seed(seedbuf);
+            let (pk1, sk1) = keypair_from_seed(&seed);
+            let (pk2, sk2) = gen_keypair();
+            let m = randombytes(i);
+            let n = gen_nonce();
+            let c = seal(&m, &n, &pk1, &sk2);
+            let opened = open(&c, &n, &pk2, &sk1);
+            assert!(Ok(m) == opened);
+        }
+    }
+
+    #[test]
+    fn test_seal_open_seed_tamper() {
+        use randombytes::{randombytes, randombytes_into};
+        for i in 0..32usize {
+            let mut seedbuf = [0; 32];
+            randombytes_into(&mut seedbuf);
+            let seed = Seed(seedbuf);
+            let (pk1, sk1) = keypair_from_seed(&seed);
+            let (pk2, sk2) = gen_keypair();
+            let m = randombytes(i);
+            let n = gen_nonce();
+            let mut c = seal(&m, &n, &pk1, &sk2);
+            for j in 0..c.len() {
+                c[j] ^= 0x20;
+                assert!(Err(()) == open(&mut c, &n, &pk2, &sk1));
                 c[j] ^= 0x20;
             }
         }
