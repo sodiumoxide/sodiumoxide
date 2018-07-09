@@ -2,10 +2,12 @@
 //! [Ed25519](http://ed25519.cr.yp.to/). This function is conjectured to meet the
 //! standard notion of unforgeability for a public-key signature scheme under
 //! chosen-message attacks.
+
+#[cfg(not(feature = "std"))] use prelude::*;
 use ffi;
 use libc::c_ulonglong;
-#[cfg(not(feature = "std"))]
-use prelude::*;
+use std::mem;
+use std::fmt;
 
 /// Number of bytes in a `Seed`.
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
@@ -148,6 +150,66 @@ pub fn verify_detached(sig: &Signature, m: &[u8], pk: &PublicKey) -> bool {
             m.len() as c_ulonglong,
             pk.0.as_ptr(),
         )
+    }
+}
+
+/// State for multi-part (streaming) computation of signature.
+#[derive(Copy, Clone)]
+pub struct State(ffi::crypto_sign_ed25519ph_state);
+
+impl State {
+    /// `init()` initialize a streaming signing state.
+    pub fn init() -> State {
+        unsafe {
+            let mut s = mem::uninitialized();
+            ffi::crypto_sign_ed25519ph_init(&mut s);
+            State(s)
+        }
+    }
+
+    /// `update()` can be called more than once in order to compute the digest
+    /// from sequential chunks of the message.
+    pub fn update(&mut self, m: &[u8]) {
+        unsafe {
+            ffi::crypto_sign_ed25519ph_update(&mut self.0, m.as_ptr(), m.len() as c_ulonglong);
+        }
+    }
+
+    /// `finalize()` finalizes the hashing computation and returns a `Signature`.
+    // Moves self becuase libsodium says the state should not be used
+    // anymore after final().
+    pub fn finalize(&mut self, &SecretKey(ref sk): &SecretKey) -> Signature {
+        unsafe {
+            let mut sig = [0u8; SIGNATUREBYTES];
+            let mut siglen: c_ulonglong = 0;
+
+            ffi::crypto_sign_ed25519ph_final_create(&mut self.0, sig.as_mut_ptr(), &mut siglen, sk.as_ptr());
+            assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
+            Signature(sig)
+        }
+    }
+
+    /// `veriry` verifies the signature in `sm` using the signer's public key `pk`.
+    pub fn verify(
+        &mut self,
+        &Signature(ref sig): &Signature,
+        &PublicKey(ref pk): &PublicKey,
+    ) -> bool {
+        let mut sig = sig.clone();
+        unsafe { 0 == ffi::crypto_sign_ed25519ph_final_verify(&mut self.0, sig.as_mut_ptr(), pk.as_ptr()) }
+    }
+}
+
+impl fmt::Debug for State {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "ed25519 state")
+    }
+}
+
+// Impl Default becuase `State` does have a sensible default: State::init()
+impl Default for State {
+    fn default() -> State {
+        State::init()
     }
 }
 
@@ -317,6 +379,37 @@ mod test {
             round_trip(sk);
             round_trip(sig);
         }
+    }
+
+    #[test]
+    fn test_streaming_sign() {
+        use randombytes::randombytes;
+        for i in 0..256usize {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let mut creation_state = State::init();
+            creation_state.update(&m);
+            let sig = creation_state.finalize(&sk);
+            let mut validator_state = State::init();
+            validator_state.update(&m);
+            assert!(validator_state.verify(&sig, &pk));
+        }
+    }
+
+    #[test]
+    fn test_chunks_sign() {
+        use randombytes::randombytes;
+        let (pk, sk) = gen_keypair();
+        let mut creation_state = State::init();
+        let mut validator_state = State::init();
+        for i in 0..64usize {
+            let chunk = randombytes(i);
+            creation_state.update(&chunk);
+            validator_state.update(&chunk);
+        }
+        let sig = creation_state.finalize(&sk);
+        assert!(validator_state.verify(&sig, &pk));
+
     }
 }
 
