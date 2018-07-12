@@ -49,6 +49,12 @@
 //! on using these primitives, are advised to use a randomly derived key for each
 //! message.
 //!
+//! # Note
+//!
+//! For authenticated encryption usage of `secretstream` is recommended as it provides guaranties:
+//! Messages cannot be truncated, removed, reordered, duplicated or modified
+//! without this being detected by the decryption functions.
+//!
 //! # Example (keystream generation)
 //! ```
 //! use sodiumoxide::crypto::stream;
