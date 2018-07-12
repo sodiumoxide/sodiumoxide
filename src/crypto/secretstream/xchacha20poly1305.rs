@@ -1,4 +1,4 @@
-//! `crypto_stream_chacha20` (Chacha20)
+//! `crypto_secretstream_xchacha20poly1305`
 use ffi::{crypto_secretstream_xchacha20poly1305_state,
           crypto_secretstream_xchacha20poly1305_init_push,
           crypto_secretstream_xchacha20poly1305_push,
@@ -43,22 +43,28 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut push_state, header) = init_push(&key);
-        let c1 = push_state.push(&msg1, None, TAG_MESSAGE);
-        let c2 = push_state.push(&msg2, None, TAG_PUSH);
-        let c3 = push_state.push(&msg3, None, TAG_FINAL);
+        let (mut encryptor, header) = Encryptor::init(&key).unwrap();
+        let c1 = encryptor.message(&msg1, None).unwrap();
+        let c2 = encryptor.push(&msg2, None).unwrap();
+        let c3 = encryptor.finalize(&msg3, None).unwrap();
 
-        let mut pull_state = init_pull(&header, &key).unwrap();
-        let (m1, t1) = pull_state.pull(&c1, None).unwrap();
-        let (m2, t2) = pull_state.pull(&c2, None).unwrap();
-        let (m3, t3) = pull_state.pull(&c3, None).unwrap();
-        
-        assert_eq!(t1, TAG_MESSAGE);
-        assert_eq!(t2, TAG_PUSH);
-        assert_eq!(t3, TAG_FINAL);
+        let mut decryptor = Decryptor::init(&header, &key).unwrap();
+        assert!(!decryptor.is_finalized());
+
+        let (m1, t1) = decryptor.decrypt(&c1, None).unwrap();
+        assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
+        assert!(!decryptor.is_finalized());
+
+        let (m2, t2) = decryptor.decrypt(&c2, None).unwrap();
+        assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
+        assert!(!decryptor.is_finalized());
+
+        let (m3, t3) = decryptor.decrypt(&c3, None).unwrap();
+        assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
+        assert!(decryptor.is_finalized());
     }
 
     #[test]
@@ -77,22 +83,28 @@ mod test {
         randombytes_into(&mut ad1);
         randombytes_into(&mut ad2);
         
-        let (mut push_state, header) = init_push(&key);
-        let c1 = push_state.push(&msg1, Some(&ad1), TAG_MESSAGE);
-        let c2 = push_state.push(&msg2, Some(&ad2), TAG_PUSH);
-        let c3 = push_state.push(&msg3, None, TAG_FINAL);
+        let (mut encryptor, header) = Encryptor::init(&key).unwrap();
+        let c1 = encryptor.message(&msg1, Some(&ad1)).unwrap();
+        let c2 = encryptor.push(&msg2, Some(&ad2)).unwrap();
+        let c3 = encryptor.finalize(&msg3, None).unwrap();
 
-        let mut pull_state = init_pull(&header, &key).unwrap();
-        let (m1, t1) = pull_state.pull(&c1, Some(&ad1)).unwrap();
-        let (m2, t2) = pull_state.pull(&c2, Some(&ad2)).unwrap();
-        let (m3, t3) = pull_state.pull(&c3, None).unwrap();
-        
-        assert_eq!(t1, TAG_MESSAGE);
-        assert_eq!(t2, TAG_PUSH);
-        assert_eq!(t3, TAG_FINAL);
+        let mut decryptor = Decryptor::init(&header, &key).unwrap();
+        assert!(!decryptor.is_finalized());
+
+        let (m1, t1) = decryptor.decrypt(&c1, Some(&ad1)).unwrap();
+        assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
+        assert!(!decryptor.is_finalized());
+
+        let (m2, t2) = decryptor.decrypt(&c2, Some(&ad2)).unwrap();
+        assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
+        assert!(!decryptor.is_finalized());
+
+        let (m3, t3) = decryptor.decrypt(&c3, None).unwrap();
+        assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
+        assert!(decryptor.is_finalized());
     }
 
     #[test]
@@ -107,22 +119,28 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut push_state, header) = init_push(&key);
-        let c1 = push_state.push(&msg1, None, TAG_MESSAGE);
-        let c2 = push_state.push(&msg2, None, TAG_REKEY);
-        let c3 = push_state.push(&msg3, None, TAG_FINAL);
+        let (mut encryptor, header) = Encryptor::init(&key).unwrap();
+        let c1 = encryptor.message(&msg1, None).unwrap();
+        let c2 = encryptor.rekey_message(&msg2, None).unwrap();
+        let c3 = encryptor.finalize(&msg3, None).unwrap();
 
-        let mut pull_state = init_pull(&header, &key).unwrap();
-        let (m1, t1) = pull_state.pull(&c1, None).unwrap();
-        let (m2, t2) = pull_state.pull(&c2, None).unwrap();
-        let (m3, t3) = pull_state.pull(&c3, None).unwrap();
-        
-        assert_eq!(t1, TAG_MESSAGE);
-        assert_eq!(t2, TAG_REKEY);
-        assert_eq!(t3, TAG_FINAL);
+        let mut decryptor = Decryptor::init(&header, &key).unwrap();
+        assert!(!decryptor.is_finalized());
+
+        let (m1, t1) = decryptor.decrypt(&c1, None).unwrap();
+        assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
+        assert!(!decryptor.is_finalized());
+
+        let (m2, t2) = decryptor.decrypt(&c2, None).unwrap();
+        assert_eq!(t2, Tag::Rekey);
         assert_eq!(msg2[..], m2[..]);
+        assert!(!decryptor.is_finalized());
+
+        let (m3, t3) = decryptor.decrypt(&c3, None).unwrap();
+        assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
+        assert!(decryptor.is_finalized());
     }
 
     #[test]
@@ -137,24 +155,32 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut push_state, header) = init_push(&key);
-        let c1 = push_state.push(&msg1, None, TAG_MESSAGE);
-        let c2 = push_state.push(&msg2, None, TAG_PUSH);
-        push_state.rekey();
-        let c3 = push_state.push(&msg3, None, TAG_FINAL);
+        let (mut encryptor, header) = Encryptor::init(&key).unwrap();
+        let c1 = encryptor.message(&msg1, None).unwrap();
+        let c2 = encryptor.push(&msg2, None).unwrap();
+        encryptor.rekey();
+        let c3 = encryptor.finalize(&msg3, None).unwrap();
 
-        let mut pull_state = init_pull(&header, &key).unwrap();
-        let (m1, t1) = pull_state.pull(&c1, None).unwrap();
-        let (m2, t2) = pull_state.pull(&c2, None).unwrap();
-        pull_state.rekey();
-        let (m3, t3) = pull_state.pull(&c3, None).unwrap();
-        
-        assert_eq!(t1, TAG_MESSAGE);
-        assert_eq!(t2, TAG_PUSH);
-        assert_eq!(t3, TAG_FINAL);
+        let mut decryptor = Decryptor::init(&header, &key).unwrap();
+        assert!(!decryptor.is_finalized());
+
+        let (m1, t1) = decryptor.decrypt(&c1, None).unwrap();
+        assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
+        assert!(!decryptor.is_finalized());
+
+        let (m2, t2) = decryptor.decrypt(&c2, None).unwrap();
+        assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
+        assert!(!decryptor.is_finalized());
+
+        decryptor.rekey();
+        assert!(!decryptor.is_finalized());
+
+        let (m3, t3) = decryptor.decrypt(&c3, None).unwrap();
+        assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
+        assert!(decryptor.is_finalized());
     }
     
 }
