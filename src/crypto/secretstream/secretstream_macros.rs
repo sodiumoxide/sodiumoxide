@@ -4,6 +4,7 @@ macro_rules! stream_module (($state_name: ident,
                              $init_pull_name:ident,
                              $pull_name:ident,
                              $rekey_name: ident,
+                             $messagebytes_max:ident,
                              $keybytes:expr,
                              $headerbytes:expr,
                              $abytes:expr,
@@ -16,6 +17,13 @@ macro_rules! stream_module (($state_name: ident,
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
 use std::mem;
+
+/// Returns the maximum length of an individual message.
+// TODO: use `const fn` when stable
+// (https://github.com/rust-lang/rust/issues/24111).
+pub fn messagebytes_max() -> usize {
+    unsafe { $messagebytes_max() }
+}
 
 /// Number of bytes in a `Key`.
 pub const KEYBYTES: usize = $keybytes as usize;
@@ -169,6 +177,13 @@ impl Encryptor {
     /// Additional data ad of length adlen can be included in the computation of the authentication tag.
     /// If no additional data is required, ad can be None.
     fn _push(&mut self, m: &[u8], ad: Option<&[u8]>, tag: u8) -> Result<Vec<u8>, ()> {
+        if m.len() > messagebytes_max() {
+            return Err(());
+        } else {
+            println!("{}", m.len());
+            println!("{}", messagebytes_max());
+        }
+
         let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
         let mut c = Vec::with_capacity(m.len() + ABYTES);
         let mut clen = c.capacity() as c_ulonglong;
@@ -219,18 +234,27 @@ impl Decryptor {
     /// Applications will typically call this function in a loop, until
     /// a message with the Tag::Final tag is found.
     pub fn decrypt(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag),()> {
+        // An empty message will still be at least ABYTES.
+        let clen = c.len();
+        if clen < ABYTES {
+            return Err(());
+        }
+        let mlen = clen - ABYTES;
+        if mlen > messagebytes_max() {
+            return Err(());
+        }
+
+        let mut m = Vec::with_capacity(mlen);
         let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
-        let mut m = Vec::with_capacity(c.len() - ABYTES);
-        let mut mlen = m.capacity() as c_ulonglong;
         let mut tag: u8 = 0;
 
         unsafe {
             if $pull_name(&mut self.state,
                           m.as_mut_ptr(),
-                          &mut mlen,
+                          &mut (mlen as c_ulonglong),
                           &mut tag,
                           c.as_ptr(),
-                          c.len() as c_ulonglong,
+                          clen as c_ulonglong,
                           ad_p,
                           ad_len) != 0 {
                 return Err(());
