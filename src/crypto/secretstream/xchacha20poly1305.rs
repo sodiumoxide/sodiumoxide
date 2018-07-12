@@ -57,8 +57,7 @@ mod test {
     // #[test]
     // fn encrypt_too_long_message() {
     //     let msg: [u8; (MESSAGEBYTES_MAX + 1)] = unsafe { mem::uninitialized() };
-    //     let key = gen_key();
-    //     let (mut encryptor, _) = Encryptor::init(&key).unwrap();
+    //     let (mut encryptor, _, _) = Encryptor::init_gen_key().unwrap();
 
     //     assert!(encryptor.message(&msg, None).is_err());
     // }
@@ -66,8 +65,7 @@ mod test {
     #[test]
     fn decrypt_too_short_ciphertext() {
         let ciphertext: [u8; (ABYTES - 1)] = unsafe { mem::uninitialized() };
-        let key = gen_key();
-        let (_, header) = Encryptor::init(&key).unwrap();
+        let (_, header, key) = Encryptor::init_gen_key().unwrap();
         let mut decryptor = Decryptor::init(&header, &key).unwrap();
 
         // TODO: when custom error types are introduced, this should assert the
@@ -77,8 +75,6 @@ mod test {
 
     #[test]
     fn test_push_pull() {
-        let key = gen_key();
-        
         let mut msg1: [u8; 128] = [0; 128];
         let mut msg2: [u8; 34]  = [0; 34];
         let mut msg3: [u8; 478] = [0; 478];
@@ -87,7 +83,7 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut encryptor, header) = Encryptor::init(&key).unwrap();
+        let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
         let c1 = encryptor.message(&msg1, None).unwrap();
         let c2 = encryptor.push(&msg2, None).unwrap();
         let c3 = encryptor.finalize(&msg3, None).unwrap();
@@ -113,8 +109,6 @@ mod test {
 
     #[test]
     fn test_push_pull_with_ad() {
-        let key = gen_key();
-        
         let mut msg1: [u8; 128] = [0; 128];
         let mut msg2: [u8; 34]  = [0; 34];
         let mut msg3: [u8; 478] = [0; 478];
@@ -127,7 +121,7 @@ mod test {
         randombytes_into(&mut ad1);
         randombytes_into(&mut ad2);
         
-        let (mut encryptor, header) = Encryptor::init(&key).unwrap();
+        let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
         let c1 = encryptor.message(&msg1, Some(&ad1)).unwrap();
         let c2 = encryptor.push(&msg2, Some(&ad2)).unwrap();
         let c3 = encryptor.finalize(&msg3, None).unwrap();
@@ -153,8 +147,6 @@ mod test {
 
     #[test]
     fn test_push_pull_with_rekey() {
-        let key = gen_key();
-        
         let mut msg1: [u8; 128] = [0; 128];
         let mut msg2: [u8; 34]  = [0; 34];
         let mut msg3: [u8; 478] = [0; 478];
@@ -163,7 +155,7 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut encryptor, header) = Encryptor::init(&key).unwrap();
+        let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
         let c1 = encryptor.message(&msg1, None).unwrap();
         let c2 = encryptor.rekey_message(&msg2, None).unwrap();
         let c3 = encryptor.finalize(&msg3, None).unwrap();
@@ -189,8 +181,6 @@ mod test {
 
     #[test]
     fn test_push_pull_with_explicit_rekey() {
-        let key = gen_key();
-        
         let mut msg1: [u8; 128] = [0; 128];
         let mut msg2: [u8; 34]  = [0; 34];
         let mut msg3: [u8; 478] = [0; 478];
@@ -199,7 +189,7 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut encryptor, header) = Encryptor::init(&key).unwrap();
+        let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
         let c1 = encryptor.message(&msg1, None).unwrap();
         let c2 = encryptor.push(&msg2, None).unwrap();
         encryptor.rekey();

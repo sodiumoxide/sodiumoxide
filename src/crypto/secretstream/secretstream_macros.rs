@@ -119,22 +119,43 @@ pub fn gen_key() -> Key {
 pub struct Encryptor($state_name);
 
 impl Encryptor {
-    /// Initializes a `Encryptor` using the `key` and an internal, automatically generated initialization vector.
-    /// It then stores the stream header into header.
-    /// The header must be sent/stored before the sequence of encrypted messages,
-    /// as it is required to decrypt the stream.
-    pub fn init(key: &Key) -> Result<(Encryptor, Header), ()> {
-        unsafe {
-            let mut state: $state_name = mem::uninitialized();
-            let mut header: [u8; HEADERBYTES] = mem::uninitialized();
-            let err = $init_push_name(&mut state, header.as_mut_ptr(), key.0.as_ptr());
-            if err == 0 {
-                Ok((Encryptor(state), Header(header)))
-            }
-            else {
-                Err(())
-            }
+    /// Initializes an `Encryptor` using a provided `key`. Returns the
+    /// `Encryptor` object and a `Header`, which is needed by the recipient to
+    /// initialize a corresponding `Decryptor`.
+    // TODO: mentioning ways you can securely create a key here, including
+    // through KEX algorithms libsodium provides would be useful information to
+    // add to this docstring.
+    pub fn init(key: &Key) -> Result<(Self, Header), ()> {
+        let mut header: [u8; HEADERBYTES] = unsafe { mem::uninitialized() };
+        let mut state: $state_name = unsafe { mem::uninitialized() };
+
+        let rc = unsafe {
+            $init_push_name(&mut state, header.as_mut_ptr(), key.0.as_ptr())
+        };
+
+        if rc == 0 {
+            Ok((Encryptor(state), Header(header)))
+        } else {
+            Err(())
         }
+    }
+
+
+    /// Securely generates a key and uses it to initialize an `Encryptor`.
+    /// Returns the `Encryptor` object, a `Header` (which is needed by the
+    /// recipient to initialize a corresponding `Decryptor`), and the `Key`
+    /// object.
+    pub fn init_gen_key() -> Result<(Self, Header, Key), ()> {
+        let key = gen_key();
+        let result = Self::init(&key);
+
+        if result.is_ok() {
+            let (encryptor, header) = result.unwrap();
+            Ok((encryptor, header, key))
+        } else {
+            Err(())
+        }
+
     }
 
     /// Encrypts a message `m` using the `state` and tags it as `Message`.
