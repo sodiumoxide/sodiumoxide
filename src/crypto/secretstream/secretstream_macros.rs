@@ -30,49 +30,55 @@ pub fn messagebytes_max() -> usize {
 pub const KEYBYTES: usize = $keybytes as usize;
 
 /// Number of bytes in a `Header`.
-/// An encrypted stream starts with a short header, whose size is HEADERBYTES bytes.
-/// That header must be sent/stored before the sequence of encrypted messages,
-/// as it is required to decrypt the stream.
+/// An encrypted stream starts with a short header, whose size is HEADERBYTES
+/// bytes. That header must be sent/stored before the sequence of encrypted
+/// messages, as it is required to decrypt the stream.
 pub const HEADERBYTES: usize = $headerbytes as usize;
 
-/// Number of added bytes. The ciphertext length is guaranteed to always be message length + ABYTES.
+/// Number of added bytes. The ciphertext length is guaranteed to always be
+/// message length + ABYTES.
 pub const ABYTES: usize = $abytes as usize;
 
-/// Tag message, the most common tag, that doesn't add any information about the nature of the message.
+/// Tag message: the most common tag, that doesn't add any information about the
+/// nature of the message.
 const TAG_MESSAGE: u8 = $tag_message as u8;
 
-/// Tag push: indicates that the message marks the end of a set of messages,
-/// but not the end of the stream.
-/// For example, a huge JSON string sent as multiple chunks can use this tag to indicate
-/// to the application that the string is complete and that it can be decoded.
-/// But the stream itself is not closed, and more data may follow.
+/// Tag push: indicates that the message marks the end of a set of messages, but
+/// not the end of the stream.
+/// For example, a huge JSON string sent as multiple chunks can use this tag to
+/// indicate to the application that the string is complete and that it can be
+/// decoded. But the stream itself is not closed, and more data may follow.
 const TAG_PUSH: u8 = $tag_push as u8;
 
-/// Tag rekey: "forget" the key used to encrypt this message and the previous ones,
-/// and derive a new secret key.
+/// Tag rekey: "forget" the key used to encrypt this message and the previous
+/// ones, and derive a new secret key.
 const TAG_REKEY: u8 = $tag_rekey as u8;
 
-/// Tag final: indicates that the message marks the end of the stream
-/// and erases the secret key used to encrypt the previous sequence.
+/// Tag final: indicates that the message marks the end of the stream and erases
+/// the secret key used to encrypt the previous sequence.
 const TAG_FINAL: u8 = $tag_final as u8;
 
-/// Tag of the message. When message is encrypted the tag is attached.
-/// When decrypting the tag is retrieved and may be used.
+/// A tag is encrypted and attached to each message before the authentication
+/// code is generated over all data. A typical encrypted stream simply attaches
+/// `0` as a tag to all messages, except the last one which is tagged as
+/// `Tag::Final`. When decrypting the tag is retrieved and may be used.
 #[derive(Debug, PartialEq)]
 pub enum Tag {
-    /// Message, the most common tag, that doesn't add any information about the nature of the message.
+    /// Message, the most common tag, that doesn't add any information about the
+    /// nature of the message.
     Message,
-    /// Push: indicates that the message marks the end of a set of messages,
-    /// but not the end of the stream.
-    /// For example, a huge JSON string sent as multiple chunks can use this tag to indicate
-    /// to the application that the string is complete and that it can be decoded.
-    /// But the stream itself is not closed, and more data may follow.
+    /// Push: indicates that the message marks the end of a set of messages, but
+    /// not the end of the stream.
+    /// For example, a huge JSON string sent as multiple chunks can use this tag
+    /// to indicate to the application that the string is complete and that it
+    /// can be decoded. But the stream itself is not closed, and more data may
+    /// follow.
     Push,
-    /// Rekey: "forget" the key used to encrypt this message and the previous ones,
-    /// and derive a new secret key.
+    /// Rekey: "forget" the key used to encrypt this message and the previous
+    /// ones, and derive a new secret key.
     Rekey,
-    /// Final: indicates that the message marks the end of the stream
-    /// and erases the secret key used to encrypt the previous sequence.
+    /// Final: indicates that the message marks the end of the stream and erases
+    /// the secret key used to encrypt the previous sequence.
     Final,
 }
 
@@ -92,8 +98,8 @@ impl Tag {
 new_type! {
     /// `Key` for symmetric encryption
     ///
-    /// When a `Key` goes out of scope its contents
-    /// will be zeroed out
+    /// When a `Key` goes out of scope its contents will be overwritten in
+    /// memory.
     secret Key(KEYBYTES);
 }
 
@@ -126,10 +132,14 @@ pub struct Encryptor($state_name);
 impl Encryptor {
     /// Initializes an `Encryptor` using a provided `key`. Returns the
     /// `Encryptor` object and a `Header`, which is needed by the recipient to
-    /// initialize a corresponding `Decryptor`.
-    // TODO: mentioning ways you can securely create a key here, including
-    // through KEX algorithms libsodium provides would be useful information to
-    // add to this docstring.
+    /// initialize a corresponding `Decryptor`. The `key` will not be needed be
+    /// required for any subsequent authenticated encryption operations.
+    /// If you would like to securely generate a key and initialize an
+    /// `Encryptor` at the same time see the `new` method.
+    /// Network protocols can leverage the key exchange API in order to get a
+    /// shared key that can be used to encrypt streams. Similarly, file
+    /// encryption applications can use the password hashing API to get a key
+    /// that can be used with the functions below.
     pub fn init(key: &Key) -> Result<(Self, Header), ()> {
         let mut header: [u8; HEADERBYTES] = unsafe { mem::uninitialized() };
         let mut state: $state_name = unsafe { mem::uninitialized() };
@@ -210,9 +220,9 @@ impl Encryptor {
     }
 
     /// Encrypts a message `m` and the tag `Tag::Finalize`. Optionally attaches
-    /// unencrypted additional data `ad`. All data is authenticated.
-    /// This method consumes the `Encryptor`, so it can no longer be used after a
-    /// call to `finalize`.
+    /// unencrypted additional data `ad`. All data is authenticated. This method
+    /// consumes the `Encryptor`, so it can no longer be used after a call to
+    /// `finalize`.
     pub fn aencrypt_finalize(mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
         self.aencrypt(m, ad, TAG_FINAL)
     }
@@ -228,17 +238,17 @@ impl Encryptor {
     }
 }
 
-/// `Decryptor` contains the state for multi-part (streaming) computations. This allows the caller
-/// to process encryption of a sequence of multiple messages.
+/// `Decryptor` contains the state for multi-part (streaming) computations. This
+/// allows the caller to process encryption of a sequence of multiple messages.
 pub struct Decryptor {
     state: $state_name,
     finalized: bool,
 }
 
 impl Decryptor {
-    /// Initializes a `state` given a secret `key` and a `header`.
-    /// The `key` k will not be required any more for subsequent operations.
-    /// It returns Err if the header is invalid.
+    /// Initializes a `Decryptor` given a secret `Key` and a `Header`. The key
+    /// will not be required any more for subsequent operations. `Err(())` is
+    /// returned if the header is invalid.
     pub fn init(header: &Header, key: &Key) -> Result<Self, ()> {
         let mut state: $state_name = unsafe { mem::uninitialized() };
 
@@ -256,12 +266,13 @@ impl Decryptor {
     /// given the internal state of the `Decryptor` (ciphertext streams cannot be
     /// decrypted out of order for this reason). Also may validate the optional
     /// unencrypted additional data `ad` using the authentication tag attached to
-    /// `c`. Finally decrypts the ciphertext and tag, and checks the tag validity.
+    /// `c`. Finally decrypts the ciphertext and tag, and checks the tag
+    /// validity.
     /// If any authentication fails, the stream has already been finalized, or if
     /// the tag byte for some reason does not correspond to a valid `Tag`,
     /// returns `Err(())`. Otherwise returns the plaintext and the tag.
-    /// Applications will typically use a `while decryptor.is_not_finalized()` loop
-    /// to authenticate and decrypt a stream of messages.
+    /// Applications will typically use a `while decryptor.is_not_finalized()`
+    /// loop to authenticate and decrypt a stream of messages.
     pub fn vdecrypt(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag),()> {
         if self.is_finalized() {
             return Err(());
@@ -306,8 +317,8 @@ impl Decryptor {
 
     /// Explicit rekeying. This updates the internal state of the `Decryptor`,
     /// and should only be called in a synchronized manner with how the
-    /// corresponding `Encryptor` called it when encrypting the stream.
-    /// Returns `Err(())` if the stream was already finalized, else `Ok(())`.
+    /// corresponding `Encryptor` called it when encrypting the stream. Returns
+    /// `Err(())` if the stream was already finalized, else `Ok(())`.
     pub fn rekey(&mut self) -> Result<(), ()> {
         if self.is_finalized() {
             return Err(());

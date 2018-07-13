@@ -34,34 +34,13 @@ mod test {
     use super::*;
     use std::mem;
 
-    // TODO: this const should be in `secretstream_macros`, but it should also
-    // be determined by calling the const fn messagebytes_max. This is not
-    // possible until `const fn` is stable
-    // (https://github.com/rust-lang/rust/issues/24111). Remove attribute if
-    // problem with `encrypt_too_long_message` is fixed before we can use
-    // `const fn`.
-    #[allow(dead_code)]
-    const MESSAGEBYTES_MAX: usize = 274877906816;
-
-    // TODO: it is impossible to allocate enough memory for `msg` below without
-    // overflowing the stack. Therefore, this test cannot function as written
-    // below. However, in writing it the question of how to en/decrypt a
-    // plain/ciphertext that cannot fit in memory arose. We must first solve
-    // this problem, then we can rewrite this test to make sure this check is
-    // working in our code. Since the maximum size is ~275GB, even if we
-    // implement a file-like read interface for the encryption and decryption
-    // methods, we'll need to create a custom class which lies about its length
-    // for testing purposes. We should add an analagous test called
-    // `decrypt_message_too_long` as well.
-    //
-    // #[test]
-    // fn encrypt_too_long_message() {
-    //     let msg: [u8; (MESSAGEBYTES_MAX + 1)] = unsafe { mem::uninitialized() };
-    //     let (mut encryptor, _, _) = Encryptor::new().unwrap();
-
-    //     assert!(encryptor.aencrypt_message(&msg, None).is_err());
-    // }
-
+    // NOTE: it is impossible to allocate enough memory for `msg` below without
+    // overflowing the stack. Further, from all the research I've done and what
+    // I know it seems impossible with Rust's type model to mock a call to `len`
+    // and none of the mocking libraries seem to privde a workaround. Therefore
+    // we cannot test en/decrypting plain/ciphertexts that exceed the ~275GB
+    // maximum.
+    
     #[test]
     fn decrypt_too_short_ciphertext() {
         let ciphertext: [u8; (ABYTES - 1)] = unsafe { mem::uninitialized() };
