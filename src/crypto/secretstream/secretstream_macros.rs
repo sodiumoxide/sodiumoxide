@@ -228,7 +228,7 @@ impl Encryptor {
 /// to process encryption of a sequence of multiple messages.
 pub struct Decryptor {
     state: $state_name,
-    flag_finalized: bool,
+    finalized: bool,
 }
 
 impl Decryptor {
@@ -245,7 +245,7 @@ impl Decryptor {
             return Err(());
         }
 
-        Ok(Self{state, flag_finalized: false})
+        Ok(Self{state, finalized: false})
     }
 
     /// Verifies that `c` is a valid ciphertext with a correct authentication tag
@@ -289,7 +289,7 @@ impl Decryptor {
 
         let tag = Tag::from_u8(tag)?;
         if tag == Tag::Final {
-            self.flag_finalized = true;
+            self.finalized = true;
         }
 
         unsafe { m.set_len(mlen) }
@@ -308,7 +308,12 @@ impl Decryptor {
 
     /// Check if stream is finalized.
     pub fn is_finalized(&self) -> bool {
-        self.flag_finalized
+        self.finalized
+    }
+
+    /// Check if stream is not finalized.
+    pub fn is_not_finalized(&self) -> bool {
+        !self.finalized
     }
 }
 
