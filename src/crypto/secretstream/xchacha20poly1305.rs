@@ -59,7 +59,7 @@ mod test {
     //     let msg: [u8; (MESSAGEBYTES_MAX + 1)] = unsafe { mem::uninitialized() };
     //     let (mut encryptor, _, _) = Encryptor::init_gen_key().unwrap();
 
-    //     assert!(encryptor.message(&msg, None).is_err());
+    //     assert!(encryptor.aencrypt_message(&msg, None).is_err());
     // }
 
     #[test]
@@ -70,7 +70,7 @@ mod test {
 
         // TODO: when custom error types are introduced, this should assert the
         // specific error.
-        assert!(decryptor.decrypt(&ciphertext, None).is_err());
+        assert!(decryptor.vdecrypt(&ciphertext, None).is_err());
     }
 
     #[test]
@@ -84,24 +84,24 @@ mod test {
         randombytes_into(&mut msg3);
         
         let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
-        let c1 = encryptor.message(&msg1, None).unwrap();
-        let c2 = encryptor.push(&msg2, None).unwrap();
-        let c3 = encryptor.finalize(&msg3, None).unwrap();
+        let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
+        let c2 = encryptor.aencrypt_push(&msg2, None).unwrap();
+        let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
 
         let mut decryptor = Decryptor::init(&header, &key).unwrap();
         assert!(!decryptor.is_finalized());
 
-        let (m1, t1) = decryptor.decrypt(&c1, None).unwrap();
+        let (m1, t1) = decryptor.vdecrypt(&c1, None).unwrap();
         assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
         assert!(!decryptor.is_finalized());
 
-        let (m2, t2) = decryptor.decrypt(&c2, None).unwrap();
+        let (m2, t2) = decryptor.vdecrypt(&c2, None).unwrap();
         assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
         assert!(!decryptor.is_finalized());
 
-        let (m3, t3) = decryptor.decrypt(&c3, None).unwrap();
+        let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
         assert!(decryptor.is_finalized());
@@ -122,24 +122,24 @@ mod test {
         randombytes_into(&mut ad2);
         
         let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
-        let c1 = encryptor.message(&msg1, Some(&ad1)).unwrap();
-        let c2 = encryptor.push(&msg2, Some(&ad2)).unwrap();
-        let c3 = encryptor.finalize(&msg3, None).unwrap();
+        let c1 = encryptor.aencrypt_message(&msg1, Some(&ad1)).unwrap();
+        let c2 = encryptor.aencrypt_push(&msg2, Some(&ad2)).unwrap();
+        let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
 
         let mut decryptor = Decryptor::init(&header, &key).unwrap();
         assert!(!decryptor.is_finalized());
 
-        let (m1, t1) = decryptor.decrypt(&c1, Some(&ad1)).unwrap();
+        let (m1, t1) = decryptor.vdecrypt(&c1, Some(&ad1)).unwrap();
         assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
         assert!(!decryptor.is_finalized());
 
-        let (m2, t2) = decryptor.decrypt(&c2, Some(&ad2)).unwrap();
+        let (m2, t2) = decryptor.vdecrypt(&c2, Some(&ad2)).unwrap();
         assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
         assert!(!decryptor.is_finalized());
 
-        let (m3, t3) = decryptor.decrypt(&c3, None).unwrap();
+        let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
         assert!(decryptor.is_finalized());
@@ -156,24 +156,24 @@ mod test {
         randombytes_into(&mut msg3);
         
         let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
-        let c1 = encryptor.message(&msg1, None).unwrap();
-        let c2 = encryptor.rekey_message(&msg2, None).unwrap();
-        let c3 = encryptor.finalize(&msg3, None).unwrap();
+        let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
+        let c2 = encryptor.aencrypt_rekey(&msg2, None).unwrap();
+        let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
 
         let mut decryptor = Decryptor::init(&header, &key).unwrap();
         assert!(!decryptor.is_finalized());
 
-        let (m1, t1) = decryptor.decrypt(&c1, None).unwrap();
+        let (m1, t1) = decryptor.vdecrypt(&c1, None).unwrap();
         assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
         assert!(!decryptor.is_finalized());
 
-        let (m2, t2) = decryptor.decrypt(&c2, None).unwrap();
+        let (m2, t2) = decryptor.vdecrypt(&c2, None).unwrap();
         assert_eq!(t2, Tag::Rekey);
         assert_eq!(msg2[..], m2[..]);
         assert!(!decryptor.is_finalized());
 
-        let (m3, t3) = decryptor.decrypt(&c3, None).unwrap();
+        let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
         assert!(decryptor.is_finalized());
@@ -190,20 +190,20 @@ mod test {
         randombytes_into(&mut msg3);
         
         let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
-        let c1 = encryptor.message(&msg1, None).unwrap();
-        let c2 = encryptor.push(&msg2, None).unwrap();
+        let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
+        let c2 = encryptor.aencrypt_push(&msg2, None).unwrap();
         encryptor.rekey();
-        let c3 = encryptor.finalize(&msg3, None).unwrap();
+        let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
 
         let mut decryptor = Decryptor::init(&header, &key).unwrap();
         assert!(!decryptor.is_finalized());
 
-        let (m1, t1) = decryptor.decrypt(&c1, None).unwrap();
+        let (m1, t1) = decryptor.vdecrypt(&c1, None).unwrap();
         assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
         assert!(!decryptor.is_finalized());
 
-        let (m2, t2) = decryptor.decrypt(&c2, None).unwrap();
+        let (m2, t2) = decryptor.vdecrypt(&c2, None).unwrap();
         assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
         assert!(!decryptor.is_finalized());
@@ -211,7 +211,7 @@ mod test {
         decryptor.rekey();
         assert!(!decryptor.is_finalized());
 
-        let (m3, t3) = decryptor.decrypt(&c3, None).unwrap();
+        let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
         assert!(decryptor.is_finalized());

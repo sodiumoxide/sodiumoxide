@@ -115,7 +115,7 @@ pub fn gen_key() -> Key {
     Key(key)
 }
 
-/// `Encryptor` contains the state for multi-part (streaming) computations. This allows the caller
+/// `AEncryptor` contains the state for multi-part (streaming) computations. This allows the caller
 /// to process encryption of a sequence of multiple messages.
 pub struct Encryptor($state_name);
 
@@ -157,46 +157,9 @@ impl Encryptor {
         Ok((encryptor, header, key))
     }
 
-    /// Encrypts a message `m` using the `state` and tags it as `Message`.
-    /// Additional data ad of length adlen can be included in the computation of the authentication tag.
-    /// If no additional data is required, ad can be None.
-    pub fn message(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
-        self._push(m, ad, TAG_MESSAGE)
-    }
-
-    /// Encrypts a message `m` using the `state` and tags it as `Push`.
-    /// Additional data ad of length adlen can be included in the computation of the authentication tag.
-    /// If no additional data is required, ad can be None.
-    pub fn push(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
-        self._push(m, ad, TAG_PUSH)
-    }
-
-    /// Encrypts a message `m` using the `state` and issues an rekey event. Message is tagged as `Rekey`.
-    /// Additional data ad of length adlen can be included in the computation of the authentication tag.
-    /// If no additional data is required, ad can be None.
-    pub fn rekey_message(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
-        self._push(m, ad, TAG_REKEY)
-    }
-
-    /// Encrypts a message `m` using the `state` and finalizes the secret stream.
-    /// Additional data ad of length adlen can be included in the computation of the authentication tag.
-    /// If no additional data is required, ad can be None.
-    pub fn finalize(mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
-        self._push(m, ad, TAG_FINAL)
-    }
-
-    /// Explicit rekeying, updates the state, but doesn't add any information about the key change to the stream.
-    /// If this function is used to create an encrypted stream, the decryption process must call that function at the exact same stream location.
-    pub fn rekey(&mut self) {
-        unsafe {
-            $rekey_name(&mut self.0);
-        }
-    }
-
-    /// Encrypts a message `m` using the `state` and the `tag`.
-    /// Additional data ad of length adlen can be included in the computation of the authentication tag.
-    /// If no additional data is required, ad can be None.
-    fn _push(&mut self, m: &[u8], ad: Option<&[u8]>, tag: u8) -> Result<Vec<u8>, ()> {
+    /// Encrypts a message `m` and its `tag`. Optionally attaches unencrypted
+    /// additional data `ad`. All data is authenticated.
+    fn aencrypt(&mut self, m: &[u8], ad: Option<&[u8]>, tag: u8) -> Result<Vec<u8>, ()> {
         let mlen = m.len();
         if m.len() > messagebytes_max() {
             return Err(());
@@ -222,6 +185,42 @@ impl Encryptor {
 
         unsafe { c.set_len(clen) };
         Ok(c)
+    }
+
+    /// Encrypts a message `m` and the tag `Tag::Message`. Optionally attaches
+    /// unencrypted additional data `ad`. All data is authenticated.
+    pub fn aencrypt_message(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
+        self.aencrypt(m, ad, TAG_MESSAGE)
+    }
+
+    /// Encrypts a message `m` and the tag `Tag::Push`. Optionally attaches
+    /// unencrypted additional data `ad`. All data is authenticated.
+    pub fn aencrypt_push(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
+        self.aencrypt(m, ad, TAG_PUSH)
+    }
+
+    /// Encrypts a message `m` and the tag `Tag::Rekey`. Optionally attaches
+    /// unencrypted additional data `ad`. All data is authenticated.
+    pub fn aencrypt_rekey(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
+        self.aencrypt(m, ad, TAG_REKEY)
+    }
+
+    /// Encrypts a message `m` and the tag `Tag::Finalize`. Optionally attaches
+    /// unencrypted additional data `ad`. All data is authenticated.
+    /// This method consumes the `Encryptor`, so it can no longer be used after a
+    /// call to `finalize`.
+    pub fn aencrypt_finalize(mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
+        self.aencrypt(m, ad, TAG_FINAL)
+    }
+
+    /// This method explicitly re-keys the `Encryptor` and updates its state, but
+    /// doesn't add any information about the key change to the stream. If this
+    /// function is used to create an encrypted stream, the decryption process
+    /// must call that function at the exact same stream location.
+    pub fn rekey(&mut self) {
+        unsafe {
+            $rekey_name(&mut self.0);
+        }
     }
 }
 
@@ -249,13 +248,17 @@ impl Decryptor {
         Ok(Self{state, flag_finalized: false})
     }
 
-    /// Verifies that c (a sequence of bytes) contains a valid ciphertext and authentication tag
-    /// for the given state state and optional authenticated data ad of length adlen bytes.
-    /// If the ciphertext appears to be invalid, the function returns Err.
-    /// If the authentication tag appears to be correct, the decrypted message is returned with tag.
-    /// Applications will typically call this function in a loop, until
-    /// a message with the Tag::Final tag is found.
-    pub fn decrypt(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag),()> {
+    /// Verifies that `c` is a valid ciphertext with a correct authentication tag
+    /// given the internal state of the `Decryptor` (ciphertext streams cannot be
+    /// decrypted out of order for this reason). Also may validate the optional
+    /// unencrypted additional data `ad` using the authentication tag attached to
+    /// `c`. Finally decrypts the ciphertext and tag, and checks the tag validity.
+    /// If any authentication fails, or if the tag byte for some reason does
+    /// not correspond to a valid `Tag`, returns `Err(())`. Otherwise returns the
+    /// plaintext and the tag.
+    /// Applications will typically use a `while decryptor.is_not_finalized()` loop
+    /// to authenticate and decrypt a stream of messages.
+    pub fn vdecrypt(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag),()> {
         // An empty message will still be at least ABYTES.
         let clen = c.len();
         if clen < ABYTES {
