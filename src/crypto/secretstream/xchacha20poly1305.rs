@@ -54,9 +54,9 @@ mod test {
 
     #[test]
     fn test_push_pull() {
-        let mut msg1: [u8; 128] = [0; 128];
-        let mut msg2: [u8; 34]  = [0; 34];
-        let mut msg3: [u8; 478] = [0; 478];
+        let mut msg1 = [0; 128];
+        let mut msg2  = [0; 34];
+        let mut msg3 = [0; 478];
 
         randombytes_into(&mut msg1);
         randombytes_into(&mut msg2);
@@ -88,11 +88,11 @@ mod test {
 
     #[test]
     fn test_push_pull_with_ad() {
-        let mut msg1: [u8; 128] = [0; 128];
-        let mut msg2: [u8; 34]  = [0; 34];
-        let mut msg3: [u8; 478] = [0; 478];
-        let mut ad1: [u8; 224] = [0; 224];
-        let mut ad2: [u8; 135] = [0; 135];
+        let mut msg1 = [0; 128];
+        let mut msg2 = [0; 34];
+        let mut msg3 = [0; 478];
+        let mut ad1 = [0; 224];
+        let mut ad2 = [0; 135];
 
         randombytes_into(&mut msg1);
         randombytes_into(&mut msg2);
@@ -126,9 +126,9 @@ mod test {
 
     #[test]
     fn test_push_pull_with_rekey() {
-        let mut msg1: [u8; 128] = [0; 128];
-        let mut msg2: [u8; 34]  = [0; 34];
-        let mut msg3: [u8; 478] = [0; 478];
+        let mut msg1 = [0; 128];
+        let mut msg2 = [0; 34];
+        let mut msg3 = [0; 478];
 
         randombytes_into(&mut msg1);
         randombytes_into(&mut msg2);
@@ -160,9 +160,9 @@ mod test {
 
     #[test]
     fn test_push_pull_with_explicit_rekey() {
-        let mut msg1: [u8; 128] = [0; 128];
-        let mut msg2: [u8; 34]  = [0; 34];
-        let mut msg3: [u8; 478] = [0; 478];
+        let mut msg1 = [0; 128];
+        let mut msg2 = [0; 34];
+        let mut msg3 = [0; 478];
 
         randombytes_into(&mut msg1);
         randombytes_into(&mut msg2);
