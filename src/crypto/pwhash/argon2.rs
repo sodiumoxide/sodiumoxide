@@ -50,7 +50,7 @@ pub const MEMLIMIT_SENSITIVE: MemLimit =
 ///
 /// A high `OpsLimit` will make the functions
 /// require more CPU cycles
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct OpsLimit(pub usize);
 
 /// `MemLimit` represents the maximum amount of RAM that the functions in this
@@ -58,11 +58,11 @@ pub struct OpsLimit(pub usize);
 ///
 /// It is highly recommended to allow the functions to use
 /// at least 16 megabytes.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct MemLimit(pub usize);
 
 /// An identifier for the Argon2 algorithm variant to use.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub enum Variant {
     Argon2i13 = 1,
     Argon2id13 = 2,
