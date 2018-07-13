@@ -17,6 +17,7 @@ macro_rules! stream_module (($state_name: ident,
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
 use std::mem;
+use std::ptr;
 
 /// Returns the maximum length of an individual message.
 // TODO: use `const fn` when stable
@@ -132,12 +133,11 @@ impl Encryptor {
         let rc = unsafe {
             $init_push_name(&mut state, header.as_mut_ptr(), key.0.as_ptr())
         };
-
-        if rc == 0 {
-            Ok((Encryptor(state), Header(header)))
-        } else {
-            Err(())
+        if rc != 0 {
+            return Err(());
         }
+
+        Ok((Self(state), Header(header)))
     }
 
 
@@ -147,15 +147,14 @@ impl Encryptor {
     /// object.
     pub fn init_gen_key() -> Result<(Self, Header, Key), ()> {
         let key = gen_key();
-        let result = Self::init(&key);
 
-        if result.is_ok() {
-            let (encryptor, header) = result.unwrap();
-            Ok((encryptor, header, key))
-        } else {
-            Err(())
+        let result = Self::init(&key);
+        if result.is_err() {
+            return Err(());
         }
 
+        let (encryptor, header) = result.unwrap();
+        Ok((encryptor, header, key))
     }
 
     /// Encrypts a message `m` using the `state` and tags it as `Message`.
@@ -198,31 +197,30 @@ impl Encryptor {
     /// Additional data ad of length adlen can be included in the computation of the authentication tag.
     /// If no additional data is required, ad can be None.
     fn _push(&mut self, m: &[u8], ad: Option<&[u8]>, tag: u8) -> Result<Vec<u8>, ()> {
+        let mlen = m.len();
         if m.len() > messagebytes_max() {
             return Err(());
-        } else {
-            println!("{}", m.len());
-            println!("{}", messagebytes_max());
+        }
+        let clen = mlen + ABYTES;
+        let mut c = Vec::with_capacity(clen);
+        let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len()))
+                               .unwrap_or((ptr::null(), 0));
+
+        let rc = unsafe {
+            $push_name(&mut self.0,
+                       c.as_mut_ptr(),
+                       &mut (clen as c_ulonglong),
+                       m.as_ptr(),
+                       mlen as c_ulonglong,
+                       ad_p,
+                       ad_len as c_ulonglong,
+                       tag)
+        };
+        if rc != 0 {
+            return Err(());
         }
 
-        let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
-        let mut c = Vec::with_capacity(m.len() + ABYTES);
-        let mut clen = c.capacity() as c_ulonglong;
-
-        unsafe {
-            let err = $push_name(&mut self.0,
-                                 c.as_mut_ptr(),
-                                 &mut clen,
-                                 m.as_ptr(),
-                                 m.len() as c_ulonglong,
-                                 ad_p,
-                                 ad_len,
-                                 tag);
-            if err != 0 {
-                return Err(());
-            }
-            c.set_len(clen as usize);
-        }
+        unsafe { c.set_len(clen) };
         Ok(c)
     }
 }
@@ -238,14 +236,17 @@ impl Decryptor {
     /// Initializes a `state` given a secret `key` and a `header`.
     /// The `key` k will not be required any more for subsequent operations.
     /// It returns Err if the header is invalid.
-    pub fn init(header: &Header, key: &Key) -> Result<Decryptor, ()> {
-        unsafe {
-            let mut state: $state_name = mem::uninitialized();
-            if $init_pull_name(&mut state, header.0.as_ptr(), key.0.as_ptr()) != 0 {
-                return Err(());
-            }
-            Ok(Decryptor{state, flag_finalized: false})
+    pub fn init(header: &Header, key: &Key) -> Result<Self, ()> {
+        let mut state: $state_name = unsafe { mem::uninitialized() };
+
+        let rc = unsafe {
+            $init_pull_name(&mut state, header.0.as_ptr(), key.0.as_ptr())
+        };
+        if rc != 0 {
+            return Err(());
         }
+
+        Ok(Self{state, flag_finalized: false})
     }
 
     /// Verifies that c (a sequence of bytes) contains a valid ciphertext and authentication tag
@@ -264,26 +265,32 @@ impl Decryptor {
         if mlen > messagebytes_max() {
             return Err(());
         }
-
         let mut m = Vec::with_capacity(mlen);
-        let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
-        let mut tag: u8 = 0;
+        let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len()))
+                               .unwrap_or((ptr::null(), 0));
+        let mut tag: u8 = unsafe { mem::uninitialized() };
 
-        unsafe {
-            if $pull_name(&mut self.state,
-                          m.as_mut_ptr(),
-                          &mut (mlen as c_ulonglong),
-                          &mut tag,
-                          c.as_ptr(),
-                          clen as c_ulonglong,
-                          ad_p,
-                          ad_len) != 0 {
-                return Err(());
-            }
-            m.set_len(mlen as usize);
+        let rc = unsafe {
+            $pull_name(&mut self.state,
+                       m.as_mut_ptr(),
+                       &mut (mlen as c_ulonglong),
+                       &mut tag,
+                       c.as_ptr(),
+                       clen as c_ulonglong,
+                       ad_p,
+                       ad_len as c_ulonglong)
+        };
+        if rc != 0 {
+            return Err(());
         }
+
         let tag = _tag_from_byte(tag)?;
-        if tag == Tag::Final { self.flag_finalized = true; }
+        if tag == Tag::Final {
+            self.flag_finalized = true;
+        }
+
+        unsafe { m.set_len(mlen) }
+
         Ok((m, tag))
     }
 
