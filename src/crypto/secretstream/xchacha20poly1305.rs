@@ -32,7 +32,9 @@ stream_module!(crypto_secretstream_xchacha20poly1305_state,
 #[cfg(test)]
 mod test {
     use super::*;
+    use randombytes::randombytes_into;
     use std::mem;
+    use std::u8;
 
     // NOTE: it is impossible to allocate enough memory for `msg` below without
     // overflowing the stack. Further, from all the research I've done and what
@@ -218,4 +220,26 @@ mod test {
         assert!(decryptor.rekey().is_err());
     }
     
+    #[test]
+    fn tag_from_u8() {
+        assert_eq!(Tag::Message, Tag::from_u8(0).unwrap());
+        assert_eq!(Tag::Push, Tag::from_u8(1).unwrap());
+        assert_eq!(Tag::Rekey, Tag::from_u8(2).unwrap());
+        assert_eq!(Tag::Final, Tag::from_u8(3).unwrap());
+        for i in 4..(u16::from(u8::MAX) + 1) {
+            assert!(Tag::from_u8(i as u8).is_err());
+        }
+    }
+
+    // NOTE: it seems impossible to create an invalid header. Maybe a header can
+    // take on all values as long as it is the correct byte length.
+    // #[test]
+    // fn invalid_header() {
+    //     // let mut header: [u8; HEADERBYTES] = unsafe { mem::uninitialized() };
+    //     // randombytes_into(&mut header);
+    //     let header = Header([0; HEADERBYTES]);
+    //     let key = Key::new();
+    //     // TODO: check specific `Err(())` when implemented (#221).
+    //     assert!(Decryptor::init(&header, &key).is_err());
+    // }
 }

@@ -96,7 +96,7 @@ impl Tag {
 }
 
 new_type! {
-    /// `Key` for symmetric encryption
+    /// `Key` for symmetric encryption.
     ///
     /// When a `Key` goes out of scope its contents will be overwritten in
     /// memory.
