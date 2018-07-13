@@ -33,7 +33,7 @@
 //! let msg3 = "final message";
 //!
 //! // initialize encrypt secret stream
-//! let (mut enc_stream, header, key) = secretstream::Encryptor::init_gen_key().unwrap();
+//! let (mut enc_stream, header, key) = secretstream::Encryptor::new().unwrap();
 //!
 //! // encrypt first message, tagging it as message.
 //! let ciphertext1 = enc_stream.aencrypt_message(msg1.as_bytes(), None).unwrap();

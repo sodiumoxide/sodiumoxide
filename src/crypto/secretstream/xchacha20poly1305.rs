@@ -57,7 +57,7 @@ mod test {
     // #[test]
     // fn encrypt_too_long_message() {
     //     let msg: [u8; (MESSAGEBYTES_MAX + 1)] = unsafe { mem::uninitialized() };
-    //     let (mut encryptor, _, _) = Encryptor::init_gen_key().unwrap();
+    //     let (mut encryptor, _, _) = Encryptor::new().unwrap();
 
     //     assert!(encryptor.aencrypt_message(&msg, None).is_err());
     // }
@@ -65,7 +65,7 @@ mod test {
     #[test]
     fn decrypt_too_short_ciphertext() {
         let ciphertext: [u8; (ABYTES - 1)] = unsafe { mem::uninitialized() };
-        let (_, header, key) = Encryptor::init_gen_key().unwrap();
+        let (_, header, key) = Encryptor::new().unwrap();
         let mut decryptor = Decryptor::init(&header, &key).unwrap();
 
         // TODO: when custom error types are introduced, this should assert the
@@ -83,7 +83,7 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
+        let (mut encryptor, header, key) = Encryptor::new().unwrap();
         let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
         let c2 = encryptor.aencrypt_push(&msg2, None).unwrap();
         let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
@@ -121,7 +121,7 @@ mod test {
         randombytes_into(&mut ad1);
         randombytes_into(&mut ad2);
         
-        let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
+        let (mut encryptor, header, key) = Encryptor::new().unwrap();
         let c1 = encryptor.aencrypt_message(&msg1, Some(&ad1)).unwrap();
         let c2 = encryptor.aencrypt_push(&msg2, Some(&ad2)).unwrap();
         let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
@@ -155,7 +155,7 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
+        let (mut encryptor, header, key) = Encryptor::new().unwrap();
         let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
         let c2 = encryptor.aencrypt_rekey(&msg2, None).unwrap();
         let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
@@ -189,7 +189,7 @@ mod test {
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
         
-        let (mut encryptor, header, key) = Encryptor::init_gen_key().unwrap();
+        let (mut encryptor, header, key) = Encryptor::new().unwrap();
         let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
         let c2 = encryptor.aencrypt_push(&msg2, None).unwrap();
         encryptor.rekey();
@@ -220,7 +220,7 @@ mod test {
     #[test]
     fn cannot_vdecrypt_after_finalization() {
         let m = [0; 128];
-        let (encryptor, header, key) = Encryptor::init_gen_key().unwrap();
+        let (encryptor, header, key) = Encryptor::new().unwrap();
         let c = encryptor.aencrypt_finalize(&m, None).unwrap();
         let mut decryptor = Decryptor::init(&header, &key).unwrap();
         decryptor.vdecrypt(&c, None).unwrap();
@@ -231,7 +231,7 @@ mod test {
     #[test]
     fn cannot_rekey_after_finalization() {
         let m = [0; 128];
-        let (encryptor, header, key) = Encryptor::init_gen_key().unwrap();
+        let (encryptor, header, key) = Encryptor::new().unwrap();
         let c = encryptor.aencrypt_finalize(&m, None).unwrap();
         let mut decryptor = Decryptor::init(&header, &key).unwrap();
         decryptor.vdecrypt(&c, None).unwrap();

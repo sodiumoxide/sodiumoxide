@@ -104,19 +104,23 @@ new_type! {
     public Header(HEADERBYTES);
 }
 
-/// `gen_key()` randomly generates a key for symmetric encryption
-///
-/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
-pub fn gen_key() -> Key {
-    let mut key: [u8; KEYBYTES] = unsafe { mem::uninitialized() };
-    randombytes_into(&mut key);
-    Key(key)
+impl Key {
+    /// Randomly generates a key for authenticated encryption.
+    ///
+    /// THREAD SAFETY: this method is safe provided that you have called
+    /// `sodiumoxide::init()` once before using any other function from
+    /// sodiumoxide.
+    // TODO: create a new `new_type!` macro for keys. It will probably look like
+    // `public`, and then just have this method.
+    pub fn new() -> Key {
+        let mut key: [u8; KEYBYTES] = unsafe { mem::uninitialized() };
+        randombytes_into(&mut key);
+        Key(key)
+    }
 }
 
-/// `Encryptor` contains the state for multi-part (streaming) computations. This allows the caller
-/// to process encryption of a sequence of multiple messages.
+/// `Encryptor` contains the state for multi-part (streaming) computations. This
+/// allows the caller to process encryption of a sequence of multiple messages.
 pub struct Encryptor($state_name);
 
 impl Encryptor {
@@ -145,8 +149,8 @@ impl Encryptor {
     /// Returns the `Encryptor` object, a `Header` (which is needed by the
     /// recipient to initialize a corresponding `Decryptor`), and the `Key`
     /// object.
-    pub fn init_gen_key() -> Result<(Self, Header, Key), ()> {
-        let key = gen_key();
+    pub fn new() -> Result<(Self, Header, Key), ()> {
+        let key = Key::new();
 
         let result = Self::init(&key);
         if result.is_err() {
