@@ -62,30 +62,30 @@ const TAG_FINAL: u8 = $tag_final as u8;
 pub enum Tag {
     /// Message, the most common tag, that doesn't add any information about the nature of the message.
     Message,
-
     /// Push: indicates that the message marks the end of a set of messages,
     /// but not the end of the stream.
     /// For example, a huge JSON string sent as multiple chunks can use this tag to indicate
     /// to the application that the string is complete and that it can be decoded.
     /// But the stream itself is not closed, and more data may follow.
     Push,
-
     /// Rekey: "forget" the key used to encrypt this message and the previous ones,
     /// and derive a new secret key.
     Rekey,
-
     /// Final: indicates that the message marks the end of the stream
     /// and erases the secret key used to encrypt the previous sequence.
     Final,
 }
 
-fn _tag_from_byte(tag: u8) -> Result<Tag, ()> {
-    match tag {
-        TAG_MESSAGE => Ok(Tag::Message),
-        TAG_PUSH => Ok(Tag::Push),
-        TAG_REKEY => Ok(Tag::Rekey),
-        TAG_FINAL => Ok(Tag::Final),
-        _ => Err(())
+impl Tag {
+    /// Returns the corresponding `Tag` given a `u8`, else `Err(())`.
+    fn from_u8(tag: u8) -> Result<Tag, ()> {
+        match tag {
+            TAG_MESSAGE => Ok(Tag::Message),
+            TAG_PUSH => Ok(Tag::Push),
+            TAG_REKEY => Ok(Tag::Rekey),
+            TAG_FINAL => Ok(Tag::Final),
+            _ => Err(())
+        }
     }
 }
 
@@ -137,7 +137,7 @@ impl Encryptor {
             return Err(());
         }
 
-        Ok((Self(state), Header(header)))
+        Ok((Encryptor(state), Header(header)))
     }
 
 
@@ -284,7 +284,7 @@ impl Decryptor {
             return Err(());
         }
 
-        let tag = _tag_from_byte(tag)?;
+        let tag = Tag::from_u8(tag)?;
         if tag == Tag::Final {
             self.flag_finalized = true;
         }
