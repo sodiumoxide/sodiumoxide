@@ -115,7 +115,7 @@ pub fn gen_key() -> Key {
     Key(key)
 }
 
-/// `AEncryptor` contains the state for multi-part (streaming) computations. This allows the caller
+/// `Encryptor` contains the state for multi-part (streaming) computations. This allows the caller
 /// to process encryption of a sequence of multiple messages.
 pub struct Encryptor($state_name);
 
@@ -253,12 +253,15 @@ impl Decryptor {
     /// decrypted out of order for this reason). Also may validate the optional
     /// unencrypted additional data `ad` using the authentication tag attached to
     /// `c`. Finally decrypts the ciphertext and tag, and checks the tag validity.
-    /// If any authentication fails, or if the tag byte for some reason does
-    /// not correspond to a valid `Tag`, returns `Err(())`. Otherwise returns the
-    /// plaintext and the tag.
+    /// If any authentication fails, the stream has already been finalized, or if
+    /// the tag byte for some reason does not correspond to a valid `Tag`,
+    /// returns `Err(())`. Otherwise returns the plaintext and the tag.
     /// Applications will typically use a `while decryptor.is_not_finalized()` loop
     /// to authenticate and decrypt a stream of messages.
     pub fn vdecrypt(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag),()> {
+        if self.is_finalized() {
+            return Err(());
+        }
         // An empty message will still be at least ABYTES.
         let clen = c.len();
         if clen < ABYTES {
@@ -297,13 +300,18 @@ impl Decryptor {
         Ok((m, tag))
     }
 
-    /// Explicit rekeying, updates the state, but doesn't add any information about the key change to the stream.
-    /// If this function is used to create an encrypted stream,
-    /// the decryption process must call that function at the exact same stream location.
-    pub fn rekey(&mut self) {
+    /// Explicit rekeying. This updates the internal state of the `Decryptor`,
+    /// and should only be called in a synchronized manner with how the
+    /// corresponding `Encryptor` called it when encrypting the stream.
+    /// Returns `Err(())` if the stream was already finalized, else `Ok(())`.
+    pub fn rekey(&mut self) -> Result<(), ()> {
+        if self.is_finalized() {
+            return Err(());
+        }
         unsafe {
             $rekey_name(&mut self.state);
         }
+        Ok(())
     }
 
     /// Check if stream is finalized.

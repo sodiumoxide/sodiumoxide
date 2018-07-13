@@ -208,13 +208,35 @@ mod test {
         assert_eq!(msg2[..], m2[..]);
         assert!(decryptor.is_not_finalized());
 
-        decryptor.rekey();
+        decryptor.rekey().unwrap();
         assert!(decryptor.is_not_finalized());
 
         let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
         assert!(decryptor.is_finalized());
+    }
+
+    #[test]
+    fn cannot_vdecrypt_after_finalization() {
+        let m = [0; 128];
+        let (encryptor, header, key) = Encryptor::init_gen_key().unwrap();
+        let c = encryptor.aencrypt_finalize(&m, None).unwrap();
+        let mut decryptor = Decryptor::init(&header, &key).unwrap();
+        decryptor.vdecrypt(&c, None).unwrap();
+        // TODO: check specific `Err(())` when implemented (#221).
+        assert!(decryptor.vdecrypt(&c, None).is_err());
+    }
+
+    #[test]
+    fn cannot_rekey_after_finalization() {
+        let m = [0; 128];
+        let (encryptor, header, key) = Encryptor::init_gen_key().unwrap();
+        let c = encryptor.aencrypt_finalize(&m, None).unwrap();
+        let mut decryptor = Decryptor::init(&header, &key).unwrap();
+        decryptor.vdecrypt(&c, None).unwrap();
+        // TODO: check specific `Err(())` when implemented (#221).
+        assert!(decryptor.rekey().is_err());
     }
     
 }
