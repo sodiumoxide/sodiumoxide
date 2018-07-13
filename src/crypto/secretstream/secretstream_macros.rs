@@ -242,6 +242,9 @@ impl Encryptor {
 
 /// `Decryptor` contains the state for multi-part (streaming) computations. This
 /// allows the caller to process encryption of a sequence of multiple messages.
+/// After the last message of a valid stream containing the tag `Tag::Finalized`
+/// is decrypted, the `Decryptor` may no longer verify and decrypt messages or
+/// re-key itself.
 pub struct Decryptor {
     state: $state_name,
     finalized: bool,

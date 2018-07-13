@@ -22,7 +22,7 @@
 //!
 //! It transparently generates nonces and automatically handles key rotation.
 //!
-//! The crypto_secretstream_*() API was introduced in libsodium 1.0.14.
+//! The `crypto_secretstream_*()` API was introduced in libsodium 1.0.14.
 //!
 //! # Example (encryption)
 //! ```
