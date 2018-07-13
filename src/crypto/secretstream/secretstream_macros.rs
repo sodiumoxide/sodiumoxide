@@ -257,7 +257,13 @@ impl Decryptor {
         let rc = unsafe {
             $init_pull_name(&mut state, header.0.as_ptr(), key.0.as_ptr())
         };
-        if rc != 0 {
+        if rc == -1 {
+            // NOTE: this return code explicitly means the header is invalid,
+            // but when implementing error types we should still consider the
+            // possibility of some other non-zero code below with a generic call
+            // to external function failed error.
+            return Err(());
+        } else if rc != 0 {
             return Err(());
         }
 
