@@ -213,8 +213,9 @@ impl Encryptor {
         self.aencrypt(m, ad, TAG_PUSH)
     }
 
-    /// Encrypts a message `m` and the tag `Tag::Rekey`. Optionally attaches
-    /// unencrypted additional data `ad`. All data is authenticated.
+    /// Encrypts a message `m` and the tag `Tag::Rekey`. Rekeys the `Encryptor`,
+    /// updating the internal state. Optionally attaches unencrypted additional
+    /// data `ad`. All data is authenticated.
     pub fn aencrypt_rekey(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
         self.aencrypt(m, ad, TAG_REKEY)
     }
@@ -231,6 +232,7 @@ impl Encryptor {
     /// doesn't add any information about the key change to the stream. If this
     /// function is used to create an encrypted stream, the decryption process
     /// must call that function at the exact same stream location.
+    /// See also the method `aencrypt_rekey`.
     pub fn rekey(&mut self) {
         unsafe {
             $rekey_name(&mut self.0);
