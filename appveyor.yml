@@ -6,7 +6,7 @@ image: Visual Studio 2017
 environment:
   VCPKGRS_DYNAMIC: 1
   RUST_VERSION: stable
-  LLVM_VERSION: 5.0.0
+  LLVM_VERSION: 6.0.1
   matrix:
   - TARGET: x86_64-pc-windows-msvc
     VCPKG_TARGET: x64-windows
