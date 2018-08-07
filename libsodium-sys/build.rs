@@ -51,18 +51,11 @@ fn main() {
 }
 
 #[cfg(target_env = "msvc")]
-fn try_vcpkg() -> bool {
+fn try_vcpkg() -> bool { ||  vcpkg::probe_package("libsodium").is_ok()
     if vcpkg::Config::new()
         .lib_name("libsodium")
         .probe("libsodium")
-        .is_ok() {
-        // found the static library - vcpkg did everything for us
-        return true;
-    } else if vcpkg::probe_package("libsodium").is_ok() {
-        // found the dynamic library - vcpkg did everything for us
-        return true;
-    }
-    false
+        .is_ok() ||  vcpkg::probe_package("libsodium").is_ok()
 }
 
 #[cfg(not(target_env = "msvc"))]
