@@ -18,6 +18,8 @@ Dependencies
 
 [Sodium](https://github.com/jedisct1/libsodium) ([installation](https://download.libsodium.org/doc/installation/index.html))
 
+pkg-config (OSX: `brew install pkg-config`)
+
 Building
 --------
     cargo build
