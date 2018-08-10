@@ -96,7 +96,7 @@ impl Tag {
 }
 
 new_type! {
-    /// `Key` for symmetric encryption.
+    /// `Key` for symmetric authenticated encryption.
     ///
     /// When a `Key` goes out of scope its contents will be overwritten in
     /// memory.
@@ -171,8 +171,9 @@ impl Encryptor {
         Ok((encryptor, header, key))
     }
 
-    /// Encrypts a message `m` and its `tag`. Optionally attaches unencrypted
-    /// additional data `ad`. All data is authenticated.
+    /// All data (including optional fields) is authenticated. Encrypts a
+    /// message `m` and its `tag`. Optionally includes additional data `ad`,
+    /// which is not encrypted.
     fn aencrypt(&mut self, m: &[u8], ad: Option<&[u8]>, tag: u8) -> Result<Vec<u8>, ()> {
         let mlen = m.len();
         if m.len() > messagebytes_max() {
@@ -201,29 +202,31 @@ impl Encryptor {
         Ok(c)
     }
 
-    /// Encrypts a message `m` and the tag `Tag::Message`. Optionally attaches
-    /// unencrypted additional data `ad`. All data is authenticated.
+    /// All data (including optional fields) is authenticated. Encrypts a
+    /// message `m` and the tag `Tag::Message`. Optionally includes additional data `ad`,
+    /// which is not encrypted.
     pub fn aencrypt_message(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
         self.aencrypt(m, ad, TAG_MESSAGE)
     }
 
-    /// Encrypts a message `m` and the tag `Tag::Push`. Optionally attaches
-    /// unencrypted additional data `ad`. All data is authenticated.
+    /// All data (including optional fields) is authenticated. Encrypts a message
+    /// `m` and the tag `Tag::Push`. Optionally includes additional data `ad`,
+    /// which is not encrypted.
     pub fn aencrypt_push(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
         self.aencrypt(m, ad, TAG_PUSH)
     }
 
-    /// Encrypts a message `m` and the tag `Tag::Rekey`. Rekeys the `Encryptor`,
-    /// updating the internal state. Optionally attaches unencrypted additional
-    /// data `ad`. All data is authenticated.
+    /// All data (including optional fields) is authenticated. Encrypts a message
+    /// `m` and the tag `Tag::Rekey`. Optionally includes additional data `ad`,
+    /// which is not encrypted.
     pub fn aencrypt_rekey(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
         self.aencrypt(m, ad, TAG_REKEY)
     }
 
-    /// Encrypts a message `m` and the tag `Tag::Finalize`. Optionally attaches
-    /// unencrypted additional data `ad`. All data is authenticated. This method
-    /// consumes the `Encryptor`, so it can no longer be used after a call to
-    /// `finalize`.
+    /// All data (including optional fields) is authenticated. Encrypts a message
+    /// `m` and the tag `Tag::Finalize`. Optionally includes additional data `ad`,
+    /// which is not encrypted. Consumes `self` so that the `Encryptor` may no
+    /// longer be used after sending the finalize tag.
     pub fn aencrypt_finalize(mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
         self.aencrypt(m, ad, TAG_FINAL)
     }
