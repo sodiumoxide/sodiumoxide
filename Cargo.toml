@@ -15,6 +15,9 @@ exclude = [
     "bors.toml"
 ]
 
+[workspace]
+members = ["libsodium-sys"]
+
 [badges]
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 
