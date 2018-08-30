@@ -51,8 +51,8 @@ fn main() {
 }
 
 #[cfg(target_env = "msvc")]
-fn try_vcpkg() -> bool { ||  vcpkg::probe_package("libsodium").is_ok()
-    if vcpkg::Config::new()
+fn try_vcpkg() -> bool {
+    vcpkg::Config::new()
         .lib_name("libsodium")
         .probe("libsodium")
         .is_ok() ||  vcpkg::probe_package("libsodium").is_ok()
