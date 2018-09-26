@@ -11,7 +11,7 @@ pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES a
 pub const HASHEDPASSWORDBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES as usize;
 
 /// All `HashedPasswords` start with this string.
-pub const STRPREFIX: &'static str = "$7$";
+pub const STRPREFIX: &str = "$7$";
 
 /// Safe base line for `OpsLimit` for interactive password hashing.
 pub const OPSLIMIT_INTERACTIVE: OpsLimit =
