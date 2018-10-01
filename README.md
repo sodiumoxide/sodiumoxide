@@ -16,7 +16,9 @@ as easy to use.
 Dependencies
 ------------
 
-[Sodium](https://github.com/jedisct1/libsodium) ([installation](https://download.libsodium.org/doc/installation/index.html))
+[Clang](https://clang.llvm.org/) >= 3.9
+
+[Libsodium](https://github.com/jedisct1/libsodium) 1.0.16 ([installation](https://download.libsodium.org/doc/installation))
 
 pkg-config (OSX: `brew install pkg-config`)
 
