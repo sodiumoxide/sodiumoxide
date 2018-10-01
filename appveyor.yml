@@ -1,0 +1,57 @@
+version: 0.1.{build}
+branches:
+  only:
+  - build-msvc-vcpkg
+image: Visual Studio 2017
+environment:
+  VCPKGRS_DYNAMIC: 1
+  RUST_VERSION: stable
+  LLVM_VERSION: 6.0.1
+  matrix:
+  - TARGET: x86_64-pc-windows-msvc
+    VCPKG_TARGET: x64-windows
+    LLVM_TARGET: win64
+  - TARGET: i686-pc-windows-msvc
+    VCPKG_TARGET: x86-windows
+    LLVM_TARGET: win32
+  - TARGET: x86_64-pc-windows-msvc
+    VCPKG_TARGET: x64-windows
+    RUST_VERSION: beta
+    LLVM_TARGET: win64
+  - TARGET: i686-pc-windows-msvc
+    VCPKG_TARGET: x86-windows
+    RUST_VERSION: beta
+    LLVM_TARGET: win32
+  - TARGET: x86_64-pc-windows-msvc
+    VCPKG_TARGET: x64-windows
+    RUST_VERSION: nightly
+    LLVM_TARGET: win64
+  - TARGET: i686-pc-windows-msvc
+    VCPKG_TARGET: x86-windows
+    RUST_VERSION: nightly
+    LLVM_TARGET: win32
+install:
+- cmd: >-
+    curl -sSf -o rustup-init.exe https://win.rustup.rs/
+    
+    curl -sSf http://releases.llvm.org/%LLVM_VERSION%/LLVM-%LLVM_VERSION%-%LLVM_TARGET%.exe -o LLVM.exe
+    
+    7z x LLVM.exe -oC:\LLVM
+    
+    set LIBCLANG_PATH=C:\LLVM\bin
+    rustup-init.exe -y --default-host %TARGET% --default-toolchain %RUST_VERSION%
+    set PATH=%PATH%;%USERPROFILE%\.cargo\bin
+    rustc -Vv
+    cargo -V
+    vcpkg install libsodium:%VCPKG_TARGET%
+cache:
+- C:\Users\appveyor\.cargo\registry
+- target
+build_script:
+- cmd: >-
+    cargo build --target %TARGET%
+    cargo build --target %TARGET% --release
+test_script:
+- cmd: >-
+    cargo test --target %TARGET%
+    cargo test --target %TARGET% --release
