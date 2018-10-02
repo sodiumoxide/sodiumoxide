@@ -30,11 +30,8 @@ environment:
 install:
 - cmd: >-
     curl -sSf -o rustup-init.exe https://win.rustup.rs/
-    
     curl -sSf http://releases.llvm.org/%LLVM_VERSION%/LLVM-%LLVM_VERSION%-%LLVM_TARGET%.exe -o LLVM.exe
-    
     7z x LLVM.exe -oC:\LLVM
-    
     set LIBCLANG_PATH=C:\LLVM\bin
     rustup-init.exe -y --default-host %TARGET% --default-toolchain %RUST_VERSION%
     set PATH=%PATH%;%USERPROFILE%\.cargo\bin
