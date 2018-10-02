@@ -1,7 +1,4 @@
 version: 0.0.{build}
-branches:
-  only:
-  - build-msvc-vcpkg
 image: Visual Studio 2017
 environment:
   VCPKGRS_DYNAMIC: 1
