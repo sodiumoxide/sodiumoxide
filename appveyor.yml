@@ -53,8 +53,11 @@ cache:
 build_script:
 - cmd: >-
     cargo build --target %TARGET%
+
     cargo build --target %TARGET% --release
+
 test_script:
 - cmd: >-
     cargo test --target %TARGET%
+
     cargo test --target %TARGET% --release
