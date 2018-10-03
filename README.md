@@ -62,6 +62,16 @@ Examples
 --------
 TBD
 
+Platform Compatibiility 
+------------------------
+Sodiumoxide has been tested on: 
+[x] Linux 
+[ ] Windows
+[ ] macOS
+[ ] iOS
+[ ] Android
+[ ] No_std platform
+
 Join in
 =======
 File bugs in the issue tracker
