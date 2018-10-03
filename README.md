@@ -66,15 +66,15 @@ Platform Compatibiility
 ------------------------
 Sodiumoxide has been tested on: 
 
- `Linux -  Yes
+ Linux -  Yes
 
- `Windows - In Progress 
+ Windows - In Progress 
 
- `Mac OS - `        
+ Mac OS - `
 
- `IOS -             
+ IOS -
 
- `Android - `       
+ Android -
 
 
 Join in
