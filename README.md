@@ -65,12 +65,15 @@ TBD
 Platform Compatibiility 
 ------------------------
 Sodiumoxide has been tested on: 
-[x] Linux 
-[ ] Windows
-[ ] macOS
-[ ] iOS
-[ ] Android
-[ ] No_std platform
+
+| Platform        |  Tested     | 
+|----- -----------|-------------|
+| `Linux          | Yes         |
+| `Windows        | In Progress |
+| `Mac OS`        |             | 
+| `IOS            |             |         
+| `Android`       |             | 
+
 
 Join in
 =======
