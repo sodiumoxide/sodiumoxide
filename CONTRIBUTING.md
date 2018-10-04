@@ -20,9 +20,7 @@ on [sodiumoxide-rs mailing list] or join our [gitter] channel.
 [Feature Requests]: #feature-requests
 
 The `sodiumoxide` crate is still in flux. All features desired may not be present. As
-such you are welcome to request for new features. Keep in mind that `sodiumoxide` is
-a general purpose library. We want to provide features that most users would
-find useful. As such not every feature may be accepted.
+such you are welcome to request for new features. 
 
 If you have the chance, please [search existing issues], as there is a chance
 that someone has already requested your feature.
@@ -36,8 +34,6 @@ filling it in.
 > We welcome pull requests for your own feature requests, provided they have
 been discussed.
 
-[Feature Request Link]: https://github.com/sodiumoxide/sodiumoxide/issues/new?template=Feature_request.md
-
 # Bug Reports
 [Bug Reports]: #bug-reports
 
@@ -50,9 +46,6 @@ sometimes you might not what exactly you are looking for.
 
 File your issue with a descriptive title, as this helps others find your issue.
 
-Reporting a bug is as easy as following [this link][Bug Report Link] and
-filling it in.
-
 Sometimes a backtrace may be needed. In that case, set `RUST_BACKTRACE`
 environment variable to `1`. For example:
 
@@ -63,7 +56,6 @@ $ RUST_BACKTRACE=1 cargo build
 > We welcome pull requests for your own bug reports, provided they have been
 discussed.
 
-[Bug Report Link]: https://github.com/sodiumoxide/sodiumoxide/issues/new?template=Bug_report.md
 
 # Pull Requests
 [Pull Requests]: #pull-requests
@@ -74,15 +66,16 @@ has some [great documentation] on using the Pull Request feature. We use the
 their personal fork and create pull requests to bring those changes into the
 source repository.
 
-Unless the changes are fairly minor (like documentation changes or tiny
-patches), we require PRs to relevant issues.
+Ensure that your changes conform to how the rest of the crate is written and follows a 
+similar API, patterns, namings & other conventions. 
 
-Please open PRs against branch:
-* `master` when making non-breaking changes 
-* `breaking` when your changes alter the public API in a breaking manner
+Your changes should contain real vectors from the underlying library along with sanity tests
+in Rust. 
+
+Please open PRs against `master` branch.
 
 If the pull request is still a work in progress, prepend`[WIP] ` in your 
-title. `WIP bot` will make sure that the PR doesn't accidentally get merged.
+title. 
 
 When you feel that the PR is ready, please ping one of the maintainers so
 they can review your changes.
