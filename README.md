@@ -97,6 +97,8 @@ at your option.
 
 ### Contribution
 
+Go through the [CONTRIBUTING.md](https://github.com/sodiumoxide/sodiumoxide/blob/master/CONTRIBUTING.md) document to know more about how to contribute to this project.
+
 Unless you explicitly state otherwise, any contribution intentionally
 submitted for inclusion in the work by you, as defined in the Apache-2.0
 license, shall be dual licensed as above, without any additional terms or
