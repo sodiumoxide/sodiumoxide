@@ -103,3 +103,7 @@ Unless you explicitly state otherwise, any contribution intentionally
 submitted for inclusion in the work by you, as defined in the Apache-2.0
 license, shall be dual licensed as above, without any additional terms or
 conditions.
+
+### Code of Conduct
+
+We believe in creating an enabling community for developers and have laid out a general [code of conduct](https://github.com/connectkushal/sodiumoxide/blob/master/CODE_OF_CONDUCT.md). Please read and adopt it to help us achieve and maintain the desired community standards.
