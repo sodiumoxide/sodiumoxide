@@ -62,6 +62,21 @@ Examples
 --------
 TBD
 
+Platform Compatibiility 
+------------------------
+Sodiumoxide has been tested on: 
+
+ Linux -  Yes
+
+ Windows - In Progress 
+
+ Mac OS - `
+
+ IOS -
+
+ Android -
+
+
 Join in
 =======
 File bugs in the issue tracker
@@ -82,7 +97,13 @@ at your option.
 
 ### Contribution
 
+Go through the [CONTRIBUTING.md](https://github.com/sodiumoxide/sodiumoxide/blob/master/CONTRIBUTING.md) document to know more about how to contribute to this project.
+
 Unless you explicitly state otherwise, any contribution intentionally
 submitted for inclusion in the work by you, as defined in the Apache-2.0
 license, shall be dual licensed as above, without any additional terms or
 conditions.
+
+### Code of Conduct
+
+We believe in creating an enabling community for developers and have laid out a general [code of conduct](https://github.com/sodiumoxide/sodiumoxide/blob/master/CODE_OF_CONDUCT.md). Please read and adopt it to help us achieve and maintain the desired community standards.
