@@ -19,8 +19,11 @@ fn main() {
             Some(_) => "static",
             None => "dylib",
         };
-
-        println!("cargo:rustc-link-lib={0}=sodium", mode);
+        if cfg!(target_env = "msvc") {
+            println!("cargo:rustc-link-lib={0}=libsodium", mode);
+        } else {
+            println!("cargo:rustc-link-lib={0}=sodium", mode);
+        }
     } else {
         if !pkg_config::probe_library("libsodium").is_ok() && !try_vcpkg() {
             panic!("Could not find libsodium on this system!")
