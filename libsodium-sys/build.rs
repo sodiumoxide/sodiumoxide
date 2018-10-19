@@ -16,8 +16,11 @@ fn main() {
             Some(_) => "static",
             None => "dylib",
         };
-
-        println!("cargo:rustc-link-lib={0}=sodium", mode);
+        if cfg!(target_env = "msvc") {
+            println!("cargo:rustc-link-lib={0}=libsodium", mode);
+        } else {
+            println!("cargo:rustc-link-lib={0}=sodium", mode);
+        }
     } else {
         pkg_config::find_library("libsodium").unwrap();
     }
