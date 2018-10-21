@@ -1,7 +1,7 @@
 //! Libsodium utility functions
 use ffi;
 
-use std::ptr::null;
+use std::ptr::{null, null_mut};
 
 /// `memzero()` tries to effectively zero out the data in `x` even if
 /// optimizations are being applied to the code.
@@ -59,7 +59,7 @@ pub fn increment_le(x: &mut [u8]) {
 pub fn add_le(x: &mut [u8], y: &[u8]) -> Result<(), ()> {
     if x.len() == y.len() {
         unsafe {
-                ffi::sodium_add(x.as_mut_ptr(), y.as_ptr(), x.len());
+            ffi::sodium_add(x.as_mut_ptr(), y.as_ptr(), x.len());
         }
         Ok(())
     } else  {
@@ -82,24 +82,32 @@ pub fn bin2hex(hex: &mut [u8], bin: &[u8]) -> Result<(), ()> {
 }
 
 /// `hex2bin()` takes bytes of a hexadecimal string in `hex`, converts it to raw bytes and puts the result in `bin`
-/// `ignore` is an optional parameter, taking a byte representation of a string to skip
+/// `ignore` is an optional parameter, taking a byte representation of a string of characters to skip.
+/// For example, the string ": " allows columns and spaces to be present at any locations in the hexadecimal string.
+/// These characters will just be ignored. As a result, "69:FC", "69 FC", "69 : FC" and "69FC" will be valid inputs,
+/// and will produce the same output. Any hex characters part of `ignore` will not be ignored. Passing ": FC" in ignore
+/// when input is "69 : FC" will result in output "69FC".
 /// `bin_len` is the length of raw bytes that `hex` was converted to.
 /// `hex_end` is an optional parameter, if passed a pointer, it will be set to the address of the
 /// first byte after the last valid parsed character.
+/// `hex2bin()` will return Err<()> if
 /// Refer docs at https://download.libsodium.org/doc/helpers#hexadecimal-encoding-decoding
-pub fn hex2bin(bin: &mut [u8], hex: &[u8], ignore: Option<&[u8]>, bin_len: &mut usize, hex_end: Option<&mut [u8]>) {
-    let ignore = match ignore {
-        Some(p) => p.as_ptr(),
-        None => null()
-    };
-    let hex_end = match hex_end {
-        Some(p) => p.as_mut_ptr(),
-        None => null()
-    };
-    unsafe {
-        ffi::sodium_hex2bin(bin.as_mut_ptr() as *mut _, bin.len(), hex.as_ptr() as *const _,
-                            hex.len(), ignore as *const _, bin_len, hex_end  as *mut _);
+pub fn hex2bin(bin: &mut [u8], hex: &[u8], ignore: Option<&[u8]>, bin_len: &mut usize,
+               hex_end: Option<&mut [u8]>) -> Result<(), ()> {
+    if hex.len() > 2*bin.len() {
+        return Err(());
     }
+    let ignore = ignore.map_or(null(), |p| p.as_ptr());
+    let hex_end = hex_end.map_or(null_mut(), |p| p.as_mut_ptr());
+
+    unsafe {
+        let r = ffi::sodium_hex2bin(bin.as_mut_ptr() as *mut _, bin.len(), hex.as_ptr() as *const _,
+                            hex.len(), ignore as *const _, bin_len, hex_end  as *mut _);
+        if r != 0 {
+            return Err(());
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -259,12 +267,12 @@ mod test {
     }
 
     #[test]
-    fn test_hex2bin() {
-        for (i, j) in vec![(0, "00\u{0}"), (1, "01\u{0}"), (10, "0a\u{0}"), (15, "0f\u{0}")] {
+    fn test_hex2bin1() {
+        for (i, j) in vec![(0, "0"), (1, "1"), (10, "a"), (15, "f")] {
             let hex = j.as_bytes();
             let mut bytes: [u8; 1] = [0];
             let mut byte_size = 0;
-            hex2bin(&mut bytes, &hex, None, &mut byte_size, None);
+            hex2bin(&mut bytes, &hex, None, &mut byte_size, None).unwrap();
             assert_eq!(byte_size, 1);
             assert_eq!(vec![i], bytes.to_vec());
         }
@@ -275,9 +283,14 @@ mod test {
         let mut bytes: [u8; 2] = [0, 0];
         let mut byte_size = 0;
         let ignore = ": ".as_bytes();
+        let ignore_with_hex = ": FC".as_bytes();
         let expected_bytes = vec![105, 252];
         for hex in vec!["69:FC".as_bytes(), "69 FC".as_bytes(), "69 : FC".as_bytes(), "69FC".as_bytes()] {
-            hex2bin(&mut bytes, &hex, Some(ignore), &mut byte_size, None);
+            hex2bin(&mut bytes, &hex, Some(ignore), &mut byte_size, None).unwrap();
+            assert_eq!(byte_size, 2);
+            assert_eq!(expected_bytes, bytes.to_vec());
+
+            hex2bin(&mut bytes, &hex, Some(ignore_with_hex), &mut byte_size, None).unwrap();
             assert_eq!(byte_size, 2);
             assert_eq!(expected_bytes, bytes.to_vec());
         }
@@ -297,7 +310,7 @@ mod test {
             assert_eq!(hex.len(), 2*i+1);
             let mut new_bytes: Vec<u8> = vec![0; i];
             let mut byte_size = 0;
-            hex2bin(&mut new_bytes, &hex, None, &mut byte_size, None);
+            hex2bin(&mut new_bytes, &hex, None, &mut byte_size, None).unwrap();
             assert_eq!(byte_size, i);
             assert_eq!(&bytes, &new_bytes);
         }
