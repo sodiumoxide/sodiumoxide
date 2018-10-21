@@ -308,8 +308,15 @@ mod test {
             assert_eq!(hex.len(), 2*i+1);
             let mut new_bytes: Vec<u8> = vec![0; i];
             let mut byte_size = 0;
-            // Removing the trailing byte
+
+            // Removing the trailing byte since `hex` end is not provided
             hex2bin(&mut new_bytes, &hex[..hex.len()-1], None, &mut byte_size, None).unwrap();
+            assert_eq!(byte_size, i);
+            assert_eq!(&bytes, &new_bytes);
+
+            // No need to remove the trailing byte since `hex` end is provided
+            let mut end: Vec<u8> = vec![0];
+            hex2bin(&mut new_bytes, &hex, None, &mut byte_size, Some(end.as_mut_slice())).unwrap();
             assert_eq!(byte_size, i);
             assert_eq!(&bytes, &new_bytes);
         }
