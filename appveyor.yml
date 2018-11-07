@@ -1,0 +1,62 @@
+image: Visual Studio 2017
+
+environment:
+  VCPKGRS_DYNAMIC: 1
+  LLVM_VERSION: 6.0.1
+  matrix:
+  - TARGET: x86_64-pc-windows-msvc
+    VCPKG_TARGET: x64-windows
+    RUST_CHANNEL: stable
+    LLVM_TARGET: win64
+
+  - TARGET: i686-pc-windows-msvc
+    VCPKG_TARGET: x86-windows
+    RUST_CHANNEL: stable
+    LLVM_TARGET: win32
+
+  - TARGET: x86_64-pc-windows-msvc
+    VCPKG_TARGET: x64-windows
+    RUST_CHANNEL: beta
+    LLVM_TARGET: win64
+
+  - TARGET: i686-pc-windows-msvc
+    VCPKG_TARGET: x86-windows
+    RUST_CHANNEL: beta
+    LLVM_TARGET: win32
+
+  - TARGET: x86_64-pc-windows-msvc
+    VCPKG_TARGET: x64-windows
+    RUST_CHANNEL: nightly
+    LLVM_TARGET: win64
+
+  - TARGET: i686-pc-windows-msvc
+    VCPKG_TARGET: x86-windows
+    RUST_CHANNEL: nightly
+    LLVM_TARGET: win32
+
+install:
+  - ps: |
+      # Install Rust
+      appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+      cmd.exe /c .\rustup-init.exe -y --default-host "$env:TARGET" --default-toolchain "$env:RUST_CHANNEL" 2`>`&1
+      $env:PATH += ";$env:USERPROFILE\.cargo\bin"
+
+      # Install LLVM
+      echo "LLVM-${env:LLVM_VERSION}-${env:LLVM_TARGET}"
+      appveyor-retry appveyor DownloadFile "http://releases.llvm.org/${env:LLVM_VERSION}/LLVM-${env:LLVM_VERSION}-${env:LLVM_TARGET}.exe" -FileName llvm-installer.exe
+      7z x llvm-installer.exe -oc:\llvm-binary
+      #$env:PATH += ";C:\llvm-binary\bin"
+      $env:LIBCLANG_PATH = "C:\llvm-binary\bin"
+
+      # Install libsodium
+      vcpkg install "libsodium:$env:VCPKG_TARGET"
+
+cache:
+  - C:\Users\appveyor\.cargo\registry
+  - target
+
+build_script:
+  - cmd: cargo build --target %TARGET%
+
+test_script:
+  - cmd: cargo test --target %TARGET%
