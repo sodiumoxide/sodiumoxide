@@ -20,6 +20,7 @@ members = ["libsodium-sys"]
 
 [badges]
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
+appveyor = { repository = "kpp/tox", id = "u05iy6wufw9ncdi7" }
 
 [dependencies]
 libc = { version = "^0.2.41" , default-features = false }
