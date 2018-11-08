@@ -45,7 +45,6 @@ install:
       echo "LLVM-${env:LLVM_VERSION}-${env:LLVM_TARGET}"
       appveyor-retry appveyor DownloadFile "http://releases.llvm.org/${env:LLVM_VERSION}/LLVM-${env:LLVM_VERSION}-${env:LLVM_TARGET}.exe" -FileName llvm-installer.exe
       7z x llvm-installer.exe -oc:\llvm-binary
-      #$env:PATH += ";C:\llvm-binary\bin"
       $env:LIBCLANG_PATH = "C:\llvm-binary\bin"
 
       # Install libsodium
