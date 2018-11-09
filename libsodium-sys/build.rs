@@ -62,7 +62,8 @@ fn find_libsodium() -> String {
         println!("cargo:rustc-link-lib={0}=sodium", mode);
         println!("cargo:rustc-link-search=native={}", lib_dir);
     } else {
-        pkg_config::find_library("libsodium").unwrap();
+        let statik = env::var_os("SODIUM_STATIC").is_some();
+        pkg_config::Config::new().statik(statik).find("libsodium").unwrap();
     }
 
     let include_dir =
