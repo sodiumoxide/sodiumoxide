@@ -12,16 +12,6 @@ fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_INC_DIR");
     println!("cargo:rerun-if-env-changed=SODIUM_STATIC");
 
-    let mode = match env::var_os("SODIUM_STATIC") {
-        Some(_) => "static",
-        None => "dylib",
-    };
-    if cfg!(target_env = "msvc") {
-        println!("cargo:rustc-link-lib={0}=libsodium", mode);
-    } else {
-        println!("cargo:rustc-link-lib={0}=sodium", mode);
-    }
-
     let include_dir = find_libsodium();
 
     let bindings = bindgen::Builder::default()
@@ -43,6 +33,11 @@ fn main() {
 #[cfg(target_env = "msvc")]
 fn find_libsodium() -> String {
     if let Ok(lib_dir) = env::var("SODIUM_LIB_DIR") {
+        let mode = match env::var_os("SODIUM_STATIC") {
+            Some(_) => "static",
+            None => "dylib",
+        };
+        println!("cargo:rustc-link-lib={0}=libsodium", mode);
         println!("cargo:rustc-link-search=native={}", lib_dir);
     } else {
         if !try_vcpkg() {
@@ -60,6 +55,11 @@ fn find_libsodium() -> String {
 #[cfg(not(target_env = "msvc"))]
 fn find_libsodium() -> String {
     if let Ok(lib_dir) = env::var("SODIUM_LIB_DIR") {
+        let mode = match env::var_os("SODIUM_STATIC") {
+            Some(_) => "static",
+            None => "dylib",
+        };
+        println!("cargo:rustc-link-lib={0}=sodium", mode);
         println!("cargo:rustc-link-search=native={}", lib_dir);
     } else {
         pkg_config::find_library("libsodium").unwrap();
