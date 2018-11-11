@@ -2,11 +2,14 @@
 
 [![Build Status](https://travis-ci.org/sodiumoxide/sodiumoxide.svg?branch=master)](https://travis-ci.org/sodiumoxide/sodiumoxide)
 [![Appveyor Build Status][appveyor-badge]][appveyor-url]
-[![Latest Version](https://img.shields.io/crates/v/sodiumoxide.svg)](https://crates.io/crates/sodiumoxide) 
+[![Latest Version](https://img.shields.io/crates/v/sodiumoxide.svg)](https://crates.io/crates/sodiumoxide)
+[![Docs][doc-badge]][doc-url]
 [![Join the chat at https://gitter.im/rust-sodiumoxide/Lobby](https://badges.gitter.im/rust-sodiumoxide/Lobby.svg)](https://gitter.im/rust-sodiumoxide/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/u05iy6wufw9ncdi7/branch/master?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/Dylan-DPC/sodiumoxide/branch/master
+[doc-badge]: https://docs.rs/sodiumoxide/badge.svg
+[doc-url]: https://docs.rs/sodiumoxide
 
 > [NaCl](http://nacl.cr.yp.to) (pronounced "salt") is a new easy-to-use high-speed software library for network communication, encryption, decryption, signatures, etc. NaCl's goal is to provide all of the core operations needed to build higher-level cryptographic tools.
 > Of course, other libraries already exist for these core operations. NaCl advances the state of the art by improving security, by improving usability, and by improving speed.
@@ -41,9 +44,6 @@ Documentation will be generated in target/doc/...
 Most documentation is taken from NaCl, with minor modification where the API
 differs between the C and Rust versions.
 
-Documentation for the latest build can be found at
-[gh-pages](https://sodiumoxide.github.io/sodiumoxide).
-
 ## Optional features
 
 Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-products) are available:
@@ -63,12 +63,12 @@ Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-prod
 
 TBD
 
-## Platform Compatibiility 
+## Platform Compatibiility
 
-Sodiumoxide has been tested on: 
+Sodiumoxide has been tested on:
 
 - Linux: Yes
-- Windows: Yes (MSVC) 
+- Windows: Yes (MSVC)
 - Mac OS:
 - IOS:
 - Android:
