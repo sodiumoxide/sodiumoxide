@@ -16,16 +16,6 @@ environment:
 
   - TARGET: x86_64-pc-windows-msvc
     VCPKG_TARGET: x64-windows
-    RUST_CHANNEL: beta
-    LLVM_TARGET: win64
-
-  - TARGET: i686-pc-windows-msvc
-    VCPKG_TARGET: x86-windows
-    RUST_CHANNEL: beta
-    LLVM_TARGET: win32
-
-  - TARGET: x86_64-pc-windows-msvc
-    VCPKG_TARGET: x64-windows
     RUST_CHANNEL: nightly
     LLVM_TARGET: win64
 
