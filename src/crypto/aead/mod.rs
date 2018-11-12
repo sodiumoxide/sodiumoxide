@@ -46,3 +46,4 @@ pub use self::chacha20poly1305_ietf::*;
 mod aead_macros;
 pub mod chacha20poly1305;
 pub mod chacha20poly1305_ietf;
+pub mod xchacha20poly1305_ietf;

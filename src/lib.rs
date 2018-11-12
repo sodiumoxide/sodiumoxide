@@ -29,7 +29,7 @@
 //!  `crypto::sign`
 //!
 //! # Sealed boxes
-//!  `crypto::sealedox`
+//!  `crypto::sealedbox`
 //!
 //! # Secret-key cryptography
 //!  `crypto::secretbox`
