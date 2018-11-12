@@ -1,49 +1,49 @@
-//! Argon2 summarizes the state of the art in the design of memory-hard functions.
-//!
-//! It aims at the highest memory filling rate and effective use of multiple
-//! computing units, while still providing defense against tradeoff attacks.
-//!
-//! It prevents ASICs from having a significant advantage over software
-//! implementations.
-//!
-//! Note: libsodium provides a limited version of the Argon2 function. The salt
-//! parameter is fixed at 128 bits and the parallelism parameter is fixed to 1.
-use ffi;
+macro_rules! argon2_module (($pwhash_name:ident,
+                           $pwhash_str_name:ident,
+                           $pwhash_str_verify_name:ident,
+                           $saltbytes:expr,
+                           $hashedpasswordbytes:expr,
+                           $strprefix:expr,
+                           $opslimit_interative:expr,
+                           $opslimit_moderate:expr,
+                           $opslimit_sensitive:expr,
+                           $memlimit_interative:expr,
+                           $memlimit_moderate:expr,
+                           $memlimit_sensitive:expr,
+                           $variant:expr) => (
+
 use libc::{c_int, c_ulonglong};
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Salt`.
-pub const SALTBYTES: usize = ffi::crypto_pwhash_argon2id_SALTBYTES as usize;
+pub const SALTBYTES: usize = $saltbytes as usize;
 
 /// Number of bytes in a `HashedPassword`.
-pub const HASHEDPASSWORDBYTES: usize = ffi::crypto_pwhash_argon2id_STRBYTES as usize;
+pub const HASHEDPASSWORDBYTES: usize = $hashedpasswordbytes as usize;
 
 /// All `HashedPasswords` start with this string.
-pub const STRPREFIX: &'static [u8] = ffi::crypto_pwhash_argon2id_STRPREFIX;
+pub const STRPREFIX: &'static [u8] = $strprefix;
 
 /// Safe base line for `OpsLimit` for interactive password hashing.
-pub const OPSLIMIT_INTERACTIVE: OpsLimit =
-    OpsLimit(ffi::crypto_pwhash_argon2id_OPSLIMIT_INTERACTIVE as usize);
+pub const OPSLIMIT_INTERACTIVE: OpsLimit = OpsLimit($opslimit_interative as usize);
 
 /// Safe base line for `MemLimit` for interactive password hashing.
-pub const MEMLIMIT_INTERACTIVE: MemLimit =
-    MemLimit(ffi::crypto_pwhash_argon2id_MEMLIMIT_INTERACTIVE as usize);
+pub const MEMLIMIT_INTERACTIVE: MemLimit = MemLimit($memlimit_interative as usize);
 
 /// `OpsLimit` for moderately sensitive data.
-pub const OPSLIMIT_MODERATE: OpsLimit =
-    OpsLimit(ffi::crypto_pwhash_argon2id_OPSLIMIT_MODERATE as usize);
+pub const OPSLIMIT_MODERATE: OpsLimit = OpsLimit($opslimit_moderate as usize);
 
 /// `MemLimit` for moderately sensitive data.
-pub const MEMLIMIT_MODERATE: MemLimit =
-    MemLimit(ffi::crypto_pwhash_argon2id_MEMLIMIT_MODERATE as usize);
+pub const MEMLIMIT_MODERATE: MemLimit = MemLimit($memlimit_moderate as usize);
 
 /// `OpsLimit` for highly sensitive data.
-pub const OPSLIMIT_SENSITIVE: OpsLimit =
-    OpsLimit(ffi::crypto_pwhash_argon2id_OPSLIMIT_SENSITIVE as usize);
+pub const OPSLIMIT_SENSITIVE: OpsLimit = OpsLimit($opslimit_sensitive as usize);
 
 /// `MemLimit` for highly sensitive data.
-pub const MEMLIMIT_SENSITIVE: MemLimit =
-    MemLimit(ffi::crypto_pwhash_argon2id_MEMLIMIT_SENSITIVE as usize);
+pub const MEMLIMIT_SENSITIVE: MemLimit = MemLimit($memlimit_sensitive as usize);
+
+/// Variant id for the Argon2i13 algorithm
+pub const VARIANT: u32 = $variant;
 
 /// `OpsLimit` represents the maximum number of computations to perform when
 /// using the functions in this module.
@@ -60,13 +60,6 @@ pub struct OpsLimit(pub usize);
 /// at least 16 megabytes.
 #[derive(Copy, Clone, Debug)]
 pub struct MemLimit(pub usize);
-
-/// An identifier for the Argon2 algorithm variant to use.
-#[derive(Copy, Clone, Debug)]
-pub enum Variant {
-    Argon2i13 = 1,
-    Argon2id13 = 2,
-}
 
 new_type! {
     /// `Salt` used for password hashing
@@ -130,31 +123,18 @@ pub fn derive_key<'a>(
     &Salt(ref sb): &Salt,
     OpsLimit(opslimit): OpsLimit,
     MemLimit(memlimit): MemLimit,
-    variant: Variant,
 ) -> Result<&'a [u8], ()> {
     if unsafe {
-        match variant {
-            Variant::Argon2id13 => ffi::crypto_pwhash_argon2id(
-                key.as_mut_ptr(),
-                key.len() as c_ulonglong,
-                passwd.as_ptr() as *const _,
-                passwd.len() as c_ulonglong,
-                sb as *const _,
-                opslimit as c_ulonglong,
-                memlimit,
-                variant as c_int,
-            ),
-            Variant::Argon2i13 => ffi::crypto_pwhash_argon2i(
-                key.as_mut_ptr(),
-                key.len() as c_ulonglong,
-                passwd.as_ptr() as *const _,
-                passwd.len() as c_ulonglong,
-                sb as *const _,
-                opslimit as c_ulonglong,
-                memlimit,
-                variant as c_int,
-            ),
-        }
+        $pwhash_name(
+            key.as_mut_ptr(),
+            key.len() as c_ulonglong,
+            passwd.as_ptr() as *const _,
+            passwd.len() as c_ulonglong,
+            sb as *const _,
+            opslimit as c_ulonglong,
+            memlimit,
+            VARIANT as c_int,
+        )
     } == 0
     {
         Ok(key)
@@ -162,6 +142,7 @@ pub fn derive_key<'a>(
         Err(())
     }
 }
+
 
 /// The `pwhash()` returns a `HashedPassword` which
 /// includes:
@@ -182,11 +163,10 @@ pub fn pwhash(
     OpsLimit(opslimit): OpsLimit,
     MemLimit(memlimit): MemLimit,
 ) -> Result<HashedPassword, ()> {
-    let out = HashedPassword([0; HASHEDPASSWORDBYTES]);
+    let mut _out = HashedPassword([0; HASHEDPASSWORDBYTES]);
     if unsafe {
-        //let HashedPassword(ref mut str_) = out;
-        ffi::crypto_pwhash_argon2id_str(
-            out.0.as_ptr() as *mut _,
+        $pwhash_str_name( 
+            _out.0.as_ptr() as *mut _,
             passwd.as_ptr() as *const _,
             passwd.len() as c_ulonglong,
             opslimit as c_ulonglong,
@@ -194,7 +174,7 @@ pub fn pwhash(
         )
     } == 0
     {
-        Ok(out)
+        Ok(_out)
     } else {
         Err(())
     }
@@ -206,7 +186,7 @@ pub fn pwhash(
 /// It returns `true` if the verification succeeds, and `false` on error.
 pub fn pwhash_verify(hp: &HashedPassword, passwd: &[u8]) -> bool {
     unsafe {
-        ffi::crypto_pwhash_argon2id_str_verify(
+        $pwhash_str_verify_name(
             hp.0.as_ptr() as *const _,
             passwd.as_ptr() as *const _,
             passwd.len() as c_ulonglong,
@@ -214,66 +194,4 @@ pub fn pwhash_verify(hp: &HashedPassword, passwd: &[u8]) -> bool {
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_derive_key() {
-        let mut kb = [0u8; 32];
-        let salt = Salt(*b"It'll get easier");
-        let pw = b"password";
-        let key_expected = [
-            0xd6, 0xf0, 0x6b, 0x1d, 0x26, 0x81, 0x86, 0x34, 0x15, 0x84, 0xb4, 0x1f, 0xa4, 0x75,
-            0xf9, 0x46, 0x15, 0xac, 0x89, 0x59, 0xfb, 0x07, 0xeb, 0xf0, 0xaa, 0xee, 0xe0, 0x9b,
-            0x74, 0xc6, 0x73, 0xd9,
-        ];
-        let key = derive_key(
-            &mut kb,
-            pw,
-            &salt,
-            OpsLimit(16),
-            MemLimit(8192),
-            Variant::Argon2id13,
-        ).unwrap();
-        assert_eq!(key, key_expected);
-    }
-
-    #[test]
-    fn test_pwhash_verify() {
-        use randombytes::randombytes;
-        for i in 0..32usize {
-            let pw = randombytes(i);
-            let pwh = pwhash(&pw, OpsLimit(16), MemLimit(8192)).unwrap();
-            assert!(pwhash_verify(&pwh, &pw));
-        }
-    }
-
-    #[test]
-    fn test_pwhash_verify_tamper() {
-        use randombytes::randombytes;
-        for i in 0..16usize {
-            let mut pw = randombytes(i);
-            let pwh = pwhash(&pw, OpsLimit(16), MemLimit(8192)).unwrap();
-            for j in 0..pw.len() {
-                pw[j] ^= 0x20;
-                assert!(!pwhash_verify(&pwh, &pw));
-                pw[j] ^= 0x20;
-            }
-        }
-    }
-
-    #[cfg(feature = "serde")]
-    #[test]
-    fn test_serialisation() {
-        use randombytes::randombytes;
-        use test_utils::round_trip;
-        for i in 0..32usize {
-            let pw = randombytes(i);
-            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
-            let salt = gen_salt();
-            round_trip(pwh);
-            round_trip(salt);
-        }
-    }
-}
+));
