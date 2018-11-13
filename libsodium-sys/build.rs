@@ -92,7 +92,7 @@ fn find_libsodium() -> Option<String> {
         .ok()
         .or_else(get_vcpkg_include_path);
 
-    Some(include_dir)
+    include_dir
 }
 
 #[cfg(not(target_env = "msvc"))]
