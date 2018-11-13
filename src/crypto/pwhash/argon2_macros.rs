@@ -81,10 +81,7 @@ new_type! {
 /// `sodiumoxide::init()` once before using any other function from sodiumoxide.
 pub fn gen_salt() -> Salt {
     let mut salt = Salt([0; SALTBYTES]);
-    {
-        let Salt(ref mut sb) = salt;
-        randombytes_into(sb);
-    }
+    randombytes_into(&mut salt.0);
     salt
 }
 
@@ -124,7 +121,8 @@ pub fn derive_key<'a>(
     OpsLimit(opslimit): OpsLimit,
     MemLimit(memlimit): MemLimit,
 ) -> Result<&'a [u8], ()> {
-    if unsafe {
+
+    let res = unsafe {
         $pwhash_name(
             key.as_mut_ptr(),
             key.len() as c_ulonglong,
@@ -133,13 +131,12 @@ pub fn derive_key<'a>(
             sb as *const _,
             opslimit as c_ulonglong,
             memlimit,
-            VARIANT as c_int,
-        )
-    } == 0
-    {
-        Ok(key)
-    } else {
-        Err(())
+            VARIANT as c_int)
+    };
+
+    match res {
+        0 => Ok(key),
+        _ => Err(()),
     }
 }
 
@@ -163,20 +160,19 @@ pub fn pwhash(
     OpsLimit(opslimit): OpsLimit,
     MemLimit(memlimit): MemLimit,
 ) -> Result<HashedPassword, ()> {
-    let mut _out = HashedPassword([0; HASHEDPASSWORDBYTES]);
-    if unsafe {
+    let mut out = HashedPassword([0; HASHEDPASSWORDBYTES]);
+    let res = unsafe {
         $pwhash_str_name( 
-            _out.0.as_ptr() as *mut _,
+            out.0.as_mut_ptr() as *mut _,
             passwd.as_ptr() as *const _,
             passwd.len() as c_ulonglong,
             opslimit as c_ulonglong,
-            memlimit,
-        )
-    } == 0
-    {
-        Ok(_out)
-    } else {
-        Err(())
+            memlimit)
+    };
+
+    match res {
+        0 => Ok(out),
+        _ => Err(()),
     }
 }
 
@@ -185,13 +181,14 @@ pub fn pwhash(
 ///
 /// It returns `true` if the verification succeeds, and `false` on error.
 pub fn pwhash_verify(hp: &HashedPassword, passwd: &[u8]) -> bool {
-    unsafe {
+    let res = unsafe {
         $pwhash_str_verify_name(
             hp.0.as_ptr() as *const _,
             passwd.as_ptr() as *const _,
-            passwd.len() as c_ulonglong,
-        ) == 0
-    }
+            passwd.len() as c_ulonglong)
+    };
+
+    res == 0
 }
 
 ));
