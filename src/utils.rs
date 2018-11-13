@@ -2,6 +2,7 @@
 use ffi;
 
 use std::ptr::{null, null_mut};
+use std::vec::Vec;
 
 /// `memzero()` tries to effectively zero out the data in `x` even if
 /// optimizations are being applied to the code.
