@@ -15,8 +15,16 @@ version = "0.1.0"
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 
 [build-dependencies]
-pkg-config = "^0.3.11"
 bindgen = "0.38.0"
+cc = "~1.0.9"
+flate2 = "~1.0.1"
+http_req = "~0.2.1"
+libc = "~0.2.40"
+pkg-config = "^0.3.11"
+sha2 = "~0.7.0"
+tar = "~0.4.15"
+unwrap = "~1.2.0"
+zip = "~0.3.1"
 
 [target.'cfg(target_env = "msvc")'.build-dependencies]
 vcpkg = "0.2"
