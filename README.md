@@ -1,9 +1,15 @@
-sodiumoxide
-===========
+# sodiumoxide
 
 [![Build Status](https://travis-ci.org/sodiumoxide/sodiumoxide.svg?branch=master)](https://travis-ci.org/sodiumoxide/sodiumoxide)
-[![Latest Version](https://img.shields.io/crates/v/sodiumoxide.svg)](https://crates.io/crates/sodiumoxide) 
+[![Appveyor Build Status][appveyor-badge]][appveyor-url]
+[![Latest Version](https://img.shields.io/crates/v/sodiumoxide.svg)](https://crates.io/crates/sodiumoxide)
+[![Docs][doc-badge]][doc-url]
 [![Join the chat at https://gitter.im/rust-sodiumoxide/Lobby](https://badges.gitter.im/rust-sodiumoxide/Lobby.svg)](https://gitter.im/rust-sodiumoxide/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
+[appveyor-badge]: https://ci.appveyor.com/api/projects/status/u05iy6wufw9ncdi7/branch/master?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/Dylan-DPC/sodiumoxide/branch/master
+[doc-badge]: https://docs.rs/sodiumoxide/badge.svg
+[doc-url]: https://docs.rs/sodiumoxide
 
 > [NaCl](http://nacl.cr.yp.to) (pronounced "salt") is a new easy-to-use high-speed software library for network communication, encryption, decryption, signatures, etc. NaCl's goal is to provide all of the core operations needed to build higher-level cryptographic tools.
 > Of course, other libraries already exist for these core operations. NaCl advances the state of the art by improving security, by improving usability, and by improving speed.
@@ -13,8 +19,7 @@ sodiumoxide
 This package aims to provide a type-safe and efficient Rust binding that's just
 as easy to use.
 
-Dependencies
-------------
+## Dependencies
 
 [Clang](https://clang.llvm.org/) >= 3.9
 
@@ -22,16 +27,16 @@ Dependencies
 
 pkg-config (OSX: `brew install pkg-config`)
 
-Building
---------
+## Building
+
     cargo build
 
-Testing
--------
+## Testing
+
     cargo test
 
-Documentation
--------------
+## Documentation
+
     cargo doc
 
 Documentation will be generated in target/doc/...
@@ -39,11 +44,7 @@ Documentation will be generated in target/doc/...
 Most documentation is taken from NaCl, with minor modification where the API
 differs between the C and Rust versions.
 
-Documentation for the latest build can be found at
-[gh-pages](https://sodiumoxide.github.io/sodiumoxide).
-
-Optional features
------------------
+## Optional features
 
 Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-products) are available:
 
@@ -58,40 +59,40 @@ Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-prod
 * `benchmarks` (default: **disabled**). Compile benchmark tests. Requires a
   nightly build of Rust.
 
-Examples
---------
+## Examples
+
 TBD
 
-Platform Compatibiility 
-------------------------
-Sodiumoxide has been tested on: 
+## Platform Compatibiility
 
- Linux -  Yes
+Sodiumoxide has been tested on:
 
- Windows - In Progress 
+- Linux: Yes
+- Windows: Yes (MSVC)
+- Mac OS:
+- IOS:
+- Android:
 
- Mac OS - `
+### Using vcpkg
 
- IOS -
+To build sodiumoxide using libsodium from vcpkg, you have to add either `VCPKGRS_DYNAMIC=1` (for dynamic linking) or `RUSTFLAGS=-Ctarget-feature=+crt-static` (for static linking) to environment variables.
 
- Android -
+Regardless of the OS, to link libsodium statically you also need to set `SODIUM_STATIC` environment variable.
 
+# Join in
 
-Join in
-=======
 File bugs in the issue tracker
 
 Master git repository
 
     git clone https://github.com/sodiumoxide/sodiumoxide.git
 
-License
--------
+## License
 
 Licensed under either of
 
- * Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
- * MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+* Apache License, Version 2.0, ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+* MIT license ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
 
