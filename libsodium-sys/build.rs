@@ -11,6 +11,10 @@ fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
     println!("cargo:rerun-if-env-changed=SODIUM_INC_DIR");
     println!("cargo:rerun-if-env-changed=SODIUM_STATIC");
+    if cfg!(target_env = "msvc") {
+        // vcpkg requires to set env VCPKGRS_DYNAMIC
+        println!("cargo:rerun-if-env-changed=VCPKGRS_DYNAMIC");
+    }
 
     let include_dir = find_libsodium();
 
