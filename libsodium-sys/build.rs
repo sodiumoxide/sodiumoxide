@@ -115,14 +115,14 @@ Return: the first include path from vcpkg
 */
 #[cfg(target_env = "msvc")]
 fn find_libsodium_pkg() -> Option<String> {
-    let lib = vcpkg::probe_package("libsodium");
-    if let Err(_) = lib {
-        return None;
-    }
-    let include_dir = lib.include_paths.get(0);
-    if let Err(_) = include_dir {
-        return None;
-    }
+    let lib = match vcpkg::probe_package("libsodium") {
+        Ok(lib) => lib,
+        Err(_) => return None,
+    };
+    let include_dir = match lib.include_paths.get(0) {
+        Some(dir) => dir,
+        None => return None,
+    };
     include_dir.clone().into_os_string().into_string().ok()
 }
 
