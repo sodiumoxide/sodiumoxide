@@ -47,25 +47,26 @@ fn main() {
         println!("cargo:rerun-if-env-changed=VCPKGRS_DYNAMIC");
     }
 
-    let mut include_dir;
-
-    if env::var("SODIUM_FROM_SRC").is_ok() {
-        include_dir = build_libsodium();
-    } else {
-        include_dir = {
+    let from_src = env::var("SODIUM_FROM_SRC").is_ok();
+    let include_dir = {
+        if from_src {
+            Some(build_libsodium())
+        } else {
             let lib_dir_isset = env::var_os("SODIUM_LIB_DIR").is_some();
             let inc_dir_isset = env::var_os("SODIUM_INC_DIR").is_some();
             if lib_dir_isset || inc_dir_isset {
+                if from_src {
+                    panic!("SODIUM_FROM_SRC is incompatible with SODIUM_LIB_DIR and SODIUM_INC_DIR");
+                }
                 find_libsodium_env()
             } else {
-                find_libsodium_pkg()
+                match find_libsodium_pkg() {
+                    Some(lib) => Some(lib),
+                    None => Some(build_libsodium()),
+                }
             }
-        };
+        }
     };
-
-    if include_dir.is_none() {
-        include_dir = build_libsodium();
-    }
 
     let mode = match env::var_os("SODIUM_STATIC") {
         Some(_) => "static",
@@ -167,7 +168,7 @@ fn get_install_dir() -> String {
 }
 
 #[cfg(target_env = "msvc")]
-fn build_libsodium() -> Option<String> {
+fn build_libsodium() -> String {
     use libc::S_IFDIR;
     use std::fs::File;
     use std::io::{Read, Write};
@@ -224,11 +225,11 @@ fn build_libsodium() -> Option<String> {
         lib_install_dir.display()
     );
 
-    Some(format!("{}/include", install_dir))
+    format!("{}/include", install_dir)
 }
 
 #[cfg(all(windows, not(target_env = "msvc")))]
-fn build_libsodium() -> Option<String> {
+fn build_libsodium() -> String {
     use flate2::read::GzDecoder;
     use tar::Archive;
 
@@ -274,11 +275,11 @@ fn build_libsodium() -> Option<String> {
         lib_install_dir.display()
     );
 
-    Some(format!("{}/include", install_dir))
+    format!("{}/include", install_dir)
 }
 
 #[cfg(not(windows))]
-fn build_libsodium() -> Option<String> {
+fn build_libsodium() -> String {
     use flate2::read::GzDecoder;
     use std::process::Command;
     use std::str;
@@ -495,5 +496,5 @@ fn build_libsodium() -> Option<String> {
 
     println!("cargo:rustc-link-search=native={}/lib", install_dir);
 
-    Some(format!("{}/include", install_dir))
+    format!("{}/include", install_dir)
 }
