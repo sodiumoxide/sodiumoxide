@@ -10,8 +10,6 @@ extern crate pkg_config;
 extern crate sha2;
 #[cfg(not(target_env = "msvc"))]
 extern crate tar;
-#[macro_use]
-extern crate unwrap;
 #[cfg(target_env = "msvc")]
 extern crate vcpkg;
 #[cfg(target_env = "msvc")]
@@ -47,17 +45,18 @@ fn main() {
         println!("cargo:rerun-if-env-changed=VCPKGRS_DYNAMIC");
     }
 
-    let from_src = env::var("SODIUM_FROM_SRC").is_ok();
+    let lib_dir_isset = env::var_os("SODIUM_LIB_DIR").is_some();
+    let inc_dir_isset = env::var_os("SODIUM_INC_DIR").is_some();
+    let from_src_isset = env::var("SODIUM_FROM_SRC").is_ok();
+
     let include_dir = {
-        if from_src {
+        if from_src_isset {
+            if lib_dir_isset || inc_dir_isset {
+                panic!("SODIUM_FROM_SRC is incompatible with SODIUM_LIB_DIR and SODIUM_INC_DIR");
+            }
             Some(build_libsodium())
         } else {
-            let lib_dir_isset = env::var_os("SODIUM_LIB_DIR").is_some();
-            let inc_dir_isset = env::var_os("SODIUM_INC_DIR").is_some();
             if lib_dir_isset || inc_dir_isset {
-                if from_src {
-                    panic!("SODIUM_FROM_SRC is incompatible with SODIUM_LIB_DIR and SODIUM_INC_DIR");
-                }
                 find_libsodium_env()
             } else {
                 match find_libsodium_pkg() {
@@ -67,17 +66,6 @@ fn main() {
             }
         }
     };
-
-    let mode = match env::var_os("SODIUM_STATIC") {
-        Some(_) => "static",
-        None => "dylib",
-    };
-
-    if cfg!(target_env = "msvc") {
-        println!("cargo:rustc-link-lib={0}=libsodium", mode);
-    } else {
-        println!("cargo:rustc-link-lib={0}=sodium", mode);
-    }
 
     let bindings = bindgen::Builder::default()
         .header("sodium_wrapper.h")
@@ -95,6 +83,19 @@ fn main() {
         .expect("Couldn't write bindings!");
 }
 
+fn print_link() {
+    let mode = match env::var_os("SODIUM_STATIC") {
+        Some(_) => "static",
+        None => "dylib",
+    };
+
+    if cfg!(target_env = "msvc") {
+        println!("cargo:rustc-link-lib={0}=libsodium", mode);
+    } else {
+        println!("cargo:rustc-link-lib={0}=sodium", mode);
+    }
+}
+
 /* Must be called when SODIUM_LIB_DIR or SODIUM_INC_DIR is set to any value
 This function will set `cargo` flags.
 Return: SODIUM_INC_DIR
@@ -105,6 +106,7 @@ fn find_libsodium_env() -> Option<String> {
     let inc_dir = env::var("SODIUM_INC_DIR")
         .expect("SODIUM_INC_DIR must be set because SODIUM_LIB_DIR is set. Error");
 
+    print_link();
     println!("cargo:rustc-link-search=native={}", lib_dir);
 
     Some(inc_dir)
@@ -118,11 +120,17 @@ Return: the first include path from vcpkg
 fn find_libsodium_pkg() -> Option<String> {
     let lib = match vcpkg::probe_package("libsodium") {
         Ok(lib) => lib,
-        Err(_) => return None,
+        Err(e) => {
+            println!("cargo:warning={:?}", e);
+            return None;
+        }
     };
     let include_dir = match lib.include_paths.get(0) {
         Some(dir) => dir,
-        None => return None,
+        None => {
+            println!("cargo:warning=no include paths from vcpkg");
+            return None;
+        }
     };
     include_dir.clone().into_os_string().into_string().ok()
 }
@@ -134,7 +142,8 @@ Return: includedir from pkg-config
 #[cfg(not(target_env = "msvc"))]
 fn find_libsodium_pkg() -> Option<String> {
     let statik = env::var_os("SODIUM_STATIC").is_some();
-    if let Err(_) = pkg_config::Config::new().statik(statik).probe("libsodium") {
+    if let Err(e) = pkg_config::Config::new().statik(statik).probe("libsodium") {
+        println!("cargo:warning={:?}", e);
         return None;
     }
     pkg_config::get_variable("libsodium", "includedir").ok()
@@ -143,7 +152,7 @@ fn find_libsodium_pkg() -> Option<String> {
 /// Download the specified URL into a buffer which is returned.
 fn download(url: &str, expected_hash: &str) -> Cursor<Vec<u8>> {
     // Send GET request
-    let response = unwrap!(request::get(url));
+    let response = request::get(url).unwrap();
 
     // Only accept 2xx status codes
     if response.status_code() < 200 && response.status_code() >= 300 {
@@ -164,7 +173,7 @@ fn download(url: &str, expected_hash: &str) -> Cursor<Vec<u8>> {
 }
 
 fn get_install_dir() -> String {
-    unwrap!(env::var("OUT_DIR")) + "/installed"
+    env::var("OUT_DIR").unwrap() + "/installed"
 }
 
 #[cfg(target_env = "msvc")]
@@ -177,12 +186,12 @@ fn build_libsodium() -> String {
     // Download zip file
     let install_dir = get_install_dir();
     let lib_install_dir = Path::new(&install_dir).join("lib");
-    unwrap!(fs::create_dir_all(&lib_install_dir));
+    fs::create_dir_all(&lib_install_dir).unwrap();
     let url = format!("{}libsodium-{}-msvc.zip", DOWNLOAD_BASE_URL, VERSION);
     let compressed_file = download(&url, SHA256);
 
     // Unpack the zip file
-    let mut zip_archive = unwrap!(ZipArchive::new(compressed_file));
+    let mut zip_archive = ZipArchive::new(compressed_file).unwrap();
 
     // Extract just the appropriate version of libsodium.lib and headers to the install path.  For
     // now, only handle MSVC 2015.
@@ -196,11 +205,11 @@ fn build_libsodium() -> String {
 
     let unpacked_lib = arch_path.join("Release/v140/static/libsodium.lib");
     for i in 0..zip_archive.len() {
-        let mut entry = unwrap!(zip_archive.by_index(i));
+        let mut entry = zip_archive.by_index(i).unwrap();
         let entry_name = entry.name().to_string();
         let entry_path = Path::new(&entry_name);
         let opt_install_path = if entry_path.starts_with("include") {
-            let is_dir = (unwrap!(entry.unix_mode()) & S_IFDIR as u32) != 0;
+            let is_dir = (entry.unix_mode().unwrap() & S_IFDIR as u32) != 0;
             if is_dir {
                 let _ = fs::create_dir(&Path::new(&install_dir).join(entry_path));
                 None
@@ -214,12 +223,13 @@ fn build_libsodium() -> String {
         };
         if let Some(full_install_path) = opt_install_path {
             let mut buffer = Vec::with_capacity(entry.size() as usize);
-            assert_eq!(entry.size(), unwrap!(entry.read_to_end(&mut buffer)) as u64);
-            let mut file = unwrap!(File::create(&full_install_path));
-            unwrap!(file.write_all(&buffer));
+            assert_eq!(entry.size(), entry.read_to_end(&mut buffer).unwrap() as u64);
+            let mut file = File::create(&full_install_path).unwrap();
+            file.write_all(&buffer).unwrap();
         }
     }
 
+    print_link();
     println!(
         "cargo:rustc-link-search=native={}",
         lib_install_dir.display()
@@ -236,7 +246,7 @@ fn build_libsodium() -> String {
     // Download gz tarball
     let install_dir = get_install_dir();
     let lib_install_dir = Path::new(&install_dir).join("lib");
-    unwrap!(fs::create_dir_all(&lib_install_dir));
+    fs::create_dir_all(&lib_install_dir).unwrap();
     let url = format!("{}libsodium-{}-mingw.tar.gz", DOWNLOAD_BASE_URL, VERSION);
     let compressed_file = download(&url, SHA256);
 
@@ -255,21 +265,22 @@ fn build_libsodium() -> String {
 
     let unpacked_include = arch_path.join("include");
     let unpacked_lib = arch_path.join("lib\\libsodium.a");
-    let entries = unwrap!(archive.entries());
+    let entries = archive.entries().unwrap();
     for entry_result in entries {
-        let mut entry = unwrap!(entry_result);
-        let entry_path = unwrap!(entry.path()).to_path_buf();
+        let mut entry = entry_result.unwrap();
+        let entry_path = entry.path().unwrap().to_path_buf();
         let full_install_path = if entry_path.starts_with(&unpacked_include) {
-            let include_file = unwrap!(entry_path.strip_prefix(arch_path));
+            let include_file = entry_path.strip_prefix(arch_path).unwrap();
             Path::new(&install_dir).join(include_file)
         } else if entry_path == unpacked_lib {
             lib_install_dir.join("libsodium.a")
         } else {
             continue;
         };
-        unwrap!(entry.unpack(full_install_path));
+        entry.unpack(full_install_path).unwrap();
     }
 
+    print_link();
     println!(
         "cargo:rustc-link-search=native={}",
         lib_install_dir.display()
@@ -286,7 +297,7 @@ fn build_libsodium() -> String {
     use tar::Archive;
 
     // Determine build target triple
-    let target = unwrap!(env::var("TARGET"));
+    let target = env::var("TARGET").unwrap();
 
     // Determine filenames and download URLs
     let basename = format!("libsodium-{}", VERSION);
@@ -294,7 +305,7 @@ fn build_libsodium() -> String {
 
     // Determine source and install dir
     let mut install_dir = get_install_dir();
-    let mut source_dir = unwrap!(env::var("OUT_DIR")) + "/source";
+    let mut source_dir = env::var("OUT_DIR").unwrap() + "/source";
 
     // Avoid issues with paths containing spaces by falling back to using a tempfile.
     // See https://github.com/jedisct1/libsodium/issues/207
@@ -311,8 +322,8 @@ fn build_libsodium() -> String {
     }
 
     // Create directories
-    unwrap!(fs::create_dir_all(&install_dir));
-    unwrap!(fs::create_dir_all(&source_dir));
+    fs::create_dir_all(&install_dir).unwrap();
+    fs::create_dir_all(&source_dir).unwrap();
 
     // Download sources
     let compressed_file = download(&url, SHA256);
@@ -320,12 +331,12 @@ fn build_libsodium() -> String {
     // Unpack the tarball
     let gz_decoder = GzDecoder::new(compressed_file);
     let mut archive = Archive::new(gz_decoder);
-    unwrap!(archive.unpack(&source_dir));
+    archive.unpack(&source_dir).unwrap();
     source_dir.push_str(&format!("/{}", basename));
 
     // Decide on CC, CFLAGS and the --host configure argument
     let build = cc::Build::new();
-    let mut compiler = unwrap!(build.get_compiler().path().to_str()).to_string();
+    let mut compiler = build.get_compiler().path().to_str().unwrap().to_string();
     let mut cflags = env::var("CFLAGS").unwrap_or(String::default());
     cflags += " -O2";
     let host_arg;
@@ -333,27 +344,25 @@ fn build_libsodium() -> String {
     let help;
     if target.contains("-ios") {
         // Determine Xcode directory path
-        let xcode_select_output = unwrap!(Command::new("xcode-select").arg("-p").output());
+        let xcode_select_output = Command::new("xcode-select").arg("-p").output().unwrap();
         if !xcode_select_output.status.success() {
             panic!("Failed to run xcode-select -p");
         }
-        let xcode_dir = unwrap!(str::from_utf8(&xcode_select_output.stdout))
+        let xcode_dir = str::from_utf8(&xcode_select_output.stdout).unwrap()
             .trim()
             .to_string();
 
         // Determine SDK directory paths
-        let sdk_dir_simulator = unwrap!(
-            Path::new(&xcode_dir)
-                .join("Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk")
-                .to_str()
-        )
-        .to_string();
-        let sdk_dir_ios = unwrap!(
-            Path::new(&xcode_dir)
-                .join("Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk")
-                .to_str()
-        )
-        .to_string();
+        let sdk_dir_simulator = Path::new(&xcode_dir)
+            .join("Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk")
+            .to_str()
+            .unwrap()
+            .to_string();
+        let sdk_dir_ios = Path::new(&xcode_dir)
+            .join("Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk")
+            .to_str()
+            .unwrap()
+            .to_string();
 
         // Min versions
         let ios_simulator_version_min = "6.0.0";
@@ -403,7 +412,7 @@ fn build_libsodium() -> String {
             compiler += " -m32 -maes";
             cflags += " -march=i686";
         }
-        let host = unwrap!(env::var("HOST"));
+        let host = env::var("HOST").unwrap();
         host_arg = format!("--host={}", target);
         cross_compiling = target != host;
         help = if cross_compiling {
@@ -451,7 +460,7 @@ fn build_libsodium() -> String {
     }
 
     // Run `make check`, or `make all` if we're cross-compiling
-    let j_arg = format!("-j{}", unwrap!(env::var("NUM_JOBS")));
+    let j_arg = format!("-j{}", env::var("NUM_JOBS").unwrap());
     let make_arg = if cross_compiling { "all" } else { "check" };
     let mut make_cmd = Command::new("make");
     let make_output = make_cmd
@@ -494,6 +503,7 @@ fn build_libsodium() -> String {
         );
     }
 
+    print_link();
     println!("cargo:rustc-link-search=native={}/lib", install_dir);
 
     format!("{}/include", install_dir)
