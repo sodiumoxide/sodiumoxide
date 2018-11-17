@@ -61,7 +61,10 @@ fn main() {
             } else {
                 match find_libsodium_pkg() {
                     Some(lib) => Some(lib),
-                    None => Some(build_libsodium()),
+                    None => {
+                        println!("cargo:warning=attempting download and build from source");
+                        Some(build_libsodium())
+                    }
                 }
             }
         }
@@ -132,7 +135,13 @@ fn find_libsodium_pkg() -> Option<String> {
             return None;
         }
     };
-    include_dir.clone().into_os_string().into_string().ok()
+    match include_dir.clone().into_os_string().into_string() {
+        Ok(lib) => Some(lib),
+        Err(e) => {
+            println!("cargo:warning={:?}", e);
+            return None;
+        }
+    }
 }
 
 /* Must be called when no SODIUM_LIB_DIR and no SODIUM_INC_DIR env vars are set
@@ -146,7 +155,13 @@ fn find_libsodium_pkg() -> Option<String> {
         println!("cargo:warning={:?}", e);
         return None;
     }
-    pkg_config::get_variable("libsodium", "includedir").ok()
+    match pkg_config::get_variable("libsodium", "includedir") {
+        Ok(lib) => Some(lib),
+        Err(e) => {
+            println!("cargo:warning={:?}", e);
+            return None;
+        }
+    }
 }
 
 /// Download the specified URL into a buffer which is returned.
@@ -348,7 +363,8 @@ fn build_libsodium() -> String {
         if !xcode_select_output.status.success() {
             panic!("Failed to run xcode-select -p");
         }
-        let xcode_dir = str::from_utf8(&xcode_select_output.stdout).unwrap()
+        let xcode_dir = str::from_utf8(&xcode_select_output.stdout)
+            .unwrap()
             .trim()
             .to_string();
 
