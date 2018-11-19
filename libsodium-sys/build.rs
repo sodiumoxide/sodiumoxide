@@ -1,4 +1,3 @@
-extern crate bindgen;
 #[cfg(not(windows))]
 extern crate cc;
 #[cfg(not(target_env = "msvc"))]
@@ -69,21 +68,6 @@ fn main() {
             }
         }
     };
-
-    let bindings = bindgen::Builder::default()
-        .header("sodium_wrapper.h")
-        .whitelist_function("(sodium|crypto|randombytes)_.*")
-        .whitelist_type("(sodium|crypto|randombytes)_.*")
-        .whitelist_var("(sodium|crypto|randombytes)_.*")
-        .clang_arg("-isystem")
-        .clang_arg(include_dir.unwrap())
-        .generate()
-        .expect("Unable to generate bindings");
-
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    bindings
-        .write_to_file(out_path.join("sodium_bindings.rs"))
-        .expect("Couldn't write bindings!");
 }
 
 fn print_link() {

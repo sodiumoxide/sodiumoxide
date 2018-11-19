@@ -15,7 +15,6 @@ version = "0.1.0"
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 
 [build-dependencies]
-bindgen = "0.38.0"
 cc = "~1.0.9"
 flate2 = "~1.0.1"
 http_req = "~0.2.1"
