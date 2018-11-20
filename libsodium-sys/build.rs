@@ -19,7 +19,8 @@ use sha2::{Digest, Sha256};
 use std::env;
 use std::fs;
 use std::io::Cursor;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+
 
 static DOWNLOAD_BASE_URL: &'static str = "https://download.libsodium.org/libsodium/releases/";
 static VERSION: &'static str = "1.0.16";
@@ -35,115 +36,109 @@ static SHA256: &'static str = "eeadc7e1e1bcef09680fb4837d448fbdf57224978f865ac1c
 
 fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
-    println!("cargo:rerun-if-env-changed=SODIUM_INC_DIR");
-    println!("cargo:rerun-if-env-changed=SODIUM_STATIC");
-    println!("cargo:rerun-if-env-changed=SODIUM_FROM_SRC");
+    println!("cargo:rerun-if-env-changed=SODIUM_SHARED");
+    println!("cargo:rerun-if-env-changed=SODIUM_USE_PKG_CONFIG");
 
     if cfg!(target_env = "msvc") {
         // vcpkg requires to set env VCPKGRS_DYNAMIC
         println!("cargo:rerun-if-env-changed=VCPKGRS_DYNAMIC");
     }
+    if cfg!(not(windows)) {
+        println!("cargo:rerun-if-env-changed=SODIUM_DISABLE_PIE");
+    }
 
-    let lib_dir_isset = env::var_os("SODIUM_LIB_DIR").is_some();
-    let inc_dir_isset = env::var_os("SODIUM_INC_DIR").is_some();
-    let from_src_isset = env::var("SODIUM_FROM_SRC").is_ok();
+    if env::var("SODIUM_STATIC").is_ok() {
+        panic!("SODIUM_STATIC is deprecated. Use SODIUM_SHARED instead.");
+    }
 
-    let include_dir = {
-        if from_src_isset {
-            if lib_dir_isset || inc_dir_isset {
-                panic!("SODIUM_FROM_SRC is incompatible with SODIUM_LIB_DIR and SODIUM_INC_DIR");
-            }
-            Some(build_libsodium())
-        } else {
-            if lib_dir_isset || inc_dir_isset {
-                find_libsodium_env()
-            } else {
-                match find_libsodium_pkg() {
-                    Some(lib) => Some(lib),
-                    None => {
-                        println!("cargo:warning=attempting download and build from source");
-                        Some(build_libsodium())
-                    }
-                }
-            }
+    let lib_dir_isset = env::var("SODIUM_LIB_DIR").is_ok();
+    let use_pkg_isset = env::var("SODIUM_USE_PKG_CONFIG").is_ok();
+    let shared_isset = env::var("SODIUM_SHARED").is_ok();
+
+    if lib_dir_isset && use_pkg_isset {
+        panic!("SODIUM_LIB_DIR is incompatible with SODIUM_USE_PKG_CONFIG. Set the only one env variable");
+    }
+
+    if lib_dir_isset {
+        find_libsodium_env();
+    } else if use_pkg_isset {
+        if shared_isset {
+            println!("cargo:warning=SODIUM_SHARED has no effect with SODIUM_USE_PKG_CONFIG");
         }
-    };
-}
 
-fn print_link() {
-    let mode = match env::var_os("SODIUM_STATIC") {
-        Some(_) => "static",
-        None => "dylib",
-    };
-
-    if cfg!(target_env = "msvc") {
-        println!("cargo:rustc-link-lib={0}=libsodium", mode);
+        find_libsodium_pkg();
     } else {
-        println!("cargo:rustc-link-lib={0}=sodium", mode);
+        if shared_isset {
+            println!("cargo:warning=SODIUM_SHARED has no effect for building libsodium from source");
+        }
+
+        build_libsodium();
     }
 }
 
-/* Must be called when SODIUM_LIB_DIR or SODIUM_INC_DIR is set to any value
+/* Must be called when SODIUM_LIB_DIR is set to any value
 This function will set `cargo` flags.
-Return: SODIUM_INC_DIR
 */
-fn find_libsodium_env() -> Option<String> {
-    let lib_dir = env::var("SODIUM_LIB_DIR")
-        .expect("SODIUM_LIB_DIR must be set because SODIUM_INC_DIR is set. Error");
-    let inc_dir = env::var("SODIUM_INC_DIR")
-        .expect("SODIUM_INC_DIR must be set because SODIUM_LIB_DIR is set. Error");
+fn find_libsodium_env() {
+    let lib_dir = env::var("SODIUM_LIB_DIR").unwrap(); // cannot fail
 
-    print_link();
     println!("cargo:rustc-link-search=native={}", lib_dir);
-
-    Some(inc_dir)
+    let mode = if env::var("SODIUM_SHARED").is_ok() {
+        "dylib"
+    } else {
+        "static"
+    };
+    let name = if cfg!(target_env = "msvc") {
+        "libsodium"
+    } else {
+        "sodium"
+    };
+    println!("cargo:rustc-link-lib={}={}", mode, name);
+    println!(
+        "cargo:warning=Using unknown libsodium version.  This crate is tested against \
+         {} and may not be fully compatible with other versions.",
+        VERSION
+    );
 }
 
-/* Must be called when no SODIUM_LIB_DIR and no SODIUM_INC_DIR env vars are set
+/* Must be called when no SODIUM_USE_PKG_CONFIG env var is set
 This function will set `cargo` flags.
-Return: the first include path from vcpkg
 */
 #[cfg(target_env = "msvc")]
-fn find_libsodium_pkg() -> Option<String> {
-    let lib = match vcpkg::probe_package("libsodium") {
-        Ok(lib) => lib,
+fn find_libsodium_pkg() {
+    match vcpkg::probe_package("libsodium") {
+        Ok(_) => {
+            println!(
+                "cargo:warning=Using unknown libsodium version.  This crate is tested against \
+                 {} and may not be fully compatible with other versions.",
+                VERSION
+            );
+        },
         Err(e) => {
-            println!("cargo:warning={:?}", e);
-            return None;
+            panic!(format!("Error: {:?}", e));
         }
     };
-    let include_dir = match lib.include_paths.get(0) {
-        Some(dir) => dir,
-        None => {
-            println!("cargo:warning=no include paths from vcpkg");
-            return None;
-        }
-    };
-    match include_dir.clone().into_os_string().into_string() {
-        Ok(lib) => Some(lib),
-        Err(e) => {
-            println!("cargo:warning={:?}", e);
-            return None;
-        }
-    }
 }
 
-/* Must be called when no SODIUM_LIB_DIR and no SODIUM_INC_DIR env vars are set
+/* Must be called when SODIUM_USE_PKG_CONFIG env var is set
 This function will set `cargo` flags.
-Return: includedir from pkg-config
 */
 #[cfg(not(target_env = "msvc"))]
-fn find_libsodium_pkg() -> Option<String> {
-    let statik = env::var_os("SODIUM_STATIC").is_some();
-    if let Err(e) = pkg_config::Config::new().statik(statik).probe("libsodium") {
-        println!("cargo:warning={:?}", e);
-        return None;
-    }
-    match pkg_config::get_variable("libsodium", "includedir") {
-        Ok(lib) => Some(lib),
+fn find_libsodium_pkg() {
+    let shared = env::var_os("SODIUM_SHARED").is_some();
+
+    match pkg_config::Config::new().statik(!shared).probe("libsodium") {
+        Ok(lib) => {
+            if lib.version != VERSION {
+                println!(
+                    "cargo:warning=Using libsodium version {}.  This crate is tested against {} \
+                     and may not be fully compatible with {}.",
+                    lib.version, VERSION, lib.version
+                );
+            }
+        },
         Err(e) => {
-            println!("cargo:warning={:?}", e);
-            return None;
+            panic!(format!("Error: {:?}", e));
         }
     }
 }
@@ -176,7 +171,7 @@ fn get_install_dir() -> String {
 }
 
 #[cfg(target_env = "msvc")]
-fn build_libsodium() -> String {
+fn build_libsodium() {
     use libc::S_IFDIR;
     use std::fs::File;
     use std::io::{Read, Write};
@@ -228,17 +223,15 @@ fn build_libsodium() -> String {
         }
     }
 
-    print_link();
+    println!("cargo:rustc-link-lib=static=libsodium");
     println!(
         "cargo:rustc-link-search=native={}",
         lib_install_dir.display()
     );
-
-    format!("{}/include", install_dir)
 }
 
 #[cfg(all(windows, not(target_env = "msvc")))]
-fn build_libsodium() -> String {
+fn build_libsodium() {
     use flate2::read::GzDecoder;
     use tar::Archive;
 
@@ -279,17 +272,15 @@ fn build_libsodium() -> String {
         entry.unpack(full_install_path).unwrap();
     }
 
-    print_link();
+    println!("cargo:rustc-link-lib=static=sodium");
     println!(
         "cargo:rustc-link-search=native={}",
         lib_install_dir.display()
     );
-
-    format!("{}/include", install_dir)
 }
 
 #[cfg(not(windows))]
-fn build_libsodium() -> String {
+fn build_libsodium() {
     use flate2::read::GzDecoder;
     use std::process::Command;
     use std::str;
@@ -434,8 +425,7 @@ fn build_libsodium() -> String {
     if !cflags.is_empty() {
         configure_cmd.env("CFLAGS", &cflags);
     }
-    println!("cargo:rerun-if-env-changed=RUST_SODIUM_DISABLE_PIE");
-    if env::var("RUST_SODIUM_DISABLE_PIE").is_ok() {
+    if env::var("SODIUM_DISABLE_PIE").is_ok() {
         configure_cmd.arg("--disable-pie");
     }
     let configure_output = configure_cmd
@@ -503,8 +493,6 @@ fn build_libsodium() -> String {
         );
     }
 
-    print_link();
+    println!("cargo:rustc-link-lib=static=sodium");
     println!("cargo:rustc-link-search=native={}/lib", install_dir);
-
-    format!("{}/include", install_dir)
 }

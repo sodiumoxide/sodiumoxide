@@ -18,8 +18,8 @@ travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 cc = "~1.0.9"
 flate2 = "~1.0.1"
 http_req = "~0.2.1"
-libc = "~0.2.40"
 pkg-config = "^0.3.11"
+libc = { version = "^0.2.41" , default-features = false }
 sha2 = "~0.7.0"
 tar = "~0.4.15"
 zip = "~0.3.1"
