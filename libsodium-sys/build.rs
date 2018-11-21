@@ -409,7 +409,7 @@ fn build_libsodium() {
         help = if cross_compiling {
             "***********************************************************\n\
              Possible missing dependencies.\n\
-             See https://github.com/maidsafe/rust_sodium#cross-compiling\n\
+             See https://github.com/sodiumoxide/sodiumoxide#cross-compiling\n\
              ***********************************************************\n\n"
         } else {
             ""
