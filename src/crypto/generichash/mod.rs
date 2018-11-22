@@ -1,9 +1,8 @@
 //! `GenericHash`.
 //!
 use ffi::{
-    crypto_generichash_BYTES_MAX, crypto_generichash_BYTES_MIN,
-    crypto_generichash_KEYBYTES_MAX, crypto_generichash_KEYBYTES_MIN,
-    crypto_generichash_final, crypto_generichash_init,
+    crypto_generichash_BYTES_MAX, crypto_generichash_BYTES_MIN, crypto_generichash_KEYBYTES_MAX,
+    crypto_generichash_KEYBYTES_MIN, crypto_generichash_final, crypto_generichash_init,
     crypto_generichash_state, crypto_generichash_update,
 };
 
@@ -59,12 +58,7 @@ impl State {
         let result = unsafe {
             state = mem::uninitialized();
             if let Some(key) = key {
-                crypto_generichash_init(
-                    &mut state,
-                    key.as_ptr(),
-                    key.len(),
-                    out_len,
-                )
+                crypto_generichash_init(&mut state, key.as_ptr(), key.len(), out_len)
             } else {
                 crypto_generichash_init(&mut state, ptr::null(), 0, out_len)
             }
@@ -84,11 +78,7 @@ impl State {
     /// to compute the hash from sequential chunks of the message.
     pub fn update(&mut self, data: &[u8]) -> Result<(), ()> {
         let rc = unsafe {
-            crypto_generichash_update(
-                &mut self.state,
-                data.as_ptr(),
-                data.len() as c_ulonglong,
-            )
+            crypto_generichash_update(&mut self.state, data.as_ptr(), data.len() as c_ulonglong)
         };
         if rc == 0 {
             Ok(())
@@ -105,11 +95,7 @@ impl State {
             data: [0u8; crypto_generichash_BYTES_MAX as usize],
         };
         let rc = unsafe {
-            crypto_generichash_final(
-                &mut self.state,
-                result.data.as_mut_ptr(),
-                result.len,
-            )
+            crypto_generichash_final(&mut self.state, result.data.as_mut_ptr(), result.len)
         };
         if rc == 0 {
             Ok(result)
@@ -130,9 +116,9 @@ mod test {
         // hash of empty string
         let x = [];
         let h_expected = [
-            0x0e, 0x57, 0x51, 0xc0, 0x26, 0xe5, 0x43, 0xb2, 0xe8, 0xab, 0x2e,
-            0xb0, 0x60, 0x99, 0xda, 0xa1, 0xd1, 0xe5, 0xdf, 0x47, 0x77, 0x8f,
-            0x77, 0x87, 0xfa, 0xab, 0x45, 0xcd, 0xf1, 0x2f, 0xe3, 0xa8,
+            0x0e, 0x57, 0x51, 0xc0, 0x26, 0xe5, 0x43, 0xb2, 0xe8, 0xab, 0x2e, 0xb0, 0x60, 0x99,
+            0xda, 0xa1, 0xd1, 0xe5, 0xdf, 0x47, 0x77, 0x8f, 0x77, 0x87, 0xfa, 0xab, 0x45, 0xcd,
+            0xf1, 0x2f, 0xe3, 0xa8,
         ];
         let mut hasher = State::new(32, None).unwrap();
         hasher.update(&x).unwrap();
@@ -144,15 +130,15 @@ mod test {
     fn test_vector_2() {
         // The quick brown fox jumps over the lazy dog
         let x = [
-            0x54, 0x68, 0x65, 0x20, 0x71, 0x75, 0x69, 0x63, 0x6b, 0x20, 0x62,
-            0x72, 0x6f, 0x77, 0x6e, 0x20, 0x66, 0x6f, 0x78, 0x20, 0x6a, 0x75,
-            0x6d, 0x70, 0x73, 0x20, 0x6f, 0x76, 0x65, 0x72, 0x20, 0x74, 0x68,
-            0x65, 0x20, 0x6c, 0x61, 0x7a, 0x79, 0x20, 0x64, 0x6f, 0x67,
+            0x54, 0x68, 0x65, 0x20, 0x71, 0x75, 0x69, 0x63, 0x6b, 0x20, 0x62, 0x72, 0x6f, 0x77,
+            0x6e, 0x20, 0x66, 0x6f, 0x78, 0x20, 0x6a, 0x75, 0x6d, 0x70, 0x73, 0x20, 0x6f, 0x76,
+            0x65, 0x72, 0x20, 0x74, 0x68, 0x65, 0x20, 0x6c, 0x61, 0x7a, 0x79, 0x20, 0x64, 0x6f,
+            0x67,
         ];
         let h_expected = [
-            0x01, 0x71, 0x8c, 0xec, 0x35, 0xcd, 0x3d, 0x79, 0x6d, 0xd0, 0x00,
-            0x20, 0xe0, 0xbf, 0xec, 0xb4, 0x73, 0xad, 0x23, 0x45, 0x7d, 0x06,
-            0x3b, 0x75, 0xef, 0xf2, 0x9c, 0x0f, 0xfa, 0x2e, 0x58, 0xa9,
+            0x01, 0x71, 0x8c, 0xec, 0x35, 0xcd, 0x3d, 0x79, 0x6d, 0xd0, 0x00, 0x20, 0xe0, 0xbf,
+            0xec, 0xb4, 0x73, 0xad, 0x23, 0x45, 0x7d, 0x06, 0x3b, 0x75, 0xef, 0xf2, 0x9c, 0x0f,
+            0xfa, 0x2e, 0x58, 0xa9,
         ];
         let mut hasher = State::new(32, None).unwrap();
         hasher.update(&x).unwrap();
@@ -166,8 +152,7 @@ mod test {
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
-        let mut r =
-            BufReader::new(File::open("testvectors/blake2b-kat.txt").unwrap());
+        let mut r = BufReader::new(File::open("testvectors/blake2b-kat.txt").unwrap());
         let mut line = String::new();
 
         loop {

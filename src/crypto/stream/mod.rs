@@ -86,7 +86,7 @@
 pub use self::xsalsa20::*;
 #[macro_use]
 mod stream_macros;
-pub mod xsalsa20;
-pub mod xchacha20;
-pub mod salsa20;
 pub mod chacha20;
+pub mod salsa20;
+pub mod xchacha20;
+pub mod xsalsa20;

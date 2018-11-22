@@ -5,10 +5,10 @@
 //!
 //! It prevents ASICs from having a significant advantage over software
 //! implementations.
-//! 
+//!
 //! Argon2id provides a hybrid implementation, selecting the best features
 //! of Argon2i (with resistance to side-channel attackes) and Argon2d (with
-//! resistance to time-memory tradeoff (TMTO) attacks).  If you are unsure 
+//! resistance to time-memory tradeoff (TMTO) attacks).  If you are unsure
 //! of which Argon2 variant to use, use this one.
 //!
 //! Note: libsodium provides a limited version of the Argon2 function. The salt

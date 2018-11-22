@@ -24,13 +24,7 @@ pub fn memcmp(x: &[u8], y: &[u8]) -> bool {
     if x.len() != y.len() {
         return false;
     }
-    unsafe {
-        ffi::sodium_memcmp(
-            x.as_ptr() as *const _,
-            y.as_ptr() as *const _,
-            x.len(),
-        ) == 0
-    }
+    unsafe { ffi::sodium_memcmp(x.as_ptr() as *const _, y.as_ptr() as *const _, x.len()) == 0 }
 }
 
 /// `increment_le()` treats `x` as an unsigned little-endian number and increments it in
@@ -62,7 +56,7 @@ pub fn add_le(x: &mut [u8], y: &[u8]) -> Result<(), ()> {
             ffi::sodium_add(x.as_mut_ptr(), y.as_ptr(), x.len());
         }
         Ok(())
-    } else  {
+    } else {
         Err(())
     }
 }
@@ -72,11 +66,16 @@ pub fn add_le(x: &mut [u8], y: &[u8]) -> Result<(), ()> {
 /// `bin2hex()` will return Err<()> if length of `hex` is not sufficient to hold the hex representation of `bin`.
 /// Refer docs at https://download.libsodium.org/doc/helpers#hexadecimal-encoding-decoding
 pub fn bin2hex(hex: &mut [u8], bin: &[u8]) -> Result<(), ()> {
-    if hex.len() <= 2*bin.len() {
+    if hex.len() <= 2 * bin.len() {
         return Err(());
     }
     unsafe {
-        ffi::sodium_bin2hex(hex.as_mut_ptr() as *mut _, 2*bin.len()+1, bin.as_ptr(), bin.len());
+        ffi::sodium_bin2hex(
+            hex.as_mut_ptr() as *mut _,
+            2 * bin.len() + 1,
+            bin.as_ptr(),
+            bin.len(),
+        );
     }
     Ok(())
 }
@@ -93,14 +92,26 @@ pub fn bin2hex(hex: &mut [u8], bin: &[u8]) -> Result<(), ()> {
 /// `hex2bin()` will return Err<()> if `bin` is not sufficient to store the parsed string or if the
 /// string couldn't be fully parsed, but a valid pointer for `hex_end` was not provided
 /// Refer docs at https://download.libsodium.org/doc/helpers#hexadecimal-encoding-decoding
-pub fn hex2bin(bin: &mut [u8], hex: &[u8], ignore: Option<&[u8]>, bin_len: &mut usize,
-               hex_end: Option<&mut [u8]>) -> Result<(), ()> {
+pub fn hex2bin(
+    bin: &mut [u8],
+    hex: &[u8],
+    ignore: Option<&[u8]>,
+    bin_len: &mut usize,
+    hex_end: Option<&mut [u8]>,
+) -> Result<(), ()> {
     let ignore = ignore.map_or(null(), |p| p.as_ptr());
     let hex_end = hex_end.map_or(null_mut(), |p| p.as_mut_ptr());
 
     unsafe {
-        let r = ffi::sodium_hex2bin(bin.as_mut_ptr() as *mut _, bin.len(), hex.as_ptr() as *const _,
-                            hex.len(), ignore as *const _, bin_len, hex_end  as *mut _);
+        let r = ffi::sodium_hex2bin(
+            bin.as_mut_ptr() as *mut _,
+            bin.len(),
+            hex.as_ptr() as *const _,
+            hex.len(),
+            ignore as *const _,
+            bin_len,
+            hex_end as *mut _,
+        );
         if r != 0 {
             return Err(());
         }
@@ -187,11 +198,11 @@ mod test {
     #[test]
     fn test_add_le_zero() {
         for i in 1..256 {
-            let mut x = vec!(0u8; i);
-            let mut y = vec!(0u8; i);
+            let mut x = vec![0u8; i];
+            let mut y = vec![0u8; i];
             y[0] = 42;
             assert!(add_le(&mut x, &y).is_ok());
-            assert!(!x.iter().all(|x| { *x == 0 }));
+            assert!(!x.iter().all(|x| *x == 0));
             assert_eq!(x, y);
         }
     }
@@ -202,38 +213,38 @@ mod test {
         let y = [42, 0, 0, 0, 0];
         let z = [41, 3, 3, 4, 5];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
         let mut x = [255, 255, 3, 4, 5];
         let z = [41, 0, 4, 4, 5];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
         let mut x = [255, 255, 255, 4, 5];
         let z = [41, 0, 0, 5, 5];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
         let mut x = [255, 255, 255, 255, 5];
         let z = [41, 0, 0, 0, 6];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
         let mut x = [255, 255, 255, 255, 255];
         let z = [41, 0, 0, 0, 0];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
     }
 
     #[test]
     fn test_add_le_overflow() {
         for i in 1..256 {
-            let mut x = vec!(255u8; i);
-            let mut y = vec!(0u8; i);
+            let mut x = vec![255u8; i];
+            let mut y = vec![0u8; i];
             y[0] = 42;
             assert!(add_le(&mut x, &y).is_ok());
-            assert!(!x.iter().all(|x| { *x == 0 }));
+            assert!(!x.iter().all(|x| *x == 0));
             y[0] -= 1;
             assert_eq!(x, y);
         }
@@ -242,13 +253,13 @@ mod test {
     #[test]
     fn test_add_le_different_lengths() {
         for i in 1..256 {
-            let mut x = vec!(1u8; i);
-            let y = vec!(42u8; i + 1);
-            let z = vec!(42u8; i - 1);
+            let mut x = vec![1u8; i];
+            let y = vec![42u8; i + 1];
+            let z = vec![42u8; i - 1];
             assert!(add_le(&mut x, &y).is_err());
-            assert_eq!(x, vec!(1u8; i));
+            assert_eq!(x, vec![1u8; i]);
             assert!(add_le(&mut x, &z).is_err());
-            assert_eq!(x, vec!(1u8; i));
+            assert_eq!(x, vec![1u8; i]);
         }
     }
 
@@ -256,7 +267,12 @@ mod test {
     fn test_bin2hex() {
         use std::str;
 
-        for (i, j) in vec![(0, "00\u{0}"), (1, "01\u{0}"), (10, "0a\u{0}"), (15, "0f\u{0}")] {
+        for (i, j) in vec![
+            (0, "00\u{0}"),
+            (1, "01\u{0}"),
+            (10, "0a\u{0}"),
+            (15, "0f\u{0}"),
+        ] {
             let bytes: [u8; 1] = [i];
             let mut hex: [u8; 3] = [0; 3];
             bin2hex(&mut hex, &bytes).unwrap();
@@ -283,12 +299,24 @@ mod test {
         let ignore = ": ".as_bytes();
         let ignore_with_hex = ": FC".as_bytes();
         let expected_bytes = vec![105, 252];
-        for hex in vec!["69:FC".as_bytes(), "69 FC".as_bytes(), "69 : FC".as_bytes(), "69FC".as_bytes()] {
+        for hex in vec![
+            "69:FC".as_bytes(),
+            "69 FC".as_bytes(),
+            "69 : FC".as_bytes(),
+            "69FC".as_bytes(),
+        ] {
             hex2bin(&mut bytes, &hex, Some(ignore), &mut byte_size, None).unwrap();
             assert_eq!(byte_size, 2);
             assert_eq!(expected_bytes, bytes.to_vec());
 
-            hex2bin(&mut bytes, &hex, Some(ignore_with_hex), &mut byte_size, None).unwrap();
+            hex2bin(
+                &mut bytes,
+                &hex,
+                Some(ignore_with_hex),
+                &mut byte_size,
+                None,
+            )
+            .unwrap();
             assert_eq!(byte_size, 2);
             assert_eq!(expected_bytes, bytes.to_vec());
         }
@@ -296,27 +324,41 @@ mod test {
 
     #[test]
     fn test_bin2hex_and_hex2bin() {
-        use randombytes::randombytes;
         use super::super::init;
+        use randombytes::randombytes;
 
         init().unwrap();
 
         for i in 1..257 {
             let bytes = randombytes(i);
-            let mut hex = vec![0; 2*i+1];
+            let mut hex = vec![0; 2 * i + 1];
             bin2hex(&mut hex, &bytes).unwrap();
-            assert_eq!(hex.len(), 2*i+1);
+            assert_eq!(hex.len(), 2 * i + 1);
             let mut new_bytes = vec![0; i];
             let mut byte_size = 0;
 
             // Removing the trailing byte since `hex` end is not provided
-            hex2bin(&mut new_bytes, &hex[..hex.len()-1], None, &mut byte_size, None).unwrap();
+            hex2bin(
+                &mut new_bytes,
+                &hex[..hex.len() - 1],
+                None,
+                &mut byte_size,
+                None,
+            )
+            .unwrap();
             assert_eq!(byte_size, i);
             assert_eq!(&bytes, &new_bytes);
 
             // No need to remove the trailing byte since `hex` end is provided
             let mut end = vec![0];
-            hex2bin(&mut new_bytes, &hex, None, &mut byte_size, Some(end.as_mut_slice())).unwrap();
+            hex2bin(
+                &mut new_bytes,
+                &hex,
+                None,
+                &mut byte_size,
+                Some(end.as_mut_slice()),
+            )
+            .unwrap();
             assert_eq!(byte_size, i);
             assert_eq!(&bytes, &new_bytes);
         }

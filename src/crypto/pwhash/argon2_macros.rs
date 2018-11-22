@@ -162,7 +162,7 @@ pub fn pwhash(
 ) -> Result<HashedPassword, ()> {
     let mut out = HashedPassword([0; HASHEDPASSWORDBYTES]);
     let res = unsafe {
-        $pwhash_str_name( 
+        $pwhash_str_name(
             out.0.as_mut_ptr() as *mut _,
             passwd.as_ptr() as *const _,
             passwd.len() as c_ulonglong,
