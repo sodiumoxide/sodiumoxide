@@ -68,7 +68,7 @@ source repository.
 
 Ensure that your changes conform to how the rest of the crate is written and follows a 
 similar API, patterns, namings & other conventions. Also ensure that your code is formatted
-using [rustfmt].
+using the latest version of [rustfmt]. (Ensure you update your nightly before running rustfmt)
 
 Your changes should contain real vectors from the underlying library along with sanity tests
 in Rust. 
