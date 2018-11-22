@@ -116,6 +116,47 @@ Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-prod
 * `benchmarks` (default: **disabled**). Compile benchmark tests. Requires a
   nightly build of Rust.
 
+## Cross-Compiling
+
+### Cross-Compiling for armv7-unknown-linux-gnueabihf
+
+1. Install dependencies and toolchain:
+
+```
+sudo apt update
+sudo apt install build-essential gcc-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross -y
+rustup target add armv7-unknown-linux-gnueabihf
+```
+
+1. Add the following to a [.cargo/config file](http://doc.crates.io/config.html):
+
+```
+[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"
+```
+
+1. Build by running:
+
+```
+cargo build --release --target armv7-unknown-linux-gnueabihf
+```
+
+### Cross-Compiling for 32-bit Linux
+
+1. Install dependencies and toolchain:
+
+```
+sudo apt update
+sudo apt install build-essential gcc-multilib -y
+rustup target add i686-unknown-linux-gnu
+```
+
+1. Build by running:
+
+```
+cargo build --release --target i686-unknown-linux-gnu
+```
+
 ## Examples
 
 TBD
