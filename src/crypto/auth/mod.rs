@@ -70,6 +70,6 @@ pub use self::hmacsha512256::*;
 mod auth_macros;
 #[macro_use]
 mod auth_state_macros;
+pub mod hmacsha256;
 pub mod hmacsha512;
 pub mod hmacsha512256;
-pub mod hmacsha256;

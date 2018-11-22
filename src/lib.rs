@@ -52,17 +52,16 @@
 #![warn(non_upper_case_globals)]
 #![warn(non_camel_case_types)]
 #![warn(unused_qualifications)]
-
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(not(feature = "std"), feature(alloc))]
 
 extern crate libsodium_sys as ffi;
 
 extern crate libc;
-#[cfg(any(test, feature = "serde"))]
-extern crate serde;
 #[cfg(test)]
 extern crate rustc_serialize;
+#[cfg(any(test, feature = "serde"))]
+extern crate serde;
 #[cfg(not(feature = "std"))]
 #[macro_use]
 extern crate alloc;
@@ -76,8 +75,8 @@ mod std {
 
 #[cfg(not(feature = "std"))]
 mod prelude {
-    pub use alloc::vec::Vec;
     pub use alloc::string::String;
+    pub use alloc::vec::Vec;
 }
 
 /// `init()` initializes the sodium library and chooses faster versions of
@@ -106,18 +105,18 @@ mod test_utils;
 /// Cryptographic functions
 pub mod crypto {
     pub mod aead;
-    pub mod box_;
-    pub mod sealedbox;
-    pub mod sign;
-    pub mod scalarmult;
     pub mod auth;
-    pub mod hash;
+    pub mod box_;
     pub mod generichash;
-    pub mod secretbox;
+    pub mod hash;
+    pub mod kx;
     pub mod onetimeauth;
     pub mod pwhash;
-    pub mod stream;
+    pub mod scalarmult;
+    pub mod sealedbox;
+    pub mod secretbox;
     pub mod shorthash;
+    pub mod sign;
+    pub mod stream;
     pub mod verify;
-    pub mod kx;
 }

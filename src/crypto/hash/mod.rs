@@ -44,5 +44,5 @@
 pub use self::sha512::*;
 #[macro_use]
 mod hash_macros;
-pub mod sha512;
 pub mod sha256;
+pub mod sha512;

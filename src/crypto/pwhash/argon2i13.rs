@@ -5,7 +5,7 @@
 //!
 //! It prevents ASICs from having a significant advantage over software
 //! implementations.
-//! 
+//!
 //! Argon2i uses data-independent memory access, which is preferred for
 //! password hashing and password-based key derivation. Argon2i is
 //! invulnerable to side-channel timing attacks but weaker against

@@ -7,10 +7,20 @@ rust:
   - beta
   - nightly
 sudo: false
+
+matrix:
+  include:
+  - os: linux
+    rust: nightly
+    before_script:
+    - rustup component add rustfmt-preview
+    script:
+    - cargo fmt --all -- --check
+    - cargo test --verbose --no-default-features
+
 script:
   - cargo build --verbose
   - cargo test --verbose
-  - if [ "$TRAVIS_RUST_VERSION" = "nightly" ]; then cargo test --verbose --no-default-features; fi
   - cargo test --verbose --no-default-features --features std
   - cargo doc
 
