@@ -8,7 +8,7 @@
 //! # Example
 //!
 //! ```
-//! use sodiumoxide::crypto::kx;
+//! use rust_sodium::crypto::kx;
 //!
 //! // client-side
 //! let (client_pk, client_sk) = kx::gen_keypair();

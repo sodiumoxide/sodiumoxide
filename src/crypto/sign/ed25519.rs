@@ -2,10 +2,9 @@
 //! [Ed25519](http://ed25519.cr.yp.to/). This function is conjectured to meet the
 //! standard notion of unforgeability for a public-key signature scheme under
 //! chosen-message attacks.
+
 use ffi;
 use libc::c_ulonglong;
-#[cfg(not(feature = "std"))]
-use prelude::*;
 
 /// Number of bytes in a `Seed`.
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
@@ -52,44 +51,41 @@ new_type! {
 /// key.
 ///
 /// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// called `rust_sodium::init()` once before using any other function
+/// from `rust_sodium`.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
-        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
-        ffi::crypto_sign_ed25519_keypair(pk.0.as_mut_ptr(), sk.0.as_mut_ptr());
-        (pk, sk)
+        let mut pk = [0u8; PUBLICKEYBYTES];
+        let mut sk = [0u8; SECRETKEYBYTES];
+        let _todo_use_result = ffi::crypto_sign_ed25519_keypair(pk.as_mut_ptr(), sk.as_mut_ptr());
+        (PublicKey(pk), SecretKey(sk))
     }
 }
 
 /// `keypair_from_seed()` computes a secret key and a corresponding public key
 /// from a `Seed`.
-pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
+pub fn keypair_from_seed(&Seed(ref seed): &Seed) -> (PublicKey, SecretKey) {
     unsafe {
-        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
-        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
-        ffi::crypto_sign_ed25519_seed_keypair(
-            pk.0.as_mut_ptr(),
-            sk.0.as_mut_ptr(),
-            seed.0.as_ptr(),
-        );
-        (pk, sk)
+        let mut pk = [0u8; PUBLICKEYBYTES];
+        let mut sk = [0u8; SECRETKEYBYTES];
+        let _todo_use_result =
+            ffi::crypto_sign_ed25519_seed_keypair(pk.as_mut_ptr(), sk.as_mut_ptr(), seed.as_ptr());
+        (PublicKey(pk), SecretKey(sk))
     }
 }
 
 /// `sign()` signs a message `m` using the signer's secret key `sk`.
 /// `sign()` returns the resulting signed message `sm`.
-pub fn sign(m: &[u8], sk: &SecretKey) -> Vec<u8> {
+pub fn sign(m: &[u8], &SecretKey(ref sk): &SecretKey) -> Vec<u8> {
     unsafe {
         let mut sm = vec![0u8; m.len() + SIGNATUREBYTES];
         let mut smlen = 0;
-        ffi::crypto_sign_ed25519(
+        let _todo_use_result = ffi::crypto_sign_ed25519(
             sm.as_mut_ptr(),
             &mut smlen,
             m.as_ptr(),
             m.len() as c_ulonglong,
-            sk.0.as_ptr(),
+            sk.as_ptr(),
         );
         sm.truncate(smlen as usize);
         sm
@@ -99,7 +95,7 @@ pub fn sign(m: &[u8], sk: &SecretKey) -> Vec<u8> {
 /// `verify()` verifies the signature in `sm` using the signer's public key `pk`.
 /// `verify()` returns the message `Ok(m)`.
 /// If the signature fails verification, `verify()` returns `Err(())`.
-pub fn verify(sm: &[u8], pk: &PublicKey) -> Result<Vec<u8>, ()> {
+pub fn verify(sm: &[u8], &PublicKey(ref pk): &PublicKey) -> Result<Vec<u8>, ()> {
     unsafe {
         let mut m = vec![0u8; sm.len()];
         let mut mlen = 0;
@@ -108,7 +104,7 @@ pub fn verify(sm: &[u8], pk: &PublicKey) -> Result<Vec<u8>, ()> {
             &mut mlen,
             sm.as_ptr(),
             sm.len() as c_ulonglong,
-            pk.0.as_ptr(),
+            pk.as_ptr(),
         ) == 0
         {
             m.truncate(mlen as usize);
@@ -121,32 +117,36 @@ pub fn verify(sm: &[u8], pk: &PublicKey) -> Result<Vec<u8>, ()> {
 
 /// `sign_detached()` signs a message `m` using the signer's secret key `sk`.
 /// `sign_detached()` returns the resulting signature `sig`.
-pub fn sign_detached(m: &[u8], sk: &SecretKey) -> Signature {
+pub fn sign_detached(m: &[u8], &SecretKey(ref sk): &SecretKey) -> Signature {
     unsafe {
-        let mut sig = Signature([0u8; SIGNATUREBYTES]);
+        let mut sig = [0u8; SIGNATUREBYTES];
         let mut siglen: c_ulonglong = 0;
-        ffi::crypto_sign_ed25519_detached(
-            sig.0.as_mut_ptr(),
+        let _todo_use_result = ffi::crypto_sign_ed25519_detached(
+            sig.as_mut_ptr(),
             &mut siglen,
             m.as_ptr(),
             m.len() as c_ulonglong,
-            sk.0.as_ptr(),
+            sk.as_ptr(),
         );
         assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
-        sig
+        Signature(sig)
     }
 }
 
 /// `verify_detached()` verifies the signature in `sig` against the message `m`
 /// and the signer's public key `pk`.
 /// `verify_detached()` returns true if the signature is valid, false otherwise.
-pub fn verify_detached(sig: &Signature, m: &[u8], pk: &PublicKey) -> bool {
+pub fn verify_detached(
+    &Signature(ref sig): &Signature,
+    m: &[u8],
+    &PublicKey(ref pk): &PublicKey,
+) -> bool {
     unsafe {
         0 == ffi::crypto_sign_ed25519_verify_detached(
-            sig.0.as_ptr(),
+            sig.as_ptr(),
             m.as_ptr(),
             m.len() as c_ulonglong,
-            pk.0.as_ptr(),
+            pk.as_ptr(),
         )
     }
 }
@@ -158,6 +158,7 @@ mod test {
     #[test]
     fn test_sign_verify() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..256usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
@@ -170,13 +171,14 @@ mod test {
     #[test]
     fn test_sign_verify_tamper() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..32usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let mut sm = sign(&m, &sk);
             for j in 0..sm.len() {
                 sm[j] ^= 0x20;
-                assert!(Err(()) == verify(&mut sm, &pk));
+                assert!(Err(()) == verify(&sm, &pk));
                 sm[j] ^= 0x20;
             }
         }
@@ -185,6 +187,7 @@ mod test {
     #[test]
     fn test_sign_verify_detached() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..256usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
@@ -196,6 +199,7 @@ mod test {
     #[test]
     fn test_sign_verify_detached_tamper() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..32usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
@@ -211,6 +215,7 @@ mod test {
     #[test]
     fn test_sign_verify_seed() {
         use randombytes::{randombytes, randombytes_into};
+        unwrap!(::init());
         for i in 0..256usize {
             let mut seedbuf = [0; 32];
             randombytes_into(&mut seedbuf);
@@ -226,6 +231,7 @@ mod test {
     #[test]
     fn test_sign_verify_tamper_seed() {
         use randombytes::{randombytes, randombytes_into};
+        unwrap!(::init());
         for i in 0..32usize {
             let mut seedbuf = [0; 32];
             randombytes_into(&mut seedbuf);
@@ -235,7 +241,7 @@ mod test {
             let mut sm = sign(&m, &sk);
             for j in 0..sm.len() {
                 sm[j] ^= 0x20;
-                assert!(Err(()) == verify(&mut sm, &pk));
+                assert!(Err(()) == verify(&sm, &pk));
                 sm[j] ^= 0x20;
             }
         }
@@ -245,30 +251,32 @@ mod test {
     fn test_vectors() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use rustc_serialize::hex::{FromHex, ToHex};
+        use hex;
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
-        let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+        unwrap!(::init());
+        let r = BufReader::new(unwrap!(File::open("testvectors/ed25519.input")));
         for mline in r.lines() {
-            let line = mline.unwrap();
+            let line = unwrap!(mline);
             let mut x = line.split(':');
-            let x0 = x.next().unwrap();
-            let x1 = x.next().unwrap();
-            let x2 = x.next().unwrap();
-            let x3 = x.next().unwrap();
-            let seed_bytes = x0[..64].from_hex().unwrap();
+            let x0 = unwrap!(x.next());
+            let x1 = unwrap!(x.next());
+            let x2 = unwrap!(x.next());
+            let x3 = unwrap!(x.next());
+            let seed_bytes = unwrap!(hex::decode(&x0[..64]));
             assert!(seed_bytes.len() == SEEDBYTES);
-            let mut seed = Seed([0u8; SEEDBYTES]);
-            for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
+            let mut seedbuf = [0u8; SEEDBYTES];
+            for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
             }
+            let seed = Seed(seedbuf);
             let (pk, sk) = keypair_from_seed(&seed);
-            let m = x2.from_hex().unwrap();
+            let m = unwrap!(hex::decode(x2));
             let sm = sign(&m, &sk);
-            verify(&sm, &pk).unwrap();
-            assert!(x1 == pk[..].to_hex());
-            assert!(x3 == sm.to_hex());
+            assert!(unwrap!(verify(&sm, &pk)) == m);
+            assert!(x1 == hex::encode(&pk[..]));
+            assert!(x3 == hex::encode(&sm));
         }
     }
 
@@ -276,46 +284,48 @@ mod test {
     fn test_vectors_detached() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use rustc_serialize::hex::{FromHex, ToHex};
+        use hex;
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
-        let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+        unwrap!(::init());
+        let r = BufReader::new(unwrap!(File::open("testvectors/ed25519.input")));
         for mline in r.lines() {
-            let line = mline.unwrap();
+            let line = unwrap!(mline);
             let mut x = line.split(':');
-            let x0 = x.next().unwrap();
-            let x1 = x.next().unwrap();
-            let x2 = x.next().unwrap();
-            let x3 = x.next().unwrap();
-            let seed_bytes = x0[..64].from_hex().unwrap();
+            let x0 = unwrap!(x.next());
+            let x1 = unwrap!(x.next());
+            let x2 = unwrap!(x.next());
+            let x3 = unwrap!(x.next());
+            let seed_bytes = unwrap!(hex::decode(&x0[..64]));
             assert!(seed_bytes.len() == SEEDBYTES);
-            let mut seed = Seed([0u8; SEEDBYTES]);
-            for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
+            let mut seedbuf = [0u8; SEEDBYTES];
+            for (s, b) in seedbuf.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
             }
+            let seed = Seed(seedbuf);
             let (pk, sk) = keypair_from_seed(&seed);
-            let m = x2.from_hex().unwrap();
+            let m = unwrap!(hex::decode(&x2));
             let sig = sign_detached(&m, &sk);
             assert!(verify_detached(&sig, &m, &pk));
-            assert!(x1 == pk[..].to_hex());
-            let sm = sig[..].to_hex() + x2; // x2 is m hex encoded
+            assert!(x1 == hex::encode(&pk[..]));
+            let sm = hex::encode(&sig[..]) + x2; // x2 is m hex encoded
             assert!(x3 == sm);
         }
     }
 
-    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
         use test_utils::round_trip;
+        unwrap!(::init());
         for i in 0..256usize {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let sig = sign_detached(&m, &sk);
-            round_trip(pk);
-            round_trip(sk);
-            round_trip(sig);
+            round_trip(&pk);
+            round_trip(&sk);
+            round_trip(&sig);
         }
     }
 }
@@ -331,6 +341,7 @@ mod bench {
 
     #[bench]
     fn bench_sign(b: &mut test::Bencher) {
+        unwrap!(::init());
         let (_, sk) = gen_keypair();
         let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| randombytes(*s)).collect();
         b.iter(|| {
@@ -342,14 +353,14 @@ mod bench {
 
     #[bench]
     fn bench_verify(b: &mut test::Bencher) {
+        unwrap!(::init());
         let (pk, sk) = gen_keypair();
         let sms: Vec<Vec<u8>> = BENCH_SIZES
             .iter()
             .map(|s| {
                 let m = randombytes(*s);
                 sign(&m, &sk)
-            })
-            .collect();
+            }).collect();
         b.iter(|| {
             for sm in sms.iter() {
                 verify(sm, &pk);

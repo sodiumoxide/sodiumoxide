@@ -4,34 +4,33 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
-#[cfg(not(feature = "std"))] use prelude::*;
-use libc::{c_ulonglong, uint64_t};
+use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes as usize;
+pub const KEYBYTES: usize = $keybytes;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = $noncebytes as usize;
+pub const NONCEBYTES: usize = $noncebytes;
 
 new_type! {
-    /// `Key` for symmetric encryption
-    ///
-    /// When a `Key` goes out of scope its contents
-    /// will be zeroed out
+/// `Key` for symmetric encryption
+///
+/// When a `Key` goes out of scope its contents
+/// will be zeroed out
     secret Key(KEYBYTES);
 }
 
 new_type! {
-    /// `Nonce` for symmetric encryption
+/// `Nonce` for symmetric encryption
     nonce Nonce(NONCEBYTES);
 }
 
 /// `gen_key()` randomly generates a key for symmetric encryption
 ///
 /// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// called `rust_sodium::init()` once before using any other function
+/// from `rust_sodium`.
 pub fn gen_key() -> Key {
     let mut key = [0; KEYBYTES];
     randombytes_into(&mut key);
@@ -41,8 +40,8 @@ pub fn gen_key() -> Key {
 /// `gen_nonce()` randomly generates a nonce for symmetric encryption
 ///
 /// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// called `rust_sodium::init()` once before using any other function
+/// from `rust_sodium`.
 ///
 /// NOTE: When using primitives with short nonces (e.g. salsa20, salsa208, salsa2012)
 /// do not use random nonces since the probability of nonce-collision is not negligible
@@ -55,14 +54,14 @@ pub fn gen_nonce() -> Nonce {
 /// `stream()` produces a `len`-byte stream `c` as a function of a
 /// secret key `k` and a nonce `n`.
 pub fn stream(len: usize,
-              n: &Nonce,
-              k: &Key) -> Vec<u8> {
+              &Nonce(ref n): &Nonce,
+              &Key(ref k): &Key) -> Vec<u8> {
     unsafe {
         let mut c = vec![0u8; len];
-        $stream_name(c.as_mut_ptr(),
-                     c.len() as c_ulonglong,
-                     n.0.as_ptr(),
-                     k.0.as_ptr());
+        let _todo_use_result = $stream_name(c.as_mut_ptr(),
+                                            c.len() as c_ulonglong,
+                                            n.as_ptr(),
+                                            k.as_ptr());
         c
     }
 }
@@ -74,15 +73,15 @@ pub fn stream(len: usize,
 /// and is the plaintext xor the output of `stream()`.
 /// Consequently `stream_xor()` can also be used to decrypt.
 pub fn stream_xor(m: &[u8],
-                  n: &Nonce,
-                  k: &Key) -> Vec<u8> {
+                  &Nonce(ref n): &Nonce,
+                  &Key(ref k): &Key) -> Vec<u8> {
     unsafe {
         let mut c = vec![0u8; m.len()];
-        $xor_name(c.as_mut_ptr(),
-                  m.as_ptr(),
-                  m.len() as c_ulonglong,
-                  n.0.as_ptr(),
-                  k.0.as_ptr());
+        let _todo_use_result = $xor_name(c.as_mut_ptr(),
+                                         m.as_ptr(),
+                                         m.len() as c_ulonglong,
+                                         n.as_ptr(),
+                                         k.as_ptr());
         c
     }
 }
@@ -94,14 +93,14 @@ pub fn stream_xor(m: &[u8],
 /// the plaintext, and is the plaintext xor the output of `stream_inplace()`.
 /// Consequently `stream_xor_inplace()` can also be used to decrypt.
 pub fn stream_xor_inplace(m: &mut [u8],
-                          n: &Nonce,
-                          k: &Key) {
+                          &Nonce(ref n): &Nonce,
+                          &Key(ref k): &Key) {
     unsafe {
-        $xor_name(m.as_mut_ptr(),
-                  m.as_ptr(),
-                  m.len() as c_ulonglong,
-                  n.0.as_ptr(),
-                  k.0.as_ptr());
+        let _todo_use_result = $xor_name(m.as_mut_ptr(),
+                                         m.as_ptr(),
+                                         m.len() as c_ulonglong,
+                                         n.as_ptr(),
+                                         k.as_ptr());
     }
 }
 
@@ -113,17 +112,17 @@ pub fn stream_xor_inplace(m: &mut [u8],
 /// and is the plaintext xor the output of `stream()`.
 /// Consequently `stream_xor()` can also be used to decrypt.
 pub fn stream_xor_ic(m: &[u8],
-                     n: &Nonce,
+                     &Nonce(ref n): &Nonce,
                      ic: u64,
-                     k: &Key) -> Vec<u8> {
+                     &Key(ref k): &Key) -> Vec<u8> {
     unsafe {
         let mut c = vec![0u8; m.len()];
-        $xor_ic_name(c.as_mut_ptr(),
+        let _ = $xor_ic_name(c.as_mut_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
-                     n.0.as_ptr(),
-                     ic as uint64_t,
-                     k.0.as_ptr());
+                     n.as_ptr(),
+                     ic,
+                     k.as_ptr());
         c
     }
 }
@@ -137,16 +136,16 @@ pub fn stream_xor_ic(m: &[u8],
 /// the plaintext, and is the plaintext xor the output of `stream_inplace()`.
 /// Consequently `stream_xor_ic_inplace()` can also be used to decrypt.
 pub fn stream_xor_ic_inplace(m: &mut [u8],
-                             n: &Nonce,
+                             &Nonce(ref n): &Nonce,
                              ic: u64,
-                             k: &Key) {
+                             &Key(ref k): &Key) {
     unsafe {
-        $xor_ic_name(m.as_mut_ptr(),
+        let _ = $xor_ic_name(m.as_mut_ptr(),
                      m.as_ptr(),
                      m.len() as c_ulonglong,
-                     n.0.as_ptr(),
-                     ic as uint64_t,
-                     k.0.as_ptr());
+                     n.as_ptr(),
+                     ic,
+                     k.as_ptr());
     }
 }
 
@@ -158,6 +157,7 @@ mod test_m {
     #[test]
     fn test_encrypt_decrypt() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -171,6 +171,7 @@ mod test_m {
     #[test]
     fn test_stream_xor() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -188,6 +189,7 @@ mod test_m {
     #[test]
     fn test_stream_xor_inplace() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -205,6 +207,7 @@ mod test_m {
     #[test]
     fn test_stream_xor_ic_same() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -218,6 +221,7 @@ mod test_m {
     #[test]
     fn test_stream_xor_ic_inplace() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -230,15 +234,15 @@ mod test_m {
         }
     }
 
-    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use test_utils::round_trip;
+        unwrap!(::init());
         for _ in 0..1024usize {
             let k = gen_key();
             let n = gen_nonce();
-            round_trip(k);
-            round_trip(n);
+            round_trip(&k);
+            round_trip(&n);
         }
     }
 }
@@ -254,6 +258,7 @@ mod bench_m {
 
     #[bench]
     fn bench_stream(b: &mut test::Bencher) {
+        unwrap!(::init());
         let k = gen_key();
         let n = gen_nonce();
         b.iter(|| {

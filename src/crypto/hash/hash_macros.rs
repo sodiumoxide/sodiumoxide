@@ -10,13 +10,13 @@ use std::mem;
 use libc::c_ulonglong;
 
 /// Number of bytes in a `Digest`.
-pub const DIGESTBYTES: usize = $hashbytes as usize;
+pub const DIGESTBYTES: usize = $hashbytes;
 
 /// Block size of the hash function.
-pub const BLOCKBYTES: usize = $blockbytes as usize;
+pub const BLOCKBYTES: usize = $blockbytes;
 
 new_type! {
-    /// Digest-structure
+/// Digest-structure
     public Digest(DIGESTBYTES);
 }
 
@@ -24,14 +24,13 @@ new_type! {
 pub fn hash(m: &[u8]) -> Digest {
     unsafe {
         let mut h = [0; DIGESTBYTES];
-        $hash_name(h.as_mut_ptr(), m.as_ptr(), m.len() as c_ulonglong);
+        let _todo_use_result = $hash_name(h.as_mut_ptr(), m.as_ptr(), m.len() as c_ulonglong);
         Digest(h)
     }
 }
 
 /// `State` contains the state for multi-part (streaming) hash computations. This allows the caller
 /// to process a message as a sequence of multiple chunks.
-#[derive(Copy, Clone)]
 pub struct State($hash_state);
 
 impl State {
@@ -39,7 +38,7 @@ impl State {
     pub fn new() -> Self {
         unsafe {
             let mut st: $hash_state = mem::uninitialized();
-            $hash_init(&mut st);
+            let _ = $hash_init(&mut st);
             State(st)
         }
     }
@@ -48,7 +47,7 @@ impl State {
     /// to compute the hash from sequential chunks of the message.
     pub fn update(&mut self, data: &[u8]) {
         unsafe {
-            $hash_update(&mut self.0, data.as_ptr(), data.len() as c_ulonglong);
+            let _ = $hash_update(&mut self.0, data.as_ptr(), data.len() as c_ulonglong);
         }
     }
 
@@ -56,9 +55,9 @@ impl State {
     /// `State` so that it cannot be accidentally reused.
     pub fn finalize(mut self) -> Digest {
         unsafe {
-            let mut digest = Digest([0u8; DIGESTBYTES]);
-            $hash_final(&mut self.0, digest.0.as_mut_ptr());
-            digest
+            let mut digest = [0u8; DIGESTBYTES];
+            let _ = $hash_final(&mut self.0, digest.as_mut_ptr());
+            Digest(digest)
         }
     }
 }
@@ -76,6 +75,7 @@ mod test_m {
     #[test]
     fn test_hash_multipart() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..256usize {
             let m = randombytes(i);
             let h = hash(&m);
@@ -89,7 +89,6 @@ mod test_m {
     }
 }
 
-#[cfg(feature = "serde")]
 #[cfg(test)]
 mod test_encode {
     use super::*;
@@ -98,10 +97,11 @@ mod test_encode {
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..32usize {
             let m = randombytes(i);
             let d = hash(&m[..]);
-            round_trip(d);
+            round_trip(&d);
         }
     }
 }
@@ -118,6 +118,7 @@ mod bench_m {
 
     #[bench]
     fn bench_hash(b: &mut test::Bencher) {
+        unwrap!(::init());
         let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| {
             randombytes(*s)
         }).collect();

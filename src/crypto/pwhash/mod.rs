@@ -26,8 +26,8 @@
 //!
 //! # Example (key derivation)
 //! ```
-//! use sodiumoxide::crypto::secretbox;
-//! use sodiumoxide::crypto::pwhash;
+//! use rust_sodium::crypto::secretbox;
+//! use rust_sodium::crypto::pwhash;
 //!
 //! let passwd = b"Correct Horse Battery Staple";
 //! let salt = pwhash::gen_salt();
@@ -42,7 +42,8 @@
 //!
 //! # Example (password hashing)
 //! ```
-//! use sodiumoxide::crypto::pwhash;
+//! # #![allow(unused_variables)]
+//! use rust_sodium::crypto::pwhash;
 //! let passwd = b"Correct Horse Battery Staple";
 //! let pwh = pwhash::pwhash(passwd,
 //!                          pwhash::OPSLIMIT_INTERACTIVE,
@@ -53,7 +54,7 @@
 //!
 //! # Example (password verification)
 //! ```
-//! use sodiumoxide::crypto::pwhash;
+//! use rust_sodium::crypto::pwhash;
 //!
 //! let passwd = b"Correct Horse Battery Staple";
 //! // in reality we want to load the password hash from somewhere
@@ -64,9 +65,6 @@
 //!                          pwhash::MEMLIMIT_INTERACTIVE).unwrap();
 //! assert!(pwhash::pwhash_verify(&pwh, passwd));
 //! ```
+
 pub use self::scryptsalsa208sha256::*;
-#[macro_use]
-mod argon2_macros;
-pub mod argon2i13;
-pub mod argon2id13;
 pub mod scryptsalsa208sha256;

@@ -20,18 +20,19 @@
 //! SHA-3 competition will improve the situation.
 //!
 //! # Alternate primitives
-//! NaCl supports the following hash functions:
+//! `NaCl` supports the following hash functions:
 //!
-//! ------------------------------------
-//! |crypto_hash       |primitive|BYTES|
-//! |------------------|---------|-----|
-//! |crypto_hash_sha256|SHA-256  |32   |
-//! |crypto_hash_sha512|SHA-512  |64   |
-//! ------------------------------------
+//! -----------------------------------------
+//! |`crypto_hash`        |primitive |BYTES |
+//! |---------------------|----------|------|
+//! |`crypto_hash_sha256` |`SHA-256` |32    |
+//! |`crypto_hash_sha512` |`SHA-512` |64    |
+//! -----------------------------------------
 //!
 //! # Example
 //! ```
-//! use sodiumoxide::crypto::hash;
+//! # #![allow(unused_variables)]
+//! use rust_sodium::crypto::hash;
 //!
 //! let data_to_hash = b"some data";
 //! let digest = hash::hash(data_to_hash);
@@ -41,6 +42,7 @@
 //! hash_state.update(b"data!");
 //! let digest = hash_state.finalize();
 //! ```
+
 pub use self::sha512::*;
 #[macro_use]
 mod hash_macros;

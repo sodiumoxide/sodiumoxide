@@ -8,11 +8,11 @@
 //! # Selected primitive
 //! `seal()`, `seal_detached()`, `open()` and `open_detached()` are currently
 //! an implementation of `chacha20poly1305_ietf`, i.e. the IETF construction defined in
-//! https://tools.ietf.org/html/rfc7539.
+//! <https://tools.ietf.org/html/rfc7539./>
 //!
 //! # Example (combined mode)
 //! ```
-//! use sodiumoxide::crypto::aead;
+//! use rust_sodium::crypto::aead;
 //!
 //! let k = aead::gen_key();
 //! let n = aead::gen_nonce();
@@ -27,7 +27,7 @@
 //!
 //! # Example (detached mode)
 //! ```
-//! use sodiumoxide::crypto::aead;
+//! use rust_sodium::crypto::aead;
 //!
 //! let k = aead::gen_key();
 //! let n = aead::gen_nonce();
@@ -46,4 +46,3 @@ pub use self::chacha20poly1305_ietf::*;
 mod aead_macros;
 pub mod chacha20poly1305;
 pub mod chacha20poly1305_ietf;
-pub mod xchacha20poly1305_ietf;

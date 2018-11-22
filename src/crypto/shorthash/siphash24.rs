@@ -1,4 +1,5 @@
 //! `SipHash-2-4`
+
 use ffi;
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
@@ -24,8 +25,8 @@ new_type! {
 /// `gen_key()` randomly generates a key for shorthash
 ///
 /// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// called `rust_sodium::init()` once before using any other function
+/// from `rust_sodium`.
 pub fn gen_key() -> Key {
     let mut k = [0; KEYBYTES];
     randombytes_into(&mut k);
@@ -34,14 +35,14 @@ pub fn gen_key() -> Key {
 
 /// `shorthash` hashes a message `m` under a key `k`. It
 /// returns a hash `h`.
-pub fn shorthash(m: &[u8], k: &Key) -> Digest {
+pub fn shorthash(m: &[u8], &Key(ref k): &Key) -> Digest {
     unsafe {
         let mut h = [0; DIGESTBYTES];
-        ffi::crypto_shorthash_siphash24(
+        let _todo_use_result = ffi::crypto_shorthash_siphash24(
             h.as_mut_ptr(),
             m.as_ptr(),
             m.len() as c_ulonglong,
-            k.0.as_ptr(),
+            k.as_ptr(),
         );
         Digest(h)
     }
@@ -50,11 +51,10 @@ pub fn shorthash(m: &[u8], k: &Key) -> Digest {
 #[cfg(test)]
 mod test {
     use super::*;
-    #[cfg(not(feature = "std"))]
-    use prelude::*;
 
     #[test]
     fn test_vectors() {
+        unwrap!(::init());
         let maxlen = 64;
         let mut m = Vec::with_capacity(64);
         for i in 0usize..64 {
@@ -133,17 +133,17 @@ mod test {
         }
     }
 
-    #[cfg(feature = "serde")]
     #[test]
     fn test_serialisation() {
         use randombytes::randombytes;
         use test_utils::round_trip;
+        unwrap!(::init());
         for i in 0..64usize {
             let k = gen_key();
             let m = randombytes(i);
             let d = shorthash(&m[..], &k);
-            round_trip(k);
-            round_trip(d);
+            round_trip(&k);
+            round_trip(&d);
         }
     }
 }
@@ -159,6 +159,7 @@ mod bench {
 
     #[bench]
     fn bench_shorthash(b: &mut test::Bencher) {
+        unwrap!(::init());
         let k = gen_key();
         let ms: Vec<Vec<u8>> = BENCH_SIZES.iter().map(|s| randombytes(*s)).collect();
         b.iter(|| {

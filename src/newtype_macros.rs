@@ -1,25 +1,28 @@
 macro_rules! newtype_clone (($newtype:ident) => (
+        #[cfg_attr(feature="cargo-clippy", allow(expl_impl_clone_on_copy))]
         impl Clone for $newtype {
             fn clone(&self) -> $newtype {
                 let &$newtype(v) = self;
                 $newtype(v)
             }
         }
-
         ));
 
 macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
-    /// `from_slice()` creates an object from a byte slice
-    ///
-    /// This function will fail and return `None` if the length of
-    /// the byte-slice isn't equal to the length of the object
+/// `from_slice()` creates an object from a byte slice
+///
+/// This function will fail and return `None` if the length of
+/// the byte-slice isn't equal to the length of the object
     pub fn from_slice(bs: &[u8]) -> Option<$newtype> {
         if bs.len() != $len {
             return None;
         }
         let mut n = $newtype([0; $len]);
-        for (ni, &bsi) in n.0.iter_mut().zip(bs.iter()) {
-            *ni = bsi
+        {
+            let $newtype(ref mut b) = n;
+            for (bi, &bsi) in b.iter_mut().zip(bs.iter()) {
+                *bi = bsi
+            }
         }
         Some(n)
     }
@@ -27,14 +30,14 @@ macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
 
 macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     impl ::std::cmp::PartialEq for $newtype {
-        fn eq(&self, other: &$newtype) -> bool {
+        fn eq(&self, &$newtype(ref other): &$newtype) -> bool {
             use utils::memcmp;
-            memcmp(&self.0, &other.0)
+            let &$newtype(ref this) = self;
+            memcmp(this, other)
         }
     }
     impl ::std::cmp::Eq for $newtype {}
 
-    #[cfg(feature = "serde")]
     impl ::serde::Serialize for $newtype {
         fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
             where S: ::serde::Serializer
@@ -43,7 +46,6 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
         }
     }
 
-    #[cfg(feature = "serde")]
     impl<'de> ::serde::Deserialize<'de> for $newtype {
         fn deserialize<D>(deserializer: D) -> Result<$newtype, D::Error>
             where D: ::serde::Deserializer<'de>
@@ -58,69 +60,78 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
                     where V: ::serde::de::SeqAccess<'de>
                 {
                     let mut res = $newtype([0; $len]);
-                    for r in res.0.iter_mut() {
-                        if let Some(value) = try!(visitor.next_element()) {
-                            *r = value;
+                    {
+                        let $newtype(ref mut arr) = res;
+                        for r in arr.iter_mut() {
+                            if let Some(value) = (visitor.next_element())? {
+                                *r = value;
+                            }
                         }
                     }
                     Ok(res)
                 }
+
                 fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
                     where E: ::serde::de::Error
                 {
-                    $newtype::from_slice(v).ok_or(::serde::de::Error::invalid_length(v.len(), &self))
+                    $newtype::from_slice(v).ok_or(::serde::de::Error::invalid_length(v.len(),
+                                                                                     &self))
                 }
             }
             deserializer.deserialize_bytes(NewtypeVisitor)
         }
     }
 
-    /// Allows a user to access the byte contents of an object as a slice.
-    ///
-    /// WARNING: it might be tempting to do comparisons on objects
-    /// by using `x[a..b] == y[a..b]`. This will open up for timing attacks
-    /// when comparing for example authenticator tags. Because of this only
-    /// use the comparison functions exposed by the sodiumoxide API.
+/// Allows a user to access the byte contents of an object as a slice.
+///
+/// WARNING: it might be tempting to do comparisons on objects
+/// by using `x[a..b] == y[a..b]`. This will open up for timing attacks
+/// when comparing for example authenticator tags. Because of this only
+/// use the comparison functions exposed by the `rust_sodium` API.
     impl ::std::ops::Index<::std::ops::Range<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::Range<usize>) -> &[u8] {
-            self.0.index(_index)
+            let &$newtype(ref b) = self;
+            b.index(_index)
         }
     }
-    /// Allows a user to access the byte contents of an object as a slice.
-    ///
-    /// WARNING: it might be tempting to do comparisons on objects
-    /// by using `x[..b] == y[..b]`. This will open up for timing attacks
-    /// when comparing for example authenticator tags. Because of this only
-    /// use the comparison functions exposed by the sodiumoxide API.
+/// Allows a user to access the byte contents of an object as a slice.
+///
+/// WARNING: it might be tempting to do comparisons on objects
+/// by using `x[..b] == y[..b]`. This will open up for timing attacks
+/// when comparing for example authenticator tags. Because of this only
+/// use the comparison functions exposed by the `rust_sodium` API.
     impl ::std::ops::Index<::std::ops::RangeTo<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeTo<usize>) -> &[u8] {
-            self.0.index(_index)
+            let &$newtype(ref b) = self;
+            b.index(_index)
         }
     }
-    /// Allows a user to access the byte contents of an object as a slice.
-    ///
-    /// WARNING: it might be tempting to do comparisons on objects
-    /// by using `x[a..] == y[a..]`. This will open up for timing attacks
-    /// when comparing for example authenticator tags. Because of this only
-    /// use the comparison functions exposed by the sodiumoxide API.
+/// Allows a user to access the byte contents of an object as a slice.
+///
+/// WARNING: it might be tempting to do comparisons on objects
+/// by using `x[a..] == y[a..]`. This will open up for timing attacks
+/// when comparing for example authenticator tags. Because of this only
+/// use the comparison functions exposed by the `rust_sodium` API.
     impl ::std::ops::Index<::std::ops::RangeFrom<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeFrom<usize>) -> &[u8] {
-            self.0.index(_index)
+            let &$newtype(ref b) = self;
+            b.index(_index)
         }
     }
-    /// Allows a user to access the byte contents of an object as a slice.
-    ///
-    /// WARNING: it might be tempting to do comparisons on objects
-    /// by using `x[] == y[]`. This will open up for timing attacks
-    /// when comparing for example authenticator tags. Because of this only
-    /// use the comparison functions exposed by the sodiumoxide API.
+/// Allows a user to access the byte contents of an object as a slice.
+///
+/// WARNING: it might be tempting to do comparisons on objects
+/// by using `x[] == y[]`. This will open up for timing attacks
+/// when comparing for example authenticator tags. Because of this only
+/// use the comparison functions exposed by the `rust_sodium` API.
     impl ::std::ops::Index<::std::ops::RangeFull> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeFull) -> &[u8] {
-            self.0.index(_index)
+            let &$newtype(ref b) = self;
+            b.index(_index)
         }
     }
     ));
@@ -172,26 +183,20 @@ macro_rules! public_newtype_traits (($newtype:ident) => (
 ///
 /// Usage:
 /// Generating secret datatypes, e.g. keys
-///
 /// ```
 /// new_type! {
 ///     /// This is some documentation for our type
 ///     secret Key(KEYBYTES);
 /// }
 /// ```
-///
 /// Generating public datatypes, e.g. public keys
-///
 /// ```
 /// new_type! {
 ///     /// This is some documentation for our type
 ///     public PublicKey(PUBLICKEYBYTES);
 /// }
-///
 /// ```
-///
 /// Generating nonce types
-///
 /// ```
 /// new_type! {
 ///     /// This is some documentation for our type
@@ -213,7 +218,8 @@ macro_rules! new_type {
         impl Drop for $name {
             fn drop(&mut self) {
                 use utils::memzero;
-                memzero(&mut self.0);
+                let &mut $name(ref mut v) = self;
+                memzero(v);
             }
         }
         impl ::std::fmt::Debug for $name {
@@ -262,7 +268,7 @@ macro_rules! new_type {
             ///
             /// WARNING: this method does not check for arithmetic overflow. It is the callers
             /// responsibility to ensure that any given nonce value is only used once.
-            /// If the caller does not do that the cryptographic primitives in sodiumoxide
+            /// If the caller does not do that the cryptographic primitives in `rust_sodium`
             /// will not uphold any security guarantees (i.e. they will break)
             pub fn increment_le(&self) -> $name {
                 let mut res = *self;
@@ -275,11 +281,12 @@ macro_rules! new_type {
             ///
             /// WARNING: this method does not check for arithmetic overflow. It is the callers
             /// responsibility to ensure that any given nonce value is only used once.
-            /// If the caller does not do that the cryptographic primitives in sodiumoxide
+            /// If the caller does not do that the cryptographic primitives in `rust_sodium`
             /// will not uphold any security guarantees.
             pub fn increment_le_inplace(&mut self) {
                 use utils::increment_le;
-                increment_le(&mut self.0);
+                let &mut $name(ref mut r) = self;
+                increment_le(r);
             }
 
         }

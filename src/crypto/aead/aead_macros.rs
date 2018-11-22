@@ -6,18 +6,18 @@ macro_rules! aead_module (($seal_name:ident,
                            $noncebytes:expr,
                            $tagbytes:expr) => (
 
-#[cfg(not(feature = "std"))] use prelude::*;
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
+use std::ptr;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes as usize;
+pub const KEYBYTES: usize = $keybytes;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = $noncebytes as usize;
+pub const NONCEBYTES: usize = $noncebytes;
 
 /// Number of bytes in an authentication `Tag`.
-pub const TAGBYTES: usize = $tagbytes as usize;
+pub const TAGBYTES: usize = $tagbytes;
 
 new_type! {
     /// `Key` for symmetric authenticated encryption with additional data.
@@ -41,8 +41,8 @@ new_type! {
 /// `gen_key()` randomly generates a secret key
 ///
 /// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// called `rust_sodium::init()` once before using any other function
+/// from `rust_sodium`.
 pub fn gen_key() -> Key {
     let mut k = Key([0u8; KEYBYTES]);
     randombytes_into(&mut k.0);
@@ -52,8 +52,8 @@ pub fn gen_key() -> Key {
 /// `gen_nonce()` randomly generates a nonce
 ///
 /// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
+/// called `rust_sodium::init()` once before using any other function
+/// from `rust_sodium`.
 pub fn gen_nonce() -> Nonce {
     let mut n = Nonce([0u8; NONCEBYTES]);
     randombytes_into(&mut n.0);
@@ -63,19 +63,20 @@ pub fn gen_nonce() -> Nonce {
 /// `seal()` encrypts and authenticates a message `m` together with optional plaintext data `ad`
 /// using a secret key `k` and a nonce `n`. It returns a ciphertext `c`.
 pub fn seal(m: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Vec<u8> {
-    let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
+    let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong))
+        .unwrap_or((ptr::null(), 0));
     let mut c = Vec::with_capacity(m.len() + TAGBYTES);
     let mut clen = c.len() as c_ulonglong;
 
     unsafe {
-        $seal_name(
+        let _ = $seal_name(
             c.as_mut_ptr(),
             &mut clen,
             m.as_ptr(),
             m.len() as c_ulonglong,
             ad_p,
             ad_len,
-            0 as *mut _,
+            ptr::null_mut(),
             n.0.as_ptr(),
             k.0.as_ptr()
         );
@@ -84,16 +85,17 @@ pub fn seal(m: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Vec<u8> {
     c
 }
 
-/// `seal_detached()` encrypts and authenticates a message `m` together with optional plaintext data `ad`
-/// using a secret key `k` and a nonce `n`.
+/// `seal_detached()` encrypts and authenticates a message `m` together with optional plaintext data
+/// `ad` using a secret key `k` and a nonce `n`.
 /// `m` is encrypted in place, so after this function returns it will contain the ciphertext.
 /// The detached authentication tag is returned by value.
 pub fn seal_detached(m: &mut [u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Tag {
-    let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
+    let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong))
+        .unwrap_or((ptr::null(), 0));
     let mut tag = Tag([0u8; TAGBYTES]);
     let mut maclen = TAGBYTES as c_ulonglong;
     unsafe {
-        $seal_detached_name(
+        let _ = $seal_detached_name(
             m.as_mut_ptr(),
             tag.0.as_mut_ptr(),
             &mut maclen,
@@ -101,7 +103,7 @@ pub fn seal_detached(m: &mut [u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Tag
             m.len() as c_ulonglong,
             ad_p,
             ad_len,
-            0 as *mut _,
+            ptr::null_mut(),
             n.0.as_ptr(),
             k.0.as_ptr()
         );
@@ -117,7 +119,8 @@ pub fn open(c: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Result<Vec<u8>, 
     if c.len() < TAGBYTES {
         return Err(());
     }
-    let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
+    let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong))
+        .unwrap_or((ptr::null(), 0));
     let mut m = Vec::with_capacity(c.len() - TAGBYTES);
     let mut mlen = m.len() as c_ulonglong;
 
@@ -126,7 +129,7 @@ pub fn open(c: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Result<Vec<u8>, 
             $open_name(
                 m.as_mut_ptr(),
                 &mut mlen,
-                0 as *mut _,
+                ptr::null_mut(),
                 c.as_ptr(),
                 c.len() as c_ulonglong,
                 ad_p,
@@ -141,17 +144,24 @@ pub fn open(c: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Result<Vec<u8>, 
     }
     Ok(m)
 }
-/// `open_detached()` verifies and decrypts a ciphertext `c` toghether with optional plaintext data `ad`
-/// and and authentication tag `tag`, using a secret key `k` and a nonce `n`.
+/// `open_detached()` verifies and decrypts a ciphertext `c` toghether with optional plaintext data
+/// `ad` and and authentication tag `tag`, using a secret key `k` and a nonce `n`.
 /// `c` is decrypted in place, so if this function is successful it will contain the plaintext.
 /// If the ciphertext fails verification, `open_detached()` returns `Err(())`,
 /// and the ciphertext is not modified.
-pub fn open_detached(c: &mut [u8], ad: Option<&[u8]>, t: &Tag, n: &Nonce, k: &Key) -> Result<(), ()> {
-    let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong)).unwrap_or((0 as *const _, 0));
+pub fn open_detached(
+    c: &mut [u8],
+    ad: Option<&[u8]>,
+    t: &Tag,
+    n: &Nonce,
+    k: &Key,
+) -> Result<(), ()> {
+    let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len() as c_ulonglong))
+        .unwrap_or((ptr::null(), 0));
     let ret = unsafe {
         $open_detached_name(
             c.as_mut_ptr(),
-            0 as *mut _,
+            ptr::null_mut(),
             c.as_ptr(),
             c.len() as c_ulonglong,
             t.0.as_ptr(),
@@ -175,13 +185,14 @@ mod test_m {
     #[test]
     fn test_seal_open() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..256usize {
             let k = gen_key();
             let n = gen_nonce();
             let ad = randombytes(i);
             let m = randombytes(i);
             let c = seal(&m, Some(&ad), &n, &k);
-            let m2 = open(&c, Some(&ad), &n, &k).unwrap();
+            let m2 = unwrap!(open(&c, Some(&ad), &n, &k));
             assert_eq!(m, m2);
         }
     }
@@ -189,6 +200,7 @@ mod test_m {
     #[test]
     fn test_seal_open_tamper() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..32usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -213,6 +225,7 @@ mod test_m {
     #[test]
     fn test_seal_open_detached() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..256usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -220,7 +233,7 @@ mod test_m {
             let mut m = randombytes(i);
             let m2 = m.clone();
             let t = seal_detached(&mut m, Some(&ad), &n, &k);
-            open_detached(&mut m, Some(&ad), &t, &n, &k).unwrap();
+            unwrap!(open_detached(&mut m, Some(&ad), &t, &n, &k));
             assert_eq!(m, m2);
         }
     }
@@ -228,6 +241,7 @@ mod test_m {
     #[test]
     fn test_seal_open_detached_tamper() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..32usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -258,6 +272,7 @@ mod test_m {
     #[test]
     fn test_seal_open_detached_same() {
         use randombytes::randombytes;
+        unwrap!(::init());
         for i in 0..256usize {
             let k = gen_key();
             let n = gen_nonce();
@@ -270,8 +285,8 @@ mod test_m {
             assert_eq!(&c[0..c.len()-TAGBYTES], &m[..]);
             assert_eq!(&c[c.len()-TAGBYTES..], &t.0[..]);
 
-            let m2 = open(&c, Some(&ad), &n, &k).unwrap();
-            open_detached(&mut m, Some(&ad), &t, &n, &k).unwrap();
+            let m2 = unwrap!(open(&c, Some(&ad), &n, &k));
+            unwrap!(open_detached(&mut m, Some(&ad), &t, &n, &k));
 
             assert_eq!(m2, m);
         }

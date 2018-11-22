@@ -1,18 +1,12 @@
 //! Libsodium version functions
+
 use ffi;
-use libc;
-use std::slice;
-use std::str;
+use std::ffi::CStr;
 
 /// `version_string()` returns the version string from libsodium.
 pub fn version_string() -> &'static str {
-    // Use libc directly because CStr isn't available with #![no_std] :(
-    let version = unsafe {
-        let version_ptr = ffi::sodium_version_string();
-        let version_len = libc::strlen(version_ptr);
-        slice::from_raw_parts(version_ptr as *const u8, version_len as usize)
-    };
-    str::from_utf8(version).unwrap()
+    let version = unsafe { CStr::from_ptr(ffi::sodium_version_string()) };
+    unwrap!(version.to_str())
 }
 
 /// `version_major()` returns the major version from libsodium.
@@ -30,6 +24,7 @@ mod test {
     #[test]
     fn test_version_string() {
         use version::version_string;
+        unwrap!(::init());
         assert!(!version_string().is_empty());
     }
 }
