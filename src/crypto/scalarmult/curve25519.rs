@@ -26,10 +26,7 @@ new_type! {
 /// `Ok(q)`.
 /// If the the `GroupElement` is all zero, `scalarmult()` returns `Err(())` since
 /// the resulting `GroupElement` would be all zero, no matter the `Scalar`.
-pub fn scalarmult(
-    n: &Scalar,
-    p: &GroupElement,
-) -> Result<GroupElement, ()> {
+pub fn scalarmult(n: &Scalar, p: &GroupElement) -> Result<GroupElement, ()> {
     let mut q = [0; GROUPELEMENTBYTES];
     unsafe {
         if ffi::crypto_scalarmult_curve25519(q.as_mut_ptr(), n.0.as_ptr(), p.0.as_ptr()) != 0 {

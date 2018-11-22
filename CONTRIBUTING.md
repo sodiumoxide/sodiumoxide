@@ -67,7 +67,8 @@ their personal fork and create pull requests to bring those changes into the
 source repository.
 
 Ensure that your changes conform to how the rest of the crate is written and follows a 
-similar API, patterns, namings & other conventions. 
+similar API, patterns, namings & other conventions. Also ensure that your code is formatted
+using [rustfmt].
 
 Your changes should contain real vectors from the underlying library along with sanity tests
 in Rust. 
@@ -82,6 +83,7 @@ they can review your changes.
 
 [great documentation]: https://help.github.com/articles/about-pull-requests/
 [fnp]: https://help.github.com/articles/about-collaborative-development-models/
+[rustfmt]: https://github.com/rust-lang/rustfmt
 
 # Writing Documentation
 [Writing Documentation]: #writing-documentation

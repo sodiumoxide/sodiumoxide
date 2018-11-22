@@ -11,9 +11,7 @@ use ffi;
 /// that depends on the longest matching prefix of `x` and `y`, often allowing easy
 /// timing attacks.
 pub fn verify_16(x: &[u8; 16], y: &[u8; 16]) -> bool {
-    unsafe {
-        ffi::crypto_verify_16(x.as_ptr(), y.as_ptr()) == 0
-    }
+    unsafe { ffi::crypto_verify_16(x.as_ptr(), y.as_ptr()) == 0 }
 }
 
 /// `verify_32()` returns true if `x[0]`, `x[1]`, ..., `x[31]` are the
@@ -26,9 +24,7 @@ pub fn verify_16(x: &[u8; 16], y: &[u8; 16]) -> bool {
 /// that depends on the longest matching prefix of `x` and `y`, often allowing easy
 /// timing attacks.
 pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
-    unsafe {
-        ffi::crypto_verify_32(x.as_ptr(), y.as_ptr()) == 0
-    }
+    unsafe { ffi::crypto_verify_32(x.as_ptr(), y.as_ptr()) == 0 }
 }
 
 /// `verify_64()` returns true if `x[0]`, `x[1]`, ..., `x[63]` are the
@@ -41,9 +37,7 @@ pub fn verify_32(x: &[u8; 32], y: &[u8; 32]) -> bool {
 /// that depends on the longest matching prefix of `x` and `y`, often allowing easy
 /// timing attacks.
 pub fn verify_64(x: &[u8; 64], y: &[u8; 64]) -> bool {
-    unsafe {
-        ffi::crypto_verify_64(x.as_ptr(), y.as_ptr()) == 0
-    }
+    unsafe { ffi::crypto_verify_64(x.as_ptr(), y.as_ptr()) == 0 }
 }
 
 #[cfg(test)]

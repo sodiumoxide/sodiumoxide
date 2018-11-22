@@ -21,7 +21,6 @@ use std::fs;
 use std::io::Cursor;
 use std::path::Path;
 
-
 static DOWNLOAD_BASE_URL: &'static str = "https://download.libsodium.org/libsodium/releases/";
 static VERSION: &'static str = "1.0.16";
 
@@ -69,7 +68,9 @@ fn main() {
         find_libsodium_pkg();
     } else {
         if shared_isset {
-            println!("cargo:warning=SODIUM_SHARED has no effect for building libsodium from source");
+            println!(
+                "cargo:warning=SODIUM_SHARED has no effect for building libsodium from source"
+            );
         }
 
         build_libsodium();
@@ -113,7 +114,7 @@ fn find_libsodium_pkg() {
                  {} and may not be fully compatible with other versions.",
                 VERSION
             );
-        },
+        }
         Err(e) => {
             panic!(format!("Error: {:?}", e));
         }
@@ -136,7 +137,7 @@ fn find_libsodium_pkg() {
                     lib.version, VERSION, lib.version
                 );
             }
-        },
+        }
         Err(e) => {
             panic!(format!("Error: {:?}", e));
         }
