@@ -1,15 +1,19 @@
 # sodiumoxide
 
-[![Build Status](https://travis-ci.org/sodiumoxide/sodiumoxide.svg?branch=master)](https://travis-ci.org/sodiumoxide/sodiumoxide)
-[![Appveyor Build Status][appveyor-badge]][appveyor-url]
-[![Latest Version](https://img.shields.io/crates/v/sodiumoxide.svg)](https://crates.io/crates/sodiumoxide)
-[![Docs][doc-badge]][doc-url]
-[![Join the chat at https://gitter.im/rust-sodiumoxide/Lobby](https://badges.gitter.im/rust-sodiumoxide/Lobby.svg)](https://gitter.im/rust-sodiumoxide/Lobby?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+|Crate|Documentation|Linux/OS X|Windows|Gitter|
+|:---:|:-----------:|:--------:|:-----:|:----:|
+|[![Crates.io][crates-badge]][crates-url]|[![Docs][doc-badge]][doc-url]|[![TravisCI][travis-badge]][travis-url]|[![AppveyorCI][appveyor-badge]][appveyor-url]|[![Gitter][gitter-badge]][gitter-url]|
 
-[appveyor-badge]: https://ci.appveyor.com/api/projects/status/u05iy6wufw9ncdi7/branch/master?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/Dylan-DPC/sodiumoxide/branch/master
+[crates-badge]: https://img.shields.io/crates/v/sodiumoxide.svg
+[crates-url]: https://crates.io/crates/sodiumoxide
 [doc-badge]: https://docs.rs/sodiumoxide/badge.svg
 [doc-url]: https://docs.rs/sodiumoxide
+[travis-badge]: https://travis-ci.org/sodiumoxide/sodiumoxide.svg?branch=master
+[travis-url]: https://travis-ci.org/sodiumoxide/sodiumoxide/branches
+[appveyor-badge]: https://ci.appveyor.com/api/projects/status/u05iy6wufw9ncdi7/branch/master?svg=true
+[appveyor-url]: https://ci.appveyor.com/project/Dylan-DPC/sodiumoxide/branch/master
+[gitter-badge]: https://badges.gitter.im/rust-sodiumoxide/Lobby.svg
+[gitter-url]: https://gitter.im/rust-sodiumoxide/Lobby
 
 > [NaCl](http://nacl.cr.yp.to) (pronounced "salt") is a new easy-to-use high-speed software library for network communication, encryption, decryption, signatures, etc. NaCl's goal is to provide all of the core operations needed to build higher-level cryptographic tools.
 > Of course, other libraries already exist for these core operations. NaCl advances the state of the art by improving security, by improving usability, and by improving speed.
@@ -19,30 +23,83 @@
 This package aims to provide a type-safe and efficient Rust binding that's just
 as easy to use.
 
-## Dependencies
+## Basic usage
 
-[Clang](https://clang.llvm.org/) >= 3.9
+### Building
+```
+cargo build
+```
 
-[Libsodium](https://github.com/jedisct1/libsodium) 1.0.16 ([installation](https://download.libsodium.org/doc/installation))
+### Testing
+```
+cargo test
+```
 
-pkg-config (OSX: `brew install pkg-config`)
-
-## Building
-
-    cargo build
-
-## Testing
-
-    cargo test
-
-## Documentation
-
-    cargo doc
+### Documentation
+```
+cargo doc
+```
 
 Documentation will be generated in target/doc/...
 
 Most documentation is taken from NaCl, with minor modification where the API
 differs between the C and Rust versions.
+
+## Dependencies
+
+C compiler (`cc`, `clang`, ...) must be installed in order to build libsodium from source.
+
+## Extended usage
+
+This project downloads and builds libsodium by default, favouring a statically-built, fixed version of the native library.
+
+Although it is highly recommended to use the default way with the pinned version, there are several ways you may want to use this crate:
+* link it against the library installed on your system
+* link it against a precompiled library that you built on your own
+
+You can do this by setting environment variables.
+
+|Name|Description|Example value|Notes|
+| :- | :-------- | :---------- | :-- |
+|`SODIUM_LIB_DIR`|Where to find a precompiled library|`/usr/lib/x86_64-linux-gnu/`|The value should be set to the directory containing `.so`,`.a`,`.la`,`.dll` or `.lib`|
+|`SODIUM_SHARED`|Tell `rustc` to link the library dynamically|`1`|Works only with `SODIUM_LIB_DIR`. We check only the presence|
+|`SODIUM_USE_PKG_CONFIG`|Tell build.rs to find system library using pkg-config or vcpkg|`1`|We check only the presence|
+|`SODIUM_DISABLE_PIE`|Build with `--disable-pie`|`1`|Certain situations may require building libsodium configured with `--disable-pie`. Useful for !Windows only and when building libsodium from source. We check only the presence|
+|`VCPKGRS_DYNAMIC`|Tell `vcpkg` to find libsodium|`1`|Usefull for Windows only with `SODIUM_USE_PKG_CONFIG`. More info: https://docs.rs/vcpkg/|
+
+### Examples on *nix
+
+#### Using pkg-config
+
+(Ubuntu: `apt install pkg-config`, OSX: `brew install pkg-config`, ...)
+
+```
+export SODIUM_USE_PKG_CONFIG=1
+cargo build
+```
+
+#### Using precompiled library
+
+See https://download.libsodium.org/doc/installation.
+
+```
+export SODIUM_LIB_DIR=/home/user/libsodium-1.0.16/release/lib/
+export SODIUM_SHARED=1
+cargo build
+```
+
+### Examples on Windows
+
+#### Using vcpkg
+
+See https://github.com/Microsoft/vcpkg.
+
+```
+C:\Users\user\dev\vcpkg\vcpkg.exe install libsodium --triplet x64-windows
+set SODIUM_USE_PKG_CONFIG=1
+set VCPKGRS_DYNAMIC=1
+cargo build
+```
 
 ## Optional features
 
@@ -59,6 +116,47 @@ Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-prod
 * `benchmarks` (default: **disabled**). Compile benchmark tests. Requires a
   nightly build of Rust.
 
+## Cross-Compiling
+
+### Cross-Compiling for armv7-unknown-linux-gnueabihf
+
+1. Install dependencies and toolchain:
+
+```
+sudo apt update
+sudo apt install build-essential gcc-arm-linux-gnueabihf libc6-armhf-cross libc6-dev-armhf-cross -y
+rustup target add armv7-unknown-linux-gnueabihf
+```
+
+1. Add the following to a [.cargo/config file](http://doc.crates.io/config.html):
+
+```
+[target.armv7-unknown-linux-gnueabihf]
+linker = "arm-linux-gnueabihf-gcc"
+```
+
+1. Build by running:
+
+```
+cargo build --release --target armv7-unknown-linux-gnueabihf
+```
+
+### Cross-Compiling for 32-bit Linux
+
+1. Install dependencies and toolchain:
+
+```
+sudo apt update
+sudo apt install build-essential gcc-multilib -y
+rustup target add i686-unknown-linux-gnu
+```
+
+1. Build by running:
+
+```
+cargo build --release --target i686-unknown-linux-gnu
+```
+
 ## Examples
 
 TBD
@@ -69,15 +167,10 @@ Sodiumoxide has been tested on:
 
 - Linux: Yes
 - Windows: Yes (MSVC)
-- Mac OS:
-- IOS:
-- Android:
+- Mac OS: Yes
+- IOS: TODO
+- Android: TODO
 
-### Using vcpkg
-
-To build sodiumoxide using libsodium from vcpkg, you have to add either `VCPKGRS_DYNAMIC=1` (for dynamic linking) or `RUSTFLAGS=-Ctarget-feature=+crt-static` (for static linking) to environment variables.
-
-Regardless of the OS, to link libsodium statically you also need to set `SODIUM_STATIC` environment variable.
 
 # Join in
 
