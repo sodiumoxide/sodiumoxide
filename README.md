@@ -1,8 +1,8 @@
 # sodiumoxide
 
-|Crate|Documentation|Linux/OS X|Windows|Gitter|
-|:---:|:-----------:|:--------:|:-----:|:----:|
-|[![Crates.io][crates-badge]][crates-url]|[![Docs][doc-badge]][doc-url]|[![TravisCI][travis-badge]][travis-url]|[![AppveyorCI][appveyor-badge]][appveyor-url]|[![Gitter][gitter-badge]][gitter-url]|
+|Crate|Documentation|Linux/OS X|Windows|Coverage|Gitter|
+|:---:|:-----------:|:--------:|:-----:|:------:|:----:|
+|[![Crates.io][crates-badge]][crates-url]|[![Docs][doc-badge]][doc-url]|[![TravisCI][travis-badge]][travis-url]|[![AppveyorCI][appveyor-badge]][appveyor-url]|[![Coverage Status][coverage-badge]][coverage-url]|[![Gitter][gitter-badge]][gitter-url]|
 
 [crates-badge]: https://img.shields.io/crates/v/sodiumoxide.svg
 [crates-url]: https://crates.io/crates/sodiumoxide
@@ -12,6 +12,8 @@
 [travis-url]: https://travis-ci.org/sodiumoxide/sodiumoxide/branches
 [appveyor-badge]: https://ci.appveyor.com/api/projects/status/u05iy6wufw9ncdi7/branch/master?svg=true
 [appveyor-url]: https://ci.appveyor.com/project/Dylan-DPC/sodiumoxide/branch/master
+[coverage-badge]: https://coveralls.io/repos/github/sodiumoxide/sodiumoxide/badge.svg
+[coverage-url]: https://coveralls.io/github/sodiumoxide/sodiumoxide
 [gitter-badge]: https://badges.gitter.im/rust-sodiumoxide/Lobby.svg
 [gitter-url]: https://gitter.im/rust-sodiumoxide/Lobby
 

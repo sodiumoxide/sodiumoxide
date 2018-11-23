@@ -13,10 +13,27 @@ matrix:
   - os: linux
     rust: nightly
     before_script:
-    - rustup component add rustfmt-preview
+      - rustup component add rustfmt-preview
     script:
-    - cargo fmt --all -- --check
-    - cargo test --verbose --no-default-features
+      - cargo fmt --all -- --check
+      - cargo test --verbose --no-default-features
+  - os: linux
+    rust: stable
+    sudo: required
+    addons: # needed for `cargo install cargo-travis`
+      apt:
+        packages:
+          - libcurl4-openssl-dev
+          - libelf-dev
+          - libdw-dev
+          - binutils-dev
+          - cmake
+        sources:
+          - kalakris-cmake
+    script:
+      - cargo install cargo-travis --debug || echo "cargo-travis has been already installed"
+      - mkdir target # fix for cargo-coveralls
+      - cargo coveralls
 
 script:
   - cargo build --verbose
