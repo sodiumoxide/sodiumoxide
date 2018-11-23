@@ -357,14 +357,12 @@ mod test {
             assert_eq!(byte_size, i);
             assert_eq!(&bytes, &new_bytes);
 
-            // No need to remove the trailing byte since `hex` end is provided
-            let mut end = 0;
             hex2bin(
                 &mut new_bytes,
                 &hex,
                 None,
                 &mut byte_size,
-                Some(&mut end),
+                None,
             )
             .unwrap();
             assert_eq!(byte_size, i);
