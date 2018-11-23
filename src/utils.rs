@@ -1,7 +1,7 @@
 //! Libsodium utility functions
 use ffi;
 
-use std::ptr::{null, null_mut};
+use std::ptr;
 
 /// `memzero()` tries to effectively zero out the data in `x` even if
 /// optimizations are being applied to the code.
@@ -87,34 +87,42 @@ pub fn bin2hex(hex: &mut [u8], bin: &[u8]) -> Result<(), ()> {
 /// and will produce the same output. Any hex characters part of `ignore` will not be ignored. Passing ": FC" in `ignore`
 /// when input is "69 : FC" will result in output "69FC".
 /// `bin_len` is the length of raw bytes that `hex` was converted to.
-/// `hex_end` is an optional parameter, if passed a pointer, it will be set to the address of the
+/// `hex_end` is an optional parameter, if passed it will be set to the index of the
 /// first byte after the last valid parsed character.
-/// `hex2bin()` will return Err<()> if `bin` is not sufficient to store the parsed string or if the
-/// string couldn't be fully parsed, but a valid pointer for `hex_end` was not provided
+/// `hex2bin()` will return Err<()> if `bin` is not sufficient to store the parsed string
 /// Refer docs at https://download.libsodium.org/doc/helpers#hexadecimal-encoding-decoding
 pub fn hex2bin(
     bin: &mut [u8],
     hex: &[u8],
     ignore: Option<&[u8]>,
     bin_len: &mut usize,
-    hex_end: Option<&mut [u8]>,
+    hex_end: Option<&mut isize>,
 ) -> Result<(), ()> {
-    let ignore = ignore.map_or(null(), |p| p.as_ptr());
-    let hex_end = hex_end.map_or(null_mut(), |p| p.as_mut_ptr());
+    let ignore = ignore.map_or(ptr::null(), |p| p.as_ptr());
 
-    unsafe {
-        let r = ffi::sodium_hex2bin(
+    let mut hex_end_ptr: *const i8 = ptr::null();
+
+    let r = unsafe {
+        ffi::sodium_hex2bin(
             bin.as_mut_ptr() as *mut _,
             bin.len(),
             hex.as_ptr() as *const _,
             hex.len(),
             ignore as *const _,
             bin_len,
-            hex_end as *mut _,
-        );
-        if r != 0 {
-            return Err(());
+            &mut hex_end_ptr as *mut _,
+        )
+    };
+    match hex_end {
+        None => {}
+        Some(v) => {
+            let offset = isize::wrapping_sub(hex_end_ptr as _, hex.as_ptr() as _);
+            *v = offset;
         }
+    };
+
+    if r != 0 {
+        return Err(());
     }
     Ok(())
 }
@@ -350,17 +358,55 @@ mod test {
             assert_eq!(&bytes, &new_bytes);
 
             // No need to remove the trailing byte since `hex` end is provided
-            let mut end = vec![0];
+            let mut end = 0;
             hex2bin(
                 &mut new_bytes,
                 &hex,
                 None,
                 &mut byte_size,
-                Some(end.as_mut_slice()),
+                Some(&mut end),
             )
             .unwrap();
             assert_eq!(byte_size, i);
             assert_eq!(&bytes, &new_bytes);
         }
+    }
+    #[test]
+    fn test_hex2bin_hex_end() {
+        // tests from https://github.com/jedisct1/libsodium/blob/master/test/default/codecs.c
+
+        let hex = "Cafe : 6942".as_bytes();
+        let mut bin = vec![0; 4];
+        let mut bin_size = 0;
+        let mut hex_end = 0;
+
+        hex2bin(&mut bin, &hex, Some(": ".as_bytes()), &mut bin_size, Some(&mut hex_end)).unwrap();
+        assert_eq!(hex_end, 11);
+
+        let hex = "deadbeef".as_bytes();
+        let mut bin = vec![0];
+        let mut bin_size = 0;
+        let mut hex_end = 0;
+
+        hex2bin(&mut bin, &hex, None, &mut bin_size, Some(&mut hex_end)).unwrap_err();
+        assert_eq!(hex_end, 2);
+
+        let hex = "de:ad:be:eff".as_bytes();
+        let mut bin = vec![0; 4];
+        let mut bin_size = 0;
+        let mut hex_end = 0;
+
+        hex2bin(&mut bin, &hex, Some(": ".as_bytes()), &mut bin_size, Some(&mut hex_end)).unwrap_err();
+        assert_eq!(hex_end, 11);
+
+
+        let hex = "de:ad:be:eff".as_bytes();
+        let mut bin = vec![0; 1000];
+        let mut bin_size = 0;
+        let mut hex_end = 0;
+
+        hex2bin(&mut bin, &hex, Some(": ".as_bytes()), &mut bin_size, None).unwrap_err();
+        hex2bin(&mut bin, &hex, Some(": ".as_bytes()), &mut bin_size, Some(&mut hex_end)).unwrap_err();
+        assert_eq!(hex_end, 11);
     }
 }
