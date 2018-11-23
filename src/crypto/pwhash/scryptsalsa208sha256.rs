@@ -11,7 +11,7 @@ pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES a
 pub const HASHEDPASSWORDBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES as usize;
 
 /// All `HashedPasswords` start with this string.
-pub const STRPREFIX: &'static str = "$7$";
+pub const STRPREFIX: &[u8] = ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX;
 
 /// Safe base line for `OpsLimit` for interactive password hashing.
 pub const OPSLIMIT_INTERACTIVE: OpsLimit =
@@ -176,22 +176,6 @@ pub fn pwhash_verify(hp: &HashedPassword, passwd: &[u8]) -> bool {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    #[test]
-    fn test_match_strprefix() {
-        // Make sure that the hardcoded STRPREFIX matches with the prefix provided by
-        // the libsodium bindings.
-        // Note: The reason why we have to hardcode the STRPREFIX is because of a type
-        //       mismatch (and the issue of converting it to a str in
-        //       a constant expression):
-        //       &'static [u8; 4usize] != &'static str
-        let tmp = ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX;
-        assert_eq!(
-            // Trim null byte and convert to an str
-            ::std::str::from_utf8(&tmp[..tmp.len() - 1]).unwrap(),
-            STRPREFIX
-        );
-    }
 
     #[test]
     fn test_derive_key() {

@@ -65,10 +65,7 @@ impl State {
         };
 
         if result == 0 {
-            Ok(State {
-                out_len: out_len,
-                state,
-            })
+            Ok(State { out_len, state })
         } else {
             Err(())
         }
