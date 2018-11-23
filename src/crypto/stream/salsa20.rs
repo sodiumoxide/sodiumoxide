@@ -1,6 +1,7 @@
 //! `crypto_stream_salsa20` (Salsa20/20), a particular cipher specified in
-//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 7.  This
+//! [Cryptography in `NaCl`](http://nacl.cr.yp.to/valid.html), Section 7.  This
 //! cipher is conjectured to meet the standard notion of unpredictability.
+
 use ffi::{
     crypto_stream_salsa20, crypto_stream_salsa20_KEYBYTES, crypto_stream_salsa20_NONCEBYTES,
     crypto_stream_salsa20_xor, crypto_stream_salsa20_xor_ic,
@@ -10,8 +11,8 @@ stream_module!(
     crypto_stream_salsa20,
     crypto_stream_salsa20_xor,
     crypto_stream_salsa20_xor_ic,
-    crypto_stream_salsa20_KEYBYTES,
-    crypto_stream_salsa20_NONCEBYTES
+    crypto_stream_salsa20_KEYBYTES as usize,
+    crypto_stream_salsa20_NONCEBYTES as usize
 );
 
 #[cfg(test)]

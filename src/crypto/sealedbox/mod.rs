@@ -25,5 +25,6 @@
 //!                     nonce=blake2b(ephemeral_pk, recipient_pk))
 //! ```
 //!
+
 pub use self::curve25519blake2bxsalsa20poly1305::*;
 pub mod curve25519blake2bxsalsa20poly1305;

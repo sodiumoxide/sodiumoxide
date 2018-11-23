@@ -12,13 +12,13 @@ use std::ptr;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes as usize;
+pub const KEYBYTES: usize = $keybytes;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = $noncebytes as usize;
+pub const NONCEBYTES: usize = $noncebytes;
 
 /// Number of bytes in an authentication `Tag`.
-pub const TAGBYTES: usize = $tagbytes as usize;
+pub const TAGBYTES: usize = $tagbytes;
 
 new_type! {
     /// `Key` for symmetric authenticated encryption with additional data.
@@ -85,8 +85,8 @@ pub fn seal(m: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Vec<u8> {
     c
 }
 
-/// `seal_detached()` encrypts and authenticates a message `m` together with optional plaintext data `ad`
-/// using a secret key `k` and a nonce `n`.
+/// `seal_detached()` encrypts and authenticates a message `m` together with optional plaintext data
+/// `ad` using a secret key `k` and a nonce `n`.
 /// `m` is encrypted in place, so after this function returns it will contain the ciphertext.
 /// The detached authentication tag is returned by value.
 pub fn seal_detached(m: &mut [u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Tag {
@@ -142,8 +142,8 @@ pub fn open(c: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Result<Vec<u8>, 
     }
     Ok(m)
 }
-/// `open_detached()` verifies and decrypts a ciphertext `c` toghether with optional plaintext data `ad`
-/// and and authentication tag `tag`, using a secret key `k` and a nonce `n`.
+/// `open_detached()` verifies and decrypts a ciphertext `c` toghether with optional plaintext data
+/// `ad` and and authentication tag `tag`, using a secret key `k` and a nonce `n`.
 /// `c` is decrypted in place, so if this function is successful it will contain the plaintext.
 /// If the ciphertext fails verification, `open_detached()` returns `Err(())`,
 /// and the ciphertext is not modified.
