@@ -8,7 +8,7 @@ pub const PUBLICKEYBYTES: usize = ffi::crypto_kx_PUBLICKEYBYTES as usize;
 /// Number of bytes in a `SecretKey`.
 pub const SECRETKEYBYTES: usize = ffi::crypto_kx_SECRETKEYBYTES as usize;
 
-/// NUmber of bytes in a `Seed`.
+/// Number of bytes in a `Seed`.
 pub const SEEDBYTES: usize = ffi::crypto_kx_SEEDBYTES as usize;
 
 /// Number of bytes in a `SessionKey`.

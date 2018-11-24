@@ -1,4 +1,5 @@
 //! Constant-time comparison of fixed-size vecs
+
 use ffi;
 
 /// `verify_16()` returns `true` if `x[0]`, `x[1]`, ..., `x[15]` are the

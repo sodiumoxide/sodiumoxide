@@ -7,10 +7,10 @@ use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes as usize;
+pub const KEYBYTES: usize = $keybytes;
 
 /// Number of bytes in a `Tag`.
-pub const TAGBYTES: usize = $tagbytes as usize;
+pub const TAGBYTES: usize = $tagbytes;
 
 new_type! {
     /// Authentication `Key`

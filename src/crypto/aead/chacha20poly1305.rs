@@ -1,6 +1,7 @@
 //! The original ChaCha20-Poly1305 construction can safely encrypt a pratically
 //! unlimited number of messages with the same key, without any practical limit
 //! to the size of a message (up to ~ 2^64 bytes).
+
 use ffi::{
     crypto_aead_chacha20poly1305_ABYTES, crypto_aead_chacha20poly1305_KEYBYTES,
     crypto_aead_chacha20poly1305_NPUBBYTES, crypto_aead_chacha20poly1305_decrypt,
@@ -12,9 +13,9 @@ aead_module!(
     crypto_aead_chacha20poly1305_decrypt,
     crypto_aead_chacha20poly1305_encrypt_detached,
     crypto_aead_chacha20poly1305_decrypt_detached,
-    crypto_aead_chacha20poly1305_KEYBYTES,
-    crypto_aead_chacha20poly1305_NPUBBYTES,
-    crypto_aead_chacha20poly1305_ABYTES
+    crypto_aead_chacha20poly1305_KEYBYTES as usize,
+    crypto_aead_chacha20poly1305_NPUBBYTES as usize,
+    crypto_aead_chacha20poly1305_ABYTES as usize
 );
 
 #[cfg(test)]

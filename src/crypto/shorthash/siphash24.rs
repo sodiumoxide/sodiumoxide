@@ -1,4 +1,5 @@
 //! `SipHash-2-4`
+
 use ffi;
 use libc::c_ulonglong;
 use randombytes::randombytes_into;

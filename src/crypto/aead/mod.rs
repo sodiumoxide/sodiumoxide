@@ -8,7 +8,7 @@
 //! # Selected primitive
 //! `seal()`, `seal_detached()`, `open()` and `open_detached()` are currently
 //! an implementation of `chacha20poly1305_ietf`, i.e. the IETF construction defined in
-//! https://tools.ietf.org/html/rfc7539.
+//! <https://tools.ietf.org/html/rfc7539>.
 //!
 //! # Example (combined mode)
 //! ```

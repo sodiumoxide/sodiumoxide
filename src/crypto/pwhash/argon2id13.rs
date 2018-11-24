@@ -28,15 +28,15 @@ argon2_module!(
     crypto_pwhash_argon2id,
     crypto_pwhash_argon2id_str,
     crypto_pwhash_argon2id_str_verify,
-    crypto_pwhash_argon2id_SALTBYTES,
-    crypto_pwhash_argon2id_STRBYTES,
+    crypto_pwhash_argon2id_SALTBYTES as usize,
+    crypto_pwhash_argon2id_STRBYTES as usize,
     crypto_pwhash_argon2id_STRPREFIX,
-    crypto_pwhash_argon2id_OPSLIMIT_INTERACTIVE,
-    crypto_pwhash_argon2id_OPSLIMIT_MODERATE,
-    crypto_pwhash_argon2id_OPSLIMIT_SENSITIVE,
-    crypto_pwhash_argon2id_MEMLIMIT_INTERACTIVE,
-    crypto_pwhash_argon2id_MEMLIMIT_MODERATE,
-    crypto_pwhash_argon2id_MEMLIMIT_SENSITIVE,
+    crypto_pwhash_argon2id_OPSLIMIT_INTERACTIVE as usize,
+    crypto_pwhash_argon2id_OPSLIMIT_MODERATE as usize,
+    crypto_pwhash_argon2id_OPSLIMIT_SENSITIVE as usize,
+    crypto_pwhash_argon2id_MEMLIMIT_INTERACTIVE as usize,
+    crypto_pwhash_argon2id_MEMLIMIT_MODERATE as usize,
+    crypto_pwhash_argon2id_MEMLIMIT_SENSITIVE as usize,
     crypto_pwhash_ALG_ARGON2ID13
 );
 

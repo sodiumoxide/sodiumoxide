@@ -10,7 +10,7 @@
 //!
 //! # Selected primitive
 //! `shorthash()` is currently an implementation of `SipHash-2-4` as specified in
-//! [SipHash: a fast short-input PRF](https://131002.net/siphash/)
+//! [`SipHash`: a fast short-input PRF](https://131002.net/siphash/)
 //!
 //! # Example
 //! ```
@@ -20,5 +20,6 @@
 //! let data_to_hash = b"some data";
 //! let digest = shorthash::shorthash(data_to_hash, &key);
 //! ```
+
 pub use self::siphash24::*;
 pub mod siphash24;
