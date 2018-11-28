@@ -9,20 +9,20 @@ links = "sodium"
 name = "libsodium-sys"
 repository = "https://github.com/sodiumoxide/sodiumoxide.git"
 categories = ["cryptography", "api-bindings"]
-version = "0.1.0"
+version = "0.2.0"
 
 [badges]
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 
 [build-dependencies]
-cc = "~1.0.9"
-flate2 = "~1.0.1"
-http_req = "~0.2.1"
-pkg-config = "^0.3.11"
-libc = { version = "^0.2.41" , default-features = false }
-sha2 = "~0.7.0"
-tar = "~0.4.15"
-zip = "~0.3.1"
+cc = "1.0.9"
+flate2 = "1.0.1"
+http_req = "0.2.1"
+pkg-config = "0.3.11"
+libc = { version = "0.2.41" , default-features = false }
+sha2 = "0.8"
+tar = "0.4.15"
+zip = "0.5"
 
 [target.'cfg(target_env = "msvc")'.build-dependencies]
 vcpkg = "0.2"
