@@ -1,9 +1,10 @@
 //! `crypto_box_curve25519xsalsa20poly1305` , a particular
 //! combination of Curve25519, Salsa20, and Poly1305 specified in
-//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html).
+//! [Cryptography in `NaCl`](http://nacl.cr.yp.to/valid.html).
 //!
 //! This function is conjectured to meet the standard notions of privacy and
 //! third-party unforgeability.
+
 use ffi;
 #[cfg(not(feature = "std"))]
 use prelude::*;

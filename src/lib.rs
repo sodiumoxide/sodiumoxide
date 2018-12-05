@@ -1,51 +1,53 @@
 //! Rust bindings to the [sodium library](https://github.com/jedisct1/libsodium).
 //!
-//! Sodium is a portable implementation of Dan Bernsteins [NaCl: Networking and
+//! Sodium is a portable implementation of Dan Bernsteins [`NaCl`: Networking and
 //! Cryptography library](http://nacl.cr.yp.to)
 //!
 //! For most users, if you want public-key (asymmetric) cryptography you should use
-//! the functions in `crypto::box_` for encryption/decryption.
+//! the functions in [`crypto::box_`](crypto/box_/index.html) for encryption/decryption.
 //!
 //! If you want secret-key (symmetric) cryptography you should be using the
-//! functions in `crypto::secretbox` for encryption/decryption.
+//! functions in [`crypto::secretbox`](crypto/secretbox/index.html) for encryption/decryption.
 //!
-//! For public-key signatures you should use the functions in `crypto::sign` for
-//! signature creation and verification.
+//! For public-key signatures you should use the functions in
+//! [`crypto::sign`](crypto/sign/index.html) for signature creation and verification.
 //!
 //! Unless you know what you're doing you most certainly don't want to use the
-//! functions in `crypto::scalarmult`, `crypto::stream`, `crypto::auth` and
-//! `crypto::onetimeauth`.
+//! functions in [`crypto::scalarmult`](crypto/scalarmult/index.html),
+//! [`crypto::stream`](crypto/stream/index.html), [`crypto::auth`](crypto/auth/index.html) and
+//! [`crypto::onetimeauth`](crypto/onetimeauth/index.html).
 //!
 //! ## Thread Safety
-//! All functions in this library are thread-safe provided that the `init()`
+//! All functions in this library are thread-safe provided that the [`init()`](fn.init.html)
 //! function has been called during program execution.
 //!
-//! If `init()` hasn't been called then all functions except the random-number
+//! If [`init()`](fn.init.html) hasn't been called then all functions except the random-number
 //! generation functions and the key-generation functions are thread-safe.
 //!
 //! # Public-key cryptography
-//!  `crypto::box_`
+//!  [`crypto::box_`](crypto/box_/index.html)
 //!
-//!  `crypto::sign`
+//!  [`crypto::sign`](crypto/sign/index.html)
 //!
 //! # Sealed boxes
-//!  `crypto::sealedbox`
+//!  [`crypto::sealedbox`](crypto/sealedbox/index.html)
 //!
 //! # Secret-key cryptography
-//!  `crypto::secretbox`
+//!  [`crypto::secretbox`](crypto/secretbox/index.html)
 //!
-//!  `crypto::stream`
+//!  [`crypto::stream`](crypto/stream/index.html)
 //!
-//!  `crypto::auth`
+//!  [`crypto::auth`](crypto/auth/index.html)
 //!
-//!  `crypto::onetimeauth`
+//!  [`crypto::onetimeauth`](crypto/onetimeauth/index.html)
 //!
 //! # Low-level functions
-//!  `crypto::hash`
+//!  [`crypto::hash`](crypto/hash/index.html)
 //!
-//!  `crypto::verify`
+//!  [`crypto::verify`](crypto/verify/index.html)
 //!
-//!  `crypto::shorthash`
+//!  [`crypto::shorthash`](crypto/shorthash/index.html)
+
 #![crate_name = "sodiumoxide"]
 #![crate_type = "lib"]
 #![warn(missing_docs)]

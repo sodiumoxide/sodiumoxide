@@ -66,7 +66,7 @@ impl State {
     /// consumes the `State` so that it cannot be accidentally reused.
     pub fn finalize(mut self) -> Tag {
         unsafe {
-            let mut tag = [0; $tagbytes as usize];
+            let mut tag = [0; $tagbytes];
             $final_name(&mut self.0, tag.as_mut_ptr());
             Tag(tag)
         }

@@ -20,9 +20,9 @@ aead_module!(
     crypto_aead_xchacha20poly1305_ietf_decrypt,
     crypto_aead_xchacha20poly1305_ietf_encrypt_detached,
     crypto_aead_xchacha20poly1305_ietf_decrypt_detached,
-    crypto_aead_xchacha20poly1305_ietf_KEYBYTES,
-    crypto_aead_xchacha20poly1305_ietf_NPUBBYTES,
-    crypto_aead_xchacha20poly1305_ietf_ABYTES
+    crypto_aead_xchacha20poly1305_ietf_KEYBYTES as usize,
+    crypto_aead_xchacha20poly1305_ietf_NPUBBYTES as usize,
+    crypto_aead_xchacha20poly1305_ietf_ABYTES as usize
 );
 
 #[cfg(test)]

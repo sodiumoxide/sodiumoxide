@@ -5,6 +5,7 @@
 //! However, for the moment, there do not appear to be alternatives that
 //! inspire satisfactory levels of confidence. One can hope that NIST's
 //! SHA-3 competition will improve the situation.
+
 use ffi::{
     crypto_hash_sha256, crypto_hash_sha256_BYTES, crypto_hash_sha256_final,
     crypto_hash_sha256_init, crypto_hash_sha256_state, crypto_hash_sha256_update,
@@ -16,7 +17,7 @@ hash_module!(
     crypto_hash_sha256_init,
     crypto_hash_sha256_update,
     crypto_hash_sha256_final,
-    crypto_hash_sha256_BYTES,
+    crypto_hash_sha256_BYTES as usize,
     64
 );
 

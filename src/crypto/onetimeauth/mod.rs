@@ -14,7 +14,7 @@
 //!
 //! # Selected primitive
 //! `authenticate()` is `crypto_onetimeauth_poly1305`, an authenticator specified
-//! in [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 9. This
+//! in [Cryptography in `NaCl`](http://nacl.cr.yp.to/valid.html), Section 9. This
 //! authenticator is proven to meet the standard notion of unforgeability after a
 //! single message.
 //!
@@ -27,6 +27,7 @@
 //! let tag = onetimeauth::authenticate(data_to_authenticate, &key);
 //! assert!(onetimeauth::verify(&tag, data_to_authenticate, &key));
 //! ```
+
 pub use self::poly1305::*;
 #[path = "../auth/auth_macros.rs"]
 #[macro_use]

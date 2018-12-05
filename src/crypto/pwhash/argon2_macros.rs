@@ -16,31 +16,31 @@ use libc::{c_int, c_ulonglong};
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Salt`.
-pub const SALTBYTES: usize = $saltbytes as usize;
+pub const SALTBYTES: usize = $saltbytes;
 
 /// Number of bytes in a `HashedPassword`.
-pub const HASHEDPASSWORDBYTES: usize = $hashedpasswordbytes as usize;
+pub const HASHEDPASSWORDBYTES: usize = $hashedpasswordbytes;
 
 /// All `HashedPasswords` start with this string.
 pub const STRPREFIX: &'static [u8] = $strprefix;
 
 /// Safe base line for `OpsLimit` for interactive password hashing.
-pub const OPSLIMIT_INTERACTIVE: OpsLimit = OpsLimit($opslimit_interative as usize);
+pub const OPSLIMIT_INTERACTIVE: OpsLimit = OpsLimit($opslimit_interative);
 
 /// Safe base line for `MemLimit` for interactive password hashing.
-pub const MEMLIMIT_INTERACTIVE: MemLimit = MemLimit($memlimit_interative as usize);
+pub const MEMLIMIT_INTERACTIVE: MemLimit = MemLimit($memlimit_interative);
 
 /// `OpsLimit` for moderately sensitive data.
-pub const OPSLIMIT_MODERATE: OpsLimit = OpsLimit($opslimit_moderate as usize);
+pub const OPSLIMIT_MODERATE: OpsLimit = OpsLimit($opslimit_moderate);
 
 /// `MemLimit` for moderately sensitive data.
-pub const MEMLIMIT_MODERATE: MemLimit = MemLimit($memlimit_moderate as usize);
+pub const MEMLIMIT_MODERATE: MemLimit = MemLimit($memlimit_moderate);
 
 /// `OpsLimit` for highly sensitive data.
-pub const OPSLIMIT_SENSITIVE: OpsLimit = OpsLimit($opslimit_sensitive as usize);
+pub const OPSLIMIT_SENSITIVE: OpsLimit = OpsLimit($opslimit_sensitive);
 
 /// `MemLimit` for highly sensitive data.
-pub const MEMLIMIT_SENSITIVE: MemLimit = MemLimit($memlimit_sensitive as usize);
+pub const MEMLIMIT_SENSITIVE: MemLimit = MemLimit($memlimit_sensitive);
 
 /// Variant id for the Argon2i13 algorithm
 pub const VARIANT: u32 = $variant;
@@ -75,7 +75,7 @@ new_type! {
     public HashedPassword(HASHEDPASSWORDBYTES);
 }
 
-/// `gen_salt()` randombly generates a new `Salt` for key derivation
+/// `gen_salt()` randomly generates a new `Salt` for key derivation
 ///
 /// THREAD SAFETY: `gen_salt()` is thread-safe provided that you have called
 /// `sodiumoxide::init()` once before using any other function from sodiumoxide.
