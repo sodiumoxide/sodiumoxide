@@ -126,9 +126,7 @@ This function will set `cargo` flags.
 */
 #[cfg(not(target_env = "msvc"))]
 fn find_libsodium_pkg() {
-    let shared = env::var_os("SODIUM_SHARED").is_some();
-
-    match pkg_config::Config::new().statik(!shared).probe("libsodium") {
+    match pkg_config::Config::new().probe("libsodium") {
         Ok(lib) => {
             if lib.version != VERSION {
                 println!(
