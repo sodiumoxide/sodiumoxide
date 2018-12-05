@@ -406,6 +406,98 @@ mod test {
     }
 
     #[test]
+    fn test_streaming_vectors() {
+        // test vectors from the Python implementation
+        // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
+        use rustc_serialize::hex::{FromHex, ToHex};
+        use std::fs::File;
+        use std::io::{BufRead, BufReader};
+
+        let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+        for mline in r.lines() {
+            let line = mline.unwrap();
+            let mut x = line.split(':');
+            let x0 = x.next().unwrap();
+            let x1 = x.next().unwrap();
+            let x2 = x.next().unwrap();
+            let seed_bytes = x0[..64].from_hex().unwrap();
+            assert!(seed_bytes.len() == SEEDBYTES);
+            let mut seed = Seed([0u8; SEEDBYTES]);
+            for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
+                *s = *b
+            }
+            let (pk, sk) = keypair_from_seed(&seed);
+
+            let m = x2.from_hex().unwrap();
+
+            let mut creation_state = State::init();
+            creation_state.update(&m);
+            let sig = creation_state.finalize(&sk);
+
+            let mut validator_state = State::init();
+            validator_state.update(&m);
+
+            assert!(validator_state.verify(&sig, &pk));
+
+            assert_eq!(x1, pk[..].to_hex());
+        }
+    }
+
+    #[test]
+    fn test_streaming_copy() {
+        use randombytes::randombytes;
+        let i = 256;
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let mut creation_state = State::init();
+        creation_state.update(&m);
+
+        let mut creation_state_copied = creation_state;
+        let sig = creation_state_copied.finalize(&sk);
+        let mut validator_state = State::init();
+        validator_state.update(&m);
+        assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_streaming_clone() {
+        use randombytes::randombytes;
+        let i = 256;
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let mut creation_state = State::init();
+        creation_state.update(&m);
+
+        let mut creation_state_cloned = creation_state.clone();
+        let sig = creation_state_cloned.finalize(&sk);
+        let mut validator_state = State::init();
+        validator_state.update(&m);
+        assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_streaming_default() {
+        use randombytes::randombytes;
+        let i = 256;
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let mut creation_state = State::default();
+        creation_state.update(&m);
+
+        let sig = creation_state.finalize(&sk);
+        let mut validator_state = State::init();
+        validator_state.update(&m);
+        assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_streaming_format() {
+        let creation_state = State::init();
+        let creation_state_fmt = format!("{:?}", creation_state);
+        assert_eq!(creation_state_fmt, "ed25519 state");
+    }
+
+    #[test]
     fn test_chunks_sign() {
         use randombytes::randombytes;
         let (pk, sk) = gen_keypair();
