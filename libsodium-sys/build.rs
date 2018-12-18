@@ -494,4 +494,5 @@ fn build_libsodium() {
 
     println!("cargo:rustc-link-lib=static=sodium");
     println!("cargo:rustc-link-search=native={}/lib", install_dir);
+    println!("cargo:rustc-link-search=native={}/lib64", install_dir);
 }
