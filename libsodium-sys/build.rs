@@ -127,12 +127,17 @@ fn get_cur_dir() -> PathBuf {
     PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap())
 }
 
+fn get_build_dir() -> PathBuf {
+    PathBuf::from(env::var("OUT_DIR").unwrap()).join("libsodium_build/")
+}
+
 fn get_install_dir() -> PathBuf {
-    PathBuf::from(env::var("OUT_DIR").unwrap()).join("installed/")
+    PathBuf::from(env::var("OUT_DIR").unwrap()).join("libsodium_installed/")
 }
 
 fn build_libsodium() {
     // Download sources
+
     let source_dir = get_cur_dir().join("libsodium/");
     if !source_dir.join(".git").exists() {
         let _ = Command::new("git")
@@ -143,9 +148,10 @@ fn build_libsodium() {
     // Determine build target triple
     let target = env::var("TARGET").unwrap();
 
-    // Determine and create install dir
+    // Determine and create build&install dir
     let install_dir = get_install_dir();
-    fs::create_dir_all(&install_dir).unwrap();
+    let build_dir = get_build_dir();
+    fs::create_dir_all(&build_dir).unwrap();
 
     // See https://github.com/jedisct1/libsodium/issues/207
     /*
@@ -249,12 +255,12 @@ fn build_libsodium() {
     }
 
     // Run ./autogen.sh
-    let mut autogen_cmd = Command::new("./autogen.sh");
+    let mut autogen_cmd = Command::new(source_dir.join("autogen.sh"));
     let autogen_cmd_output = autogen_cmd
         .current_dir(&source_dir)
         .output()
         .unwrap_or_else(|error| {
-            panic!("Failed to run './configure': {}\n{}", error, help);
+            panic!("Failed to run './autogen.sh': {}\n{}", error, help);
         });
     if !autogen_cmd_output.status.success() {
         panic!(
@@ -268,7 +274,7 @@ fn build_libsodium() {
 
     // Run `./configure`
     let prefix_arg = format!("--prefix={}", install_dir.display());
-    let mut configure_cmd = Command::new("./configure");
+    let mut configure_cmd = Command::new(source_dir.join("configure"));
     if !compiler.is_empty() {
         configure_cmd.env("CC", &compiler);
     }
@@ -279,7 +285,7 @@ fn build_libsodium() {
         configure_cmd.arg("--disable-pie");
     }
     let configure_output = configure_cmd
-        .current_dir(&source_dir)
+        .current_dir(&build_dir)
         .arg(&prefix_arg)
         .arg(&host_arg)
         .arg("--enable-shared=no")
@@ -304,7 +310,7 @@ fn build_libsodium() {
     let make_arg = if cross_compiling { "all" } else { "check" };
     let mut make_cmd = Command::new("make");
     let make_output = make_cmd
-        .current_dir(&source_dir)
+        .current_dir(&build_dir)
         .env("V", "1")
         .arg(make_arg)
         .arg(&j_arg)
@@ -326,7 +332,7 @@ fn build_libsodium() {
     // Run `make install`
     let mut install_cmd = Command::new("make");
     let install_output = install_cmd
-        .current_dir(&source_dir)
+        .current_dir(&build_dir)
         .arg("install")
         .output()
         .unwrap_or_else(|error| {
