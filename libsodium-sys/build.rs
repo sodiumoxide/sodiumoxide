@@ -8,9 +8,9 @@ extern crate vcpkg;
 
 use std::env;
 use std::fs;
-use std::str;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use std::str;
 
 static VERSION: &'static str = "1.0.16";
 
@@ -131,14 +131,13 @@ fn get_install_dir() -> PathBuf {
     PathBuf::from(env::var("OUT_DIR").unwrap()).join("installed/")
 }
 
-
 fn build_libsodium() {
-
     // Download sources
     let source_dir = get_cur_dir().join("libsodium/");
     if !source_dir.join(".git").exists() {
-        let _ = Command::new("git").args(&["submodule", "update", "--init"])
-                                   .status();
+        let _ = Command::new("git")
+            .args(&["submodule", "update", "--init"])
+            .status();
     }
 
     // Determine build target triple
@@ -345,5 +344,8 @@ fn build_libsodium() {
     }
 
     println!("cargo:rustc-link-lib=static=sodium");
-    println!("cargo:rustc-link-search=native={}/lib", install_dir.display());
+    println!(
+        "cargo:rustc-link-search=native={}/lib",
+        install_dir.display()
+    );
 }
