@@ -15,9 +15,8 @@ macro_rules! stream_module (($state_name: ident,
 
 use libc::c_ulonglong;
 #[cfg(not(feature = "std"))]
-use prelude::*;
+use prelude::Vec;
 use randombytes::randombytes_into;
-use std::marker::PhantomData;
 use std::mem;
 use std::ops::Drop;
 use std::ptr;
@@ -129,7 +128,13 @@ pub fn gen_key() -> Key {
 pub struct Stream<M: StreamMode> {
     state: $state_name,
     finalized: bool,
-    marker: PhantomData<M>,
+
+    #[cfg(feature = "std")]
+    marker: std::marker::PhantomData<M>,
+
+    #[cfg(not(feature = "std"))]
+    #[allow(unused)]
+    mode: M,
 }
 
 impl<M: StreamMode> Stream<M> {
@@ -187,7 +192,12 @@ impl Stream<Push> {
             Stream::<Push> {
                 state,
                 finalized: false,
-                marker: PhantomData,
+
+                #[cfg(feature = "std")]
+                marker: std::marker::PhantomData,
+
+                #[cfg(not(feature = "std"))]
+                mode: Push,
             },
             Header(header),
         ))
@@ -267,7 +277,12 @@ impl Stream<Pull> {
         Ok(Stream::<Pull> {
             state: state,
             finalized: false,
-            marker: PhantomData,
+
+            #[cfg(feature = "std")]
+            marker: std::marker::PhantomData,
+
+            #[cfg(not(feature = "std"))]
+            mode: Pull,
         })
     }
 
@@ -336,10 +351,10 @@ impl<T: StreamMode> Drop for Stream<T> {
 pub trait StreamMode: private::Sealed {}
 
 /// Represents the push mode of a Stream.
-pub enum Push {}
+pub struct Push;
 
 /// Represents the pull mode of a Stream.
-pub enum Pull {}
+pub struct Pull;
 
 mod private {
     pub trait Sealed {}
