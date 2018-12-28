@@ -24,45 +24,46 @@
 //!
 //! The `crypto_secretstream_*()` API was introduced in libsodium 1.0.14.
 //!
-//! # Example (encryption)
+//! # Example
 //! ```
-//! use sodiumoxide::crypto::secretstream;
+//! use sodiumoxide::crypto::secretstream::{gen_key, Stream, Tag};
 //!
 //! let msg1 = "some message 1";
 //! let msg2 = "other message";
 //! let msg3 = "final message";
 //!
 //! // initialize encrypt secret stream
-//! let (mut enc_stream, header, key) = secretstream::Encryptor::new().unwrap();
+//! let key = gen_key();
+//! let (mut enc_stream, header) = Stream::init_push(&key).unwrap();
 //!
 //! // encrypt first message, tagging it as message.
-//! let ciphertext1 = enc_stream.aencrypt_message(msg1.as_bytes(), None).unwrap();
+//! let ciphertext1 = enc_stream.push(msg1.as_bytes(), None, Tag::Message).unwrap();
 //!
 //! // encrypt second message, tagging it as push.
-//! let ciphertext2 = enc_stream.aencrypt_push(msg2.as_bytes(), None).unwrap();
+//! let ciphertext2 = enc_stream.push(msg2.as_bytes(), None, Tag::Push).unwrap();
 //!
 //! // encrypt third message, tagging it as final.
-//! let ciphertext3 = enc_stream.aencrypt_finalize(msg3.as_bytes(), None).unwrap();
+//! let ciphertext3 = enc_stream.push(msg3.as_bytes(), None, Tag::Final).unwrap();
 //!
 //! // initialize decrypt secret stream
-//! let mut dec_stream = secretstream::Decryptor::init(&header, &key).unwrap();
+//! let mut dec_stream = Stream::init_pull(&header, &key).unwrap();
 //!
 //! // decrypt first message.
 //! assert!(!dec_stream.is_finalized());
-//! let (decrypted1, tag1) = dec_stream.vdecrypt(&ciphertext1, None).unwrap();
-//! assert_eq!(tag1, secretstream::Tag::Message);
+//! let (decrypted1, tag1) = dec_stream.pull(&ciphertext1, None).unwrap();
+//! assert_eq!(tag1, Tag::Message);
 //! assert_eq!(msg1.as_bytes(), &decrypted1[..]);
 //!
 //! // decrypt second message.
 //! assert!(!dec_stream.is_finalized());
-//! let (decrypted2, tag2) = dec_stream.vdecrypt(&ciphertext2, None).unwrap();
-//! assert_eq!(tag2, secretstream::Tag::Push);
+//! let (decrypted2, tag2) = dec_stream.pull(&ciphertext2, None).unwrap();
+//! assert_eq!(tag2, Tag::Push);
 //! assert_eq!(msg2.as_bytes(), &decrypted2[..]);
 //!
 //! // decrypt last message.
 //! assert!(!dec_stream.is_finalized());
-//! let (decrypted3, tag3) = dec_stream.vdecrypt(&ciphertext3, None).unwrap();
-//! assert_eq!(tag3, secretstream::Tag::Final);
+//! let (decrypted3, tag3) = dec_stream.pull(&ciphertext3, None).unwrap();
+//! assert_eq!(tag3, Tag::Final);
 //! assert_eq!(msg3.as_bytes(), &decrypted3[..]);
 //!
 //! // dec_stream is now finalized.

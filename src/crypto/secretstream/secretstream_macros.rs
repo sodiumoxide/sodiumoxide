@@ -13,10 +13,13 @@ macro_rules! stream_module (($state_name: ident,
                              $tag_rekey: expr,
                              $tag_final: expr) => (
 
-#[cfg(not(feature = "std"))] use prelude::*;
 use libc::c_ulonglong;
+#[cfg(not(feature = "std"))]
+use prelude::*;
 use randombytes::randombytes_into;
+use std::marker::PhantomData;
 use std::mem;
+use std::ops::Drop;
 use std::ptr;
 
 /// Returns the maximum length of an individual message.
@@ -110,158 +113,147 @@ new_type! {
     public Header(HEADERBYTES);
 }
 
-impl Key {
-    /// Randomly generates a key for authenticated encryption.
-    ///
-    /// THREAD SAFETY: this method is safe provided that you have called
-    /// `sodiumoxide::init()` once before using any other function from
-    /// sodiumoxide.
-    // TODO: create a new `new_type!` macro for keys. It will probably look like
-    // `public`, and then just have this method.
-    pub fn new() -> Key {
-        let mut key: [u8; KEYBYTES] = unsafe { mem::uninitialized() };
-        randombytes_into(&mut key);
-        Key(key)
+/// `gen_key()` randomly generates a secret key
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
+pub fn gen_key() -> Key {
+    let mut key = [0; KEYBYTES];
+    randombytes_into(&mut key);
+    Key(key)
+}
+
+/// `Stream` contains the state for multi-part (streaming) computations. This
+/// allows the caller to process encryption of a sequence of multiple messages.
+pub struct Stream<M: StreamMode> {
+    state: $state_name,
+    finalized: bool,
+    marker: PhantomData<M>,
+}
+
+impl<M: StreamMode> Stream<M> {
+    /// Explicit rekeying. This updates the internal state of the `Stream<Pull>`,
+    /// and should only be called in a synchronized manner with how the
+    /// corresponding `Stream` called it when encrypting the stream. Returns
+    /// `Err(())` if the stream was already finalized, else `Ok(())`.
+    pub fn rekey(&mut self) -> Result<(), ()> {
+        if self.finalized {
+            return Err(());
+        }
+        unsafe {
+            $rekey_name(&mut self.state);
+        }
+        Ok(())
+    }
+
+    /// Returns true if the stream is finalized.
+    pub fn is_finalized(&self) -> bool {
+        self.finalized
+    }
+
+    /// Returns true if the stream is not finalized.
+    pub fn is_not_finalized(&self) -> bool {
+        !self.finalized
     }
 }
 
-/// `Encryptor` contains the state for multi-part (streaming) computations. This
-/// allows the caller to process encryption of a sequence of multiple messages.
-pub struct Encryptor($state_name);
-
-impl Encryptor {
-    /// Initializes an `Encryptor` using a provided `key`. Returns the
-    /// `Encryptor` object and a `Header`, which is needed by the recipient to
-    /// initialize a corresponding `Decryptor`. The `key` will not be needed be
+impl Stream<Push> {
+    /// Initializes an `Stream` using a provided `key`. Returns the
+    /// `Stream` object and a `Header`, which is needed by the recipient to
+    /// initialize a corresponding `Stream<Pull>`. The `key` will not be needed be
     /// required for any subsequent authenticated encryption operations.
     /// If you would like to securely generate a key and initialize an
-    /// `Encryptor` at the same time see the `new` method.
+    /// `Stream` at the same time see the `new` method.
     /// Network protocols can leverage the key exchange API in order to get a
     /// shared key that can be used to encrypt streams. Similarly, file
     /// encryption applications can use the password hashing API to get a key
     /// that can be used with the functions below.
-    pub fn init(key: &Key) -> Result<(Self, Header), ()> {
+    pub fn init_push(key: &Key) -> Result<(Stream<Push>, Header), ()> {
         let mut header: [u8; HEADERBYTES] = unsafe { mem::uninitialized() };
-        let mut state: $state_name = unsafe { mem::uninitialized() };
-
+        let mut state: $state_name =
+            unsafe { mem::uninitialized() };
         let rc = unsafe {
-            $init_push_name(&mut state, header.as_mut_ptr(), key.0.as_ptr())
+            $init_push_name(
+                &mut state,
+                header.as_mut_ptr(),
+                key.0.as_ptr(),
+            )
         };
         if rc != 0 {
             return Err(());
         }
-
-        Ok((Encryptor(state), Header(header)))
-    }
-
-
-    /// Securely generates a key and uses it to initialize an `Encryptor`.
-    /// Returns the `Encryptor` object, a `Header` (which is needed by the
-    /// recipient to initialize a corresponding `Decryptor`), and the `Key`
-    /// object.
-    pub fn new() -> Result<(Self, Header, Key), ()> {
-        let key = Key::new();
-
-        let result = Self::init(&key);
-        if result.is_err() {
-            return Err(());
-        }
-
-        let (encryptor, header) = result.unwrap();
-        Ok((encryptor, header, key))
+        Ok((
+            Stream::<Push> {
+                state,
+                finalized: false,
+                marker: PhantomData,
+            },
+            Header(header),
+        ))
     }
 
     /// All data (including optional fields) is authenticated. Encrypts a
     /// message `m` and its `tag`. Optionally includes additional data `ad`,
     /// which is not encrypted.
-    fn aencrypt(&mut self, m: &[u8], ad: Option<&[u8]>, tag: u8) -> Result<Vec<u8>, ()> {
-        let mlen = m.len();
-        if m.len() > messagebytes_max() {
+    pub fn push(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag) -> Result<Vec<u8>, ()> {
+        if self.finalized {
             return Err(());
         }
-        let clen = mlen + ABYTES;
-        let mut c = Vec::with_capacity(clen);
-        let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len()))
-                               .unwrap_or((ptr::null(), 0));
+        let m_len = m.len();
+        if m_len > messagebytes_max() {
+            return Err(());
+        }
+        if tag == Tag::Final {
+            self.finalized = true;
+        }
 
+        let (ad_p, ad_len) = ad
+            .map(|ad| (ad.as_ptr(), ad.len()))
+            .unwrap_or((ptr::null(), 0));
+
+        let buf_len = m_len + ABYTES;
+        let mut buf = Vec::with_capacity(buf_len);
         let rc = unsafe {
-            $push_name(&mut self.0,
-                       c.as_mut_ptr(),
-                       &mut (clen as c_ulonglong),
-                       m.as_ptr(),
-                       mlen as c_ulonglong,
-                       ad_p,
-                       ad_len as c_ulonglong,
-                       tag)
+            buf.set_len(buf_len);
+            $push_name(
+                &mut self.state,
+                buf.as_mut_ptr(),
+                &mut (buf_len as c_ulonglong),
+                m.as_ptr(),
+                m_len as c_ulonglong,
+                ad_p,
+                ad_len as c_ulonglong,
+                tag as u8,
+            )
         };
         if rc != 0 {
             return Err(());
         }
-
-        unsafe { c.set_len(clen) };
-        Ok(c)
+        Ok(buf)
     }
 
-    /// All data (including optional fields) is authenticated. Encrypts a
-    /// message `m` and the tag `Tag::Message`. Optionally includes additional data `ad`,
-    /// which is not encrypted.
-    pub fn aencrypt_message(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
-        self.aencrypt(m, ad, TAG_MESSAGE)
-    }
-
-    /// All data (including optional fields) is authenticated. Encrypts a message
-    /// `m` and the tag `Tag::Push`. Optionally includes additional data `ad`,
-    /// which is not encrypted.
-    pub fn aencrypt_push(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
-        self.aencrypt(m, ad, TAG_PUSH)
-    }
-
-    /// All data (including optional fields) is authenticated. Encrypts a message
-    /// `m` and the tag `Tag::Rekey`. Optionally includes additional data `ad`,
-    /// which is not encrypted.
-    pub fn aencrypt_rekey(&mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
-        self.aencrypt(m, ad, TAG_REKEY)
-    }
-
-    /// All data (including optional fields) is authenticated. Encrypts a message
-    /// `m` and the tag `Tag::Finalize`. Optionally includes additional data `ad`,
-    /// which is not encrypted. Consumes `self` so that the `Encryptor` may no
-    /// longer be used after sending the finalize tag.
-    pub fn aencrypt_finalize(mut self, m: &[u8], ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
-        self.aencrypt(m, ad, TAG_FINAL)
-    }
-
-    /// This method explicitly re-keys the `Encryptor` and updates its state, but
-    /// doesn't add any information about the key change to the stream. If this
-    /// function is used to create an encrypted stream, the decryption process
-    /// must call that function at the exact same stream location.
-    /// See also the method `aencrypt_rekey`.
-    pub fn rekey(&mut self) {
-        unsafe {
-            $rekey_name(&mut self.0);
-        }
+    /// Create a ciphertext for an empty message with the `TAG_FINAL` added
+    /// to signal the end of the stream. Since the `Stream` is not usable
+    /// after this point, this method consumes the `Stream.
+    pub fn finalize(mut self, ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
+        self.push(&[], ad, Tag::Final)
     }
 }
 
-/// `Decryptor` contains the state for multi-part (streaming) computations. This
-/// allows the caller to process encryption of a sequence of multiple messages.
-/// After the last message of a valid stream containing the tag `Tag::Finalized`
-/// is decrypted, the `Decryptor` may no longer verify and decrypt messages or
-/// re-key itself.
-pub struct Decryptor {
-    state: $state_name,
-    finalized: bool,
-}
-
-impl Decryptor {
-    /// Initializes a `Decryptor` given a secret `Key` and a `Header`. The key
+impl Stream<Pull> {
+    /// Initializes a `Stream<Pull>` given a secret `Key` and a `Header`. The key
     /// will not be required any more for subsequent operations. `Err(())` is
     /// returned if the header is invalid.
-    pub fn init(header: &Header, key: &Key) -> Result<Self, ()> {
-        let mut state: $state_name = unsafe { mem::uninitialized() };
-
+    pub fn init_pull(header: &Header, key: &Key) -> Result<Stream<Pull>, ()> {
+        let mut state: $state_name =
+            unsafe { mem::uninitialized() };
         let rc = unsafe {
-            $init_pull_name(&mut state, header.0.as_ptr(), key.0.as_ptr())
+            $init_pull_name(
+                &mut state,
+                header.0.as_ptr(),
+                key.0.as_ptr(),
+            )
         };
         if rc == -1 {
             // NOTE: this return code explicitly means the header is invalid,
@@ -272,12 +264,15 @@ impl Decryptor {
         } else if rc != 0 {
             return Err(());
         }
-
-        Ok(Self{state, finalized: false})
+        Ok(Stream::<Pull> {
+            state: state,
+            finalized: false,
+            marker: PhantomData,
+        })
     }
 
     /// Verifies that `c` is a valid ciphertext with a correct authentication tag
-    /// given the internal state of the `Decryptor` (ciphertext streams cannot be
+    /// given the internal state of the `Stream` (ciphertext streams cannot be
     /// decrypted out of order for this reason). Also may validate the optional
     /// unencrypted additional data `ad` using the authentication tag attached to
     /// `c`. Finally decrypts the ciphertext and tag, and checks the tag
@@ -285,73 +280,75 @@ impl Decryptor {
     /// If any authentication fails, the stream has already been finalized, or if
     /// the tag byte for some reason does not correspond to a valid `Tag`,
     /// returns `Err(())`. Otherwise returns the plaintext and the tag.
-    /// Applications will typically use a `while decryptor.is_not_finalized()`
+    /// Applications will typically use a `while stream.is_not_finalized()`
     /// loop to authenticate and decrypt a stream of messages.
-    pub fn vdecrypt(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag),()> {
-        if self.is_finalized() {
+    pub fn pull(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag), ()> {
+        if self.finalized {
             return Err(());
         }
-        // An empty message will still be at least ABYTES.
-        let clen = c.len();
-        if clen < ABYTES {
+        let c_len = c.len();
+        if c_len < ABYTES {
+            // An empty message will still be at least ABYTES.
             return Err(());
         }
-        let mlen = clen - ABYTES;
-        if mlen > messagebytes_max() {
+        let m_len = c_len - ABYTES;
+        if m_len > messagebytes_max() {
             return Err(());
         }
-        let mut m = Vec::with_capacity(mlen);
-        let (ad_p, ad_len) = ad.map(|ad| (ad.as_ptr(), ad.len()))
-                               .unwrap_or((ptr::null(), 0));
+        let (ad_p, ad_len) = ad
+            .map(|ad| (ad.as_ptr(), ad.len()))
+            .unwrap_or((ptr::null(), 0));
         let mut tag: u8 = unsafe { mem::uninitialized() };
-
+        let mut buf = Vec::with_capacity(m_len);
         let rc = unsafe {
-            $pull_name(&mut self.state,
-                       m.as_mut_ptr(),
-                       &mut (mlen as c_ulonglong),
-                       &mut tag,
-                       c.as_ptr(),
-                       clen as c_ulonglong,
-                       ad_p,
-                       ad_len as c_ulonglong)
+            buf.set_len(m_len);
+            $pull_name(
+                &mut self.state,
+                buf.as_mut_ptr(),
+                &mut (m_len as c_ulonglong),
+                &mut tag,
+                c.as_ptr(),
+                c_len as c_ulonglong,
+                ad_p,
+                ad_len as c_ulonglong,
+            )
         };
         if rc != 0 {
             return Err(());
         }
-
         let tag = Tag::from_u8(tag)?;
         if tag == Tag::Final {
             self.finalized = true;
         }
-
-        unsafe { m.set_len(mlen) }
-
-        Ok((m, tag))
-    }
-
-    /// Explicit rekeying. This updates the internal state of the `Decryptor`,
-    /// and should only be called in a synchronized manner with how the
-    /// corresponding `Encryptor` called it when encrypting the stream. Returns
-    /// `Err(())` if the stream was already finalized, else `Ok(())`.
-    pub fn rekey(&mut self) -> Result<(), ()> {
-        if self.is_finalized() {
-            return Err(());
-        }
-        unsafe {
-            $rekey_name(&mut self.state);
-        }
-        Ok(())
-    }
-
-    /// Check if stream is finalized.
-    pub fn is_finalized(&self) -> bool {
-        self.finalized
-    }
-
-    /// Check if stream is not finalized.
-    pub fn is_not_finalized(&self) -> bool {
-        !self.finalized
+        Ok((buf, tag))
     }
 }
+
+// As additional precaution, rotate the keys when dropping the `Stream`
+// to ensure keys do no stay in memory.
+impl<T: StreamMode> Drop for Stream<T> {
+    fn drop(&mut self) {
+        let _ = self.rekey();
+    }
+}
+
+/// The trait that distinguishes between the pull and push modes of a Stream.
+pub trait StreamMode: private::Sealed {}
+
+/// Represents the push mode of a Stream.
+pub enum Push {}
+
+/// Represents the pull mode of a Stream.
+pub enum Pull {}
+
+mod private {
+    pub trait Sealed {}
+
+    impl Sealed for super::Push {}
+    impl Sealed for super::Pull {}
+}
+
+impl StreamMode for Push {}
+impl StreamMode for Pull {}
 
 ));

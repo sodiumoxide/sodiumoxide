@@ -1,40 +1,40 @@
 //! `crypto_secretstream_xchacha20poly1305`
-use ffi::{crypto_secretstream_xchacha20poly1305_state,
-          crypto_secretstream_xchacha20poly1305_init_push,
-          crypto_secretstream_xchacha20poly1305_push,
-          crypto_secretstream_xchacha20poly1305_init_pull,
-          crypto_secretstream_xchacha20poly1305_pull,
-          crypto_secretstream_xchacha20poly1305_rekey,
-          crypto_secretstream_xchacha20poly1305_messagebytes_max,
-          crypto_secretstream_xchacha20poly1305_KEYBYTES,
-          crypto_secretstream_xchacha20poly1305_HEADERBYTES,
-          crypto_secretstream_xchacha20poly1305_ABYTES,
-          crypto_secretstream_xchacha20poly1305_TAG_MESSAGE,
-          crypto_secretstream_xchacha20poly1305_TAG_PUSH,
-          crypto_secretstream_xchacha20poly1305_TAG_REKEY,
-          crypto_secretstream_xchacha20poly1305_TAG_FINAL};
+use ffi::{
+    crypto_secretstream_xchacha20poly1305_ABYTES,
+    crypto_secretstream_xchacha20poly1305_HEADERBYTES,
+    crypto_secretstream_xchacha20poly1305_KEYBYTES,
+    crypto_secretstream_xchacha20poly1305_TAG_FINAL,
+    crypto_secretstream_xchacha20poly1305_TAG_MESSAGE,
+    crypto_secretstream_xchacha20poly1305_TAG_PUSH,
+    crypto_secretstream_xchacha20poly1305_TAG_REKEY,
+    crypto_secretstream_xchacha20poly1305_init_pull,
+    crypto_secretstream_xchacha20poly1305_init_push,
+    crypto_secretstream_xchacha20poly1305_messagebytes_max,
+    crypto_secretstream_xchacha20poly1305_pull, crypto_secretstream_xchacha20poly1305_push,
+    crypto_secretstream_xchacha20poly1305_rekey, crypto_secretstream_xchacha20poly1305_state,
+};
 
-stream_module!(crypto_secretstream_xchacha20poly1305_state,
-               crypto_secretstream_xchacha20poly1305_init_push,
-               crypto_secretstream_xchacha20poly1305_push,
-               crypto_secretstream_xchacha20poly1305_init_pull,
-               crypto_secretstream_xchacha20poly1305_pull,
-               crypto_secretstream_xchacha20poly1305_rekey,
-               crypto_secretstream_xchacha20poly1305_messagebytes_max,
-               crypto_secretstream_xchacha20poly1305_KEYBYTES,
-               crypto_secretstream_xchacha20poly1305_HEADERBYTES,
-               crypto_secretstream_xchacha20poly1305_ABYTES,
-               crypto_secretstream_xchacha20poly1305_TAG_MESSAGE,
-               crypto_secretstream_xchacha20poly1305_TAG_PUSH,
-               crypto_secretstream_xchacha20poly1305_TAG_REKEY,
-               crypto_secretstream_xchacha20poly1305_TAG_FINAL);
+stream_module!(
+    crypto_secretstream_xchacha20poly1305_state,
+    crypto_secretstream_xchacha20poly1305_init_push,
+    crypto_secretstream_xchacha20poly1305_push,
+    crypto_secretstream_xchacha20poly1305_init_pull,
+    crypto_secretstream_xchacha20poly1305_pull,
+    crypto_secretstream_xchacha20poly1305_rekey,
+    crypto_secretstream_xchacha20poly1305_messagebytes_max,
+    crypto_secretstream_xchacha20poly1305_KEYBYTES,
+    crypto_secretstream_xchacha20poly1305_HEADERBYTES,
+    crypto_secretstream_xchacha20poly1305_ABYTES,
+    crypto_secretstream_xchacha20poly1305_TAG_MESSAGE,
+    crypto_secretstream_xchacha20poly1305_TAG_PUSH,
+    crypto_secretstream_xchacha20poly1305_TAG_REKEY,
+    crypto_secretstream_xchacha20poly1305_TAG_FINAL
+);
 
 #[cfg(test)]
 mod test {
     use super::*;
     use randombytes::randombytes_into;
-    use std::mem;
-    use std::u8;
 
     // NOTE: it is impossible to allocate enough memory for `msg` below without
     // overflowing the stack. Further, from all the research I've done and what
@@ -42,54 +42,55 @@ mod test {
     // and none of the mocking libraries seem to privde a workaround. Therefore
     // we cannot test en/decrypting plain/ciphertexts that exceed the ~275GB
     // maximum.
-    
+
     #[test]
     fn decrypt_too_short_ciphertext() {
         let ciphertext: [u8; (ABYTES - 1)] = unsafe { mem::uninitialized() };
-        let (_, header, key) = Encryptor::new().unwrap();
-        let mut decryptor = Decryptor::init(&header, &key).unwrap();
-
+        let key = gen_key();
+        let (_, header) = Stream::init_push(&key).unwrap();
+        let mut stream = Stream::init_pull(&header, &key).unwrap();
         // TODO: when custom error types are introduced, this should assert the
         // specific error.
-        assert!(decryptor.vdecrypt(&ciphertext, None).is_err());
+        assert!(stream.pull(&ciphertext, None).is_err());
     }
 
     #[test]
-    fn test_push_pull() {
+    fn push_pull() {
         let mut msg1 = [0; 128];
-        let mut msg2  = [0; 34];
+        let mut msg2 = [0; 34];
         let mut msg3 = [0; 478];
 
         randombytes_into(&mut msg1);
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
-        
-        let (mut encryptor, header, key) = Encryptor::new().unwrap();
-        let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
-        let c2 = encryptor.aencrypt_push(&msg2, None).unwrap();
-        let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
 
-        let mut decryptor = Decryptor::init(&header, &key).unwrap();
-        assert!(decryptor.is_not_finalized());
+        let key = gen_key();
+        let (mut stream, header) = Stream::init_push(&key).unwrap();
+        let c1 = stream.push(&msg1, None, Tag::Message).unwrap();
+        assert!(stream.is_not_finalized());
+        let c2 = stream.push(&msg2, None, Tag::Push).unwrap();
+        assert!(stream.is_not_finalized());
+        let c3 = stream.push(&msg3, None, Tag::Final).unwrap();
+        assert!(stream.is_finalized());
 
-        let (m1, t1) = decryptor.vdecrypt(&c1, None).unwrap();
+        let mut stream = Stream::init_pull(&header, &key).unwrap();
+        assert!(stream.is_not_finalized());
+
+        let (m1, t1) = stream.pull(&c1, None).unwrap();
         assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
-        assert!(decryptor.is_not_finalized());
 
-        let (m2, t2) = decryptor.vdecrypt(&c2, None).unwrap();
+        let (m2, t2) = stream.pull(&c2, None).unwrap();
         assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
-        assert!(decryptor.is_not_finalized());
 
-        let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
+        let (m3, t3) = stream.pull(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
-        assert!(decryptor.is_finalized());
     }
 
     #[test]
-    fn test_push_pull_with_ad() {
+    fn push_pull_with_ad() {
         let mut msg1 = [0; 128];
         let mut msg2 = [0; 34];
         let mut msg3 = [0; 478];
@@ -101,33 +102,34 @@ mod test {
         randombytes_into(&mut msg3);
         randombytes_into(&mut ad1);
         randombytes_into(&mut ad2);
-        
-        let (mut encryptor, header, key) = Encryptor::new().unwrap();
-        let c1 = encryptor.aencrypt_message(&msg1, Some(&ad1)).unwrap();
-        let c2 = encryptor.aencrypt_push(&msg2, Some(&ad2)).unwrap();
-        let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
 
-        let mut decryptor = Decryptor::init(&header, &key).unwrap();
-        assert!(decryptor.is_not_finalized());
+        let key = gen_key();
+        let (mut stream, header) = Stream::init_push(&key).unwrap();
+        let c1 = stream.push(&msg1, Some(&ad1), Tag::Message).unwrap();
+        let c2 = stream.push(&msg2, Some(&ad2), Tag::Push).unwrap();
+        let c3 = stream.push(&msg3, None, Tag::Final).unwrap();
 
-        let (m1, t1) = decryptor.vdecrypt(&c1, Some(&ad1)).unwrap();
+        let mut stream = Stream::init_pull(&header, &key).unwrap();
+        assert!(stream.is_not_finalized());
+
+        let (m1, t1) = stream.pull(&c1, Some(&ad1)).unwrap();
         assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
-        assert!(decryptor.is_not_finalized());
+        assert!(stream.is_not_finalized());
 
-        let (m2, t2) = decryptor.vdecrypt(&c2, Some(&ad2)).unwrap();
+        let (m2, t2) = stream.pull(&c2, Some(&ad2)).unwrap();
         assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
-        assert!(decryptor.is_not_finalized());
+        assert!(stream.is_not_finalized());
 
-        let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
+        let (m3, t3) = stream.pull(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
-        assert!(decryptor.is_finalized());
+        assert!(stream.is_finalized());
     }
 
     #[test]
-    fn test_push_pull_with_rekey() {
+    fn push_pull_with_rekey() {
         let mut msg1 = [0; 128];
         let mut msg2 = [0; 34];
         let mut msg3 = [0; 478];
@@ -135,33 +137,34 @@ mod test {
         randombytes_into(&mut msg1);
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
-        
-        let (mut encryptor, header, key) = Encryptor::new().unwrap();
-        let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
-        let c2 = encryptor.aencrypt_rekey(&msg2, None).unwrap();
-        let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
 
-        let mut decryptor = Decryptor::init(&header, &key).unwrap();
-        assert!(decryptor.is_not_finalized());
+        let key = gen_key();
+        let (mut stream, header) = Stream::init_push(&key).unwrap();
+        let c1 = stream.push(&msg1, None, Tag::Message).unwrap();
+        let c2 = stream.push(&msg2, None, Tag::Rekey).unwrap();
+        let c3 = stream.push(&msg3, None, Tag::Final).unwrap();
 
-        let (m1, t1) = decryptor.vdecrypt(&c1, None).unwrap();
+        let mut stream = Stream::init_pull(&header, &key).unwrap();
+        assert!(stream.is_not_finalized());
+
+        let (m1, t1) = stream.pull(&c1, None).unwrap();
         assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
-        assert!(decryptor.is_not_finalized());
+        assert!(stream.is_not_finalized());
 
-        let (m2, t2) = decryptor.vdecrypt(&c2, None).unwrap();
+        let (m2, t2) = stream.pull(&c2, None).unwrap();
         assert_eq!(t2, Tag::Rekey);
         assert_eq!(msg2[..], m2[..]);
-        assert!(decryptor.is_not_finalized());
+        assert!(stream.is_not_finalized());
 
-        let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
+        let (m3, t3) = stream.pull(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
-        assert!(decryptor.is_finalized());
+        assert!(stream.is_finalized());
     }
 
     #[test]
-    fn test_push_pull_with_explicit_rekey() {
+    fn push_pull_with_explicit_rekey() {
         let mut msg1 = [0; 128];
         let mut msg2 = [0; 34];
         let mut msg3 = [0; 478];
@@ -169,77 +172,71 @@ mod test {
         randombytes_into(&mut msg1);
         randombytes_into(&mut msg2);
         randombytes_into(&mut msg3);
-        
-        let (mut encryptor, header, key) = Encryptor::new().unwrap();
-        let c1 = encryptor.aencrypt_message(&msg1, None).unwrap();
-        let c2 = encryptor.aencrypt_push(&msg2, None).unwrap();
-        encryptor.rekey();
-        let c3 = encryptor.aencrypt_finalize(&msg3, None).unwrap();
 
-        let mut decryptor = Decryptor::init(&header, &key).unwrap();
-        assert!(decryptor.is_not_finalized());
+        let key = gen_key();
+        let (mut stream, header) = Stream::init_push(&key).unwrap();
+        let c1 = stream.push(&msg1, None, Tag::Message).unwrap();
+        let c2 = stream.push(&msg2, None, Tag::Push).unwrap();
+        stream.rekey().unwrap();
+        let c3 = stream.push(&msg3, None, Tag::Final).unwrap();
 
-        let (m1, t1) = decryptor.vdecrypt(&c1, None).unwrap();
+        let mut stream = Stream::init_pull(&header, &key).unwrap();
+        assert!(stream.is_not_finalized());
+
+        let (m1, t1) = stream.pull(&c1, None).unwrap();
         assert_eq!(t1, Tag::Message);
         assert_eq!(msg1[..], m1[..]);
-        assert!(decryptor.is_not_finalized());
+        assert!(stream.is_not_finalized());
 
-        let (m2, t2) = decryptor.vdecrypt(&c2, None).unwrap();
+        let (m2, t2) = stream.pull(&c2, None).unwrap();
         assert_eq!(t2, Tag::Push);
         assert_eq!(msg2[..], m2[..]);
-        assert!(decryptor.is_not_finalized());
+        assert!(stream.is_not_finalized());
 
-        decryptor.rekey().unwrap();
-        assert!(decryptor.is_not_finalized());
+        stream.rekey().unwrap();
+        assert!(stream.is_not_finalized());
 
-        let (m3, t3) = decryptor.vdecrypt(&c3, None).unwrap();
+        let (m3, t3) = stream.pull(&c3, None).unwrap();
         assert_eq!(t3, Tag::Final);
         assert_eq!(msg3[..], m3[..]);
-        assert!(decryptor.is_finalized());
+        assert!(stream.is_finalized());
     }
 
     #[test]
-    fn cannot_vdecrypt_after_finalization() {
+    fn cannot_pull_after_finalization() {
         let m = [0; 128];
-        let (encryptor, header, key) = Encryptor::new().unwrap();
-        let c = encryptor.aencrypt_finalize(&m, None).unwrap();
-        let mut decryptor = Decryptor::init(&header, &key).unwrap();
-        decryptor.vdecrypt(&c, None).unwrap();
+        let key = gen_key();
+        let (mut stream, header) = Stream::init_push(&key).unwrap();
+        let c = stream.push(&m, None, Tag::Final).unwrap();
+        let mut stream = Stream::init_pull(&header, &key).unwrap();
+        assert!(stream.is_not_finalized());
+        stream.pull(&c, None).unwrap();
         // TODO: check specific `Err(())` when implemented (#221).
-        assert!(decryptor.vdecrypt(&c, None).is_err());
+        assert!(stream.pull(&c, None).is_err());
     }
 
     #[test]
     fn cannot_rekey_after_finalization() {
         let m = [0; 128];
-        let (encryptor, header, key) = Encryptor::new().unwrap();
-        let c = encryptor.aencrypt_finalize(&m, None).unwrap();
-        let mut decryptor = Decryptor::init(&header, &key).unwrap();
-        decryptor.vdecrypt(&c, None).unwrap();
+        let key = gen_key();
+        let (mut stream, header) = Stream::init_push(&key).unwrap();
+        let c = stream.push(&m, None, Tag::Final).unwrap();
+        let mut stream = Stream::init_pull(&header, &key).unwrap();
+        assert!(stream.is_not_finalized());
+        stream.pull(&c, None).unwrap();
         // TODO: check specific `Err(())` when implemented (#221).
-        assert!(decryptor.rekey().is_err());
+        assert!(stream.rekey().is_err());
     }
-    
+
     #[test]
     fn tag_from_u8() {
         assert_eq!(Tag::Message, Tag::from_u8(0).unwrap());
         assert_eq!(Tag::Push, Tag::from_u8(1).unwrap());
         assert_eq!(Tag::Rekey, Tag::from_u8(2).unwrap());
         assert_eq!(Tag::Final, Tag::from_u8(3).unwrap());
-        for i in 4..(u16::from(u8::MAX) + 1) {
+        for i in 4..(u16::from(std::u8::MAX) + 1) {
             assert!(Tag::from_u8(i as u8).is_err());
         }
     }
 
-    // NOTE: it seems impossible to create an invalid header. Maybe a header can
-    // take on all values as long as it is the correct byte length.
-    // #[test]
-    // fn invalid_header() {
-    //     // let mut header: [u8; HEADERBYTES] = unsafe { mem::uninitialized() };
-    //     // randombytes_into(&mut header);
-    //     let header = Header([0; HEADERBYTES]);
-    //     let key = Key::new();
-    //     // TODO: check specific `Err(())` when implemented (#221).
-    //     assert!(Decryptor::init(&header, &key).is_err());
-    // }
 }
