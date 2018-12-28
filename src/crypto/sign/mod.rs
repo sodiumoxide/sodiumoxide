@@ -1,26 +1,25 @@
 //! Public-key signatures
 //!
 //! # Security model
-//! The `sign()` function is designed to meet the standard
+//! The [`sign()`](ed25519/fn.sign.html) function is designed to meet the standard
 //! notion of unforgeability for a public-key signature scheme under
 //! chosen-message attacks.
 //!
 //! # Selected primitive
-//! `crypto::sign::sign` is `ed25519`, a signature scheme specified in
+//! [`crypto::sign::sign`](ed25519/fn.sign.html) is `ed25519`, a signature scheme specified in
 //! [Ed25519](http://ed25519.cr.yp.to/). This function is conjectured to meet the
 //! standard notion of unforgeability for a public-key signature scheme under
 //! chosen-message attacks.
 //!
 //! # Alternate primitives
 //!
-//! --------------------------------------------------------------------------------
-//! |crypto_sign                         | PUBLICKEYBYTES | SECRETKEYBYTES | BYTES |
-//! |------------------------------------|----------------|----------------|-------|
-//! |crypto_sign_ed25519                 | 32             | 64             | 64    |
-//! |crypto_sign_edwards25519sha512batch | 32             | 64             | 64    |
-//! --------------------------------------------------------------------------------
+//! ----------------------------------------------------------------------------------
+//! |`crypto_sign`                         | PUBLICKEYBYTES | SECRETKEYBYTES | BYTES |
+//! |--------------------------------------|----------------|----------------|-------|
+//! |`crypto_sign_ed25519`                 | 32             | 64             | 64    |
+//! |`crypto_sign_edwards25519sha512batch` | 32             | 64             | 64    |
 //!
-//! crypto_sign_edwards25519sha512batch is a prototype. It has been replaced with
+//! `crypto_sign_edwards25519sha512batch` is a prototype. It has been replaced with
 //! Ed25519 and is only kept here for compatibility reasons.
 //!
 //! # Example

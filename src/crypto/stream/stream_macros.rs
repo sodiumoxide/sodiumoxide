@@ -9,10 +9,10 @@ use libc::{c_ulonglong, uint64_t};
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
-pub const KEYBYTES: usize = $keybytes as usize;
+pub const KEYBYTES: usize = $keybytes;
 
 /// Number of bytes in a `Nonce`.
-pub const NONCEBYTES: usize = $noncebytes as usize;
+pub const NONCEBYTES: usize = $noncebytes;
 
 new_type! {
     /// `Key` for symmetric encryption

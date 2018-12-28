@@ -1,8 +1,8 @@
 //! `crypto_scalarmult_curve25519` specified in
-//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Sections 2, 3, and 4.
+//! [Cryptography in `NaCl`](http://nacl.cr.yp.to/valid.html), Sections 2, 3, and 4.
 //! This function is conjectured to be strong. For background see Bernstein,
 //! "Curve25519: new Diffie-Hellman speed records," Lecture Notes in Computer
-//! Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.
+//! Science 3958 (2006), 207–228, <http://cr.yp.to/papers.html#curve25519>.
 use ffi;
 
 /// Number of bytes in a `GroupElement`.
@@ -22,14 +22,10 @@ new_type! {
 }
 
 /// `scalarmult()` multiplies a group element `p`
-/// by an integer `n`. It returns the resulting group element
-/// `Ok(q)`.
+/// by an integer `n`. It returns the resulting group element `Ok(q)`.
 /// If the the `GroupElement` is all zero, `scalarmult()` returns `Err(())` since
 /// the resulting `GroupElement` would be all zero, no matter the `Scalar`.
-pub fn scalarmult(
-    n: &Scalar,
-    p: &GroupElement,
-) -> Result<GroupElement, ()> {
+pub fn scalarmult(n: &Scalar, p: &GroupElement) -> Result<GroupElement, ()> {
     let mut q = [0; GROUPELEMENTBYTES];
     unsafe {
         if ffi::crypto_scalarmult_curve25519(q.as_mut_ptr(), n.0.as_ptr(), p.0.as_ptr()) != 0 {

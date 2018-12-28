@@ -20,14 +20,13 @@
 //! SHA-3 competition will improve the situation.
 //!
 //! # Alternate primitives
-//! NaCl supports the following hash functions:
+//! `NaCl` supports the following hash functions:
 //!
-//! ------------------------------------
-//! |crypto_hash       |primitive|BYTES|
-//! |------------------|---------|-----|
-//! |crypto_hash_sha256|SHA-256  |32   |
-//! |crypto_hash_sha512|SHA-512  |64   |
-//! ------------------------------------
+//! -----------------------------------------
+//! |`crypto_hash`        |primitive |BYTES |
+//! |---------------------|----------|------|
+//! |`crypto_hash_sha256` |`SHA-256` |32    |
+//! |`crypto_hash_sha512` |`SHA-512` |64    |
 //!
 //! # Example
 //! ```
@@ -41,8 +40,9 @@
 //! hash_state.update(b"data!");
 //! let digest = hash_state.finalize();
 //! ```
+
 pub use self::sha512::*;
 #[macro_use]
 mod hash_macros;
-pub mod sha512;
 pub mod sha256;
+pub mod sha512;

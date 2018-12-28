@@ -22,13 +22,7 @@ pub fn memcmp(x: &[u8], y: &[u8]) -> bool {
     if x.len() != y.len() {
         return false;
     }
-    unsafe {
-        ffi::sodium_memcmp(
-            x.as_ptr() as *const _,
-            y.as_ptr() as *const _,
-            x.len(),
-        ) == 0
-    }
+    unsafe { ffi::sodium_memcmp(x.as_ptr() as *const _, y.as_ptr() as *const _, x.len()) == 0 }
 }
 
 /// `increment_le()` treats `x` as an unsigned little-endian number and increments it in
@@ -60,7 +54,7 @@ pub fn add_le(x: &mut [u8], y: &[u8]) -> Result<(), ()> {
             ffi::sodium_add(x.as_mut_ptr(), y.as_ptr(), x.len());
         }
         Ok(())
-    } else  {
+    } else {
         Err(())
     }
 }
@@ -144,11 +138,11 @@ mod test {
     #[test]
     fn test_add_le_zero() {
         for i in 1..256 {
-            let mut x = vec!(0u8; i);
-            let mut y = vec!(0u8; i);
+            let mut x = vec![0u8; i];
+            let mut y = vec![0u8; i];
             y[0] = 42;
             assert!(add_le(&mut x, &y).is_ok());
-            assert!(!x.iter().all(|x| { *x == 0 }));
+            assert!(!x.iter().all(|x| *x == 0));
             assert_eq!(x, y);
         }
     }
@@ -159,38 +153,38 @@ mod test {
         let y = [42, 0, 0, 0, 0];
         let z = [41, 3, 3, 4, 5];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
         let mut x = [255, 255, 3, 4, 5];
         let z = [41, 0, 4, 4, 5];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
         let mut x = [255, 255, 255, 4, 5];
         let z = [41, 0, 0, 5, 5];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
         let mut x = [255, 255, 255, 255, 5];
         let z = [41, 0, 0, 0, 6];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
         let mut x = [255, 255, 255, 255, 255];
         let z = [41, 0, 0, 0, 0];
         assert!(add_le(&mut x, &y).is_ok());
-        assert!(!x.iter().all(|x| { *x == 0 }));
+        assert!(!x.iter().all(|x| *x == 0));
         assert_eq!(x, z);
     }
 
     #[test]
     fn test_add_le_overflow() {
         for i in 1..256 {
-            let mut x = vec!(255u8; i);
-            let mut y = vec!(0u8; i);
+            let mut x = vec![255u8; i];
+            let mut y = vec![0u8; i];
             y[0] = 42;
             assert!(add_le(&mut x, &y).is_ok());
-            assert!(!x.iter().all(|x| { *x == 0 }));
+            assert!(!x.iter().all(|x| *x == 0));
             y[0] -= 1;
             assert_eq!(x, y);
         }
@@ -199,13 +193,13 @@ mod test {
     #[test]
     fn test_add_le_different_lengths() {
         for i in 1..256 {
-            let mut x = vec!(1u8; i);
-            let y = vec!(42u8; i + 1);
-            let z = vec!(42u8; i - 1);
+            let mut x = vec![1u8; i];
+            let y = vec![42u8; i + 1];
+            let z = vec![42u8; i - 1];
             assert!(add_le(&mut x, &y).is_err());
-            assert_eq!(x, vec!(1u8; i));
+            assert_eq!(x, vec![1u8; i]);
             assert!(add_le(&mut x, &z).is_err());
-            assert_eq!(x, vec!(1u8; i));
+            assert_eq!(x, vec![1u8; i]);
         }
     }
 }

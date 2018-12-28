@@ -1,0 +1,40 @@
+image: Visual Studio 2017
+
+environment:
+  matrix:
+    # stable x86_64 with static libsodium from sources
+  - TARGET: x86_64-pc-windows-msvc
+    RUST_CHANNEL: stable
+
+    # stable x86 with static libsodium from sources
+  - TARGET: i686-pc-windows-msvc
+    RUST_CHANNEL: stable
+
+    # stable x86_64 with dynamic libsodium from vcpkg
+  - TARGET: x86_64-pc-windows-msvc
+    RUST_CHANNEL: stable
+    VCPKG_TARGET: x64-windows
+    SODIUM_USE_PKG_CONFIG: 1
+    VCPKGRS_DYNAMIC: 1
+
+install:
+  - ps: |
+      # Install Rust
+      appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
+      cmd.exe /c .\rustup-init.exe -y --default-host "$env:TARGET" --default-toolchain "$env:RUST_CHANNEL" 2`>`&1
+      $env:PATH += ";$env:USERPROFILE\.cargo\bin"
+
+      If ($env:SODIUM_USE_PKG_CONFIG -eq '1') {
+        # Install libsodium via vcpkg
+        vcpkg install "libsodium:$env:VCPKG_TARGET"
+      }
+
+cache:
+  - C:\Users\appveyor\.cargo\registry
+  - target
+
+build_script:
+  - cmd: cargo build --target %TARGET%
+
+test_script:
+  - cmd: cargo test --target %TARGET%

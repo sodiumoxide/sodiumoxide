@@ -64,5 +64,10 @@
 //!                          pwhash::MEMLIMIT_INTERACTIVE).unwrap();
 //! assert!(pwhash::pwhash_verify(&pwh, passwd));
 //! ```
+
 pub use self::scryptsalsa208sha256::*;
+#[macro_use]
+mod argon2_macros;
+pub mod argon2i13;
+pub mod argon2id13;
 pub mod scryptsalsa208sha256;

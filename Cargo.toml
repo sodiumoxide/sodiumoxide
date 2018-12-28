@@ -8,19 +8,24 @@ name = "sodiumoxide"
 readme = "README.md"
 repository = "https://github.com/sodiumoxide/sodiumoxide"
 categories = ["cryptography"]
-version = "0.1.0"
+version = "0.2.0"
 exclude = [
     "**/.gitignore",
     ".travis.yml",
     "bors.toml"
 ]
 
+[workspace]
+members = ["libsodium-sys"]
+
 [badges]
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
+appveyor = { repository = "Dylan-DPC/sodiumoxide", id = "u05iy6wufw9ncdi7" }
+coveralls = { repository = "sodiumoxide/sodiumoxide" }
 
 [dependencies]
 libc = { version = "^0.2.41" , default-features = false }
-libsodium-sys = { version = "0.1", path = "libsodium-sys" }
+libsodium-sys = { version = "0.2", path = "libsodium-sys" }
 serde = { version = "^1.0.59", default-features = false, optional = true }
 
 [dev-dependencies]
@@ -28,7 +33,6 @@ serde = "^1.0.59"
 serde_json = "^1.0.17"
 rustc-serialize = "^0.3.24"
 rmp-serde = "^0.13.7"
-quickcheck = "^0.6.2"
 
 [features]
 benchmarks = []

@@ -1,41 +1,56 @@
-//! `crypto_pwhash_scryptsalsa208sha256`, a particular combination of Scrypt, Salsa20/8
-//! and SHA-256
+macro_rules! argon2_module (($pwhash_name:ident,
+                           $pwhash_str_name:ident,
+                           $pwhash_str_verify_name:ident,
+                           $saltbytes:expr,
+                           $hashedpasswordbytes:expr,
+                           $strprefix:expr,
+                           $opslimit_interative:expr,
+                           $opslimit_moderate:expr,
+                           $opslimit_sensitive:expr,
+                           $memlimit_interative:expr,
+                           $memlimit_moderate:expr,
+                           $memlimit_sensitive:expr,
+                           $variant:expr) => (
 
-use ffi;
-use libc::c_ulonglong;
+use libc::{c_int, c_ulonglong};
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Salt`.
-pub const SALTBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES as usize;
+pub const SALTBYTES: usize = $saltbytes;
 
 /// Number of bytes in a `HashedPassword`.
-pub const HASHEDPASSWORDBYTES: usize = ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES as usize;
+pub const HASHEDPASSWORDBYTES: usize = $hashedpasswordbytes;
 
 /// All `HashedPasswords` start with this string.
-pub const STRPREFIX: &[u8] = ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX;
+pub const STRPREFIX: &'static [u8] = $strprefix;
 
 /// Safe base line for `OpsLimit` for interactive password hashing.
-pub const OPSLIMIT_INTERACTIVE: OpsLimit =
-    OpsLimit(ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE as usize);
+pub const OPSLIMIT_INTERACTIVE: OpsLimit = OpsLimit($opslimit_interative);
 
 /// Safe base line for `MemLimit` for interactive password hashing.
-pub const MEMLIMIT_INTERACTIVE: MemLimit =
-    MemLimit(ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE as usize);
+pub const MEMLIMIT_INTERACTIVE: MemLimit = MemLimit($memlimit_interative);
+
+/// `OpsLimit` for moderately sensitive data.
+pub const OPSLIMIT_MODERATE: OpsLimit = OpsLimit($opslimit_moderate);
+
+/// `MemLimit` for moderately sensitive data.
+pub const MEMLIMIT_MODERATE: MemLimit = MemLimit($memlimit_moderate);
 
 /// `OpsLimit` for highly sensitive data.
-pub const OPSLIMIT_SENSITIVE: OpsLimit =
-    OpsLimit(ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE as usize);
+pub const OPSLIMIT_SENSITIVE: OpsLimit = OpsLimit($opslimit_sensitive);
 
 /// `MemLimit` for highly sensitive data.
-pub const MEMLIMIT_SENSITIVE: MemLimit =
-    MemLimit(ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE as usize);
+pub const MEMLIMIT_SENSITIVE: MemLimit = MemLimit($memlimit_sensitive);
+
+/// Variant id for the Argon2i13 algorithm
+pub const VARIANT: u32 = $variant;
 
 /// `OpsLimit` represents the maximum number of computations to perform when
 /// using the functions in this module.
 ///
 /// A high `OpsLimit` will make the functions
 /// require more CPU cycles
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct OpsLimit(pub usize);
 
 /// `MemLimit` represents the maximum amount of RAM that the functions in this
@@ -43,7 +58,7 @@ pub struct OpsLimit(pub usize);
 ///
 /// It is highly recommended to allow the functions to use
 /// at least 16 megabytes.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct MemLimit(pub usize);
 
 new_type! {
@@ -60,7 +75,7 @@ new_type! {
     public HashedPassword(HASHEDPASSWORDBYTES);
 }
 
-/// `gen_salt()` randombly generates a new `Salt` for key derivation
+/// `gen_salt()` randomly generates a new `Salt` for key derivation
 ///
 /// THREAD SAFETY: `gen_salt()` is thread-safe provided that you have called
 /// `sodiumoxide::init()` once before using any other function from sodiumoxide.
@@ -102,27 +117,29 @@ pub fn gen_salt() -> Salt {
 pub fn derive_key<'a>(
     key: &'a mut [u8],
     passwd: &[u8],
-    salt: &Salt,
+    &Salt(ref sb): &Salt,
     OpsLimit(opslimit): OpsLimit,
     MemLimit(memlimit): MemLimit,
 ) -> Result<&'a [u8], ()> {
-    if unsafe {
-        ffi::crypto_pwhash_scryptsalsa208sha256(
+
+    let res = unsafe {
+        $pwhash_name(
             key.as_mut_ptr(),
             key.len() as c_ulonglong,
             passwd.as_ptr() as *const _,
             passwd.len() as c_ulonglong,
-            salt.0.as_ptr(),
+            sb as *const _,
             opslimit as c_ulonglong,
             memlimit,
-        )
-    } == 0
-    {
-        Ok(key)
-    } else {
-        Err(())
+            VARIANT as c_int)
+    };
+
+    match res {
+        0 => Ok(key),
+        _ => Err(()),
     }
 }
+
 
 /// The `pwhash()` returns a `HashedPassword` which
 /// includes:
@@ -143,20 +160,19 @@ pub fn pwhash(
     OpsLimit(opslimit): OpsLimit,
     MemLimit(memlimit): MemLimit,
 ) -> Result<HashedPassword, ()> {
-    let mut hp = HashedPassword([0; HASHEDPASSWORDBYTES]);
-    if unsafe {
-        ffi::crypto_pwhash_scryptsalsa208sha256_str(
-            hp.0.as_mut_ptr() as *mut _,
+    let mut out = HashedPassword([0; HASHEDPASSWORDBYTES]);
+    let res = unsafe {
+        $pwhash_str_name(
+            out.0.as_mut_ptr() as *mut _,
             passwd.as_ptr() as *const _,
             passwd.len() as c_ulonglong,
             opslimit as c_ulonglong,
-            memlimit,
-        )
-    } == 0
-    {
-        Ok(hp)
-    } else {
-        Err(())
+            memlimit)
+    };
+
+    match res {
+        0 => Ok(out),
+        _ => Err(()),
     }
 }
 
@@ -165,79 +181,14 @@ pub fn pwhash(
 ///
 /// It returns `true` if the verification succeeds, and `false` on error.
 pub fn pwhash_verify(hp: &HashedPassword, passwd: &[u8]) -> bool {
-    unsafe {
-        ffi::crypto_pwhash_scryptsalsa208sha256_str_verify(
+    let res = unsafe {
+        $pwhash_str_verify_name(
             hp.0.as_ptr() as *const _,
             passwd.as_ptr() as *const _,
-            passwd.len() as c_ulonglong,
-        ) == 0
-    }
+            passwd.len() as c_ulonglong)
+    };
+
+    res == 0
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_derive_key() {
-        let mut kb = [0u8; 32];
-        let salt = Salt([
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-            24, 25, 26, 27, 28, 29, 30, 31,
-        ]);
-        let pw = b"Correct Horse Battery Staple";
-        // test vector generated by using libsodium
-        let key_expected = [
-            0xf1, 0xbb, 0xb8, 0x7c, 0x43, 0x36, 0x5b, 0x03, 0x3b, 0x9a, 0xe8, 0x3e, 0x05, 0xef,
-            0xad, 0x25, 0xdb, 0x8d, 0x83, 0xb8, 0x3d, 0xb1, 0xde, 0xe3, 0x6b, 0xdb, 0xf5, 0x4d,
-            0xcd, 0x3a, 0x1a, 0x11,
-        ];
-        let key = derive_key(
-            &mut kb,
-            pw,
-            &salt,
-            OPSLIMIT_INTERACTIVE,
-            MEMLIMIT_INTERACTIVE,
-        )
-        .unwrap();
-        assert_eq!(key, key_expected);
-    }
-
-    #[test]
-    fn test_pwhash_verify() {
-        use randombytes::randombytes;
-        for i in 0..32usize {
-            let pw = randombytes(i);
-            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
-            assert!(pwhash_verify(&pwh, &pw));
-        }
-    }
-
-    #[test]
-    fn test_pwhash_verify_tamper() {
-        use randombytes::randombytes;
-        for i in 0..16usize {
-            let mut pw = randombytes(i);
-            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
-            for j in 0..pw.len() {
-                pw[j] ^= 0x20;
-                assert!(!pwhash_verify(&pwh, &pw));
-                pw[j] ^= 0x20;
-            }
-        }
-    }
-
-    #[cfg(feature = "serde")]
-    #[test]
-    fn test_serialisation() {
-        use randombytes::randombytes;
-        use test_utils::round_trip;
-        for i in 0..32usize {
-            let pw = randombytes(i);
-            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
-            let salt = gen_salt();
-            round_trip(pwh);
-            round_trip(salt);
-        }
-    }
-}
+));

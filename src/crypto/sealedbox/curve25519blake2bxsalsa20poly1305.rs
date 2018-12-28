@@ -1,6 +1,8 @@
-//! A particular combination of Curve25519, Blake2B, Salsa20 and Poly1305.
-#[cfg(not(feature = "std"))] use prelude::*;
+//! A particular combination of `Curve25519`, `Blake2B`, `XSalsa20` and `Poly1305`.
+
 use ffi;
+#[cfg(not(feature = "std"))]
+use prelude::*;
 
 use libc::c_ulonglong;
 
@@ -16,14 +18,15 @@ pub const SEALBYTES: usize = ffi::crypto_box_SEALBYTES as usize;
 /// The function creates a new key pair for each message, and attaches the public
 /// key to the ciphertext. The secret key is overwritten and is not accessible
 /// after this function returns.
-pub fn seal(m: &[u8],
-            pk: &box_::PublicKey) -> Vec<u8> {
+pub fn seal(m: &[u8], pk: &box_::PublicKey) -> Vec<u8> {
     let mut c = vec![0u8; m.len() + SEALBYTES];
     unsafe {
-        ffi::crypto_box_seal(c.as_mut_ptr(),
-                             m.as_ptr(),
-                             m.len() as c_ulonglong,
-                             pk.0.as_ptr());
+        ffi::crypto_box_seal(
+            c.as_mut_ptr(),
+            m.as_ptr(),
+            m.len() as c_ulonglong,
+            pk.0.as_ptr(),
+        );
     }
     c
 }
@@ -39,19 +42,19 @@ pub fn seal(m: &[u8],
 /// ciphertext already includes this information.
 ///
 /// If decryption fails it returns `Err(())`.
-pub fn open(c: &[u8],
-            pk: &box_::PublicKey,
-            sk: &box_::SecretKey) -> Result<Vec<u8>, ()> {
+pub fn open(c: &[u8], pk: &box_::PublicKey, sk: &box_::SecretKey) -> Result<Vec<u8>, ()> {
     if c.len() < SEALBYTES {
         return Err(());
     }
     let mut m = vec![0u8; c.len() - SEALBYTES];
     let ret = unsafe {
-        ffi::crypto_box_seal_open(m.as_mut_ptr(),
-                                  c.as_ptr(),
-                                  c.len() as c_ulonglong,
-                                  pk.0.as_ptr(),
-                                  sk.0.as_ptr())
+        ffi::crypto_box_seal_open(
+            m.as_mut_ptr(),
+            c.as_ptr(),
+            c.len() as c_ulonglong,
+            pk.0.as_ptr(),
+            sk.0.as_ptr(),
+        )
     };
     if ret == 0 {
         Ok(m)
@@ -62,8 +65,8 @@ pub fn open(c: &[u8],
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use super::super::super::box_::curve25519xsalsa20poly1305 as box_;
+    use super::*;
 
     #[test]
     fn test_seal_open() {

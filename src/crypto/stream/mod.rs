@@ -17,7 +17,7 @@
 //! of Bellare, Kilian, and Rogaway, "The security of the cipher block
 //! chaining message authentication code," Journal of Computer and System
 //! Sciences 61 (2000), 362–399;
-//! http://www-cse.ucsd.edu/~mihir/papers/cbc.html.
+//! <http://www-cse.ucsd.edu/~mihir/papers/cbc.html>.
 //!
 //! This means that an attacker cannot distinguish this function from a
 //! uniform random function. Consequently, if a series of messages is
@@ -31,27 +31,26 @@
 //! Nonces are long enough that randomly generated nonces have negligible
 //! risk of collision.
 //!
-//! NaCl does not make any promises regarding the resistance of `stream()` to
+//! `NaCl` does not make any promises regarding the resistance of `stream()` to
 //! "related-key attacks." It is the caller's responsibility to use proper
 //! key-derivation functions.
 //!
 //! # Selected primitive
 //! `stream()` is `crypto_stream_xsalsa20`, a particular cipher specified in
-//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Section 7.
+//! [Cryptography in `NaCl`](http://nacl.cr.yp.to/valid.html), Section 7.
 //! This cipher is conjectured to meet the standard notion of
 //! unpredictability.
 //!
 //! # Alternate primitives
 //! NaCl supports the following secret-key encryption functions:
 //!
-//! ------------------------------------------------------------
-//! |crypto_stream           |primitive   |KEYBYTES |NONCEBYTES|
-//! |------------------------|------------|---------|----------|
-//! |crypto_stream_chacha20  |Chacha20/20 |32       |8         |
-//! |crypto_stream_salsa20   |Salsa20/20  |32       |8         |
-//! |crypto_stream_xsalsa20  |XSalsa20/20 |32       |24        |
-//! |crypto_stream_xchacha20 |XChacha20/20|32       |24        |
-//! ------------------------------------------------------------
+//! --------------------------------------------------------------
+//! |`crypto_stream`           |primitive   |KEYBYTES |NONCEBYTES|
+//! |--------------------------|------------|---------|----------|
+//! |`crypto_stream_chacha20`  |Chacha20/20 |32       |8         |
+//! |`crypto_stream_salsa20`   |Salsa20/20  |32       |8         |
+//! |`crypto_stream_xsalsa20`  |XSalsa20/20 |32       |24        |
+//! |`crypto_stream_xchacha20` |XChacha20/20|32       |24        |
 //!
 //! Beware that several of these primitives have 8-byte nonces. For those
 //! primitives it is no longer true that randomly generated nonces have negligible
@@ -93,10 +92,11 @@
 //! stream::stream_xor_inplace(plaintext, &nonce, &key);
 //! assert_eq!(plaintext, &mut [0, 1, 2, 3]);
 //! ```
+
 pub use self::xsalsa20::*;
 #[macro_use]
 mod stream_macros;
-pub mod xsalsa20;
-pub mod xchacha20;
-pub mod salsa20;
 pub mod chacha20;
+pub mod salsa20;
+pub mod xchacha20;
+pub mod xsalsa20;
