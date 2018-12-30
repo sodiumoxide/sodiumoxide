@@ -128,13 +128,7 @@ pub fn gen_key() -> Key {
 pub struct Stream<M: StreamMode> {
     state: $state_name,
     finalized: bool,
-
-    #[cfg(feature = "std")]
-    marker: std::marker::PhantomData<M>,
-
-    #[cfg(not(feature = "std"))]
-    #[allow(unused)]
-    mode: M,
+    phantom: core::marker::PhantomData<M>,
 }
 
 impl<M: StreamMode> Stream<M> {
@@ -192,12 +186,7 @@ impl Stream<Push> {
             Stream::<Push> {
                 state,
                 finalized: false,
-
-                #[cfg(feature = "std")]
-                marker: std::marker::PhantomData,
-
-                #[cfg(not(feature = "std"))]
-                mode: Push,
+                phantom: core::marker::PhantomData,
             },
             Header(header),
         ))
@@ -277,12 +266,7 @@ impl Stream<Pull> {
         Ok(Stream::<Pull> {
             state: state,
             finalized: false,
-
-            #[cfg(feature = "std")]
-            marker: std::marker::PhantomData,
-
-            #[cfg(not(feature = "std"))]
-            mode: Pull,
+            phantom: core::marker::PhantomData,
         })
     }
 
