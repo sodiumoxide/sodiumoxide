@@ -35,6 +35,8 @@
 //! # Secret-key cryptography
 //!  [`crypto::secretbox`](crypto/secretbox/index.html)
 //!
+//!  [`crypto::secretstream`](crypto/secretstream/index.html)
+//!
 //!  [`crypto::stream`](crypto/stream/index.html)
 //!
 //!  [`crypto::auth`](crypto/auth/index.html)
