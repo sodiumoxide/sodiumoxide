@@ -110,6 +110,11 @@ mod test {
 
     #[test]
     fn test_crypto_generichash_state_alignment() {
+        // bindgen does not properly compute the alignment of crypto_generichash_state,
+        // which is why gen.sh in libsodium-sys applies a patch after it has run rust-bindgen
+        // this test verifies that the patch has been properly applied by asserting that the
+        // alignment of crypto_generichash_state is the same as the one defined in the sodium
+        // library for crypto_generichash_blake2b_state
         assert_eq!(64, mem::align_of::<crypto_generichash_state>());
     }
 
