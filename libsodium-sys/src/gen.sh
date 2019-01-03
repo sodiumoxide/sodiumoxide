@@ -9,3 +9,5 @@ bindgen PATH_TO/libsodium-1.0.16/src/libsodium/include/sodium.h -o sodium_bindin
   --whitelist-function=$REGEX \
   --whitelist-type=$REGEX \
   --whitelist-var=$REGEX
+
+git apply crypto_generichash_blake2b_state.patch

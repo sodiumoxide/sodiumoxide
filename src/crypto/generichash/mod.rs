@@ -109,6 +109,11 @@ mod test {
     use prelude::*;
 
     #[test]
+    fn test_crypto_generichash_state_alignment() {
+        assert_eq!(64, mem::align_of::<crypto_generichash_state>());
+    }
+
+    #[test]
     fn test_vector_1() {
         // hash of empty string
         let x = [];

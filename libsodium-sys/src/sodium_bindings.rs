@@ -1454,7 +1454,7 @@ extern "C" {
         c: *const libc::c_uchar,
     ) -> libc::c_int;
 }
-#[repr(C)]
+#[repr(C, align(64))]
 #[derive(Copy, Clone)]
 pub struct crypto_generichash_blake2b_state {
     pub h: [u64; 8usize],
@@ -1463,7 +1463,6 @@ pub struct crypto_generichash_blake2b_state {
     pub buf: [u8; 256usize],
     pub buflen: usize,
     pub last_node: u8,
-    pub __bindgen_padding_0: [u8; 23usize],
 }
 #[test]
 fn bindgen_test_layout_crypto_generichash_blake2b_state() {
