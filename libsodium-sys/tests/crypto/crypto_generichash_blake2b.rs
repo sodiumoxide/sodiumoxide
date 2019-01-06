@@ -3,6 +3,12 @@
 use libsodium_sys::*;
 
 #[test]
+fn test_crypto_generichash_blake2b_state_alignment() {
+    // this asserts the alignment applied in alignment_fix.patch (see gen.sh)
+    assert_eq!(64, std::mem::align_of::<crypto_generichash_blake2b_state>());
+}
+
+#[test]
 fn test_crypto_generichash_blake2b_bytes_min() {
     assert_eq!(
         unsafe { crypto_generichash_blake2b_bytes_min() },
