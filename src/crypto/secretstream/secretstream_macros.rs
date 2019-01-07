@@ -323,14 +323,6 @@ impl Stream<Pull> {
     }
 }
 
-// As additional precaution, rotate the keys when dropping the `Stream`
-// to ensure keys do no stay in memory.
-impl<T: StreamMode> Drop for Stream<T> {
-    fn drop(&mut self) {
-        let _ = self.rekey();
-    }
-}
-
 /// The trait that distinguishes between the pull and push modes of a Stream.
 pub trait StreamMode: private::Sealed {}
 
