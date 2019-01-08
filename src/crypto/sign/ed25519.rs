@@ -406,6 +406,15 @@ mod test {
     }
 
     #[test]
+    fn test_streaming_empty_sign() {
+        let (pk, sk) = gen_keypair();
+        let creation_state = State::init();
+        let sig = creation_state.finalize(&sk);
+        let mut validator_state = State::init();
+        assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
     fn test_streaming_vectors() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
