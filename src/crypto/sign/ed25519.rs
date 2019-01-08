@@ -180,7 +180,7 @@ impl State {
     /// `finalize()` finalizes the hashing computation and returns a `Signature`.
     // Moves self becuase libsodium says the state should not be used
     // anymore after final().
-    pub fn finalize(&mut self, &SecretKey(ref sk): &SecretKey) -> Signature {
+    pub fn finalize(mut self, &SecretKey(ref sk): &SecretKey) -> Signature {
         let mut sig = [0u8; SIGNATUREBYTES];
         let mut siglen: c_ulonglong = 0;
         unsafe {
@@ -452,7 +452,7 @@ mod test {
         let mut creation_state = State::init();
         creation_state.update(&m);
 
-        let mut creation_state_copied = creation_state;
+        let creation_state_copied = creation_state;
         let sig = creation_state_copied.finalize(&sk);
         let mut validator_state = State::init();
         validator_state.update(&m);
@@ -468,7 +468,7 @@ mod test {
         let mut creation_state = State::init();
         creation_state.update(&m);
 
-        let mut creation_state_cloned = creation_state.clone();
+        let creation_state_cloned = creation_state.clone();
         let sig = creation_state_cloned.finalize(&sk);
         let mut validator_state = State::init();
         validator_state.update(&m);
