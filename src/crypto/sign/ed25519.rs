@@ -7,6 +7,8 @@ use ffi;
 use libc::c_ulonglong;
 #[cfg(not(feature = "std"))]
 use prelude::*;
+use std::fmt;
+use std::mem;
 
 /// Number of bytes in a `Seed`.
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
@@ -56,35 +58,35 @@ new_type! {
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
+    let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+    let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
     unsafe {
-        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
-        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
         ffi::crypto_sign_ed25519_keypair(pk.0.as_mut_ptr(), sk.0.as_mut_ptr());
-        (pk, sk)
     }
+    (pk, sk)
 }
 
 /// `keypair_from_seed()` computes a secret key and a corresponding public key
 /// from a `Seed`.
 pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
+    let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+    let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
     unsafe {
-        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
-        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
         ffi::crypto_sign_ed25519_seed_keypair(
             pk.0.as_mut_ptr(),
             sk.0.as_mut_ptr(),
             seed.0.as_ptr(),
         );
-        (pk, sk)
     }
+    (pk, sk)
 }
 
 /// `sign()` signs a message `m` using the signer's secret key `sk`.
 /// `sign()` returns the resulting signed message `sm`.
 pub fn sign(m: &[u8], sk: &SecretKey) -> Vec<u8> {
+    let mut sm = vec![0u8; m.len() + SIGNATUREBYTES];
+    let mut smlen = 0;
     unsafe {
-        let mut sm = vec![0u8; m.len() + SIGNATUREBYTES];
-        let mut smlen = 0;
         ffi::crypto_sign_ed25519(
             sm.as_mut_ptr(),
             &mut smlen,
@@ -92,40 +94,40 @@ pub fn sign(m: &[u8], sk: &SecretKey) -> Vec<u8> {
             m.len() as c_ulonglong,
             sk.0.as_ptr(),
         );
-        sm.truncate(smlen as usize);
-        sm
     }
+    sm.truncate(smlen as usize);
+    sm
 }
 
 /// `verify()` verifies the signature in `sm` using the signer's public key `pk`.
 /// `verify()` returns the message `Ok(m)`.
 /// If the signature fails verification, `verify()` returns `Err(())`.
 pub fn verify(sm: &[u8], pk: &PublicKey) -> Result<Vec<u8>, ()> {
-    unsafe {
-        let mut m = vec![0u8; sm.len()];
-        let mut mlen = 0;
-        if ffi::crypto_sign_ed25519_open(
+    let mut m = vec![0u8; sm.len()];
+    let mut mlen = 0;
+    let ret = unsafe {
+        ffi::crypto_sign_ed25519_open(
             m.as_mut_ptr(),
             &mut mlen,
             sm.as_ptr(),
             sm.len() as c_ulonglong,
             pk.0.as_ptr(),
-        ) == 0
-        {
-            m.truncate(mlen as usize);
-            Ok(m)
-        } else {
-            Err(())
-        }
+        )
+    };
+    if ret == 0 {
+        m.truncate(mlen as usize);
+        Ok(m)
+    } else {
+        Err(())
     }
 }
 
 /// `sign_detached()` signs a message `m` using the signer's secret key `sk`.
 /// `sign_detached()` returns the resulting signature `sig`.
 pub fn sign_detached(m: &[u8], sk: &SecretKey) -> Signature {
+    let mut sig = Signature([0u8; SIGNATUREBYTES]);
+    let mut siglen: c_ulonglong = 0;
     unsafe {
-        let mut sig = Signature([0u8; SIGNATUREBYTES]);
-        let mut siglen: c_ulonglong = 0;
         ffi::crypto_sign_ed25519_detached(
             sig.0.as_mut_ptr(),
             &mut siglen,
@@ -133,22 +135,90 @@ pub fn sign_detached(m: &[u8], sk: &SecretKey) -> Signature {
             m.len() as c_ulonglong,
             sk.0.as_ptr(),
         );
-        assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
-        sig
     }
+    assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
+    sig
 }
 
 /// `verify_detached()` verifies the signature in `sig` against the message `m`
 /// and the signer's public key `pk`.
 /// `verify_detached()` returns true if the signature is valid, false otherwise.
 pub fn verify_detached(sig: &Signature, m: &[u8], pk: &PublicKey) -> bool {
-    unsafe {
-        0 == ffi::crypto_sign_ed25519_verify_detached(
+    let ret = unsafe {
+        ffi::crypto_sign_ed25519_verify_detached(
             sig.0.as_ptr(),
             m.as_ptr(),
             m.len() as c_ulonglong,
             pk.0.as_ptr(),
         )
+    };
+    ret == 0
+}
+
+/// State for multi-part (streaming) computation of signature.
+#[derive(Copy, Clone)]
+pub struct State(ffi::crypto_sign_ed25519ph_state);
+
+impl State {
+    /// `init()` initialize a streaming signing state.
+    pub fn init() -> State {
+        unsafe {
+            let mut s = mem::uninitialized();
+            ffi::crypto_sign_ed25519ph_init(&mut s);
+            State(s)
+        }
+    }
+
+    /// `update()` can be called more than once in order to compute the digest
+    /// from sequential chunks of the message.
+    pub fn update(&mut self, m: &[u8]) {
+        unsafe {
+            ffi::crypto_sign_ed25519ph_update(&mut self.0, m.as_ptr(), m.len() as c_ulonglong);
+        }
+    }
+
+    /// `finalize()` finalizes the hashing computation and returns a `Signature`.
+    // Moves self becuase libsodium says the state should not be used
+    // anymore after final().
+    pub fn finalize(mut self, &SecretKey(ref sk): &SecretKey) -> Signature {
+        let mut sig = [0u8; SIGNATUREBYTES];
+        let mut siglen: c_ulonglong = 0;
+        unsafe {
+            ffi::crypto_sign_ed25519ph_final_create(
+                &mut self.0,
+                sig.as_mut_ptr(),
+                &mut siglen,
+                sk.as_ptr(),
+            );
+        }
+        assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
+        Signature(sig)
+    }
+
+    /// `veriry` verifies the signature in `sm` using the signer's public key `pk`.
+    pub fn verify(
+        &mut self,
+        &Signature(ref sig): &Signature,
+        &PublicKey(ref pk): &PublicKey,
+    ) -> bool {
+        let mut sig = sig.clone();
+        let ret = unsafe {
+            ffi::crypto_sign_ed25519ph_final_verify(&mut self.0, sig.as_mut_ptr(), pk.as_ptr())
+        };
+        ret == 0
+    }
+}
+
+impl fmt::Debug for State {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "ed25519 state")
+    }
+}
+
+// Impl Default becuase `State` does have a sensible default: State::init()
+impl Default for State {
+    fn default() -> State {
+        State::init()
     }
 }
 
@@ -318,6 +388,137 @@ mod test {
             round_trip(sk);
             round_trip(sig);
         }
+    }
+
+    #[test]
+    fn test_streaming_sign() {
+        use randombytes::randombytes;
+        for i in 0..256usize {
+            let (pk, sk) = gen_keypair();
+            let m = randombytes(i);
+            let mut creation_state = State::init();
+            creation_state.update(&m);
+            let sig = creation_state.finalize(&sk);
+            let mut validator_state = State::init();
+            validator_state.update(&m);
+            assert!(validator_state.verify(&sig, &pk));
+        }
+    }
+
+    #[test]
+    fn test_streaming_empty_sign() {
+        let (pk, sk) = gen_keypair();
+        let creation_state = State::init();
+        let sig = creation_state.finalize(&sk);
+        let mut validator_state = State::init();
+        assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_streaming_vectors() {
+        // test vectors from the Python implementation
+        // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
+        use rustc_serialize::hex::{FromHex, ToHex};
+        use std::fs::File;
+        use std::io::{BufRead, BufReader};
+
+        let r = BufReader::new(File::open("testvectors/ed25519.input").unwrap());
+        for mline in r.lines() {
+            let line = mline.unwrap();
+            let mut x = line.split(':');
+            let x0 = x.next().unwrap();
+            let x1 = x.next().unwrap();
+            let x2 = x.next().unwrap();
+            let seed_bytes = x0[..64].from_hex().unwrap();
+            assert!(seed_bytes.len() == SEEDBYTES);
+            let mut seed = Seed([0u8; SEEDBYTES]);
+            for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
+                *s = *b
+            }
+            let (pk, sk) = keypair_from_seed(&seed);
+
+            let m = x2.from_hex().unwrap();
+
+            let mut creation_state = State::init();
+            creation_state.update(&m);
+            let sig = creation_state.finalize(&sk);
+
+            let mut validator_state = State::init();
+            validator_state.update(&m);
+
+            assert!(validator_state.verify(&sig, &pk));
+
+            assert_eq!(x1, pk[..].to_hex());
+        }
+    }
+
+    #[test]
+    fn test_streaming_copy() {
+        use randombytes::randombytes;
+        let i = 256;
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let mut creation_state = State::init();
+        creation_state.update(&m);
+
+        let creation_state_copied = creation_state;
+        let sig = creation_state_copied.finalize(&sk);
+        let mut validator_state = State::init();
+        validator_state.update(&m);
+        assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_streaming_clone() {
+        use randombytes::randombytes;
+        let i = 256;
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let mut creation_state = State::init();
+        creation_state.update(&m);
+
+        let creation_state_cloned = creation_state.clone();
+        let sig = creation_state_cloned.finalize(&sk);
+        let mut validator_state = State::init();
+        validator_state.update(&m);
+        assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_streaming_default() {
+        use randombytes::randombytes;
+        let i = 256;
+        let (pk, sk) = gen_keypair();
+        let m = randombytes(i);
+        let mut creation_state = State::default();
+        creation_state.update(&m);
+
+        let sig = creation_state.finalize(&sk);
+        let mut validator_state = State::init();
+        validator_state.update(&m);
+        assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_streaming_format() {
+        let creation_state = State::init();
+        let creation_state_fmt = format!("{:?}", creation_state);
+        assert_eq!(creation_state_fmt, "ed25519 state");
+    }
+
+    #[test]
+    fn test_chunks_sign() {
+        use randombytes::randombytes;
+        let (pk, sk) = gen_keypair();
+        let mut creation_state = State::init();
+        let mut validator_state = State::init();
+        for i in 0..64usize {
+            let chunk = randombytes(i);
+            creation_state.update(&chunk);
+            validator_state.update(&chunk);
+        }
+        let sig = creation_state.finalize(&sk);
+        assert!(validator_state.verify(&sig, &pk));
     }
 }
 
