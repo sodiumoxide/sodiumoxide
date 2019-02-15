@@ -35,6 +35,8 @@
 //! # Secret-key cryptography
 //!  [`crypto::secretbox`](crypto/secretbox/index.html)
 //!
+//!  [`crypto::secretstream`](crypto/secretstream/index.html)
+//!
 //!  [`crypto::stream`](crypto/stream/index.html)
 //!
 //!  [`crypto::auth`](crypto/auth/index.html)
@@ -117,6 +119,7 @@ pub mod crypto {
     pub mod scalarmult;
     pub mod sealedbox;
     pub mod secretbox;
+    pub mod secretstream;
     pub mod shorthash;
     pub mod sign;
     pub mod stream;

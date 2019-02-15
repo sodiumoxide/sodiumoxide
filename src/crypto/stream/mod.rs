@@ -1,5 +1,15 @@
 //! Secret-key encryption
 //!
+//! # Note
+//!
+//! Generally speaking [`crypto::secretstream`](../secretstream/index.html) provides a more
+//! straightforward API for authenticated encryption with associated data
+//! (AEAD) and should be used when this is desired. By contrast, the `stream`
+//! module is more appropriate for use cases such as when a variable-length
+//! pseudorandom function is needed. [`crypto::secretstream`](../secretstream/index.html)
+//! also guarantees messages cannot be truncated, removed, reordered, duplicated, or modified,
+//! among other useful guarantees. See the module documentation for more information.
+//!
 //! # Security Model
 //! The `stream()` function, viewed as a function of the nonce for a
 //! uniform random key, is designed to meet the standard notion of

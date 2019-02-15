@@ -1,0 +1,22 @@
+diff --git a/libsodium-sys/src/sodium_bindings.rs b/libsodium-sys/src/sodium_bindings.rs
+index 21b807b5..dab31105 100644
+--- a/libsodium-sys/src/sodium_bindings.rs
++++ b/libsodium-sys/src/sodium_bindings.rs
+@@ -1489,7 +1489,7 @@ extern "C" {
+         c: *const libc::c_uchar,
+     ) -> libc::c_int;
+ }
+-#[repr(C)]
++#[repr(C, align(64))]
+ #[derive(Copy, Clone)]
+ pub struct crypto_generichash_blake2b_state {
+     pub opaque: [libc::c_uchar; 384usize],
+@@ -1763,7 +1763,7 @@ extern "C" {
+         client_pk: *const libc::c_uchar,
+     ) -> libc::c_int;
+ }
+-#[repr(C)]
++#[repr(C, align(16))]
+ #[derive(Copy, Clone)]
+ pub struct crypto_onetimeauth_poly1305_state {
+     pub opaque: [libc::c_uchar; 256usize],
