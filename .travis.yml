@@ -10,14 +10,15 @@ sudo: false
 
 matrix:
   include:
-  - os: linux
-    rust: nightly
+  - name: fmt
+    os: linux
+    rust: stable
     before_script:
-      - rustup component add rustfmt-preview
+      - rustup component add rustfmt
     script:
       - cargo fmt --all -- --check
-      - cargo test --verbose --no-default-features
-  - os: linux
+  - name: coverage
+    os: linux
     rust: stable
     sudo: required
     addons: # needed for `cargo install cargo-travis`
