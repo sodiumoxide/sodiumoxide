@@ -15,20 +15,24 @@ version = "0.2.0"
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 
 [build-dependencies]
-cc = "1.0.9"
-flate2 = "1.0.1"
-http_req = "0.2.1"
-pkg-config = "0.3.11"
-libc = { version = "0.2.41" , default-features = false }
+http_req = { version = "0.4", default-features = false, features = ["rust-tls"] }
 sha2 = "0.8"
-tar = "0.4.15"
-zip = "0.5"
+pkg-config = "0.3"
+
+
 
 [target.'cfg(target_env = "msvc")'.build-dependencies]
+libc = { version = "=0.2.48" , default-features = false }
 vcpkg = "0.2"
+zip = "0.5"
+
+[target.'cfg(not(target_env = "msvc"))'.build-dependencies]
+cc = "1.0"
+libflate = "0.1"
+tar = "0.4"
 
 [dependencies]
-libc = { version = "^0.2.41" , default-features = false }
+libc = { version = "=0.2.48" , default-features = false }
 
 [lib]
 name = "libsodium_sys"

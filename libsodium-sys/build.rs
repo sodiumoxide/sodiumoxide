@@ -1,10 +1,10 @@
 #[cfg(not(windows))]
 extern crate cc;
-#[cfg(not(target_env = "msvc"))]
-extern crate flate2;
 extern crate http_req;
 #[cfg(target_env = "msvc")]
 extern crate libc;
+#[cfg(not(target_env = "msvc"))]
+extern crate libflate;
 extern crate pkg_config;
 extern crate sha2;
 #[cfg(not(target_env = "msvc"))]
@@ -145,24 +145,23 @@ fn find_libsodium_pkg() {
 /// Download the specified URL into a buffer which is returned.
 fn download(url: &str, expected_hash: &str) -> Cursor<Vec<u8>> {
     // Send GET request
-    let response = request::get(url).unwrap();
+    let mut response_body = Vec::new();
+    let response = request::get(url, &mut response_body).unwrap();
 
     // Only accept 2xx status codes
-    if response.status_code() < 200 && response.status_code() >= 300 {
+    if !response.status_code().is_success() {
         panic!("Download error: HTTP {}", response.status_code());
     }
-    let resp_body = response.body();
-    let buffer = resp_body.to_vec();
 
     // Check the SHA-256 hash of the downloaded file is as expected
-    let hash = Sha256::digest(&buffer);
+    let hash = Sha256::digest(&response_body);
     assert_eq!(
         &format!("{:x}", hash),
         expected_hash,
         "\n\nDownloaded libsodium file failed hash check.\n\n"
     );
 
-    Cursor::new(buffer)
+    Cursor::new(response_body)
 }
 
 fn get_install_dir() -> String {
@@ -231,7 +230,7 @@ fn build_libsodium() {
 
 #[cfg(all(windows, not(target_env = "msvc")))]
 fn build_libsodium() {
-    use flate2::read::GzDecoder;
+    use libflate::gzip::Decoder;
     use tar::Archive;
 
     // Download gz tarball
@@ -242,7 +241,7 @@ fn build_libsodium() {
     let compressed_file = download(&url, SHA256);
 
     // Unpack the tarball
-    let gz_decoder = GzDecoder::new(compressed_file);
+    let gz_decoder = Decoder::new(compressed_file).unwrap();
     let mut archive = Archive::new(gz_decoder);
 
     // Extract just the appropriate version of libsodium.a and headers to the install path
@@ -280,7 +279,7 @@ fn build_libsodium() {
 
 #[cfg(not(windows))]
 fn build_libsodium() {
-    use flate2::read::GzDecoder;
+    use libflate::gzip::Decoder;
     use std::process::Command;
     use std::str;
     use tar::Archive;
@@ -318,7 +317,7 @@ fn build_libsodium() {
     let compressed_file = download(&url, SHA256);
 
     // Unpack the tarball
-    let gz_decoder = GzDecoder::new(compressed_file);
+    let gz_decoder = Decoder::new(compressed_file).unwrap();
     let mut archive = Archive::new(gz_decoder);
     archive.unpack(&source_dir).unwrap();
     source_dir.push_str(&format!("/{}", basename));
