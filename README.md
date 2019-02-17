@@ -130,17 +130,54 @@ sudo apt install build-essential gcc-arm-linux-gnueabihf libc6-armhf-cross libc6
 rustup target add armv7-unknown-linux-gnueabihf
 ```
 
-1. Add the following to a [.cargo/config file](http://doc.crates.io/config.html):
+2. Add the following to a [.cargo/config file](http://doc.crates.io/config.html):
 
 ```
 [target.armv7-unknown-linux-gnueabihf]
 linker = "arm-linux-gnueabihf-gcc"
 ```
 
-1. Build by running:
+3. Build by running:
 
 ```
 cargo build --release --target armv7-unknown-linux-gnueabihf
+```
+
+### Cross-Compiling for armv7-unknown-linux-musleabihf via docker
+
+1. cargo.config:
+
+```
+[target.armv7-unknown-linux-musleabihf]
+linker = "arm-buildroot-linux-musleabihf-gcc"
+```
+
+2. Dockerfile:
+
+```
+FROM rust:1.30.1
+
+ENV TARGET="armv7-unknown-linux-musleabihf"
+
+ARG TOOLCHAIN_ARM7="armv7-eabihf--musl--stable-2018.02-2"
+ARG TC_ARM7_URL="https://toolchains.bootlin.com/downloads/releases/toolchains/armv7-eabihf/tarballs/${TOOLCHAIN_ARM7}.tar.bz2"
+
+RUN rustup target add ${TARGET}
+COPY cargo.config "${CARGO_HOME}/config"
+
+WORKDIR /opt
+RUN curl -o- ${TC_ARM7_URL} | tar -xjf -
+
+ENV PATH="${PATH}:/opt/${TOOLCHAIN_ARM7}/bin"
+ENV CC_armv7_unknown_linux_musleabihf=arm-buildroot-linux-musleabihf-gcc
+ENV CXX_armv7_unknown_linux_musleabihf=arm-buildroot-linux-musleabihf-g++
+ENV LD_armv7_unknown_linux_musleabihf=arm-buildroot-linux-musleabihf-ld
+
+WORKDIR /work
+RUN git clone https://github.com/sodiumoxide/sodiumoxide
+
+WORKDIR /work/sodiumoxide
+RUN cargo build --target=${TARGET}
 ```
 
 ### Cross-Compiling for 32-bit Linux
@@ -153,7 +190,7 @@ sudo apt install build-essential gcc-multilib -y
 rustup target add i686-unknown-linux-gnu
 ```
 
-1. Build by running:
+2. Build by running:
 
 ```
 cargo build --release --target i686-unknown-linux-gnu
