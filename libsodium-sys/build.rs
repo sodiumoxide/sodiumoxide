@@ -51,7 +51,11 @@ fn main() {
     }
 
     let lib_dir_isset = env::var("SODIUM_LIB_DIR").is_ok();
-    let use_pkg_isset = env::var("SODIUM_USE_PKG_CONFIG").is_ok();
+    let use_pkg_isset = if cfg!(feature = "use-pkg-config") {
+        true
+    } else {
+        env::var("SODIUM_USE_PKG_CONFIG").is_ok()
+    };
     let shared_isset = env::var("SODIUM_SHARED").is_ok();
 
     if lib_dir_isset && use_pkg_isset {
