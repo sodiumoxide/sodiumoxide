@@ -36,3 +36,6 @@ libc = { version = "=0.2.48" , default-features = false }
 
 [lib]
 name = "libsodium_sys"
+
+[features]
+use-pkg-config = []
