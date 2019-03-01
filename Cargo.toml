@@ -25,7 +25,7 @@ coveralls = { repository = "sodiumoxide/sodiumoxide" }
 
 [dependencies]
 libc = { version = "^0.2.41" , default-features = false }
-libsodium-sys = { version = "0.2", path = "libsodium-sys" }
+libsodium-sys = { version = "0.2.1", path = "libsodium-sys" }
 serde = { version = "^1.0.59", default-features = false, optional = true }
 
 [dev-dependencies]
