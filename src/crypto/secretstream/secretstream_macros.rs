@@ -17,6 +17,7 @@ use libc::c_ulonglong;
 #[cfg(not(feature = "std"))]
 use prelude::Vec;
 use randombytes::randombytes_into;
+use std::marker;
 use std::mem;
 use std::ops::Drop;
 use std::ptr;
@@ -128,7 +129,7 @@ pub fn gen_key() -> Key {
 pub struct Stream<M: StreamMode> {
     state: $state_name,
     finalized: bool,
-    phantom: core::marker::PhantomData<M>,
+    phantom: marker::PhantomData<M>,
 }
 
 impl<M: StreamMode> Stream<M> {
@@ -186,7 +187,7 @@ impl Stream<Push> {
             Stream::<Push> {
                 state,
                 finalized: false,
-                phantom: core::marker::PhantomData,
+                phantom: marker::PhantomData,
             },
             Header(header),
         ))
@@ -266,7 +267,7 @@ impl Stream<Pull> {
         Ok(Stream::<Pull> {
             state: state,
             finalized: false,
-            phantom: core::marker::PhantomData,
+            phantom: marker::PhantomData,
         })
     }
 
