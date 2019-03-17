@@ -1,4 +1,4 @@
-# 0.2.1
+# 0.2.1 (March 1, 2019)
 
 * Remove statik option from pkg_config usage (#296)
 * Fix struct alignments that are not correctly recognized by bindgen (#304)
