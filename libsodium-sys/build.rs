@@ -1,6 +1,5 @@
 #[cfg(not(windows))]
 extern crate cc;
-extern crate http_req;
 #[cfg(target_env = "msvc")]
 extern crate libc;
 #[cfg(not(target_env = "msvc"))]
@@ -14,14 +13,12 @@ extern crate vcpkg;
 #[cfg(target_env = "msvc")]
 extern crate zip;
 
-use http_req::request;
 use sha2::{Digest, Sha256};
 use std::env;
 use std::fs;
 use std::io::Cursor;
 use std::path::Path;
 
-static DOWNLOAD_BASE_URL: &'static str = "https://download.libsodium.org/libsodium/releases/";
 static VERSION: &'static str = "1.0.17";
 
 #[cfg(target_env = "msvc")] // libsodium-<VERSION>-msvc.zip
@@ -146,26 +143,27 @@ fn find_libsodium_pkg() {
     }
 }
 
-/// Download the specified URL into a buffer which is returned.
-fn download(url: &str, expected_hash: &str) -> Cursor<Vec<u8>> {
-    // Send GET request
-    let mut response_body = Vec::new();
-    let response = request::get(url, &mut response_body).unwrap();
+fn get_archive(filename: &str, expected_hash: &str) -> Cursor<Vec<u8>> {
+    use std::fs::File;
+    use std::io::{BufReader, Read};
 
-    // Only accept 2xx status codes
-    if !response.status_code().is_success() {
-        panic!("Download error: HTTP {}", response.status_code());
-    }
+    let f = File::open(filename).expect(
+        &format!("Failed to open {}", filename)
+    );
+    let mut reader = BufReader::new(f);
+    let mut content = Vec::new();
+    reader.read_to_end(&mut content).expect(
+        &format!("Failed to read {}", filename)
+    );
 
-    // Check the SHA-256 hash of the downloaded file is as expected
-    let hash = Sha256::digest(&response_body);
+    let hash = Sha256::digest(&content);
     assert_eq!(
         &format!("{:x}", hash),
         expected_hash,
-        "\n\nDownloaded libsodium file failed hash check.\n\n"
+        "\n\nExisting libsodium file failed hash check.\n\n"
     );
 
-    Cursor::new(response_body)
+    Cursor::new(content)
 }
 
 fn get_install_dir() -> String {
@@ -293,7 +291,7 @@ fn build_libsodium() {
 
     // Determine filenames and download URLs
     let basename = format!("libsodium-{}", VERSION);
-    let url = format!("{}{}.tar.gz", DOWNLOAD_BASE_URL, basename);
+    let filename = format!("{}.tar.gz", basename);
 
     // Determine source and install dir
     let mut install_dir = get_install_dir();
@@ -318,7 +316,7 @@ fn build_libsodium() {
     fs::create_dir_all(&source_dir).unwrap();
 
     // Download sources
-    let compressed_file = download(&url, SHA256);
+    let compressed_file = get_archive(&filename, SHA256);
 
     // Unpack the tarball
     let gz_decoder = Decoder::new(compressed_file).unwrap();

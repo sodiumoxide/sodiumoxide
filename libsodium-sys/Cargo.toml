@@ -15,7 +15,6 @@ version = "0.2.1"
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
 
 [build-dependencies]
-http_req = { version = "0.4", default-features = false, features = ["rust-tls"] }
 sha2 = "0.8"
 pkg-config = "0.3"
 
