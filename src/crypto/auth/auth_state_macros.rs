@@ -84,7 +84,7 @@ mod test_s {
             let k = gen_key();
             let m = randombytes(i);
             let tag = authenticate(&m, &k);
-            let mut state = State::init(&k[..]);
+            let mut state = State::init(k.as_ref());
             state.update(&m);
             let tag2 = state.finalize();
             assert_eq!(tag, tag2);
@@ -98,7 +98,7 @@ mod test_s {
             let k = gen_key();
             let m = randombytes(i);
             let tag = authenticate(&m, &k);
-            let mut state = State::init(&k[..]);
+            let mut state = State::init(k.as_ref());
             for c in m.chunks(1) {
                 state.update(c);
             }
