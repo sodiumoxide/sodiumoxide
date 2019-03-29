@@ -82,13 +82,6 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
         }
     }
 
-    impl AsMut<[u8]> for $newtype {
-        #[inline]
-        fn as_mut(&mut self) -> &mut [u8] {
-            &mut self.0
-        }
-    }
-
     /// Allows a user to access the byte contents of an object as a slice.
     ///
     /// WARNING: it might be tempting to do comparisons on objects
