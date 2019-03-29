@@ -25,6 +25,40 @@ pub fn memcmp(x: &[u8], y: &[u8]) -> bool {
     unsafe { ffi::sodium_memcmp(x.as_ptr() as *const _, y.as_ptr() as *const _, x.len()) == 0 }
 }
 
+
+/// `mlock()` locks memory given region which can help avoiding swapping the
+/// sensitive memory region to disk.
+///
+/// Operating system might limit the amount of memory a process can `mlock()`.
+/// This function can fail if `mlock()` fails to lock the memory.
+pub fn mlock(x: &mut [u8]) -> Result<(), ()> {
+    let ret = unsafe {
+        ffi::sodium_mlock(x.as_mut_ptr() as *mut _, x.len())
+    };
+    if ret == 0 {
+        Ok(())
+    } else {
+        Err(())
+    }
+}
+
+/// `munlock()` unlocks memory region.
+///
+/// `munlock()` overwrites the region with zeros before unlocking it, so it
+/// doesn't have to be done before calling this function.
+pub fn munlock(x: &mut [u8]) -> Result<(), ()> {
+    let ret = unsafe {
+        // sodium_munlock() internally calls sodium_memzero() to clear memory
+        // region
+        ffi::sodium_munlock(x.as_mut_ptr() as *mut _, x.len())
+    };
+    if ret == 0 {
+        Ok(())
+    } else {
+        Err(())
+    }
+}
+
 /// `increment_le()` treats `x` as an unsigned little-endian number and increments it in
 /// constant time.
 ///
@@ -201,5 +235,16 @@ mod test {
             assert!(add_le(&mut x, &z).is_err());
             assert_eq!(x, vec![1u8; i]);
         }
+    }
+
+    #[test]
+    fn test_mlock_munlock() {
+        let t = b"hello world";
+        let mut x = Vec::new();
+        x.extend_from_slice(t);
+        assert!(mlock(&mut x).is_ok());
+        assert_eq!(&x, t);
+        assert!(munlock(&mut x).is_ok());
+        assert_ne!(&x, t);
     }
 }
