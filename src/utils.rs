@@ -25,16 +25,13 @@ pub fn memcmp(x: &[u8], y: &[u8]) -> bool {
     unsafe { ffi::sodium_memcmp(x.as_ptr() as *const _, y.as_ptr() as *const _, x.len()) == 0 }
 }
 
-
 /// `mlock()` locks memory given region which can help avoiding swapping the
 /// sensitive memory region to disk.
 ///
 /// Operating system might limit the amount of memory a process can `mlock()`.
 /// This function can fail if `mlock()` fails to lock the memory.
 pub fn mlock(x: &mut [u8]) -> Result<(), ()> {
-    let ret = unsafe {
-        ffi::sodium_mlock(x.as_mut_ptr() as *mut _, x.len())
-    };
+    let ret = unsafe { ffi::sodium_mlock(x.as_mut_ptr() as *mut _, x.len()) };
     if ret == 0 {
         Ok(())
     } else {
@@ -49,7 +46,7 @@ pub fn mlock(x: &mut [u8]) -> Result<(), ()> {
 pub fn munlock(x: &mut [u8]) -> Result<(), ()> {
     let ret = unsafe {
         // sodium_munlock() internally calls sodium_memzero() to clear memory
-        // region
+        // region.
         ffi::sodium_munlock(x.as_mut_ptr() as *mut _, x.len())
     };
     if ret == 0 {
