@@ -338,7 +338,7 @@ mod test {
             let m = x2.from_hex().unwrap();
             let sm = sign(&m, &sk);
             verify(&sm, &pk).unwrap();
-            assert!(x1 == pk[..].to_hex());
+            assert!(x1 == pk.as_ref().to_hex());
             assert!(x3 == sm.to_hex());
         }
     }
@@ -369,8 +369,8 @@ mod test {
             let m = x2.from_hex().unwrap();
             let sig = sign_detached(&m, &sk);
             assert!(verify_detached(&sig, &m, &pk));
-            assert!(x1 == pk[..].to_hex());
-            let sm = sig[..].to_hex() + x2; // x2 is m hex encoded
+            assert!(x1 == pk.as_ref().to_hex());
+            let sm = sig.as_ref().to_hex() + x2; // x2 is m hex encoded
             assert!(x3 == sm);
         }
     }
@@ -448,7 +448,7 @@ mod test {
 
             assert!(validator_state.verify(&sig, &pk));
 
-            assert_eq!(x1, pk[..].to_hex());
+            assert_eq!(x1, pk.as_ref().to_hex());
         }
     }
 
