@@ -254,7 +254,10 @@ mod test {
         // duration.
         const LOCK_LIMIT: libc::rlim_t = 16384;
 
-        let mut limit = libc::rlimit { rlim_cur: 0, rlim_max: 0 };
+        let mut limit = libc::rlimit {
+            rlim_cur: 0,
+            rlim_max: 0,
+        };
         let ret = unsafe { libc::getrlimit(libc::RLIMIT_MEMLOCK, &mut limit) };
         assert_eq!(ret, 0, "libc::getrlimit failed");
 
@@ -265,7 +268,7 @@ mod test {
         let ret = unsafe { libc::setrlimit(libc::RLIMIT_MEMLOCK, &limit) };
         assert_eq!(ret, 0, "libc::setrlimit failed");
 
-        let mut x = vec![0; 5*LOCK_LIMIT as usize];
+        let mut x = vec![0; 5 * LOCK_LIMIT as usize];
         assert!(mlock(&mut x).is_err());
     }
 }
