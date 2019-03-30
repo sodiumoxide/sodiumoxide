@@ -244,4 +244,28 @@ mod test {
         assert!(munlock(&mut x).is_ok());
         assert_ne!(&x, t);
     }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_mlock_fail() {
+        // This value should be bigger than platform's page size so that we can
+        // lock at least page size of memory. And this limit is going to be the
+        // RLIMIT_MEMLOCK (see setrlimit(2)) for the rest of the process
+        // duration.
+        const LOCK_LIMIT: libc::rlim_t = 16384;
+
+        let mut limit = libc::rlimit { rlim_cur: 0, rlim_max: 0 };
+        let ret = unsafe { libc::getrlimit(libc::RLIMIT_MEMLOCK, &mut limit) };
+        assert_eq!(ret, 0, "libc::getrlimit failed");
+
+        if limit.rlim_cur > LOCK_LIMIT {
+            limit.rlim_cur = LOCK_LIMIT;
+        }
+
+        let ret = unsafe { libc::setrlimit(libc::RLIMIT_MEMLOCK, &limit) };
+        assert_eq!(ret, 0, "libc::setrlimit failed");
+
+        let mut x = vec![0; 5*LOCK_LIMIT as usize];
+        assert!(mlock(&mut x).is_err());
+    }
 }
