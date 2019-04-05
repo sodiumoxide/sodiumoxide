@@ -25,10 +25,10 @@ static DOWNLOAD_BASE_URL: &'static str = "https://download.libsodium.org/libsodi
 static VERSION: &'static str = "1.0.17";
 
 #[cfg(target_env = "msvc")] // libsodium-<VERSION>-msvc.zip
-static SHA256: &'static str = "d0ccc129253d0d51f09f8d030129041eb56fc3f488a0206babff2ef0b1752368";
+static SHA256: &'static str = "66aa0ca60c171201a9e795b8abcd7881bc9f3c664f0f80a53a55c6723dd97ad7";
 
 #[cfg(all(windows, not(target_env = "msvc")))] // libsodium-<VERSION>-mingw.tar.gz
-static SHA256: &'static str = "3c76ab4a5033b03503331314b2f289361171d7fbbfd98886751dd7f8a8a6496f";
+static SHA256: &'static str = "ea385a26997f2d8f8ea44ed930da6fe233f9377753f0436e40f80f221ded190e";
 
 #[cfg(not(windows))] // libsodium-<VERSION>.tar.gz
 static SHA256: &'static str = "0cc3dae33e642cc187b5ceb467e0ad0e1b51dcba577de1190e9ffa17766ac2b1";
