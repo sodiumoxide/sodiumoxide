@@ -61,6 +61,8 @@
 
 extern crate libsodium_sys as ffi;
 
+#[macro_use]
+extern crate ctor;
 extern crate libc;
 #[cfg(test)]
 extern crate rustc_serialize;
@@ -89,11 +91,22 @@ mod prelude {
 /// thread-safe
 ///
 /// `init()` returns `Ok` if initialization succeeded and `Err` if it failed.
+#[deprecated(
+    since = "0.2.2",
+    note = "libsodium is automatically initialized by sodiumoxide now."
+)]
 pub fn init() -> Result<(), ()> {
     if unsafe { ffi::sodium_init() } >= 0 {
         Ok(())
     } else {
         Err(())
+    }
+}
+
+#[ctor]
+fn init_real() {
+    unsafe {
+        ffi::sodium_init();
     }
 }
 
