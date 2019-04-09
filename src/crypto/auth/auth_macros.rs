@@ -29,10 +29,6 @@ new_type! {
 }
 
 /// `gen_key()` randomly generates a key for authentication
-///
-/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut k = [0; KEYBYTES];
     randombytes_into(&mut k);

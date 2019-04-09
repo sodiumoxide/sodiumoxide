@@ -81,10 +81,6 @@ new_type! {
 }
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public key.
-///
-/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
@@ -95,10 +91,6 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
 }
 
 /// `key_pair_from_seed()` deterministically derives a key pair from a single key seed (crypto_box_SEEDBYTES bytes).
-///
-/// THREAD SAFETY: `key_pair_from_seed()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
 pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
@@ -113,10 +105,6 @@ pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
 }
 
 /// `gen_nonce()` randomly generates a nonce
-///
-/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
     let mut n = [0; NONCEBYTES];
     randombytes_into(&mut n);

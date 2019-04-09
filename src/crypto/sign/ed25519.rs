@@ -53,10 +53,6 @@ new_type! {
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
 /// key.
-///
-/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
     let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
@@ -338,7 +334,7 @@ mod test {
             let m = x2.from_hex().unwrap();
             let sm = sign(&m, &sk);
             verify(&sm, &pk).unwrap();
-            assert!(x1 == pk[..].to_hex());
+            assert!(x1 == pk.as_ref().to_hex());
             assert!(x3 == sm.to_hex());
         }
     }
@@ -369,8 +365,8 @@ mod test {
             let m = x2.from_hex().unwrap();
             let sig = sign_detached(&m, &sk);
             assert!(verify_detached(&sig, &m, &pk));
-            assert!(x1 == pk[..].to_hex());
-            let sm = sig[..].to_hex() + x2; // x2 is m hex encoded
+            assert!(x1 == pk.as_ref().to_hex());
+            let sm = sig.as_ref().to_hex() + x2; // x2 is m hex encoded
             assert!(x3 == sm);
         }
     }
@@ -448,7 +444,7 @@ mod test {
 
             assert!(validator_state.verify(&sig, &pk));
 
-            assert_eq!(x1, pk[..].to_hex());
+            assert_eq!(x1, pk.as_ref().to_hex());
         }
     }
 

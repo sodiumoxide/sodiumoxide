@@ -47,7 +47,7 @@
 //! let pwh = pwhash::pwhash(passwd,
 //!                          pwhash::OPSLIMIT_INTERACTIVE,
 //!                          pwhash::MEMLIMIT_INTERACTIVE).unwrap();
-//! let pwh_bytes = &pwh[..];
+//! let pwh_bytes = pwh.as_ref();
 //! //store pwh_bytes somewhere
 //! ```
 //!

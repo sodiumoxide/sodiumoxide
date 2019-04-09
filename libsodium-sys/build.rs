@@ -1,10 +1,10 @@
 #[cfg(not(windows))]
 extern crate cc;
-#[cfg(not(target_env = "msvc"))]
-extern crate flate2;
 extern crate http_req;
 #[cfg(target_env = "msvc")]
 extern crate libc;
+#[cfg(not(target_env = "msvc"))]
+extern crate libflate;
 extern crate pkg_config;
 extern crate sha2;
 #[cfg(not(target_env = "msvc"))]
@@ -25,10 +25,10 @@ static DOWNLOAD_BASE_URL: &'static str = "https://download.libsodium.org/libsodi
 static VERSION: &'static str = "1.0.17";
 
 #[cfg(target_env = "msvc")] // libsodium-<VERSION>-msvc.zip
-static SHA256: &'static str = "d0ccc129253d0d51f09f8d030129041eb56fc3f488a0206babff2ef0b1752368";
+static SHA256: &'static str = "66aa0ca60c171201a9e795b8abcd7881bc9f3c664f0f80a53a55c6723dd97ad7";
 
 #[cfg(all(windows, not(target_env = "msvc")))] // libsodium-<VERSION>-mingw.tar.gz
-static SHA256: &'static str = "3c76ab4a5033b03503331314b2f289361171d7fbbfd98886751dd7f8a8a6496f";
+static SHA256: &'static str = "ea385a26997f2d8f8ea44ed930da6fe233f9377753f0436e40f80f221ded190e";
 
 #[cfg(not(windows))] // libsodium-<VERSION>.tar.gz
 static SHA256: &'static str = "0cc3dae33e642cc187b5ceb467e0ad0e1b51dcba577de1190e9ffa17766ac2b1";
@@ -51,7 +51,11 @@ fn main() {
     }
 
     let lib_dir_isset = env::var("SODIUM_LIB_DIR").is_ok();
-    let use_pkg_isset = env::var("SODIUM_USE_PKG_CONFIG").is_ok();
+    let use_pkg_isset = if cfg!(feature = "use-pkg-config") {
+        true
+    } else {
+        env::var("SODIUM_USE_PKG_CONFIG").is_ok()
+    };
     let shared_isset = env::var("SODIUM_SHARED").is_ok();
 
     if lib_dir_isset && use_pkg_isset {
@@ -145,24 +149,23 @@ fn find_libsodium_pkg() {
 /// Download the specified URL into a buffer which is returned.
 fn download(url: &str, expected_hash: &str) -> Cursor<Vec<u8>> {
     // Send GET request
-    let response = request::get(url).unwrap();
+    let mut response_body = Vec::new();
+    let response = request::get(url, &mut response_body).unwrap();
 
     // Only accept 2xx status codes
-    if response.status_code() < 200 && response.status_code() >= 300 {
+    if !response.status_code().is_success() {
         panic!("Download error: HTTP {}", response.status_code());
     }
-    let resp_body = response.body();
-    let buffer = resp_body.to_vec();
 
     // Check the SHA-256 hash of the downloaded file is as expected
-    let hash = Sha256::digest(&buffer);
+    let hash = Sha256::digest(&response_body);
     assert_eq!(
         &format!("{:x}", hash),
         expected_hash,
         "\n\nDownloaded libsodium file failed hash check.\n\n"
     );
 
-    Cursor::new(buffer)
+    Cursor::new(response_body)
 }
 
 fn get_install_dir() -> String {
@@ -231,7 +234,7 @@ fn build_libsodium() {
 
 #[cfg(all(windows, not(target_env = "msvc")))]
 fn build_libsodium() {
-    use flate2::read::GzDecoder;
+    use libflate::gzip::Decoder;
     use tar::Archive;
 
     // Download gz tarball
@@ -242,7 +245,7 @@ fn build_libsodium() {
     let compressed_file = download(&url, SHA256);
 
     // Unpack the tarball
-    let gz_decoder = GzDecoder::new(compressed_file);
+    let gz_decoder = Decoder::new(compressed_file).unwrap();
     let mut archive = Archive::new(gz_decoder);
 
     // Extract just the appropriate version of libsodium.a and headers to the install path
@@ -280,7 +283,7 @@ fn build_libsodium() {
 
 #[cfg(not(windows))]
 fn build_libsodium() {
-    use flate2::read::GzDecoder;
+    use libflate::gzip::Decoder;
     use std::process::Command;
     use std::str;
     use tar::Archive;
@@ -318,7 +321,7 @@ fn build_libsodium() {
     let compressed_file = download(&url, SHA256);
 
     // Unpack the tarball
-    let gz_decoder = GzDecoder::new(compressed_file);
+    let gz_decoder = Decoder::new(compressed_file).unwrap();
     let mut archive = Archive::new(gz_decoder);
     archive.unpack(&source_dir).unwrap();
     source_dir.push_str(&format!("/{}", basename));
