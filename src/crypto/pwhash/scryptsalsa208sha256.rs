@@ -121,6 +121,34 @@ pub fn derive_key<'a>(
     }
 }
 
+/// `derive_key_interactive()` is a shortcut function for `derive_key()` with
+/// interactive limits (i.e. using `derive_key()` with `OPSLIMIT_INTERACTIVE`
+/// and `MEMLIMIT_INTERACTIVE`)
+pub fn derive_key_interactive<'a>(
+    key: &'a mut [u8],
+    passwd: &[u8],
+    salt: &Salt,
+) -> Result<&'a [u8], ()> {
+    derive_key(
+        key,
+        passwd,
+        salt,
+        OPSLIMIT_INTERACTIVE,
+        MEMLIMIT_INTERACTIVE,
+    )
+}
+
+/// `derive_key_sensitive()` is a shortcut function for `derive_key()` with
+/// sensitive limits (i.e. using `derive_key()` with `OPSLIMIT_SENSITIVE`
+/// and `MEMLIMIT_SENSITIVE`)
+pub fn derive_key_sensitive<'a>(
+    key: &'a mut [u8],
+    passwd: &[u8],
+    salt: &Salt,
+) -> Result<&'a [u8], ()> {
+    derive_key(key, passwd, salt, OPSLIMIT_SENSITIVE, MEMLIMIT_SENSITIVE)
+}
+
 /// The `pwhash()` returns a `HashedPassword` which
 /// includes:
 ///
@@ -155,6 +183,20 @@ pub fn pwhash(
     } else {
         Err(())
     }
+}
+
+/// `pwhash_interactive()` is a shortcut function for `pwhash()` with
+/// interactive limits (i.e. using `pwhash()` with `OPSLIMIT_INTERACTIVE`
+/// and `MEMLIMIT_INTERACTIVE`)
+pub fn pwhash_interactive(passwd: &[u8]) -> Result<HashedPassword, ()> {
+    pwhash(passwd, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE)
+}
+
+/// `pwhash_sensitive()` is a shortcut function for `pwhash()` with
+/// sensitive limits (i.e. using `pwhash()` with `OPSLIMIT_SENSITIVE`
+/// and `MEMLIMIT_SENSITIVE`)
+pub fn pwhash_sensitive(passwd: &[u8]) -> Result<HashedPassword, ()> {
+    pwhash(passwd, OPSLIMIT_SENSITIVE, MEMLIMIT_SENSITIVE)
 }
 
 /// `pwhash_verify()` verifies that the password `str_` is a valid password
