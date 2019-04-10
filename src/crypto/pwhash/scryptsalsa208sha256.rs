@@ -129,7 +129,13 @@ pub fn derive_key_interactive<'a>(
     passwd: &[u8],
     salt: &Salt,
 ) -> Result<&'a [u8], ()> {
-    derive_key(key, passwd, salt, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE)
+    derive_key(
+        key,
+        passwd,
+        salt,
+        OPSLIMIT_INTERACTIVE,
+        MEMLIMIT_INTERACTIVE,
+    )
 }
 
 /// `derive_key_sensitive()` is a shortcut function for `derive_key()` with
@@ -140,13 +146,7 @@ pub fn derive_key_sensitive<'a>(
     passwd: &[u8],
     salt: &Salt,
 ) -> Result<&'a [u8], ()> {
-    derive_key(
-        key,
-        passwd,
-        salt,
-        OPSLIMIT_SENSITIVE,
-        MEMLIMIT_SENSITIVE,
-    )
+    derive_key(key, passwd, salt, OPSLIMIT_SENSITIVE, MEMLIMIT_SENSITIVE)
 }
 
 /// The `pwhash()` returns a `HashedPassword` which
