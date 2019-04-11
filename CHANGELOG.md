@@ -1,3 +1,11 @@
+# ... (???)
+
+* Add `AsRef<[u8]>` for newtypes (#323)
+* Initialize libsodium with global constructor (#325)
+* Update libsodium hashes due to jedisct1/libsodium#813 (#327)
+* Implement memory locking and unlocking (#324)
+* Add convenience functions for pwhash() and derive_key() (#309)
+
 # 0.2.1 (March 1, 2019)
 
 * Remove statik option from pkg_config usage (#296)
