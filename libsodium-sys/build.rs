@@ -137,22 +137,41 @@ fn get_crate_dir() -> String {
     env::var("CARGO_MANIFEST_DIR").unwrap()
 }
 
+#[cfg(target_env = "msvc")]
+fn is_release_profile() -> bool {
+    env::var("PROFILE").unwrap() == "release"
+}
+
 #[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
 fn build_libsodium() {
     println!("cargo:rustc-link-lib=static=libsodium");
-    println!(
-        "cargo:rustc-link-search=native={}/msvc/Win32/Release/v140/",
-        get_crate_dir()
-    );
+    if is_release_profile() {
+        println!(
+            "cargo:rustc-link-search=native={}/msvc/Win32/Release/v140/",
+            get_crate_dir()
+        );
+    } else {
+        println!(
+            "cargo:rustc-link-search=native={}/msvc/Win32/Debug/v140/",
+            get_crate_dir()
+        );
+    }
 }
 
 #[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
 fn build_libsodium() {
     println!("cargo:rustc-link-lib=static=libsodium");
-    println!(
-        "cargo:rustc-link-search=native={}/msvc/x64/Release/v140/",
-        get_crate_dir()
-    );
+    if is_release_profile() {
+        println!(
+            "cargo:rustc-link-search=native={}/msvc/x64/Release/v140/",
+            get_crate_dir()
+        );
+    } else {
+        println!(
+            "cargo:rustc-link-search=native={}/msvc/x64/Debug/v140/",
+            get_crate_dir()
+        );
+    }
 }
 
 #[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
