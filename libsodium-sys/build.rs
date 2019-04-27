@@ -15,9 +15,7 @@ extern crate tar;
 extern crate pkg_config;
 
 use std::env;
-use std::fs;
 use std::io::Cursor;
-use std::path::Path;
 
 static VERSION: &'static str = "1.0.17";
 
@@ -134,6 +132,48 @@ fn find_libsodium_pkg() {
     }
 }
 
+#[cfg(any(windows, target_env = "msvc"))]
+fn get_crate_dir() -> String {
+    env::var("CARGO_MANIFEST_DIR").unwrap()
+}
+
+#[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
+fn build_libsodium() {
+    println!("cargo:rustc-link-lib=static=libsodium");
+    println!(
+        "cargo:rustc-link-search=native={}/msvc/Win32/Release/v140/",
+        get_crate_dir()
+    );
+}
+
+#[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
+fn build_libsodium() {
+    println!("cargo:rustc-link-lib=static=libsodium");
+    println!(
+        "cargo:rustc-link-search=native={}/msvc/x64/Release/v140/",
+        get_crate_dir()
+    );
+}
+
+#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
+fn build_libsodium() {
+    println!("cargo:rustc-link-lib=static=sodium");
+    println!(
+        "cargo:rustc-link-search=native={}/mingw/win32/",
+        get_crate_dir()
+    );
+}
+
+#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "64"))]
+fn build_libsodium() {
+    println!("cargo:rustc-link-lib=static=sodium");
+    println!(
+        "cargo:rustc-link-search=native={}/mingw/win64/",
+        get_crate_dir()
+    );
+}
+
+#[cfg(not(windows))]
 fn get_archive(filename: &str) -> Cursor<Vec<u8>> {
     use std::fs::File;
     use std::io::{BufReader, Read};
@@ -148,43 +188,16 @@ fn get_archive(filename: &str) -> Cursor<Vec<u8>> {
     Cursor::new(content)
 }
 
-fn get_crate_dir() -> String {
-    env::var("CARGO_MANIFEST_DIR").unwrap()
-}
-
+#[cfg(not(windows))]
 fn get_install_dir() -> String {
     env::var("OUT_DIR").unwrap() + "/installed"
-}
-
-#[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
-fn build_libsodium() {
-    println!("cargo:rustc-link-lib=static=libsodium");
-    println!("cargo:rustc-link-search=native={}/msvc/Win32/Release/v140/", get_crate_dir());
-}
-
-#[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
-fn build_libsodium() {
-    println!("cargo:rustc-link-lib=static=libsodium");
-    println!("cargo:rustc-link-search=native={}/msvc/x64/Release/v140/", get_crate_dir());
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
-fn build_libsodium() {
-    println!("cargo:rustc-link-lib=static=sodium");
-    println!("cargo:rustc-link-search=native={}/mingw/win32/", get_crate_dir());
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "64"))]
-fn build_libsodium() {
-    println!("cargo:rustc-link-lib=static=sodium");
-    println!("cargo:rustc-link-search=native={}/mingw/win64/", get_crate_dir());
 }
 
 #[cfg(not(windows))]
 fn build_libsodium() {
     use libflate::gzip::Decoder;
     use std::process::Command;
-    use std::str;
+    use std::{fs, path::Path, str};
     use tar::Archive;
 
     // Determine build target triple
