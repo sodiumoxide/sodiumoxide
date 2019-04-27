@@ -15,7 +15,6 @@ extern crate tar;
 extern crate pkg_config;
 
 use std::env;
-use std::io::Cursor;
 
 static VERSION: &'static str = "1.0.17";
 
@@ -193,7 +192,7 @@ fn build_libsodium() {
 }
 
 #[cfg(not(windows))]
-fn get_archive(filename: &str) -> Cursor<Vec<u8>> {
+fn get_archive(filename: &str) -> std::io::Cursor<Vec<u8>> {
     use std::fs::File;
     use std::io::{BufReader, Read};
 
@@ -204,7 +203,7 @@ fn get_archive(filename: &str) -> Cursor<Vec<u8>> {
         .read_to_end(&mut content)
         .expect(&format!("Failed to read {}", filename));
 
-    Cursor::new(content)
+    std::io::Cursor::new(content)
 }
 
 #[cfg(not(windows))]
