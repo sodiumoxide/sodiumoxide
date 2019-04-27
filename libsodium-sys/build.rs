@@ -148,6 +148,10 @@ fn get_archive(filename: &str) -> Cursor<Vec<u8>> {
     Cursor::new(content)
 }
 
+fn get_crate_dir() -> String {
+    env::var("CARGO_MANIFEST_DIR").unwrap()
+}
+
 fn get_install_dir() -> String {
     env::var("OUT_DIR").unwrap() + "/installed"
 }
@@ -155,25 +159,25 @@ fn get_install_dir() -> String {
 #[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
 fn build_libsodium() {
     println!("cargo:rustc-link-lib=static=libsodium");
-    println!("cargo:rustc-link-search=native=msvc/Win32/Release/v140/");
+    println!("cargo:rustc-link-search=native={}/msvc/Win32/Release/v140/", get_crate_dir());
 }
 
 #[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
 fn build_libsodium() {
     println!("cargo:rustc-link-lib=static=libsodium");
-    println!("cargo:rustc-link-search=native=msvc/x64/Release/v140/");
+    println!("cargo:rustc-link-search=native={}/msvc/x64/Release/v140/", get_crate_dir());
 }
 
 #[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
 fn build_libsodium() {
     println!("cargo:rustc-link-lib=static=sodium");
-    println!("cargo:rustc-link-search=native=mingw/win32/",);
+    println!("cargo:rustc-link-search=native={}/mingw/win32/", get_crate_dir());
 }
 
 #[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "64"))]
 fn build_libsodium() {
     println!("cargo:rustc-link-lib=static=sodium");
-    println!("cargo:rustc-link-search=native=mingw/win64/",);
+    println!("cargo:rustc-link-search=native={}/mingw/win64/", get_crate_dir());
 }
 
 #[cfg(not(windows))]
