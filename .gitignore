@@ -1,18 +1,3 @@
-#### Binary ####
-### Archive ###
-*.a
-*.lib
-
-### Object ###
-*.o
-*.obj
-
-### Shared Object ###
-*.dll
-*.dylib
-*.so
-*.so.*
-
 #### IDEs ####
 ### CLion ###
 # CMake
