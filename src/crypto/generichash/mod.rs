@@ -145,7 +145,6 @@ mod test {
 
     #[test]
     fn test_blake2b_vectors() {
-        use rustc_serialize::hex::FromHex;
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -166,21 +165,21 @@ mod test {
                 }
 
                 assert!(line.starts_with("in:"));
-                line[3..].trim().from_hex().unwrap()
+                hex::decode(line[3..].trim()).unwrap()
             };
 
             let key = {
                 line.clear();
                 r.read_line(&mut line).unwrap();
                 assert!(line.starts_with("key:"));
-                line[4..].trim().from_hex().unwrap()
+                hex::decode(line[4..].trim()).unwrap()
             };
 
             let expected_hash = {
                 line.clear();
                 r.read_line(&mut line).unwrap();
                 assert!(line.starts_with("hash:"));
-                line[5..].from_hex().unwrap()
+                hex::decode(&line[5..].trim()).unwrap()
             };
 
             let mut hasher = State::new(64, Some(&key)).unwrap();

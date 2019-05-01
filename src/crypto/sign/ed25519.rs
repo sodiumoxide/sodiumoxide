@@ -316,7 +316,6 @@ mod test {
     fn test_vectors() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use rustc_serialize::hex::{FromHex, ToHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -328,18 +327,18 @@ mod test {
             let x1 = x.next().unwrap();
             let x2 = x.next().unwrap();
             let x3 = x.next().unwrap();
-            let seed_bytes = x0[..64].from_hex().unwrap();
+            let seed_bytes = hex::decode(&x0[..64]).unwrap();
             assert!(seed_bytes.len() == SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
             for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
             }
             let (pk, sk) = keypair_from_seed(&seed);
-            let m = x2.from_hex().unwrap();
+            let m = hex::decode(x2).unwrap();
             let sm = sign(&m, &sk);
             verify(&sm, &pk).unwrap();
-            assert!(x1 == pk.as_ref().to_hex());
-            assert!(x3 == sm.to_hex());
+            assert!(x1 == hex::encode(pk));
+            assert!(x3 == hex::encode(sm));
         }
     }
 
@@ -347,7 +346,6 @@ mod test {
     fn test_vectors_detached() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use rustc_serialize::hex::{FromHex, ToHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -359,18 +357,18 @@ mod test {
             let x1 = x.next().unwrap();
             let x2 = x.next().unwrap();
             let x3 = x.next().unwrap();
-            let seed_bytes = x0[..64].from_hex().unwrap();
+            let seed_bytes = hex::decode(&x0[..64]).unwrap();
             assert!(seed_bytes.len() == SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
             for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
             }
             let (pk, sk) = keypair_from_seed(&seed);
-            let m = x2.from_hex().unwrap();
+            let m = hex::decode(x2).unwrap();
             let sig = sign_detached(&m, &sk);
             assert!(verify_detached(&sig, &m, &pk));
-            assert!(x1 == pk.as_ref().to_hex());
-            let sm = sig.as_ref().to_hex() + x2; // x2 is m hex encoded
+            assert!(x1 == hex::encode(pk));
+            let sm = hex::encode(sig) + x2; // x2 is m hex encoded
             assert!(x3 == sm);
         }
     }
@@ -418,7 +416,6 @@ mod test {
     fn test_streaming_vectors() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use rustc_serialize::hex::{FromHex, ToHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -429,7 +426,7 @@ mod test {
             let x0 = x.next().unwrap();
             let x1 = x.next().unwrap();
             let x2 = x.next().unwrap();
-            let seed_bytes = x0[..64].from_hex().unwrap();
+            let seed_bytes = hex::decode(&x0[..64]).unwrap();
             assert!(seed_bytes.len() == SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
             for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
@@ -437,7 +434,7 @@ mod test {
             }
             let (pk, sk) = keypair_from_seed(&seed);
 
-            let m = x2.from_hex().unwrap();
+            let m = hex::decode(x2).unwrap();
 
             let mut creation_state = State::init();
             creation_state.update(&m);
@@ -448,7 +445,7 @@ mod test {
 
             assert!(validator_state.verify(&sig, &pk));
 
-            assert_eq!(x1, pk.as_ref().to_hex());
+            assert_eq!(x1, hex::encode(pk));
         }
     }
 
