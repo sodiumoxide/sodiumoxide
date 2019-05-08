@@ -10,6 +10,10 @@ environment:
   - TARGET: i686-pc-windows-msvc
     RUST_CHANNEL: stable
 
+  # stable x86_64 with static libsodium from sources
+  - TARGET: x86_64-pc-windows-gnu
+    RUST_CHANNEL: stable
+
     # stable x86_64 with dynamic libsodium from vcpkg
   - TARGET: x86_64-pc-windows-msvc
     RUST_CHANNEL: stable
@@ -28,6 +32,8 @@ install:
         # Install libsodium via vcpkg
         vcpkg install "libsodium:$env:VCPKG_TARGET"
       }
+  # Add GCC to PATH if needed.
+  - if "%TARGET%" == "x86_64-pc-windows-gnu" set PATH=%PATH%;C:\msys64\mingw64\bin
 
 cache:
   - C:\Users\appveyor\.cargo\registry
