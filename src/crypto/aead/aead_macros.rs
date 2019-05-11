@@ -40,6 +40,10 @@ new_type! {
 }
 
 /// `gen_key()` randomly generates a secret key
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut k = Key([0u8; KEYBYTES]);
     randombytes_into(&mut k.0);
@@ -47,6 +51,10 @@ pub fn gen_key() -> Key {
 }
 
 /// `gen_nonce()` randomly generates a nonce
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
     let mut n = Nonce([0u8; NONCEBYTES]);
     randombytes_into(&mut n.0);
