@@ -86,15 +86,15 @@ mod test_m {
         for i in 0..32usize {
             let k = gen_key();
             let mut m = randombytes(i);
-            let Tag(mut tagbuf) = authenticate(&mut m, &k);
+            let Tag(mut tagbuf) = authenticate(&m, &k);
             for j in 0..m.len() {
                 m[j] ^= 0x20;
-                assert!(!verify(&Tag(tagbuf), &mut m, &k));
+                assert!(!verify(&Tag(tagbuf), &m, &k));
                 m[j] ^= 0x20;
             }
             for j in 0..tagbuf.len() {
                 tagbuf[j] ^= 0x20;
-                assert!(!verify(&Tag(tagbuf), &mut m, &k));
+                assert!(!verify(&Tag(tagbuf), &m, &k));
                 tagbuf[j] ^= 0x20;
             }
         }

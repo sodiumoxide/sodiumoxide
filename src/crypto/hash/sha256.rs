@@ -67,7 +67,7 @@ mod test {
         loop {
             line.clear();
             r.read_line(&mut line).unwrap();
-            if line.len() == 0 {
+            if line.is_empty() {
                 break;
             }
             let starts_with_len = line.starts_with("Len = ");
@@ -81,7 +81,7 @@ mod test {
                 r.read_line(&mut line).unwrap();
                 let md = hex::decode(&line[5..].trim()).unwrap();
                 let Digest(digest) = hash(msg);
-                assert!(&digest[..] == &md[..]);
+                assert!(digest[..] == md[..]);
             }
         }
     }

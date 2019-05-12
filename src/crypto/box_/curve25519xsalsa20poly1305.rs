@@ -379,7 +379,7 @@ mod test {
             let mut c = seal(&m, &n, &pk1, &sk2);
             for j in 0..c.len() {
                 c[j] ^= 0x20;
-                assert!(Err(()) == open(&mut c, &n, &pk2, &sk1));
+                assert!(Err(()) == open(&c, &n, &pk2, &sk1));
                 c[j] ^= 0x20;
             }
         }
@@ -398,7 +398,7 @@ mod test {
             let mut c = seal_precomputed(&m, &n, &k1);
             for j in 0..c.len() {
                 c[j] ^= 0x20;
-                assert!(Err(()) == open_precomputed(&mut c, &n, &k2));
+                assert!(Err(()) == open_precomputed(&c, &n, &k2));
                 c[j] ^= 0x20;
             }
         }
@@ -435,7 +435,7 @@ mod test {
             let mut c = seal(&m, &n, &pk1, &sk2);
             for j in 0..c.len() {
                 c[j] ^= 0x20;
-                assert!(Err(()) == open(&mut c, &n, &pk2, &sk1));
+                assert!(Err(()) == open(&c, &n, &pk2, &sk1));
                 c[j] ^= 0x20;
             }
         }

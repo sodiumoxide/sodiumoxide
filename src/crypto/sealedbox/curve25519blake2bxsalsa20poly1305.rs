@@ -89,7 +89,7 @@ mod test {
             let mut c = seal(&m, &pk);
             for j in 0..c.len() {
                 c[j] ^= 0x20;
-                assert!(Err(()) == open(&mut c, &pk, &sk));
+                assert!(Err(()) == open(&c, &pk, &sk));
                 c[j] ^= 0x20;
             }
         }

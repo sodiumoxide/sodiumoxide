@@ -154,7 +154,8 @@ mod test {
         loop {
             let msg = {
                 line.clear();
-                if let Err(_) = r.read_line(&mut line) {
+                r.read_line(&mut line).unwrap();
+                if line.is_empty() {
                     break;
                 }
 
