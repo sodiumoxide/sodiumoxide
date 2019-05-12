@@ -29,9 +29,9 @@ libsodium-sys = { version = "0.2.1", path = "libsodium-sys" }
 serde = { version = "^1.0.59", default-features = false, optional = true }
 
 [dev-dependencies]
+hex = "0.3"
 serde = "^1.0.59"
 serde_json = "^1.0.17"
-rustc-serialize = "^0.3.24"
 rmp-serde = "^0.13.7"
 
 [features]
