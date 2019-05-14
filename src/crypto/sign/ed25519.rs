@@ -201,7 +201,7 @@ impl State {
         &Signature(ref sig): &Signature,
         &PublicKey(ref pk): &PublicKey,
     ) -> bool {
-        let mut sig = sig.clone();
+        let mut sig = *sig;
         let ret = unsafe {
             ffi::crypto_sign_ed25519ph_final_verify(&mut self.0, sig.as_mut_ptr(), pk.as_ptr())
         };
@@ -247,7 +247,7 @@ mod test {
             let mut sm = sign(&m, &sk);
             for j in 0..sm.len() {
                 sm[j] ^= 0x20;
-                assert!(Err(()) == verify(&mut sm, &pk));
+                assert!(Err(()) == verify(&sm, &pk));
                 sm[j] ^= 0x20;
             }
         }
@@ -306,7 +306,7 @@ mod test {
             let mut sm = sign(&m, &sk);
             for j in 0..sm.len() {
                 sm[j] ^= 0x20;
-                assert!(Err(()) == verify(&mut sm, &pk));
+                assert!(Err(()) == verify(&sm, &pk));
                 sm[j] ^= 0x20;
             }
         }
@@ -458,24 +458,8 @@ mod test {
         let mut creation_state = State::init();
         creation_state.update(&m);
 
-        let creation_state_copied = creation_state;
-        let sig = creation_state_copied.finalize(&sk);
-        let mut validator_state = State::init();
-        validator_state.update(&m);
-        assert!(validator_state.verify(&sig, &pk));
-    }
-
-    #[test]
-    fn test_streaming_clone() {
-        use randombytes::randombytes;
-        let i = 256;
-        let (pk, sk) = gen_keypair();
-        let m = randombytes(i);
-        let mut creation_state = State::init();
-        creation_state.update(&m);
-
-        let creation_state_cloned = creation_state.clone();
-        let sig = creation_state_cloned.finalize(&sk);
+        let creation_state_copy = creation_state;
+        let sig = creation_state_copy.finalize(&sk);
         let mut validator_state = State::init();
         validator_state.update(&m);
         assert!(validator_state.verify(&sig, &pk));

@@ -75,7 +75,7 @@ mod test {
     fn to_hashed_password(s: &str) -> HashedPassword {
         let mut pw = [0; 128];
         s.as_bytes()
-            .into_iter()
+            .iter()
             .enumerate()
             .for_each(|(i, val)| pw[i] = *val);
         HashedPassword(pw)
@@ -151,7 +151,7 @@ mod test {
             0xa2, 0xf7, 0x97, 0x4a, 0x3b, 0xd7, 0x30, 0xd0, 0x4d, 0x52, 0x5d, 0x25, 0x3c, 0xcc,
             0x38,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 155, 5, 7256678);
+        let result = run_derive_key_test(&password, salt, &expected, 155, 5, 7_256_678);
         assert!(result.is_ok());
     }
 
@@ -190,7 +190,7 @@ mod test {
             0x43, 0x02, 0xad, 0xe7, 0x9f, 0x61, 0xcb, 0xd5, 0x49, 0x7c, 0x95, 0x48, 0x63, 0x40,
             0xbb, 0x89, 0x1a, 0x73, 0x72, 0x23, 0x10, 0x0b, 0xe0, 0x42, 0x96, 0x50,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 250, 4, 7849083);
+        let result = run_derive_key_test(&password, salt, &expected, 250, 4, 7_849_083);
         assert!(result.is_ok());
     }
 
@@ -236,7 +236,7 @@ mod test {
             0x56, 0x03, 0x72, 0xc4, 0x45, 0x2f, 0xfb, 0x2a, 0x04, 0xfb, 0x7c, 0x66, 0x91, 0x48,
             0x9f, 0x70, 0xcb, 0x46, 0x83, 0x1b, 0xe0, 0x67, 0x91, 0x17, 0xf7,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 249, 3, 7994791);
+        let result = run_derive_key_test(&password, salt, &expected, 249, 3, 7_994_791);
         assert!(result.is_ok());
     }
 
@@ -260,7 +260,7 @@ mod test {
             0x59, 0x8f,
         ];
         let expected = [0x00];
-        let result = run_derive_key_test(&password, salt, &expected, 5, 4, 1397645);
+        let result = run_derive_key_test(&password, salt, &expected, 5, 4, 1_397_645);
         assert!(result.is_err(), "Test should fail, output size too small");
     }
 
@@ -294,7 +294,7 @@ mod test {
             0xe0, 0xf3, 0xa1, 0x28, 0xe7, 0x15, 0x5a, 0x68, 0xe8, 0x7c, 0xf7, 0x96, 0x26, 0xff,
             0xca, 0x0b, 0x2a, 0x30, 0x22, 0xfc, 0x84, 0x20,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 190, 3, 1432947);
+        let result = run_derive_key_test(&password, salt, &expected, 190, 3, 1_432_947);
         assert!(result.is_ok());
     }
 
@@ -333,7 +333,7 @@ mod test {
             0x2c, 0x1b, 0xcc, 0xc5, 0xfd, 0x63, 0xad, 0x57, 0xf4, 0x32, 0xfb, 0xcc, 0xa6, 0xf9,
             0xe1, 0x8d, 0x5a, 0x59, 0x01, 0x59, 0x50, 0xcd, 0xf0, 0x53,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 178, 3, 4886999);
+        let result = run_derive_key_test(&password, salt, &expected, 178, 3, 4_886_999);
         assert!(result.is_ok());
     }
 
@@ -349,7 +349,7 @@ mod test {
             0x79, 0xb4,
         ];
         let expected = [0x00];
-        let result = run_derive_key_test(&password, salt, &expected, 231, 1, 1631659);
+        let result = run_derive_key_test(&password, salt, &expected, 231, 1, 1_631_659);
         assert!(
             result.is_err(),
             "Test should fail, argon2i with opslimit < 3"
@@ -394,7 +394,7 @@ mod test {
             0x6e, 0x91, 0x03, 0x1b, 0xfd, 0xcc, 0x2a, 0x9d, 0xc0, 0xe0, 0x28, 0xd1, 0x7b, 0x97,
             0x05, 0xba, 0x2d, 0x7b, 0xcd, 0xcd, 0x1e, 0x3b, 0xa7, 0x5b, 0x4b, 0x1f, 0xea,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 167, 3, 1784128);
+        let result = run_derive_key_test(&password, salt, &expected, 167, 3, 1_784_128);
         assert!(result.is_ok());
     }
 
@@ -430,7 +430,7 @@ mod test {
             0x9d, 0xe0, 0x9e, 0x20, 0xc3, 0xab, 0xe6, 0x51, 0x55, 0x01, 0xb3, 0x15, 0x6c, 0xd5,
             0x1e,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 155, 4, 397645);
+        let result = run_derive_key_test(&password, salt, &expected, 155, 4, 397_645);
         assert!(result.is_ok());
     }
 
@@ -466,7 +466,7 @@ mod test {
             0x7b, 0x7a, 0xb2, 0x3a, 0x77, 0xee, 0xef, 0xb2, 0xa0, 0xbe, 0x2e, 0xf4, 0x5e, 0x90,
             0x3c,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 155, 3, 397645);
+        let result = run_derive_key_test(&password, salt, &expected, 155, 3, 397_645);
         assert!(result.is_ok());
     }
 
@@ -526,7 +526,7 @@ mod test {
     fn test_hash_1() {
         let password = "Correct Horse Battery Staple";
         let opslimit = OpsLimit(3);
-        let memlimit = MemLimit(5000000);
+        let memlimit = MemLimit(5_000_000);
 
         let result = pwhash(password.as_bytes(), opslimit, memlimit);
         assert!(result.is_ok(), "failed to hash password (1)");
@@ -543,7 +543,7 @@ mod test {
     fn test_hash_2() {
         let password = "Correct Horse Battery Staple";
         let opslimit = OpsLimit(1);
-        let memlimit = MemLimit(5000000);
+        let memlimit = MemLimit(5_000_000);
 
         let result = pwhash(password.as_bytes(), opslimit, memlimit);
         assert!(
@@ -556,7 +556,7 @@ mod test {
     fn test_hash_3() {
         let password = "Correct Horse Battery Staple";
         let opslimit = OpsLimit(3);
-        let memlimit = MemLimit(5000000);
+        let memlimit = MemLimit(5_000_000);
 
         let result = pwhash(password.as_bytes(), opslimit, memlimit);
         assert!(result.is_ok(), "failed to hash password (1)");

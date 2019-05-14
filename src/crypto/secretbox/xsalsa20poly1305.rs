@@ -175,7 +175,7 @@ mod test {
             for i in 0..c.len() {
                 c[i] ^= 0x20;
                 // Test the combined mode.
-                assert_eq!(Err(()), open(&mut c, &n, &k));
+                assert_eq!(Err(()), open(&c, &n, &k));
                 // Test the detached mode.
                 let tag = Tag::from_slice(&c[..MACBYTES]).unwrap();
                 assert_eq!(Err(()), open_detached(&mut c[MACBYTES..], &tag, &n, &k));
