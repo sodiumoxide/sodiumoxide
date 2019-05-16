@@ -8,7 +8,7 @@ name = "sodiumoxide"
 readme = "README.md"
 repository = "https://github.com/sodiumoxide/sodiumoxide"
 categories = ["cryptography"]
-version = "0.2.1"
+version = "0.2.2"
 exclude = [
     "**/.gitignore",
     ".travis.yml",
