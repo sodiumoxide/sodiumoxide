@@ -1,8 +1,7 @@
-# ... (???)
+# 0.2.2 (???)
 
+* Bundle libsodium .a .lib for win & cygwin (#332)
 * Add `AsRef<[u8]>` for newtypes (#323)
-* Initialize libsodium with global constructor (#325)
-* Update libsodium hashes due to jedisct1/libsodium#813 (#327)
 * Implement memory locking and unlocking (#324)
 * Add convenience functions for pwhash() and derive_key() (#309)
 
