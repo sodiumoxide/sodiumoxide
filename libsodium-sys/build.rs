@@ -16,7 +16,7 @@ extern crate pkg_config;
 
 use std::env;
 
-static VERSION: &'static str = "1.0.17";
+static VERSION: &'static str = "1.0.18";
 
 fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");

@@ -4,7 +4,8 @@ use libsodium_sys::*;
 
 #[test]
 fn test_crypto_onetimeauth_poly1305_state_alignment() {
-    // this asserts the alignment applied in alignment_fix.patch (see gen.sh)
+    // this asserts the alignment applied that was broken with old
+    // versions of bindgen
     assert_eq!(
         16,
         std::mem::align_of::<crypto_onetimeauth_poly1305_state>()
