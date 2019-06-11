@@ -10,6 +10,8 @@ use prelude::*;
 use std::fmt;
 use std::mem;
 
+use super::super::box_::curve25519xsalsa20poly1305 as box_;
+
 /// Number of bytes in a `Seed`.
 pub const SEEDBYTES: usize = ffi::crypto_sign_ed25519_SEEDBYTES as usize;
 
@@ -153,6 +155,36 @@ pub fn verify_detached(sig: &Signature, m: &[u8], pk: &PublicKey) -> bool {
         )
     };
     ret == 0
+}
+
+/// `convert_pk()` converts an Ed25519 public key `pk` to an X25519 public key `curve_pk`.
+/// `convert_pk()` returns the X25519 public key `Ok(curve_pk)`.
+/// If the conversion fails, `convert_pk()` returns `Err(())`.
+pub fn convert_pk(pk: &PublicKey) -> Result<box_::PublicKey, ()> {
+    let mut curve_pk = box_::PublicKey([0u8; box_::PUBLICKEYBYTES]);
+    let ret = unsafe {
+        ffi::crypto_sign_ed25519_pk_to_curve25519(curve_pk.0.as_mut_ptr(), pk.0.as_ptr())
+    };
+    if ret == 0 {
+        Ok(curve_pk)
+    } else {
+        Err(())
+    }
+}
+
+/// `convert_sk()` converts an Ed25519 secret key `sk` to an X25519 secret key `curve_sk`.
+/// `convert_sk()` returns the X25519 secret key `Ok(curve_sk)`.
+/// If the conversion fails, `convert_sk()` returns `Err(())`.
+pub fn convert_sk(sk: &SecretKey) -> Result<box_::SecretKey, ()> {
+    let mut curve_sk = box_::SecretKey([0u8; box_::SECRETKEYBYTES]);
+    let ret = unsafe {
+        ffi::crypto_sign_ed25519_sk_to_curve25519(curve_sk.0.as_mut_ptr(), sk.0.as_ptr())
+    };
+    if ret == 0 {
+        Ok(curve_sk)
+    } else {
+        Err(())
+    }
 }
 
 /// State for multi-part (streaming) computation of signature.
@@ -310,6 +342,24 @@ mod test {
                 sm[j] ^= 0x20;
             }
         }
+    }
+
+    #[test]
+    fn test_sign_convert_pk() {
+        use randombytes::randombytes_into;
+        let mut seedbuf = [0; 32];
+        randombytes_into(&mut seedbuf);
+        let seed_ed = Seed(seedbuf);
+        let seed_curve = box_::Seed(seedbuf);
+        let (pk, sk) = keypair_from_seed(&seed_ed);
+        let (curve_pk, curve_sk) = box_::keypair_from_seed(&seed_curve);
+        assert!(Ok(curve_pk) == convert_pk(&pk))
+    }
+
+    #[test]
+    fn test_sign_convert_sk() {
+        let (pk, sk) = gen_keypair();
+        assert!(Err(()) != convert_sk(&sk));
     }
 
     #[test]
