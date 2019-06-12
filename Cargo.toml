@@ -16,7 +16,7 @@ exclude = [
 ]
 
 [workspace]
-members = ["libsodium-sys"]
+members = ["libsodium-sys", "testcrate"]
 
 [badges]
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }

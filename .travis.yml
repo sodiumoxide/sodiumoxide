@@ -45,7 +45,7 @@ matrix:
 
 script:
   - cargo build --verbose
-  - cargo test --verbose
+  - cargo test --verbose --all
   - cargo test --verbose --no-default-features --features std
   - cargo doc
 
