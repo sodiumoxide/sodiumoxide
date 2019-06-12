@@ -1,4 +1,8 @@
-# 0.2.2 (???)
+# 0.2.3 (???)
+
+* Update libsodium to 1.0.18 (#342)
+
+# 0.2.2 (May 16, 2019)
 
 * Bundle libsodium .a .lib for win & cygwin (#332)
 * Add `AsRef<[u8]>` for newtypes (#323)
