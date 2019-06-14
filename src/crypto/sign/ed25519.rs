@@ -41,6 +41,17 @@ new_type! {
     secret SecretKey(SECRETKEYBYTES);
 }
 
+impl SecretKey {
+    /// `public_key()` computes the corresponding public key for a given secret key
+    pub fn public_key(&self) -> PublicKey {
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        unsafe {
+            ffi::crypto_sign_ed25519_sk_to_pk(pk.0.as_mut_ptr(), self.0.as_ptr());
+        }
+        pk
+    }
+}
+
 new_type! {
     /// `PublicKey` for signatures
     public PublicKey(PUBLICKEYBYTES);
@@ -225,6 +236,12 @@ impl Default for State {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_sk_to_pk() {
+        let (pk, sk) = gen_keypair();
+        assert_eq!(sk.public_key(), pk);
+    }
 
     #[test]
     fn test_sign_verify() {
