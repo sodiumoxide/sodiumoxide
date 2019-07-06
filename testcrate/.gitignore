@@ -1,0 +1,30 @@
+#### IDEs ####
+### CLion ###
+# CMake
+cmake-build-debug/
+
+### IntelliJ ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### Vim ###
+.sw[a-p]
+.*.sw[a-p]
+Session.vim
+.netrwhist
+*~
+
+### Visual Studio Code ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history
+
+#### Languages ####
+### Rust ###
+/target/
+Cargo.lock

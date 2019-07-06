@@ -5,14 +5,17 @@ environment:
     # stable x86_64 with static libsodium from sources
   - TARGET: x86_64-pc-windows-msvc
     RUST_CHANNEL: stable
+    RUST_BACKTRACE: 1
 
     # stable x86 with static libsodium from sources
   - TARGET: i686-pc-windows-msvc
     RUST_CHANNEL: stable
+    RUST_BACKTRACE: 1
 
   # stable x86_64 with static libsodium from sources
   - TARGET: x86_64-pc-windows-gnu
     RUST_CHANNEL: stable
+    RUST_BACKTRACE: 1
 
     # stable x86_64 with dynamic libsodium from vcpkg
   - TARGET: x86_64-pc-windows-msvc
@@ -20,6 +23,7 @@ environment:
     VCPKG_TARGET: x64-windows
     SODIUM_USE_PKG_CONFIG: 1
     VCPKGRS_DYNAMIC: 1
+    RUST_BACKTRACE: 1
 
 install:
   - ps: |
@@ -39,10 +43,8 @@ cache:
   - C:\Users\appveyor\.cargo\registry
   - target
 
-build_script:
-  - cmd: cargo build --target %TARGET%
-  - cmd: cargo build --release --target %TARGET%
+build: false
 
 test_script:
-  - cmd: cargo test --target %TARGET%
-  - cmd: cargo test --release --target %TARGET%
+  - cargo test --target %TARGET%
+  - cargo test --release --target %TARGET%
