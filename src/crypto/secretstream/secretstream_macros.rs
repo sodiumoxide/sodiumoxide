@@ -169,19 +169,22 @@ impl Stream<Push> {
     /// encryption applications can use the password hashing API to get a key
     /// that can be used with the functions below.
     pub fn init_push(key: &Key) -> Result<(Stream<Push>, Header), ()> {
-        let mut header: [u8; HEADERBYTES] = unsafe { mem::uninitialized() };
-        let mut state: $state_name =
-            unsafe { mem::uninitialized() };
+        let mut header = mem::MaybeUninit::<[u8; HEADERBYTES]>::uninit();
+        let mut state = mem::MaybeUninit::uninit();
         let rc = unsafe {
             $init_push_name(
-                &mut state,
-                header.as_mut_ptr(),
+                state.as_mut_ptr(),
+                header.as_mut_ptr() as *mut u8,
                 key.0.as_ptr(),
             )
         };
         if rc != 0 {
             return Err(());
         }
+        // rc == 0 and both state and header are initialized
+        let state = unsafe { state.assume_init() };
+        let header = unsafe { header.assume_init() };
+
         Ok((
             Stream::<Push> {
                 state,
@@ -245,11 +248,10 @@ impl Stream<Pull> {
     /// will not be required any more for subsequent operations. `Err(())` is
     /// returned if the header is invalid.
     pub fn init_pull(header: &Header, key: &Key) -> Result<Stream<Pull>, ()> {
-        let mut state: $state_name =
-            unsafe { mem::uninitialized() };
+        let mut state = mem::MaybeUninit::uninit();
         let rc = unsafe {
             $init_pull_name(
-                &mut state,
+                state.as_mut_ptr(),
                 header.0.as_ptr(),
                 key.0.as_ptr(),
             )
@@ -263,6 +265,9 @@ impl Stream<Pull> {
         } else if rc != 0 {
             return Err(());
         }
+        // rc == 0 and state is initialized
+        let state = unsafe { state.assume_init() };
+
         Ok(Stream::<Pull> {
             state: state,
             finalized: false,
@@ -297,7 +302,7 @@ impl Stream<Pull> {
         let (ad_p, ad_len) = ad
             .map(|ad| (ad.as_ptr(), ad.len()))
             .unwrap_or((ptr::null(), 0));
-        let mut tag: u8 = unsafe { mem::uninitialized() };
+        let mut tag = mem::MaybeUninit::uninit();
         let mut buf = Vec::with_capacity(m_len);
         let rc = unsafe {
             buf.set_len(m_len);
@@ -305,7 +310,7 @@ impl Stream<Pull> {
                 &mut self.state,
                 buf.as_mut_ptr(),
                 &mut (m_len as c_ulonglong),
-                &mut tag,
+                tag.as_mut_ptr(),
                 c.as_ptr(),
                 c_len as c_ulonglong,
                 ad_p,
@@ -315,6 +320,9 @@ impl Stream<Pull> {
         if rc != 0 {
             return Err(());
         }
+        // rc == 0 and tag is initialized
+        let tag = unsafe { tag.assume_init() };
+
         let tag = Tag::from_u8(tag)?;
         if tag == Tag::Final {
             self.finalized = true;
