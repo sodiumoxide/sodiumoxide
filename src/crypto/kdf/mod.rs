@@ -11,12 +11,13 @@
 //! ```
 //! use sodiumoxide::crypto::kdf;
 //!
-//! let key = kdf::gen_key();
-//! let context = kdf::Context::from_slice(&[0u8; 8]).unwrap();
+//! const CONTEXT: [u8; 8] = *b"Examples";
 //!
-//! let key1 = kdf::derive_from_key(1, &context, &key);
-//! let key2 = kdf::derive_from_key(2, &context, &key);
-//! let key3 = kdf::derive_from_key(3, &context, &key);
+//! let key = kdf::gen_key();
+//!
+//! let key1 = kdf::derive_from_key(1, CONTEXT, &key);
+//! let key2 = kdf::derive_from_key(2, CONTEXT, &key);
+//! let key3 = kdf::derive_from_key(3, CONTEXT, &key);
 //! ```
 
 pub mod blake2b;

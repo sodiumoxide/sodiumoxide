@@ -17,11 +17,6 @@ new_type! {
 }
 
 new_type! {
-    /// `Context` for key derivation.
-    public Context(CONTEXTBYTES);
-}
-
-new_type! {
     /// `SubKey` from key derivation.
     public SubKey(SUBKEYBYTES);
 }
@@ -40,14 +35,14 @@ pub fn gen_key() -> Key {
 }
 
 /// `derive_from_key` derives the subkey_id-th `SubKey` from the master key `key` and the context `ctx`.
-pub fn derive_from_key(subkey_id: u64, ctx: &Context, key: &Key) -> Result<SubKey, ()> {
+pub fn derive_from_key(subkey_id: u64, ctx: [u8; CONTEXTBYTES], key: &Key) -> Result<SubKey, ()> {
     unsafe {
         let mut subkey = SubKey([0u8; SUBKEYBYTES]);
         let r = ffi::crypto_kdf_blake2b_derive_from_key(
             subkey.0.as_mut_ptr(),
             SUBKEYBYTES,
             subkey_id,
-            ctx.0.as_ptr() as *mut i8,
+            ctx.as_ptr() as *mut i8,
             key.0.as_ptr(),
         );
         if r != 0 {
@@ -69,10 +64,10 @@ mod test {
         // and only protect against new errors. They do not actually verify the implementation.
         {
             let key = Key([0u8; KEYBYTES]);
-            let ctx = Context([0u8; CONTEXTBYTES]);
-            let subkey1 = derive_from_key(1, &ctx, &key).unwrap();
-            let subkey2 = derive_from_key(2, &ctx, &key).unwrap();
-            let subkey3 = derive_from_key(3, &ctx, &key).unwrap();
+            let ctx = [0u8; CONTEXTBYTES];
+            let subkey1 = derive_from_key(1, ctx, &key).unwrap();
+            let subkey2 = derive_from_key(2, ctx, &key).unwrap();
+            let subkey3 = derive_from_key(3, ctx, &key).unwrap();
 
             assert_eq!(
                 subkey1,
@@ -101,10 +96,10 @@ mod test {
         }
         {
             let key = Key([1u8; KEYBYTES]);
-            let ctx = Context([2u8; CONTEXTBYTES]);
-            let subkey1 = derive_from_key(1, &ctx, &key).unwrap();
-            let subkey2 = derive_from_key(2, &ctx, &key).unwrap();
-            let subkey3 = derive_from_key(3, &ctx, &key).unwrap();
+            let ctx = [2u8; CONTEXTBYTES];
+            let subkey1 = derive_from_key(1, ctx, &key).unwrap();
+            let subkey2 = derive_from_key(2, ctx, &key).unwrap();
+            let subkey3 = derive_from_key(3, ctx, &key).unwrap();
 
             assert_eq!(
                 subkey1,
