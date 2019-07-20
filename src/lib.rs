@@ -46,6 +46,8 @@
 //! # Low-level functions
 //!  [`crypto::hash`](crypto/hash/index.html)
 //!
+//!  [`crypto::kdf`](crypto/kdf/index.html)
+//!
 //!  [`crypto::verify`](crypto/verify/index.html)
 //!
 //!  [`crypto::shorthash`](crypto/shorthash/index.html)
@@ -114,6 +116,7 @@ pub mod crypto {
     pub mod box_;
     pub mod generichash;
     pub mod hash;
+    pub mod kdf;
     pub mod kx;
     mod nonce;
     pub mod onetimeauth;
