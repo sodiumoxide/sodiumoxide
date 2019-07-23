@@ -45,7 +45,7 @@ mod test {
 
     #[test]
     fn decrypt_too_short_ciphertext() {
-        let ciphertext: [u8; (ABYTES - 1)] = unsafe { mem::uninitialized() };
+        let ciphertext: [u8; (ABYTES - 1)] = unsafe { mem::MaybeUninit::uninit().assume_init() };
         let key = gen_key();
         let (_, header) = Stream::init_push(&key).unwrap();
         let mut stream = Stream::init_pull(&header, &key).unwrap();

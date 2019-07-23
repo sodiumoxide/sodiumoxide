@@ -173,10 +173,10 @@ pub struct State(ffi::crypto_sign_ed25519ph_state);
 impl State {
     /// `init()` initialize a streaming signing state.
     pub fn init() -> State {
+        let mut s = mem::MaybeUninit::uninit();
         unsafe {
-            let mut s = mem::uninitialized();
-            ffi::crypto_sign_ed25519ph_init(&mut s);
-            State(s)
+            ffi::crypto_sign_ed25519ph_init(s.as_mut_ptr());
+            State(s.assume_init())
         }
     }
 

@@ -37,10 +37,10 @@ pub struct State($hash_state);
 impl State {
     /// `new` constructs and initializes a new `State`.
     pub fn new() -> Self {
+        let mut st: mem::MaybeUninit<$hash_state> = mem::MaybeUninit::uninit();
         unsafe {
-            let mut st: $hash_state = mem::uninitialized();
-            $hash_init(&mut st);
-            State(st)
+            $hash_init(st.as_mut_ptr());
+            State(st.assume_init())
         }
     }
 

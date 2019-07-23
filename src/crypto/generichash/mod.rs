@@ -53,16 +53,17 @@ impl State {
             }
         }
 
-        let mut state: crypto_generichash_state;
+        let mut state: mem::MaybeUninit<crypto_generichash_state> = mem::MaybeUninit::uninit();
 
         let result = unsafe {
-            state = mem::uninitialized();
             if let Some(key) = key {
-                crypto_generichash_init(&mut state, key.as_ptr(), key.len(), out_len)
+                crypto_generichash_init(state.as_mut_ptr(), key.as_ptr(), key.len(), out_len)
             } else {
-                crypto_generichash_init(&mut state, ptr::null(), 0, out_len)
+                crypto_generichash_init(state.as_mut_ptr(), ptr::null(), 0, out_len)
             }
         };
+
+        let state = unsafe { state.assume_init() };
 
         if result == 0 {
             Ok(State { out_len, state })
