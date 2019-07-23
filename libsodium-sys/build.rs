@@ -151,7 +151,7 @@ fn make_libsodium(_: &str, _: &Path, _: &Path) -> PathBuf {
 
 #[cfg(not(windows))]
 fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBuf {
-    use std::{process::Command, str};
+    use std::{fs, process::Command, str};
 
     // Decide on CC, CFLAGS and the --host configure argument
     let build = cc::Build::new();
@@ -247,7 +247,7 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
 
     // Run `./configure`
     let prefix_arg = format!("--prefix={}", install_dir.to_str().unwrap());
-    let mut configure_cmd = Command::new("./configure");
+    let mut configure_cmd = Command::new(fs::canonicalize(source_dir.join("configure")).unwrap());
     if !compiler.is_empty() {
         configure_cmd.env("CC", &compiler);
     }
