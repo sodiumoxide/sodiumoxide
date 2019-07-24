@@ -5,7 +5,7 @@ macro_rules! stream_module (($stream_name:ident,
                              $noncebytes:expr) => (
 
 #[cfg(not(feature = "std"))] use prelude::*;
-use libc::{c_ulonglong, uint64_t};
+use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
@@ -122,7 +122,7 @@ pub fn stream_xor_ic(m: &[u8],
                      m.as_ptr(),
                      m.len() as c_ulonglong,
                      n.0.as_ptr(),
-                     ic as uint64_t,
+                     ic as u64,
                      k.0.as_ptr());
         c
     }
@@ -145,7 +145,7 @@ pub fn stream_xor_ic_inplace(m: &mut [u8],
                      m.as_ptr(),
                      m.len() as c_ulonglong,
                      n.0.as_ptr(),
-                     ic as uint64_t,
+                     ic as u64,
                      k.0.as_ptr());
     }
 }
