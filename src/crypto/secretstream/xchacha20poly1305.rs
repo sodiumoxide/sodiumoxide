@@ -203,6 +203,50 @@ mod test {
     }
 
     #[test]
+    fn push_pull_with_recycled_vec() {
+        let mut msg1 = [0; 128];
+        let mut msg2 = [0; 34];
+        let mut msg3 = [0; 478];
+
+        randombytes_into(&mut msg1);
+        randombytes_into(&mut msg2);
+        randombytes_into(&mut msg3);
+
+        let key = gen_key();
+        let (mut push_stream, header) = Stream::init_push(&key).unwrap();
+        let mut pull_stream = Stream::init_pull(&header, &key).unwrap();
+
+        let mut c_buf = Vec::new();
+        let mut m_buf = Vec::new();
+        push_stream
+            .push_to_vec(&msg1, None, Tag::Message, &mut c_buf)
+            .unwrap();
+        let t1 = pull_stream.pull_to_vec(&c_buf, None, &mut m_buf).unwrap();
+        assert_eq!(t1, Tag::Message);
+        assert_eq!(msg1[..], m_buf[..]);
+        assert!(push_stream.is_not_finalized());
+        assert!(pull_stream.is_not_finalized());
+
+        push_stream
+            .push_to_vec(&msg2, None, Tag::Message, &mut c_buf)
+            .unwrap();
+        let t2 = pull_stream.pull_to_vec(&c_buf, None, &mut m_buf).unwrap();
+        assert_eq!(t2, Tag::Message);
+        assert_eq!(msg2[..], m_buf[..]);
+        assert!(push_stream.is_not_finalized());
+        assert!(pull_stream.is_not_finalized());
+
+        push_stream
+            .push_to_vec(&msg3, None, Tag::Final, &mut c_buf)
+            .unwrap();
+        let t3 = pull_stream.pull_to_vec(&c_buf, None, &mut m_buf).unwrap();
+        assert_eq!(t3, Tag::Final);
+        assert_eq!(msg3[..], m_buf[..]);
+        assert!(push_stream.is_finalized());
+        assert!(pull_stream.is_finalized());
+    }
+
+    #[test]
     fn cannot_pull_after_finalization() {
         let m = [0; 128];
         let key = gen_key();
@@ -216,6 +260,16 @@ mod test {
     }
 
     #[test]
+    fn cannot_push_after_finalization() {
+        let m = [0; 128];
+        let key = gen_key();
+        let (mut stream, _) = Stream::init_push(&key).unwrap();
+        stream.push(&m, None, Tag::Final).unwrap();
+        // TODO: check specific `Err(())` when implemented (#221)
+        assert!(stream.push(&m, None, Tag::Message).is_err());
+    }
+
+    #[test]
     fn cannot_rekey_after_finalization() {
         let m = [0; 128];
         let key = gen_key();
@@ -226,6 +280,27 @@ mod test {
         stream.pull(&c, None).unwrap();
         // TODO: check specific `Err(())` when implemented (#221).
         assert!(stream.rekey().is_err());
+    }
+
+    #[test]
+    fn finalize_with_ad() {
+        let mut m = [0; 128];
+        let mut ad = [0; 64];
+        randombytes_into(&mut m);
+        randombytes_into(&mut ad);
+        let key = gen_key();
+        let (mut stream, header) = Stream::init_push(&key).unwrap();
+        let c1 = stream.push(&m, None, Tag::Message).unwrap();
+        let c2 = stream.finalize(Some(&ad)).unwrap();
+
+        let mut stream = Stream::init_pull(&header, &key).unwrap();
+        let (m1, t1) = stream.pull(&c1, None).unwrap();
+        assert_eq!(m[..], m1[..]);
+        assert_eq!(t1, Tag::Message);
+
+        let (m2, t2) = stream.pull(&c2, Some(&ad)).unwrap();
+        assert_eq!(m2[..], [0; 0]);
+        assert_eq!(t2, Tag::Final);
     }
 
     #[test]
