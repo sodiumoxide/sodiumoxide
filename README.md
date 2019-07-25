@@ -24,6 +24,7 @@
 
 This package aims to provide a type-safe and efficient Rust binding that's just
 as easy to use.
+Rust >= 1.36.0 is required because of mem::MaybeUninit.
 
 ## Basic usage
 

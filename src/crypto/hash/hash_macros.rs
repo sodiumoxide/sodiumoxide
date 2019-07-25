@@ -37,11 +37,12 @@ pub struct State($hash_state);
 impl State {
     /// `new` constructs and initializes a new `State`.
     pub fn new() -> Self {
-        unsafe {
-            let mut st: $hash_state = mem::uninitialized();
-            $hash_init(&mut st);
-            State(st)
-        }
+        let mut st = mem::MaybeUninit::uninit();
+        let state = unsafe {
+            $hash_init(st.as_mut_ptr());
+            st.assume_init() // st is definitely initialized
+        };
+        State(state)
     }
 
     /// `update` updates the `State` with `data`. `update` can be called multiple times in order

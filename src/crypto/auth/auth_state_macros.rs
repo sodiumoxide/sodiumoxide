@@ -47,11 +47,12 @@ impl Drop for State {
 impl State {
     /// `init()` initializes an authentication structure using a secret key 'k'.
     pub fn init(k: &[u8]) -> State {
-        unsafe {
-            let mut s = mem::uninitialized();
-            $init_name(&mut s, k.as_ptr(), k.len());
-            State(s)
-        }
+        let mut s = mem::MaybeUninit::uninit();
+        let state = unsafe {
+            $init_name(s.as_mut_ptr(), k.as_ptr(), k.len());
+            s.assume_init() // s is definitely initialized
+        };
+        State(state)
     }
 
     /// `update()` can be called more than once in order to compute the authenticator

@@ -173,11 +173,12 @@ pub struct State(ffi::crypto_sign_ed25519ph_state);
 impl State {
     /// `init()` initialize a streaming signing state.
     pub fn init() -> State {
-        unsafe {
-            let mut s = mem::uninitialized();
-            ffi::crypto_sign_ed25519ph_init(&mut s);
-            State(s)
-        }
+        let mut s = mem::MaybeUninit::uninit();
+        let state = unsafe {
+            ffi::crypto_sign_ed25519ph_init(s.as_mut_ptr());
+            s.assume_init() // s is definitely initialized
+        };
+        State(state)
     }
 
     /// `update()` can be called more than once in order to compute the digest
