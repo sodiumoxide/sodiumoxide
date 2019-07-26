@@ -58,6 +58,14 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_gen_key() {
+        // Smoke test. Just verifies that randombytes interacts with the newtype correctly.
+        let key1 = gen_key();
+        let key2 = gen_key();
+        assert_ne!(key1, key2);
+    }
+
+    #[test]
     fn test_vectors() {
         // Libsodium tests do not contain any test-vectors for `crypto_kdf_derive_from_key`.
         // The test vectors were generated using the initial implementation of this module
