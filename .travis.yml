@@ -44,9 +44,8 @@ matrix:
       - cargo coveralls --exclude-pattern "$PWD/target/,$PWD/libsodium-sys/src/sodium_bindings.rs"
 
 script:
-  - cargo build --verbose
-  - cargo test --verbose --all
-  - cargo test --verbose --no-default-features --features std
+  - cargo test --all --verbose
+  - cargo test --all --verbose --no-default-features --features std
   - cargo doc
 
 branches:
