@@ -10,14 +10,20 @@
 //!
 //! ```
 //! use sodiumoxide::crypto::kdf;
+//! use sodiumoxide::crypto::secretbox;
 //!
 //! const CONTEXT: [u8; 8] = *b"Examples";
 //!
 //! let key = kdf::gen_key();
 //!
-//! let key1 = kdf::derive_from_key(1, CONTEXT, &key);
-//! let key2 = kdf::derive_from_key(2, CONTEXT, &key);
-//! let key3 = kdf::derive_from_key(3, CONTEXT, &key);
+//! let mut key1 = secretbox::Key([0; secretbox::KEYBYTES]);
+//! kdf::derive_from_key(&mut key1.0[..], 1, CONTEXT, &key).unwrap();
+//!
+//! let mut key2 = secretbox::Key([0; secretbox::KEYBYTES]);
+//! kdf::derive_from_key(&mut key2.0[..], 2, CONTEXT, &key).unwrap();
+//!
+//! let mut key3 = secretbox::Key([0; secretbox::KEYBYTES]);
+//! kdf::derive_from_key(&mut key3.0[..], 3, CONTEXT, &key).unwrap();
 //! ```
 
 pub mod blake2b;
