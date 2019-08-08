@@ -22,6 +22,9 @@ pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as usi
 /// Number of bytes in a `Signature`.
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES as usize;
 
+/// Number of bytes in a Curve25519 key.
+pub const SCALARMULTBYTES: usize = ffi::crypto_scalarmult_curve25519_BYTES as usize;
+
 new_type! {
     /// `Seed` that can be used for keypair generation
     ///
@@ -166,6 +169,57 @@ pub fn verify_detached(sig: &Signature, m: &[u8], pk: &PublicKey) -> bool {
     ret == 0
 }
 
+/// Converts Ed25519 public key to Curve25519 public key.
+pub fn convert_ed_pk_to_curve25519(pk: &[u8; SCALARMULTBYTES]) -> [u8; SCALARMULTBYTES] {
+    let mut curve_pk = [0; SCALARMULTBYTES];
+    unsafe {
+        ffi::crypto_sign_ed25519_pk_to_curve25519(curve_pk.as_mut_ptr(), pk.as_ptr());
+    }
+    curve_pk
+}
+
+/// Converts Ed25519 secret key to Curve25519 secret key.
+pub fn convert_ed_sk_to_curve25519(sk: &[u8; SCALARMULTBYTES]) -> [u8; SCALARMULTBYTES] {
+    let mut curve_sk = [0; SCALARMULTBYTES];
+    unsafe {
+        ffi::crypto_sign_ed25519_sk_to_curve25519(curve_sk.as_mut_ptr(), sk.as_ptr());
+    }
+    curve_sk
+}
+
+/// Converts Ed25519 keypair to Curve25519 keypair.
+#[allow(clippy::needless_pass_by_value)]
+pub fn convert_ed_keypair_to_curve25519(pk: PublicKey, sk: SecretKey) -> (PublicKey, SecretKey) {
+    let pk = convert_ed_pk_to_curve25519(&pk.0);
+
+    let mut secret_key = [0; SCALARMULTBYTES];
+    secret_key.clone_from_slice(&sk[..SCALARMULTBYTES]);
+    let sk = convert_ed_sk_to_curve25519(&secret_key);
+
+    let mut secret_key = [0; SECRETKEYBYTES];
+    secret_key.clone_from_slice([sk, pk].concat().as_ref());
+
+    (PublicKey(pk), SecretKey(secret_key))
+}
+
+/// Converts `SecretKey` to `Seed`.
+pub fn convert_sk_to_seed(sk: &SecretKey) -> Seed {
+    let mut seed = [0; SEEDBYTES];
+    unsafe {
+        ffi::crypto_sign_ed25519_sk_to_seed(seed.as_mut_ptr(), sk.0.as_ptr());
+    }
+    Seed(seed)
+}
+
+/// Converts `SecretKey` to `PublicKey`.
+pub fn convert_sk_to_pk(sk: &SecretKey) -> PublicKey {
+    let mut pk = [0; PUBLICKEYBYTES];
+    unsafe {
+        ffi::crypto_sign_ed25519_sk_to_pk(pk.as_mut_ptr(), sk.0.as_ptr());
+    }
+    PublicKey(pk)
+}
+
 /// State for multi-part (streaming) computation of signature.
 #[derive(Copy, Clone)]
 pub struct State(ffi::crypto_sign_ed25519ph_state);
@@ -252,7 +306,7 @@ mod test {
             let m = randombytes(i);
             let sm = sign(&m, &sk);
             let m2 = verify(&sm, &pk);
-            assert!(Ok(m) == m2);
+            assert_eq!(Ok(m), m2);
         }
     }
 
@@ -265,7 +319,7 @@ mod test {
             let mut sm = sign(&m, &sk);
             for j in 0..sm.len() {
                 sm[j] ^= 0x20;
-                assert!(Err(()) == verify(&sm, &pk));
+                assert_eq!(Err(()), verify(&sm, &pk));
                 sm[j] ^= 0x20;
             }
         }
@@ -308,7 +362,7 @@ mod test {
             let m = randombytes(i);
             let sm = sign(&m, &sk);
             let m2 = verify(&sm, &pk);
-            assert!(Ok(m) == m2);
+            assert_eq!(Ok(m), m2);
         }
     }
 
@@ -324,7 +378,7 @@ mod test {
             let mut sm = sign(&m, &sk);
             for j in 0..sm.len() {
                 sm[j] ^= 0x20;
-                assert!(Err(()) == verify(&sm, &pk));
+                assert_eq!(Err(()), verify(&sm, &pk));
                 sm[j] ^= 0x20;
             }
         }
@@ -346,7 +400,7 @@ mod test {
             let x2 = x.next().unwrap();
             let x3 = x.next().unwrap();
             let seed_bytes = hex::decode(&x0[..64]).unwrap();
-            assert!(seed_bytes.len() == SEEDBYTES);
+            assert_eq!(seed_bytes.len(), SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
             for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
@@ -376,7 +430,7 @@ mod test {
             let x2 = x.next().unwrap();
             let x3 = x.next().unwrap();
             let seed_bytes = hex::decode(&x0[..64]).unwrap();
-            assert!(seed_bytes.len() == SEEDBYTES);
+            assert_eq!(seed_bytes.len(), SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
             for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
@@ -445,7 +499,7 @@ mod test {
             let x1 = x.next().unwrap();
             let x2 = x.next().unwrap();
             let seed_bytes = hex::decode(&x0[..64]).unwrap();
-            assert!(seed_bytes.len() == SEEDBYTES);
+            assert_eq!(seed_bytes.len(), SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
             for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
@@ -518,6 +572,32 @@ mod test {
         }
         let sig = creation_state.finalize(&sk);
         assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_crypto_sign_ed25519_to_curve25519() {
+        use crate::crypto::scalarmult::curve25519::{scalarmult_base, GroupElement, Scalar};
+
+        let (pk, sk) = gen_keypair();
+        let (PublicKey(ref pk), SecretKey(ref sk)) = convert_ed_keypair_to_curve25519(pk, sk);
+        let secret_key = Scalar::from_slice(&sk[..SCALARMULTBYTES]).unwrap();
+        let GroupElement(public_key) = scalarmult_base(&secret_key);
+        assert_eq!(pk, &public_key);
+    }
+
+    #[test]
+    fn test_convert_sk_to_seed() {
+        let (_, sk) = gen_keypair();
+        let seed = convert_sk_to_seed(&sk);
+        let (_, sk_from_seed) = keypair_from_seed(&seed);
+        assert_eq!(sk, sk_from_seed);
+    }
+
+    #[test]
+    fn test_convert_sk_to_pk() {
+        let (pk, sk) = gen_keypair();
+        let pk_from_sk = convert_sk_to_pk(&sk);
+        assert_eq!(pk, pk_from_sk);
     }
 }
 
