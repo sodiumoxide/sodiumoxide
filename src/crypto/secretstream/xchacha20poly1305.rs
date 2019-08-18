@@ -238,5 +238,4 @@ mod test {
             assert!(Tag::from_u8(i as u8).is_err());
         }
     }
-
 }

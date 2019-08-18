@@ -218,9 +218,13 @@ impl Default for State {
     }
 }
 
+use crate::crypto::box_::{
+    PublicKey as Curve25519PublicKey, PUBLICKEYBYTES as CURVE25519_PUBLICKEYBYTES,
+};
+use crate::crypto::box_::{
+    SecretKey as Curve25519SecretKey, SECRETKEYBYTES as CURVE25519_SECRETKEYBYTES,
+};
 use std::convert::TryFrom;
-use crate::crypto::box_::{SecretKey as Curve25519SecretKey, SECRETKEYBYTES as CURVE25519_SECRETKEYBYTES};
-use crate::crypto::box_::{PublicKey as Curve25519PublicKey, PUBLICKEYBYTES as CURVE25519_PUBLICKEYBYTES};
 
 impl TryFrom<&PublicKey> for Curve25519PublicKey {
     type Error = ();
@@ -230,7 +234,10 @@ impl TryFrom<&PublicKey> for Curve25519PublicKey {
         let mut x25519_pk = Curve25519PublicKey([0u8; CURVE25519_PUBLICKEYBYTES]);
 
         let ret = unsafe {
-            ffi::crypto_sign_ed25519_pk_to_curve25519((&mut x25519_pk.0).as_mut_ptr(), (&ed25519_pk.0).as_ptr())
+            ffi::crypto_sign_ed25519_pk_to_curve25519(
+                (&mut x25519_pk.0).as_mut_ptr(),
+                (&ed25519_pk.0).as_ptr(),
+            )
         };
 
         if ret == 0 {
@@ -249,7 +256,10 @@ impl TryFrom<&SecretKey> for Curve25519SecretKey {
         let mut x25519_sk = Curve25519SecretKey([0u8; CURVE25519_SECRETKEYBYTES]);
 
         let ret = unsafe {
-            ffi::crypto_sign_ed25519_sk_to_curve25519((&mut x25519_sk.0).as_mut_ptr(), (&ed25519_sk.0).as_ptr())
+            ffi::crypto_sign_ed25519_sk_to_curve25519(
+                (&mut x25519_sk.0).as_mut_ptr(),
+                (&ed25519_sk.0).as_ptr(),
+            )
         };
 
         if ret == 0 {
