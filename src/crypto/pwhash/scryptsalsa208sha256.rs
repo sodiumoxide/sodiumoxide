@@ -217,9 +217,8 @@ pub fn pwhash_verify(hp: &HashedPassword, passwd: &[u8]) -> bool {
 }
 
 #[cfg(test)]
-mod test {
+mod testvectors {
     use super::*;
-
     #[test]
     fn test_derive_key() {
         let mut kb = [0u8; 32];
@@ -244,6 +243,13 @@ mod test {
         .unwrap();
         assert_eq!(key, key_expected);
     }
+}
+
+// TODO: consider depending on arrayvec, using that instead of heap alloc here
+#[cfg(feature = "alloc")]
+#[cfg(test)]
+mod test {
+    use super::*;
 
     #[test]
     fn test_pwhash_verify() {

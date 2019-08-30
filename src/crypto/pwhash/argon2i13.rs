@@ -41,84 +41,7 @@ argon2_module!(
 );
 
 #[cfg(test)]
-mod test {
-    use super::*;
-
-    /// Helper function to allow for testing derive_key with different configurations
-    fn run_derive_key_test(
-        password: &[u8],
-        salt: [u8; SALTBYTES],
-        expected: &[u8],
-        out_len: usize,
-        ops: usize,
-        mem: usize,
-    ) -> Result<(), ()> {
-        let mut out_bin = vec![0u8; out_len];
-        let result = derive_key(
-            out_bin.as_mut_slice(),
-            password,
-            &Salt(salt),
-            OpsLimit(ops),
-            MemLimit(mem),
-        );
-
-        match result {
-            Ok(out_bin) => {
-                assert_eq!(expected, out_bin, "output does not match expected result");
-                Ok(())
-            }
-            Err(_) => Err(()),
-        }
-    }
-
-    /// Converts a str into a hashed password struct
-    fn to_hashed_password(s: &str) -> HashedPassword {
-        let mut pw = [0; 128];
-        s.as_bytes()
-            .iter()
-            .enumerate()
-            .for_each(|(i, val)| pw[i] = *val);
-        HashedPassword(pw)
-    }
-
-    #[test]
-    fn test_pwhash_verify() {
-        use randombytes::randombytes;
-        for i in 0..32usize {
-            let pw = randombytes(i);
-            let pwh = pwhash(&pw, OpsLimit(16), MemLimit(8192)).unwrap();
-            assert!(pwhash_verify(&pwh, &pw));
-        }
-    }
-
-    #[test]
-    fn test_pwhash_verify_tamper() {
-        use randombytes::randombytes;
-        for i in 0..16usize {
-            let mut pw = randombytes(i);
-            let pwh = pwhash(&pw, OpsLimit(16), MemLimit(8192)).unwrap();
-            for j in 0..pw.len() {
-                pw[j] ^= 0x20;
-                assert!(!pwhash_verify(&pwh, &pw));
-                pw[j] ^= 0x20;
-            }
-        }
-    }
-
-    #[cfg(feature = "serde")]
-    #[test]
-    fn test_serialisation() {
-        use randombytes::randombytes;
-        use test_utils::round_trip;
-        for i in 0..32usize {
-            let pw = randombytes(i);
-            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
-            let salt = gen_salt();
-            round_trip(pwh);
-            round_trip(salt);
-        }
-    }
-
+mod testvectors {
     #[test]
     fn test_derive_01() {
         let password = [
@@ -566,5 +489,86 @@ mod test {
             pwhash_verify(&out, password.as_bytes()),
             "failed to verify password with hash"
         );
+    }
+}
+
+#[cfg(feature = "alloc")]
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    /// Helper function to allow for testing derive_key with different configurations
+    fn run_derive_key_test(
+        password: &[u8],
+        salt: [u8; SALTBYTES],
+        expected: &[u8],
+        out_len: usize,
+        ops: usize,
+        mem: usize,
+    ) -> Result<(), ()> {
+        let mut out_bin = vec![0u8; out_len];
+        let result = derive_key(
+            out_bin.as_mut_slice(),
+            password,
+            &Salt(salt),
+            OpsLimit(ops),
+            MemLimit(mem),
+        );
+
+        match result {
+            Ok(out_bin) => {
+                assert_eq!(expected, out_bin, "output does not match expected result");
+                Ok(())
+            }
+            Err(_) => Err(()),
+        }
+    }
+
+    /// Converts a str into a hashed password struct
+    fn to_hashed_password(s: &str) -> HashedPassword {
+        let mut pw = [0; 128];
+        s.as_bytes()
+            .iter()
+            .enumerate()
+            .for_each(|(i, val)| pw[i] = *val);
+        HashedPassword(pw)
+    }
+
+    #[test]
+    fn test_pwhash_verify() {
+        use randombytes::randombytes;
+        for i in 0..32usize {
+            let pw = randombytes(i);
+            let pwh = pwhash(&pw, OpsLimit(16), MemLimit(8192)).unwrap();
+            assert!(pwhash_verify(&pwh, &pw));
+        }
+    }
+
+    #[test]
+    fn test_pwhash_verify_tamper() {
+        use randombytes::randombytes;
+        for i in 0..16usize {
+            let mut pw = randombytes(i);
+            let pwh = pwhash(&pw, OpsLimit(16), MemLimit(8192)).unwrap();
+            for j in 0..pw.len() {
+                pw[j] ^= 0x20;
+                assert!(!pwhash_verify(&pwh, &pw));
+                pw[j] ^= 0x20;
+            }
+        }
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_serialisation() {
+        use randombytes::randombytes;
+        use test_utils::round_trip;
+        for i in 0..32usize {
+            let pw = randombytes(i);
+            let pwh = pwhash(&pw, OPSLIMIT_INTERACTIVE, MEMLIMIT_INTERACTIVE).unwrap();
+            let salt = gen_salt();
+            round_trip(pwh);
+            round_trip(salt);
+        }
     }
 }

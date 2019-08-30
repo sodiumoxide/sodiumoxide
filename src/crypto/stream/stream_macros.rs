@@ -58,13 +58,19 @@ pub fn gen_nonce() -> Nonce {
 pub fn stream(len: usize,
               n: &Nonce,
               k: &Key) -> Vec<u8> {
+    let mut c = vec![0u8; len];
+    stream_to_slice(&mut c, n, k);
+    c
+}
+
+pub fn stream_to_slice(buf: &mut [u8],
+                       n: &Nonce,
+                       k: &key) {
     unsafe {
-        let mut c = vec![0u8; len];
-        $stream_name(c.as_mut_ptr(),
-                     c.len() as c_ulonglong,
+        $stream_name(buf.as_mut_ptr(),
+                     buf.len() as c_ulonglong,
                      n.0.as_ptr(),
                      k.0.as_ptr());
-        c
     }
 }
 
@@ -154,6 +160,8 @@ pub fn stream_xor_ic_inplace(m: &mut [u8],
 }
 
 
+// TODO: consider depending on arrayvec, using that instead of heap alloc here
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test_m {
     use super::*;

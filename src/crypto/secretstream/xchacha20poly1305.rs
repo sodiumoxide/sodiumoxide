@@ -31,6 +31,8 @@ stream_module!(
     crypto_secretstream_xchacha20poly1305_TAG_FINAL
 );
 
+// TODO: refactor these tests to use heapless interface
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::*;
@@ -313,5 +315,4 @@ mod test {
             assert!(Tag::from_u8(i as u8).is_err());
         }
     }
-
 }

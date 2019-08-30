@@ -150,6 +150,7 @@ pub fn open_detached(c: &mut [u8], tag: &Tag, n: &Nonce, k: &Key) -> Result<(), 
     }
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::*;

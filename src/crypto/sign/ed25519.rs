@@ -237,6 +237,8 @@ impl Default for State {
     }
 }
 
+// TODO: consider depending on arrayvec, using that instead of heap alloc here
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::*;
