@@ -3,6 +3,7 @@ extern crate core;
 extern crate rmp_serde;
 extern crate serde_json;
 #[cfg(not(feature = "std"))]
+#[cfg(feature = "alloc")]
 use prelude::*;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};

@@ -107,6 +107,7 @@ impl State {
 mod test {
     use super::*;
     #[cfg(not(feature = "std"))]
+    #[cfg(feature = "alloc")]
     use prelude::*;
 
     #[test]

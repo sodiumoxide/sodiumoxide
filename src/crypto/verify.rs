@@ -45,6 +45,7 @@ pub fn verify_64(x: &[u8; 64], y: &[u8; 64]) -> bool {
 mod test {
     use super::*;
     #[cfg(not(feature = "std"))]
+    #[cfg(feature = "alloc")]
     use prelude::*;
 
     #[test]
@@ -100,5 +101,4 @@ mod test {
             }
         }
     }
-
 }

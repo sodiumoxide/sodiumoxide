@@ -52,6 +52,7 @@ pub fn shorthash(m: &[u8], k: &Key) -> Digest {
 mod test {
     use super::*;
     #[cfg(not(feature = "std"))]
+    #[cfg(feature = "alloc")]
     use prelude::*;
 
     #[test]

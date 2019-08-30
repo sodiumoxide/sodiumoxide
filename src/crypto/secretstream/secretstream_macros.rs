@@ -15,6 +15,7 @@ macro_rules! stream_module (($state_name: ident,
 
 use libc::c_ulonglong;
 #[cfg(not(feature = "std"))]
+#[cfg(feature = "alloc")]
 use prelude::Vec;
 use randombytes::randombytes_into;
 use std::mem;

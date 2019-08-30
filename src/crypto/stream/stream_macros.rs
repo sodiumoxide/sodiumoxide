@@ -4,7 +4,7 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
-#[cfg(not(feature = "std"))] use prelude::*;
+#[cfg(not(feature = "std"))] #[cfg(feature = "alloc")] use prelude::*;
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
@@ -52,6 +52,7 @@ pub fn gen_nonce() -> Nonce {
     Nonce(nonce)
 }
 
+#[cfg(feature = "alloc")]
 /// `stream()` produces a `len`-byte stream `c` as a function of a
 /// secret key `k` and a nonce `n`.
 pub fn stream(len: usize,
@@ -67,6 +68,7 @@ pub fn stream(len: usize,
     }
 }
 
+#[cfg(feature = "alloc")]
 /// `stream_xor()` encrypts a message `m` using a secret key `k` and a nonce `n`.
 /// The `stream_xor()` function returns the ciphertext `c`.
 ///
@@ -105,6 +107,7 @@ pub fn stream_xor_inplace(m: &mut [u8],
     }
 }
 
+#[cfg(feature = "alloc")]
 /// `stream_xor_ic()` encrypts a message `m` using a secret key `k` and a nonce `n`,
 /// it is similar to `stream_xor()` but allows the caller to set the value of the initial
 /// block counter `ic`.

@@ -7,6 +7,7 @@
 
 use ffi;
 #[cfg(not(feature = "std"))]
+#[cfg(feature = "alloc")]
 use prelude::*;
 use randombytes::randombytes_into;
 
@@ -63,6 +64,7 @@ pub fn gen_nonce() -> Nonce {
     Nonce(nonce)
 }
 
+#[cfg(feature = "alloc")]
 /// `seal()` encrypts and authenticates a message `m` using a secret key `k` and a
 /// nonce `n`.  It returns a ciphertext `c`.
 pub fn seal(m: &[u8], n: &Nonce, k: &Key) -> Vec<u8> {
@@ -99,6 +101,7 @@ pub fn seal_detached(m: &mut [u8], n: &Nonce, k: &Key) -> Tag {
     Tag(tag)
 }
 
+#[cfg(feature = "alloc")]
 /// `open()` verifies and decrypts a ciphertext `c` using a secret key `k` and a nonce `n`.
 /// It returns a plaintext `Ok(m)`.
 /// If the ciphertext fails verification, `open()` returns `Err(())`.

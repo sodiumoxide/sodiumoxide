@@ -2,8 +2,10 @@
 
 use ffi;
 #[cfg(not(feature = "std"))]
+#[cfg(feature = "alloc")]
 use prelude::*;
 
+#[cfg(feature = "alloc")]
 /// `randombytes()` randomly generates size bytes of data.
 ///
 /// THREAD SAFETY: `randombytes()` is thread-safe provided that you have

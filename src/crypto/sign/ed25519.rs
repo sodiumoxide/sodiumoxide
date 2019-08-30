@@ -6,6 +6,7 @@
 use ffi;
 use libc::c_ulonglong;
 #[cfg(not(feature = "std"))]
+#[cfg(feature = "alloc")]
 use prelude::*;
 use std::fmt;
 use std::mem;
@@ -92,6 +93,7 @@ pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
     (pk, sk)
 }
 
+#[cfg(feature = "alloc")]
 /// `sign()` signs a message `m` using the signer's secret key `sk`.
 /// `sign()` returns the resulting signed message `sm`.
 pub fn sign(m: &[u8], sk: &SecretKey) -> Vec<u8> {
@@ -110,6 +112,7 @@ pub fn sign(m: &[u8], sk: &SecretKey) -> Vec<u8> {
     sm
 }
 
+#[cfg(feature = "alloc")]
 /// `verify()` verifies the signature in `sm` using the signer's public key `pk`.
 /// `verify()` returns the message `Ok(m)`.
 /// If the signature fails verification, `verify()` returns `Err(())`.

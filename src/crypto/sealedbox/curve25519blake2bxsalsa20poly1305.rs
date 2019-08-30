@@ -2,6 +2,7 @@
 
 use ffi;
 #[cfg(not(feature = "std"))]
+#[cfg(feature = "alloc")]
 use prelude::*;
 
 use libc::c_ulonglong;
