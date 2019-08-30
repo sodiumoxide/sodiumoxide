@@ -196,17 +196,19 @@ impl Stream<Push> {
         ))
     }
 
+    #[cfg(feature = "alloc")]
     /// All data (including optional fields) is authenticated. Encrypts a
     /// message `m` and its `tag`. Optionally includes additional data `ad`,
     /// which is not encrypted.
     pub fn push(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag) -> Result<Vec<u8>, ()> {
         let buf_len = self.push_check(m, tag)?;
 
-        let mut buf = Vec::with_capacity(buf_len);
-        self.push_impl(m, ad, tag, &mut buf)?;
+        let mut buf = vec![0;buf_len];
+        unsafe { self.push_impl(m, ad, tag, &mut buf)?; }
         Ok(buf)
     }
 
+    #[cfg(feature = "alloc")]
     /// All data (including optional fields) is authenticated. Encrypts a
     /// message `m` and its `tag`. Optionally includes additional data `ad`,
     /// which is not encrypted.
@@ -216,7 +218,22 @@ impl Stream<Push> {
         let buf_len = self.push_check(m, tag)?;
         out.clear();
         out.reserve(buf_len);
-        self.push_impl(m, ad, tag, out)
+        unsafe { self.push_impl(m, ad, tag, out) }
+    }
+
+    /// All data (including optional fields) is authenticated. Encrypts a
+    /// message `m` and its `tag`. Optionally includes additional data `ad`,
+    /// which is not encrypted.
+    ///
+    /// The encrypted message is written to the `out` vector, which must be
+    /// of length `m_len + ABYTES`, overwriting any existing data there.
+    pub fn push_to_slice(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, out: &mut [u8]) -> Result<(), ()> {
+        let buf_len = self.push_check(m, tag)?;
+        if out.len() != buf_len {
+            Err(())
+        } else {
+            unsafe { self.push_impl(m, ad, tag, out) }
+        }
     }
 
     fn push_check(&mut self, m: &[u8], tag: Tag) -> Result<usize, ()> {
@@ -233,30 +250,28 @@ impl Stream<Push> {
         Ok(m_len + ABYTES)
     }
 
-    fn push_impl(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, buf: &mut Vec<u8>) -> Result<(), ()> {
+    unsafe fn push_impl(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, buf: &mut [u8]) -> Result<(), ()> {
         let (ad_p, ad_len) = ad
             .map(|ad| (ad.as_ptr(), ad.len()))
             .unwrap_or((ptr::null(), 0));
         let mut c_len: c_ulonglong = 0;
-        unsafe {
-            let rc = $push_name(
-                &mut self.state,
-                buf.as_mut_ptr(),
-                &mut c_len,
-                m.as_ptr(),
-                m.len() as c_ulonglong,
-                ad_p,
-                ad_len as c_ulonglong,
-                tag as u8,
-                );
-            if rc != 0 {
-                return Err(());
-            }
-            buf.set_len(c_len as usize);
+        let rc = $push_name(
+            &mut self.state,
+            buf.as_mut_ptr(),
+            &mut c_len,
+            m.as_ptr(),
+            m.len() as c_ulonglong,
+            ad_p,
+            ad_len as c_ulonglong,
+            tag as u8,
+            );
+        if rc != 0 {
+            return Err(());
         }
         Ok(())
     }
 
+    #[cfg(feature = "alloc")]
     /// Create a ciphertext for an empty message with the `TAG_FINAL` added
     /// to signal the end of the stream. Since the `Stream` is not usable
     /// after this point, this method consumes the `Stream.
@@ -298,6 +313,7 @@ impl Stream<Pull> {
         })
     }
 
+    #[cfg(feature = "alloc")]
     /// Verifies that `c` is a valid ciphertext with a correct authentication tag
     /// given the internal state of the `Stream` (ciphertext streams cannot be
     /// decrypted out of order for this reason). Also may validate the optional
@@ -312,10 +328,11 @@ impl Stream<Pull> {
     pub fn pull(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag), ()> {
         let m_len = self.pull_check(c)?;
         let mut buf = Vec::with_capacity(m_len);
-        let tag = self.pull_impl(c, ad, &mut buf)?;
+        let tag = unsafe { self.pull_impl(c, ad, &mut buf)? };
         Ok((buf, tag))
     }
 
+    #[cfg(feature = "alloc")]
     /// Verifies that `c` is a valid ciphertext with a correct authentication tag
     /// given the internal state of the `Stream` (ciphertext streams cannot be
     /// decrypted out of order for this reason). Also may validate the optional
@@ -333,7 +350,30 @@ impl Stream<Pull> {
         let m_len = self.pull_check(c)?;
         out.clear();
         out.reserve(m_len);
-        self.pull_impl(c, ad, out)
+        unsafe { self.pull_impl(c, ad, out) }
+    }
+
+    /// Verifies that `c` is a valid ciphertext with a correct authentication tag
+    /// given the internal state of the `Stream` (ciphertext streams cannot be
+    /// decrypted out of order for this reason). Also may validate the optional
+    /// unencrypted additional data `ad` using the authentication tag attached to
+    /// `c`. Finally decrypts the ciphertext and tag, and checks the tag
+    /// validity.
+    /// If any authentication fails, the stream has already been finalized, or if
+    /// the tag byte for some reason does not correspond to a valid `Tag`,
+    /// returns `Err(())`. Otherwise returns the plaintext and the tag.
+    /// Applications will typically use a `while stream.is_not_finalized()`
+    /// loop to authenticate and decrypt a stream of messages.
+    ///
+    /// The decrypted message is written to the `out` slice, which must be of
+    /// length `c.len() - ABYTES`, overwriting any existing data there.
+    pub fn pull_to_slice(&mut self, c: &[u8], ad: Option<&[u8]>, out: &mut [u8]) -> Result<Tag, ()> {
+        let m_len = self.pull_check(c)?;
+        if out.len() != m_len {
+            Err(())
+        } else {
+            unsafe { self.pull_impl(c, ad, out) }
+        }
     }
 
     fn pull_check(&self, c: &[u8]) -> Result<usize, ()> {
@@ -352,29 +392,28 @@ impl Stream<Pull> {
         Ok(m_len)
     }
 
-    fn pull_impl(&mut self, c: &[u8], ad: Option<&[u8]>, buf: &mut Vec<u8>) -> Result<Tag, ()> {
+    /// assumes that buf is of length at least `self.pull_check(c)`.
+    /// will cause UB otherwise
+    unsafe fn pull_impl(&mut self, c: &[u8], ad: Option<&[u8]>, buf: &mut [u8]) -> Result<Tag, ()> {
         let mut tag: u8 = 0;
         let mut m_len: c_ulonglong = 0;
         let (ad_p, ad_len) = ad
             .map(|ad| (ad.as_ptr(), ad.len()))
             .unwrap_or((ptr::null(), 0));
-        unsafe {
-            let rc = $pull_name(
-                &mut self.state,
-                buf.as_mut_ptr(),
-                &mut m_len,
-                &mut tag,
-                c.as_ptr(),
-                c.len() as c_ulonglong,
-                ad_p,
-                ad_len as c_ulonglong,
-                );
-            if rc != 0 {
-                return Err(());
-            }
-            // rc == 0 and tag is initialized
-            buf.set_len(m_len as usize);
+        let rc = $pull_name(
+            &mut self.state,
+            buf.as_mut_ptr(),
+            &mut m_len,
+            &mut tag,
+            c.as_ptr(),
+            c.len() as c_ulonglong,
+            ad_p,
+            ad_len as c_ulonglong,
+            );
+        if rc != 0 {
+            return Err(());
         }
+        // rc == 0 and tag is initialized
 
         let tag = Tag::from_u8(tag)?;
         if tag == Tag::Final {

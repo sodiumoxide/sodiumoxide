@@ -13,6 +13,7 @@ use super::super::box_::curve25519xsalsa20poly1305 as box_;
 /// plaintext.
 pub const SEALBYTES: usize = ffi::crypto_box_SEALBYTES as usize;
 
+#[cfg(feature = "alloc")]
 /// The `seal()` function encrypts a message `m` for a recipient whose public key
 /// is `pk`. It returns the ciphertext whose length is `SEALBYTES + m.len()`.
 ///
@@ -21,17 +22,30 @@ pub const SEALBYTES: usize = ffi::crypto_box_SEALBYTES as usize;
 /// after this function returns.
 pub fn seal(m: &[u8], pk: &box_::PublicKey) -> Vec<u8> {
     let mut c = vec![0u8; m.len() + SEALBYTES];
-    unsafe {
-        ffi::crypto_box_seal(
-            c.as_mut_ptr(),
-            m.as_ptr(),
-            m.len() as c_ulonglong,
-            pk.0.as_ptr(),
-        );
-    }
+    seal_to_slice(m, pk, &mut c);
     c
 }
 
+pub fn seal_to_slice(m: &[u8], pk: &box_::PublicKey, buf: &mut [u8]) -> Result<(), ()> {
+    if buf.len() != m.len() + SEALBYTES {
+        return Err(());
+    }
+    let ret = unsafe {
+        ffi::crypto_box_seal(
+            buf.as_mut_ptr(),
+            m.as_ptr(),
+            m.len() as c_ulonglong,
+            pk.0.as_ptr(),
+        )
+    };
+    if ret == 0 {
+        Ok(())
+    } else {
+        Err(())
+    }
+}
+
+#[cfg(feature = "alloc")]
 /// The `open()` function decrypts the ciphertext `c` using the key pair `(pk, sk)`
 /// and returns the decrypted message.
 ///
@@ -48,9 +62,21 @@ pub fn open(c: &[u8], pk: &box_::PublicKey, sk: &box_::SecretKey) -> Result<Vec<
         return Err(());
     }
     let mut m = vec![0u8; c.len() - SEALBYTES];
+    open_to_slice(c, pk, sk, &mut m)
+}
+
+pub fn open_to_slice(
+    c: &[u8],
+    pk: &box_::PublicKey,
+    sk: &box_::SecretKey,
+    buf: &mut [u8],
+) -> Result<(), ()> {
+    if c.len() < SEALBYTES || buf.len() != c.len() - SEALBYTES {
+        return Err(());
+    }
     let ret = unsafe {
         ffi::crypto_box_seal_open(
-            m.as_mut_ptr(),
+            buf.as_mut_ptr(),
             c.as_ptr(),
             c.len() as c_ulonglong,
             pk.0.as_ptr(),
@@ -58,7 +84,7 @@ pub fn open(c: &[u8], pk: &box_::PublicKey, sk: &box_::SecretKey) -> Result<Vec<
         )
     };
     if ret == 0 {
-        Ok(m)
+        Ok(())
     } else {
         Err(())
     }
