@@ -21,11 +21,10 @@ hash_module!(
     128
 );
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::*;
-    #[cfg(not(feature = "std"))]
-    #[cfg(feature = "alloc")]
     use prelude::*;
 
     #[test]
@@ -44,6 +43,8 @@ mod test {
         assert!(h[..] == h_expected[..]);
     }
 
+    // TODO: replace this with a macro that uses the include!(filename) macro to avoid heap
+    // allocation
     fn test_nist_vector(filename: &str) {
         use std::fs::File;
         use std::io::{BufRead, BufReader};

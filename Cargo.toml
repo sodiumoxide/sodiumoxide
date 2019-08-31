@@ -38,5 +38,5 @@ rmp-serde = "^0.13.7"
 benchmarks = ["alloc"]
 std = ["alloc"]
 alloc = []
-default = ["serde"]
+default = ["serde", "std"]
 use-pkg-config = ["libsodium-sys/use-pkg-config"]

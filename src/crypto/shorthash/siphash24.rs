@@ -52,15 +52,14 @@ pub fn shorthash(m: &[u8], k: &Key) -> Digest {
 mod test {
     use super::*;
     #[cfg(not(feature = "std"))]
-    #[cfg(feature = "alloc")]
     use prelude::*;
 
     #[test]
     fn test_vectors() {
         let maxlen = 64;
-        let mut m = Vec::with_capacity(64);
-        for i in 0usize..64 {
-            m.push(i as u8);
+        let mut m = [0u8; 64];
+        for i in 0u8..64 {
+            m[i as usize] = i;
         }
         let h_expecteds = [
             [0x31, 0x0e, 0x0e, 0xdd, 0x47, 0xdb, 0x6f, 0x72],
