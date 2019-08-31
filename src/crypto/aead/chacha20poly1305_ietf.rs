@@ -18,6 +18,7 @@ aead_module!(
     crypto_aead_chacha20poly1305_ietf_ABYTES as usize
 );
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::*;

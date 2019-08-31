@@ -25,6 +25,7 @@ aead_module!(
     crypto_aead_xchacha20poly1305_ietf_ABYTES as usize
 );
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::*;
