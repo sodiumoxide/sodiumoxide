@@ -17,6 +17,7 @@ stream_module!(
 mod test {
     use super::*;
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn test_vector_1() {
         // the fifth test from https://tools.ietf.org/html/draft-agl-tls-chacha20poly1305-04#section-7

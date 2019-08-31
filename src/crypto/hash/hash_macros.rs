@@ -70,6 +70,7 @@ impl Default for State {
     }
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test_m {
     use super::*;
@@ -90,6 +91,7 @@ mod test_m {
     }
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(feature = "serde")]
 #[cfg(test)]
 mod test_encode {

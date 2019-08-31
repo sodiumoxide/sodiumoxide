@@ -336,6 +336,7 @@ pub fn open_detached_precomputed(
     }
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::*;
@@ -637,7 +638,13 @@ mod test {
             "input should not be modified if authentication fails"
         );
     }
+}
 
+// this shouldn't be necessary but I'd have to replace seal with seal_in_place, which would be more
+// complicated
+#[cfg(feature = "alloc")]
+#[cfg(test)]
+mod testvectors {
     #[test]
     fn test_vector_1() {
         // corresponding to tests/box.c and tests/box3.cpp from NaCl

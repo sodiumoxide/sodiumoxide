@@ -55,17 +55,13 @@ pub fn gen_nonce() -> Nonce {
 #[cfg(feature = "alloc")]
 /// `stream()` produces a `len`-byte stream `c` as a function of a
 /// secret key `k` and a nonce `n`.
-pub fn stream(len: usize,
-              n: &Nonce,
-              k: &Key) -> Vec<u8> {
+pub fn stream(len: usize, n: &Nonce, k: &Key) -> Vec<u8> {
     let mut c = vec![0u8; len];
     stream_to_slice(&mut c, n, k);
     c
 }
 
-pub fn stream_to_slice(buf: &mut [u8],
-                       n: &Nonce,
-                       k: &key) {
+pub fn stream_to_slice(buf: &mut [u8], n: &Nonce, k: &Key) {
     unsafe {
         $stream_name(buf.as_mut_ptr(),
                      buf.len() as c_ulonglong,

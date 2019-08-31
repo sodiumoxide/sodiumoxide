@@ -90,6 +90,7 @@ pub fn open_to_slice(
     }
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::super::super::box_::curve25519xsalsa20poly1305 as box_;

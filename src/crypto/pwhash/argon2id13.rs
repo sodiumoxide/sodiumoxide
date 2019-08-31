@@ -42,6 +42,9 @@ argon2_module!(
 
 #[cfg(test)]
 mod testvectors {
+    use super::testcommon::*;
+    use super::*;
+
     #[test]
     fn test_derive_01() {
         let password = [
@@ -74,7 +77,8 @@ mod testvectors {
             0x74, 0xeb, 0x89, 0xec, 0x62, 0x05, 0xfe, 0x1e, 0xeb, 0x94, 0x1c, 0x73, 0xb1, 0xfc,
             0xf1,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 155, 5, 7_256_678);
+        let mut out = [0u8; 155];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 5, 7_256_678);
         assert!(result.is_ok());
     }
 
@@ -113,7 +117,8 @@ mod testvectors {
             0xc4, 0x01, 0xe1, 0x2d, 0x5c, 0xd8, 0xd9, 0x36, 0xc9, 0xba, 0xf7, 0x5e, 0xbd, 0xfb,
             0x55, 0x7d, 0x34, 0x2d, 0x28, 0x58, 0xfc, 0x78, 0x1d, 0xa3, 0x18, 0x60,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 250, 4, 7_849_083);
+        let mut out = [0u8; 250];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 4, 7_849_083);
         assert!(result.is_ok());
     }
 
@@ -159,7 +164,8 @@ mod testvectors {
             0xd9, 0x38, 0x01, 0x67, 0xc2, 0x53, 0x03, 0x86, 0x54, 0x4e, 0xbf, 0xbe, 0xad, 0xbe,
             0x23, 0x77, 0x84, 0xd1, 0x02, 0xbb, 0x92, 0xa1, 0x0f, 0xd2, 0x42,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 249, 3, 7_994_791);
+        let mut out = [0u8; 249];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 3, 7_994_791);
         assert!(result.is_ok());
     }
 
@@ -183,7 +189,8 @@ mod testvectors {
             0x59, 0x8f,
         ];
         let expected = [0x00];
-        let result = run_derive_key_test(&password, salt, &expected, 5, 4, 1_397_645);
+        let mut out = [0u8; 5];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 4, 1_397_645);
         assert!(result.is_err(), "Test should fail, output size too small");
     }
 
@@ -217,7 +224,8 @@ mod testvectors {
             0x44, 0x7f, 0x5b, 0x00, 0xec, 0xd1, 0xb0, 0x4a, 0x7b, 0xe1, 0x56, 0x9c, 0x8e, 0x55,
             0x6a, 0xdb, 0x7b, 0xba, 0x48, 0xad, 0xf8, 0x1d,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 190, 3, 1_432_947);
+        let mut out = [0u8; 190];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 3, 1_432_947);
         assert!(result.is_ok());
     }
 
@@ -256,7 +264,8 @@ mod testvectors {
             0xd4, 0xb2, 0x49, 0x83, 0x89, 0xe6, 0x0a, 0x3f, 0xf9, 0xf0, 0xf8, 0xf4, 0xb9, 0xfc,
             0xa1, 0x12, 0x6e, 0x64, 0xf4, 0x95, 0x01, 0xe3, 0x86, 0x90,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 178, 3, 4_886_999);
+        let mut out = [0u8; 178];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 3, 4_886_999);
         assert!(result.is_ok());
     }
 
@@ -290,7 +299,8 @@ mod testvectors {
             0x2d, 0x98, 0xc1, 0x33, 0x03, 0xb3, 0xfe, 0x76, 0x28, 0x55, 0x31, 0xa8, 0x26, 0xb6,
             0xfc, 0x0f, 0xe8, 0xe3, 0xdd, 0xde, 0xcf,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 231, 1, 1_631_659);
+        let mut out = [0u8; 231];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 1, 1_631_659);
         assert!(result.is_ok());
     }
 
@@ -332,7 +342,8 @@ mod testvectors {
             0x51, 0xa4, 0x62, 0xf8, 0xbf, 0x52, 0x61, 0x0a, 0xf2, 0x1f, 0xc6, 0x9d, 0xba, 0x6b,
             0x07, 0x26, 0x06, 0xf2, 0xda, 0xbc, 0xa7, 0xd4, 0xae, 0x1d, 0x91, 0xd9, 0x19,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 167, 3, 1_784_128);
+        let mut out = [0u8; 167];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 3, 1_784_128);
         assert!(result.is_ok());
     }
 
@@ -368,7 +379,8 @@ mod testvectors {
             0x7b, 0xb6, 0x55, 0xe9, 0x9c, 0xe9, 0x6b, 0xc5, 0x06, 0x96, 0x12, 0x16, 0xef, 0x88,
             0x7a,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 155, 4, 397_645);
+        let mut out = [0u8; 155];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 4, 397_645);
         assert!(result.is_ok());
     }
 
@@ -404,7 +416,8 @@ mod testvectors {
             0xad, 0x88, 0x11, 0xd9, 0xaa, 0x48, 0x70, 0xa9, 0xe0, 0xb3, 0x9f, 0xef, 0x47, 0xc9,
             0x2e,
         ];
-        let result = run_derive_key_test(&password, salt, &expected, 155, 3, 397_645);
+        let mut out = [0u8; 155];
+        let result = run_derive_key_test(&password, salt, &expected, &mut out, 3, 397_645);
         assert!(result.is_ok());
     }
 
@@ -527,44 +540,9 @@ mod testvectors {
 #[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
+    use super::testcommon::*;
     use super::*;
 
-    /// Helper function to allow for testing derive_key with different configurations
-    fn run_derive_key_test(
-        password: &[u8],
-        salt: [u8; SALTBYTES],
-        expected: &[u8],
-        out_len: usize,
-        ops: usize,
-        mem: usize,
-    ) -> Result<(), ()> {
-        let mut out_bin = vec![0u8; out_len];
-        let result = derive_key(
-            out_bin.as_mut_slice(),
-            password,
-            &Salt(salt),
-            OpsLimit(ops),
-            MemLimit(mem),
-        );
-
-        match result {
-            Ok(out_bin) => {
-                assert_eq!(expected, out_bin, "output does not match expected result");
-                Ok(())
-            }
-            Err(_) => Err(()),
-        }
-    }
-
-    /// Converts a str into a hashed password struct
-    fn to_hashed_password(s: &str) -> HashedPassword {
-        let mut pw = [0; 128];
-        s.as_bytes()
-            .iter()
-            .enumerate()
-            .for_each(|(i, val)| pw[i] = *val);
-        HashedPassword(pw)
-    }
     #[test]
     fn test_pwhash_verify() {
         use randombytes::randombytes;
@@ -601,5 +579,40 @@ mod test {
             round_trip(pwh);
             round_trip(salt);
         }
+    }
+}
+
+#[cfg(test)]
+mod testcommon {
+    use super::*;
+
+    /// Helper function to allow for testing derive_key with different configurations
+    pub fn run_derive_key_test(
+        password: &[u8],
+        salt: [u8; SALTBYTES],
+        expected: &[u8],
+        out_bin: &mut [u8],
+        ops: usize,
+        mem: usize,
+    ) -> Result<(), ()> {
+        let result = derive_key(out_bin, password, &Salt(salt), OpsLimit(ops), MemLimit(mem));
+
+        match result {
+            Ok(out_bin) => {
+                assert_eq!(expected, out_bin, "output does not match expected result");
+                Ok(())
+            }
+            Err(_) => Err(()),
+        }
+    }
+
+    /// Converts a str into a hashed password struct
+    pub fn to_hashed_password(s: &str) -> HashedPassword {
+        let mut pw = [0; 128];
+        s.as_bytes()
+            .iter()
+            .enumerate()
+            .for_each(|(i, val)| pw[i] = *val);
+        HashedPassword(pw)
     }
 }

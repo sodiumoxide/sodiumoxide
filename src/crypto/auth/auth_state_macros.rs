@@ -74,6 +74,7 @@ impl State {
     }
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test_s {
     use super::*;

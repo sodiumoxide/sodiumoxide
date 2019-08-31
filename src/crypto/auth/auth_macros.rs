@@ -65,6 +65,7 @@ pub fn verify(tag: &Tag, m: &[u8],
     }
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test_m {
     use super::*;

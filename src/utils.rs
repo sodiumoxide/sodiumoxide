@@ -90,10 +90,12 @@ pub fn add_le(x: &mut [u8], y: &[u8]) -> Result<(), ()> {
     }
 }
 
+#[cfg(feature = "alloc")]
 #[cfg(test)]
 mod test {
     use super::*;
 
+    #[cfg(feature = "alloc")]
     #[test]
     fn test_memcmp() {
         use randombytes::randombytes;
