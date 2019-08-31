@@ -645,6 +645,8 @@ mod test {
 #[cfg(feature = "alloc")]
 #[cfg(test)]
 mod testvectors {
+    use super::*;
+
     #[test]
     fn test_vector_1() {
         // corresponding to tests/box.c and tests/box3.cpp from NaCl
