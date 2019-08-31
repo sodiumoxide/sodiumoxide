@@ -107,6 +107,7 @@ impl State {
 #[cfg(test)]
 mod test {
     use super::*;
+    #[cfg(not(feature = "std"))]
     use prelude::*;
 
     #[test]

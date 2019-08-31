@@ -20,8 +20,13 @@ stream_module!(
 mod test {
     use super::*;
 
+    // not strictly necessary but this test vector overflows the stack...
+    #[cfg(feature = "alloc")]
     #[test]
     fn test_vector_1() {
+        #[cfg(not(feature = "std"))]
+        use prelude::*;
+
         // corresponding to tests/stream.c and tests/stream5.cpp from NaCl
         use crypto::hash::sha256::{hash, Digest};
         let firstkey = Key([
@@ -33,7 +38,7 @@ mod test {
             0x69, 0x69, 0x6e, 0xe9, 0x55, 0xb6, 0x2b, 0x73, 0xcd, 0x62, 0xbd, 0xa8, 0x75, 0xfc,
             0x73, 0xd6, 0x82, 0x19, 0xe0, 0x03, 0x6b, 0x7a, 0x0b, 0x37,
         ]);
-        let mut output = [0u8; 4_194_304];
+        let mut output = vec![0u8; 4_194_304];
         stream_to_slice(&mut output, &nonce, &firstkey);
         let digest_expected = [
             0x66, 0x2b, 0x9d, 0x0e, 0x34, 0x63, 0x02, 0x91, 0x56, 0x06, 0x9b, 0x12, 0xf9, 0x18,
