@@ -331,7 +331,7 @@ impl Stream<Pull> {
     /// loop to authenticate and decrypt a stream of messages.
     pub fn pull(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag), ()> {
         let m_len = self.pull_check(c)?;
-        let mut buf = Vec::with_capacity(m_len);
+        let mut buf = vec![0u8; m_len];
         let tag = unsafe { self.pull_impl(c, ad, &mut buf)? };
         Ok((buf, tag))
     }
