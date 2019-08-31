@@ -62,7 +62,8 @@ pub fn open(c: &[u8], pk: &box_::PublicKey, sk: &box_::SecretKey) -> Result<Vec<
         return Err(());
     }
     let mut m = vec![0u8; c.len() - SEALBYTES];
-    open_to_slice(c, pk, sk, &mut m)
+    open_to_slice(c, pk, sk, &mut m)?;
+    Ok(m)
 }
 
 pub fn open_to_slice(
