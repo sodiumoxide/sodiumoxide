@@ -218,7 +218,11 @@ impl Stream<Push> {
         let buf_len = self.push_check(m, tag)?;
         out.clear();
         out.reserve(buf_len);
-        unsafe { self.push_impl(m, ad, tag, out) }
+        unsafe {
+            out.set_len(buf_len);
+            let r = self.push_impl(m, ad, tag, out)?;
+            Ok(r)
+        }
     }
 
     /// All data (including optional fields) is authenticated. Encrypts a
@@ -350,7 +354,11 @@ impl Stream<Pull> {
         let m_len = self.pull_check(c)?;
         out.clear();
         out.reserve(m_len);
-        unsafe { self.pull_impl(c, ad, out) }
+        unsafe {
+            out.set_len(m_len);
+            let r = self.pull_impl(c, ad, out)? ;
+            Ok(r)
+        }
     }
 
     /// Verifies that `c` is a valid ciphertext with a correct authentication tag
