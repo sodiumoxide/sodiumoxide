@@ -61,6 +61,8 @@ pub fn stream(len: usize, n: &Nonce, k: &Key) -> Vec<u8> {
     c
 }
 
+/// `stream_to_slice` fills `buf` with a random stream as a function of a secret key `k` and a
+/// nonce `n`.
 pub fn stream_to_slice(buf: &mut [u8], n: &Nonce, k: &Key) {
     unsafe {
         $stream_name(buf.as_mut_ptr(),

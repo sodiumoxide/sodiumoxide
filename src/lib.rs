@@ -52,11 +52,10 @@
 
 #![crate_name = "sodiumoxide"]
 #![crate_type = "lib"]
-#![allow(warnings)]
-// #![warn(missing_docs)]
-// #![warn(non_upper_case_globals)]
-// #![warn(non_camel_case_types)]
-// #![warn(unused_qualifications)]
+#![warn(missing_docs)]
+#![warn(non_upper_case_globals)]
+#![warn(non_camel_case_types)]
+#![warn(unused_qualifications)]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(clippy::all)]
 

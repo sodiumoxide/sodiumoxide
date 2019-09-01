@@ -20,12 +20,18 @@ pub const SEALBYTES: usize = ffi::crypto_box_SEALBYTES as usize;
 /// The function creates a new key pair for each message, and attaches the public
 /// key to the ciphertext. The secret key is overwritten and is not accessible
 /// after this function returns.
-pub fn seal(m: &[u8], pk: &box_::PublicKey) -> Vec<u8> {
+pub fn seal(m: &[u8], pk: &box_::PublicKey) -> Result<Vec<u8>, ()> {
     let mut c = vec![0u8; m.len() + SEALBYTES];
-    seal_to_slice(m, pk, &mut c);
-    c
+    seal_to_slice(m, pk, &mut c)?;
+    Ok(c)
 }
 
+/// The `seal_to_slice()` function encrypts a message `m` for a recipient whose public key
+/// is `pk`. It writes the ciphertext whose length is `SEALBYTES + m.len()` to `buf`.
+///
+/// The function creates a new key pair for each message, and attaches the public
+/// key to the ciphertext. The secret key is overwritten and is not accessible
+/// after this function returns.
 pub fn seal_to_slice(m: &[u8], pk: &box_::PublicKey, buf: &mut [u8]) -> Result<(), ()> {
     if buf.len() != m.len() + SEALBYTES {
         return Err(());
@@ -66,6 +72,17 @@ pub fn open(c: &[u8], pk: &box_::PublicKey, sk: &box_::SecretKey) -> Result<Vec<
     Ok(m)
 }
 
+/// The `open_to_slice()` function decrypts the ciphertext `c` using the key pair `(pk, sk)`
+/// and writes the result to `buf`.
+///
+/// Key pairs are compatible with other
+/// `crypto::box_::curve25519xsalsa20poly1305` operations and can be created
+/// using `crypto::box::gen_keypair()`.
+///
+/// This function doesn't require passing the public key of the sender, as the
+/// ciphertext already includes this information.
+///
+/// If decryption fails it returns `Err(())`.
 pub fn open_to_slice(
     c: &[u8],
     pk: &box_::PublicKey,
