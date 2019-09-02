@@ -59,7 +59,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
                 {
                     let mut res = $newtype([0; $len]);
                     for r in res.0.iter_mut() {
-                        if let Some(value) = try!(visitor.next_element()) {
+                        if let Some(value) = visitor.next_element()? {
                             *r = value;
                         }
                     }
