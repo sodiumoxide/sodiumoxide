@@ -52,6 +52,7 @@
 
 #![crate_name = "sodiumoxide"]
 #![crate_type = "lib"]
+#![allow(warnings)]
 #![warn(missing_docs)]
 #![warn(non_upper_case_globals)]
 #![warn(non_camel_case_types)]
@@ -66,18 +67,16 @@ extern crate hex;
 extern crate libc;
 #[cfg(any(test, feature = "serde"))]
 extern crate serde;
-#[cfg(not(feature = "std"))]
+#[cfg(all(not(feature = "std"), feature = "alloc"))]
 #[macro_use]
 extern crate alloc;
-#[cfg(all(test, not(feature = "std")))]
-extern crate std;
-
-#[cfg(all(not(test), not(feature = "std")))]
-mod std {
-    pub use core::{cmp, fmt, hash, iter, mem, ops, ptr, slice, str};
-}
 
 #[cfg(not(feature = "std"))]
+mod std {
+    pub use core::*;
+}
+
+#[cfg(all(not(feature = "std"), feature = "alloc"))]
 mod prelude {
     pub use alloc::string::String;
     pub use alloc::vec::Vec;

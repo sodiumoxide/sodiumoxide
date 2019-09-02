@@ -4,7 +4,7 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
-#[cfg(not(feature = "std"))] #[cfg(feature = "alloc")] use prelude::*;
+#[cfg(all(not(feature = "std"), feature = "alloc"))] use prelude::*;
 use libc::c_ulonglong;
 use randombytes::randombytes_into;
 

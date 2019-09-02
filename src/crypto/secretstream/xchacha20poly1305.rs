@@ -311,7 +311,7 @@ mod test {
         assert_eq!(Tag::Push, Tag::from_u8(1).unwrap());
         assert_eq!(Tag::Rekey, Tag::from_u8(2).unwrap());
         assert_eq!(Tag::Final, Tag::from_u8(3).unwrap());
-        for i in 4..=u16::from(core::u8::MAX) {
+        for i in 4..=u16::from(crate::std::u8::MAX) {
             assert!(Tag::from_u8(i as u8).is_err());
         }
     }

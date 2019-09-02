@@ -23,7 +23,7 @@ mod test {
     #[cfg(feature = "alloc")]
     #[test]
     fn test_vector_1() {
-        #[cfg(not(feature = "std"))]
+        #[cfg(all(not(feature = "std"), feature = "alloc"))]
         use prelude::*;
         // corresponding to tests/stream2.c and tests/stream6.cpp from NaCl
         use crypto::hash::sha256::{hash, Digest};

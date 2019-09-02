@@ -6,7 +6,7 @@ macro_rules! aead_module (($seal_name:ident,
                            $noncebytes:expr,
                            $tagbytes:expr) => (
 
-#[cfg(not(feature = "std"))] #[cfg(feature = "alloc")] use prelude::*;
+#[cfg(all(not(feature = "std"), feature = "alloc"))] use prelude::*;
 use libc::c_ulonglong;
 use std::ptr;
 use randombytes::randombytes_into;

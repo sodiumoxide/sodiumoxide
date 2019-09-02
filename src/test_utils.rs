@@ -2,8 +2,7 @@
 extern crate core;
 extern crate rmp_serde;
 extern crate serde_json;
-#[cfg(not(feature = "std"))]
-#[cfg(feature = "alloc")]
+#[cfg(all(not(feature = "std"), feature = "alloc"))]
 use prelude::*;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
@@ -11,7 +10,7 @@ use serde::{Deserialize, Serialize};
 // Encodes then decodes `value` using JSON
 pub fn round_trip<T>(value: T)
 where
-    T: Serialize + DeserializeOwned + Eq + core::fmt::Debug,
+    T: Serialize + DeserializeOwned + Eq + std::fmt::Debug,
 {
     let encoded_value = serde_json::to_string(&value).unwrap();
     let decoded_value = serde_json::from_str(&encoded_value).unwrap();

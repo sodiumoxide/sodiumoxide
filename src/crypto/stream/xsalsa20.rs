@@ -24,7 +24,7 @@ mod test {
     #[cfg(feature = "alloc")]
     #[test]
     fn test_vector_1() {
-        #[cfg(not(feature = "std"))]
+        #[cfg(all(not(feature = "std"), feature = "alloc"))]
         use prelude::*;
 
         // corresponding to tests/stream.c and tests/stream5.cpp from NaCl

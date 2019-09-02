@@ -14,13 +14,12 @@ macro_rules! stream_module (($state_name: ident,
                              $tag_final: expr) => (
 
 use libc::c_ulonglong;
-#[cfg(not(feature = "std"))]
-#[cfg(feature = "alloc")]
+#[cfg(all(not(feature = "std"), feature = "alloc"))]
 use prelude::Vec;
 use randombytes::randombytes_into;
-use std::mem;
-use std::ops::Drop;
-use std::ptr;
+use crate::std::mem;
+use crate::std::ops::Drop;
+use crate::std::ptr;
 
 /// Returns the maximum length of an individual message.
 // TODO: use `const fn` when stable
@@ -129,7 +128,7 @@ pub fn gen_key() -> Key {
 pub struct Stream<M: StreamMode> {
     state: $state_name,
     finalized: bool,
-    phantom: core::marker::PhantomData<M>,
+    phantom: crate::std::marker::PhantomData<M>,
 }
 
 impl<M: StreamMode> Stream<M> {
@@ -190,7 +189,7 @@ impl Stream<Push> {
             Stream::<Push> {
                 state,
                 finalized: false,
-                phantom: core::marker::PhantomData,
+                phantom: crate::std::marker::PhantomData,
             },
             Header(header),
         ))
@@ -313,7 +312,7 @@ impl Stream<Pull> {
         Ok(Stream::<Pull> {
             state: state,
             finalized: false,
-            phantom: core::marker::PhantomData,
+            phantom: crate::std::marker::PhantomData,
         })
     }
 

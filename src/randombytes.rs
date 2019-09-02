@@ -1,8 +1,7 @@
 //! Cryptographic random number generation.
 
 use ffi;
-#[cfg(not(feature = "std"))]
-#[cfg(feature = "alloc")]
+#[cfg(all(not(feature = "std"), feature = "alloc"))]
 use prelude::*;
 
 #[cfg(feature = "alloc")]

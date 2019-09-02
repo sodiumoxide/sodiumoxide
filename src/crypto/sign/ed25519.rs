@@ -5,8 +5,7 @@
 
 use ffi;
 use libc::c_ulonglong;
-#[cfg(not(feature = "std"))]
-#[cfg(feature = "alloc")]
+#[cfg(all(not(feature = "std"), feature = "alloc"))]
 use prelude::*;
 use std::fmt;
 use std::mem;
@@ -335,6 +334,7 @@ mod test {
         }
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn test_vectors() {
         // test vectors from the Python implementation
@@ -365,6 +365,7 @@ mod test {
         }
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn test_vectors_detached() {
         // test vectors from the Python implementation
@@ -435,6 +436,7 @@ mod test {
         assert!(validator_state.verify(&sig, &pk));
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn test_streaming_vectors() {
         // test vectors from the Python implementation

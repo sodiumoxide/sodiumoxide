@@ -25,7 +25,7 @@ hash_module!(
 #[cfg(test)]
 mod test {
     use super::*;
-    #[cfg(not(feature = "std"))]
+    #[cfg(all(not(feature = "std"), feature = "alloc"))]
     use prelude::*;
 
     #[test]
@@ -58,6 +58,11 @@ mod test {
         let Digest(h) = hash(&x);
         assert!(h == h_expected);
     }
+}
+
+#[cfg(all(test, feature = "std"))]
+mod nist_vectors {
+    use super::*;
 
     // TODO: replace this with a macro that uses the include!(filename) macro to avoid heap
     // allocation

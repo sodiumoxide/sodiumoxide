@@ -1,6 +1,9 @@
 //! Libsodium utility functions
 use ffi;
 
+#[cfg(all(not(feature = "std"), feature = "alloc"))]
+use prelude::*;
+
 /// `memzero()` tries to effectively zero out the data in `x` even if
 /// optimizations are being applied to the code.
 pub fn memzero(x: &mut [u8]) {

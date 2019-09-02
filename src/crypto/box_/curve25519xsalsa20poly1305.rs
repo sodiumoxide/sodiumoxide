@@ -6,8 +6,7 @@
 //! third-party unforgeability.
 
 use ffi;
-#[cfg(not(feature = "std"))]
-#[cfg(feature = "alloc")]
+#[cfg(all(not(feature = "std"), feature = "alloc"))]
 use prelude::*;
 use randombytes::randombytes_into;
 

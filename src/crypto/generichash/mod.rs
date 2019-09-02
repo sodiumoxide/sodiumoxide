@@ -107,7 +107,7 @@ impl State {
 #[cfg(test)]
 mod test {
     use super::*;
-    #[cfg(not(feature = "std"))]
+    #[cfg(all(not(feature = "std"), feature = "alloc"))]
     use prelude::*;
 
     #[test]
@@ -146,7 +146,8 @@ mod test {
     }
 
     // TODO: replace this with a macro that uses the include!(filename) macro to avoid heap
-    // allocation
+    // allocation, std requirement
+    #[cfg(feature = "std")]
     #[test]
     fn test_blake2b_vectors() {
         use std::fs::File;
