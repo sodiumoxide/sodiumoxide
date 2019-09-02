@@ -20,10 +20,10 @@ pub const SEALBYTES: usize = ffi::crypto_box_SEALBYTES as usize;
 /// The function creates a new key pair for each message, and attaches the public
 /// key to the ciphertext. The secret key is overwritten and is not accessible
 /// after this function returns.
-pub fn seal(m: &[u8], pk: &box_::PublicKey) -> Result<Vec<u8>, ()> {
+pub fn seal(m: &[u8], pk: &box_::PublicKey) -> Vec<u8> {
     let mut c = vec![0u8; m.len() + SEALBYTES];
-    seal_to_slice(m, pk, &mut c)?;
-    Ok(c)
+    seal_to_slice(m, pk, &mut c).expect("failed to seal");
+    c
 }
 
 /// The `seal_to_slice()` function encrypts a message `m` for a recipient whose public key

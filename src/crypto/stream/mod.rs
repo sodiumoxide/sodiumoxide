@@ -67,6 +67,16 @@
 //! let keystream = stream::stream(128, &nonce, &key); // generate 128 bytes of keystream
 //! ```
 //!
+//! # Example (in place keystream generation)
+//! ```
+//! use sodiumoxide::crypto::stream;
+//!
+//! let key = stream::gen_key();
+//! let nonce = stream::gen_nonce();
+//! let mut keystream = [0u8; 128];
+//! stream::stream_to_slice(&mut keystream, &nonce, &key); // generate 128 bytes of keystream
+//! ```
+//!
 //! # Example (encryption)
 //! ```
 //! use sodiumoxide::crypto::stream;
