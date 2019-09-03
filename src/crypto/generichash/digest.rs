@@ -1,8 +1,8 @@
+use ffi::crypto_generichash_BYTES_MAX;
 use std::cmp::{Eq, Ordering, PartialEq, PartialOrd};
 use std::fmt::{Debug, Formatter};
 use std::hash::{Hash, Hasher};
 use std::ops::{Index, Range, RangeFrom, RangeFull, RangeTo};
-use ffi::crypto_generichash_BYTES_MAX;
 
 /// Digest-structure
 ///
