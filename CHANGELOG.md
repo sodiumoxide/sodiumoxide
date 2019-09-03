@@ -1,3 +1,7 @@
+# 0.2.4 (Sep 3, 2019)
+* Fixed erronoeus dependency on older libsodium-sys
+* Fixed use of deprecated try! macro (#369)
+
 # 0.2.3 (Sep 1, 2019)
 
 * Allow reusing Vec for secretstream (#357)
