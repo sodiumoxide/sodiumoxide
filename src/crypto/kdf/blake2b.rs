@@ -46,7 +46,7 @@ pub fn derive_from_key(
             subkey.as_mut_ptr() as _,
             subkey.len(),
             subkey_id,
-            ctx.as_ptr() as *mut i8,
+            ctx.as_ptr() as _,
             key.0.as_ptr(),
         );
         if r != 0 {
