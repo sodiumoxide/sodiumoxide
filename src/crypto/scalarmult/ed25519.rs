@@ -68,7 +68,7 @@ mod test {
 
         // derive key using algorithm descriped in rfc8032 section 5.1.5
         // https://tools.ietf.org/html/rfc8032#page-13
-        use crate::crypto::hash::sha512::{Digest, hash};
+        use crate::crypto::hash::sha512::{hash, Digest};
         let Digest(mut h) = hash(&sk);
         h[0] &= 0xF8;
         h[31] |= 0x40;

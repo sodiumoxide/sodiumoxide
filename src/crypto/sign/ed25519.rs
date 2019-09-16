@@ -101,8 +101,8 @@ pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
 /// 'keypair_from_secret_key_slice()' returns a public/secret key pair given
 /// a bare rfc8032 secret key (32 bytes)
 pub fn keypair_from_secret_key_slice(secret_key_slice: &[u8]) -> Option<(PublicKey, SecretKey)> {
-    use crate::crypto::hash::sha512::{Digest, hash};
-    use crate::crypto::scalarmult::ed25519::{GroupElement, Scalar, scalarmult_base};
+    use crate::crypto::hash::sha512::{hash, Digest};
+    use crate::crypto::scalarmult::ed25519::{scalarmult_base, GroupElement, Scalar};
 
     if secret_key_slice.len() != SCALARBYTES {
         return None;
@@ -123,7 +123,7 @@ pub fn keypair_from_secret_key_slice(secret_key_slice: &[u8]) -> Option<(PublicK
     sk_bytes[0..SCALARBYTES].copy_from_slice(&secret_key_slice);
     sk_bytes[SCALARBYTES..].copy_from_slice(&pk);
     let sk = SecretKey(sk_bytes);
-    
+
     Some((sk.public_key(), sk))
 }
 
