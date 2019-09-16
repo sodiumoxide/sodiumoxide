@@ -36,3 +36,4 @@
 //! Science 3958 (2006), 207–228, <http://cr.yp.to/papers.html#curve25519>.
 pub use self::curve25519::*;
 pub mod curve25519;
+pub mod ed25519;

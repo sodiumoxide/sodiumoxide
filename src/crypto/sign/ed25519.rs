@@ -22,6 +22,12 @@ pub const PUBLICKEYBYTES: usize = ffi::crypto_sign_ed25519_PUBLICKEYBYTES as usi
 /// Number of bytes in a `Signature`.
 pub const SIGNATUREBYTES: usize = ffi::crypto_sign_ed25519_BYTES as usize;
 
+/// Number of bytes in a scalar multiply... used to derive public key from secret key
+/// A libsodium secret key is both the 32byte secret key plus the 32 byte public key
+/// If only the 32 byte secret key is provided, the public key must be derived in order
+/// to produce a libsodium secret key
+pub const SCALARBYTES: usize = ffi::crypto_scalarmult_ed25519_SCALARBYTES as usize;
+
 new_type! {
     /// `Seed` that can be used for keypair generation
     ///
@@ -90,6 +96,35 @@ pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
         );
     }
     (pk, sk)
+}
+
+/// 'keypair_from_secret_key_slice()' returns a public/secret key pair given
+/// a bare rfc8032 secret key (32 bytes)
+pub fn keypair_from_secret_key_slice(secret_key_slice: &[u8]) -> Option<(PublicKey, SecretKey)> {
+    use crate::crypto::hash::sha512::{Digest, hash};
+    use crate::crypto::scalarmult::ed25519::{GroupElement, Scalar, scalarmult_base};
+
+    if secret_key_slice.len() != SCALARBYTES {
+        return None;
+    }
+
+    // derive key using algorithm descriped in rfc8032 section 5.1.5
+    // https://tools.ietf.org/html/rfc8032#page-13
+    let Digest(mut h) = hash(&secret_key_slice);
+    h[0] &= 0xF8;
+    h[31] |= 0x40;
+
+    let mut n = [0u8; SCALARBYTES];
+    n.copy_from_slice(&h[0..SCALARBYTES]);
+    let GroupElement(pk) = scalarmult_base(&Scalar(n));
+
+    // SECRETKEYBYTES = 64 bytes which is 2x SCALARBYTES
+    let mut sk_bytes = [0u8; SECRETKEYBYTES];
+    sk_bytes[0..SCALARBYTES].copy_from_slice(&secret_key_slice);
+    sk_bytes[SCALARBYTES..].copy_from_slice(&pk);
+    let sk = SecretKey(sk_bytes);
+    
+    Some((sk.public_key(), sk))
 }
 
 /// `sign()` signs a message `m` using the signer's secret key `sk`.
@@ -518,6 +553,34 @@ mod test {
         }
         let sig = creation_state.finalize(&sk);
         assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_keypair_from_secret_key_slice() {
+        // https://tools.ietf.org/html/rfc8032#page-24
+        let sk = [
+            0x9d, 0x61, 0xb1, 0x9d, 0xef, 0xfd, 0x5a, 0x60, 0xba, 0x84, 0x4a, 0xf4, 0x92, 0xec,
+            0x2c, 0xc4, 0x44, 0x49, 0xc5, 0x69, 0x7b, 0x32, 0x69, 0x19, 0x70, 0x3b, 0xac, 0x03,
+            0x1c, 0xae, 0x7f, 0x60,
+        ];
+        let pk_expected = [
+            0xd7, 0x5a, 0x98, 0x01, 0x82, 0xb1, 0x0a, 0xb7, 0xd5, 0x4b, 0xfe, 0xd3, 0xc9, 0x64,
+            0x07, 0x3a, 0x0e, 0xe1, 0x72, 0xf3, 0xda, 0xa6, 0x23, 0x25, 0xaf, 0x02, 0x1a, 0x68,
+            0xf7, 0x07, 0x51, 0x1a,
+        ];
+        let sk_expected = [
+            0x9d, 0x61, 0xb1, 0x9d, 0xef, 0xfd, 0x5a, 0x60, 0xba, 0x84, 0x4a, 0xf4, 0x92, 0xec,
+            0x2c, 0xc4, 0x44, 0x49, 0xc5, 0x69, 0x7b, 0x32, 0x69, 0x19, 0x70, 0x3b, 0xac, 0x03,
+            0x1c, 0xae, 0x7f, 0x60, 0xd7, 0x5a, 0x98, 0x01, 0x82, 0xb1, 0x0a, 0xb7, 0xd5, 0x4b,
+            0xfe, 0xd3, 0xc9, 0x64, 0x07, 0x3a, 0x0e, 0xe1, 0x72, 0xf3, 0xda, 0xa6, 0x23, 0x25,
+            0xaf, 0x02, 0x1a, 0x68, 0xf7, 0x07, 0x51, 0x1a,
+        ];
+
+        let (public_key, secret_key) = keypair_from_secret_key_slice(&sk).unwrap();
+
+        assert!(secret_key == SecretKey(sk_expected));
+        assert!(public_key == PublicKey(pk_expected));
+        assert!(secret_key.public_key() == public_key);
     }
 }
 
