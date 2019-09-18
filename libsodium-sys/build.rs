@@ -61,7 +61,15 @@ fn main() {
             );
         }
 
-        build_libsodium();
+        //build_libsodium();
+        println!("cargo:rustc-link-lib=static=sodium");
+
+        let crate_path: PathBuf = env::var("CARGO_MANIFEST_DIR").unwrap().into();
+        let lib_dir = crate_path.join("wasm32/wasi/");
+        println!(
+            "cargo:rustc-link-search=native={}",
+            lib_dir.to_str().unwrap()
+        );
     }
 }
 
@@ -352,6 +360,8 @@ fn get_lib_dir() -> PathBuf {
         get_crate_dir().join("msvc/x64/Debug/v140/")
     }
 }
+
+
 
 #[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
 fn get_lib_dir() -> PathBuf {

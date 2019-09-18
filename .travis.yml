@@ -43,6 +43,26 @@ matrix:
       - mkdir target # fix for cargo-coveralls
       - cargo coveralls
 
+  - name: wasi
+    os: linux
+    rust: stable
+    install:
+      - curl https://get.wasmer.io -sSfL | sh
+    before_script:
+      - rustup target add wasm32-wasi
+    script:
+      - cargo build --tests --target wasm32-wasi
+    test:
+      - cargo test --target wasm32-wasi -- -- --skip crypto::generichash::test::test_blake2b_vectors  \
+            --skip crypto::hash::sha256::test::test_vectors_nist_short \
+            --skip crypto::hash::sha256::test::test_vectors_nist_long \
+            --skip crypto::hash::sha512::test::test_vectors_nist_short \
+            --skip crypto::hash::sha512::test::test_vectors_nist_long \
+            --skip crypto::sign::ed25519::test::test_vectors \
+            --skip crypto::sign::ed25519::test::test_streaming_vectors \
+            --skip utils::test::test_mlock_munlock
+
+
 script:
   - cargo build --verbose
   - cargo test --verbose --all
