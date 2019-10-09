@@ -235,6 +235,7 @@ mod test {
     }
 
     #[test]
+    #[ignore]
     fn test_mlock_munlock() {
         let t = b"hello world";
         let mut x = Vec::new();

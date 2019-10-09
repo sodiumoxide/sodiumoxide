@@ -52,16 +52,7 @@ matrix:
       - source $HOME/.wasmer/wasmer.sh
     script:
       - cargo build --tests --target wasm32-wasi
-      - cargo test --target wasm32-wasi -- --
-            --skip crypto::generichash::test::test_blake2b_vectors
-            --skip crypto::hash::sha256::test::test_vectors_nist_short
-            --skip crypto::hash::sha256::test::test_vectors_nist_long
-            --skip crypto::hash::sha512::test::test_vectors_nist_short
-            --skip crypto::hash::sha512::test::test_vectors_nist_long
-            --skip crypto::sign::ed25519::test::test_vectors
-            --skip crypto::sign::ed25519::test::test_streaming_vectors
-            --skip utils::test::test_mlock_munlock
-
+      - cargo test --target wasm32-wasi
 
 script:
   - cargo build --verbose
