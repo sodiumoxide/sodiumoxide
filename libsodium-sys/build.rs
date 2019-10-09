@@ -1,444 +1,161 @@
-#[cfg(not(windows))]
-extern crate cc;
-
-#[cfg(target_env = "msvc")]
-extern crate libc;
-#[cfg(target_env = "msvc")]
-extern crate vcpkg;
-
-extern crate libflate;
-extern crate pkg_config;
-extern crate tar;
-
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
-
-static VERSION: &'static str = "1.0.18";
-
 fn main() {
-    println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
-    println!("cargo:rerun-if-env-changed=SODIUM_SHARED");
-    println!("cargo:rerun-if-env-changed=SODIUM_USE_PKG_CONFIG");
+    let mut avx512f = cc::Build::new();
+    let files = [
+        "crypto_pwhash/argon2/argon2-fill-block-avx512f.c",
+    ];
+    files.into_iter().for_each(|p| {
+        let base = "libsodium-1.0.18/src/libsodium/".to_string();
+        let path = base + p;
+        avx512f.file(path);
+    });
 
-    if cfg!(target_env = "msvc") {
-        // vcpkg requires to set env VCPKGRS_DYNAMIC
-        println!("cargo:rerun-if-env-changed=VCPKGRS_DYNAMIC");
-    }
-    if cfg!(not(windows)) {
-        println!("cargo:rerun-if-env-changed=SODIUM_DISABLE_PIE");
-    }
+    avx512f
+        .include("libsodium-1.0.18/src/libsodium/include/sodium/")
+        .warnings(false)
+        .define("DEV_MODE", None)
+        .define("CONFIGURED", None)
+        .flag_if_supported("-mavx512f")
+        .compile("avx512f");
 
-    if env::var("SODIUM_STATIC").is_ok() {
-        panic!("SODIUM_STATIC is deprecated. Use SODIUM_SHARED instead.");
-    }
 
-    let lib_dir_isset = env::var("SODIUM_LIB_DIR").is_ok();
-    let use_pkg_isset = if cfg!(feature = "use-pkg-config") {
-        true
-    } else {
-        env::var("SODIUM_USE_PKG_CONFIG").is_ok()
-    };
-    let shared_isset = env::var("SODIUM_SHARED").is_ok();
+    let mut build = cc::Build::new();
+    let files = [
+        "crypto_aead/aes256gcm/aesni/aead_aes256gcm_aesni.c",
+        "crypto_aead/chacha20poly1305/sodium/aead_chacha20poly1305.c",
+        "crypto_aead/xchacha20poly1305/sodium/aead_xchacha20poly1305.c",
+        "crypto_auth/crypto_auth.c",
+        "crypto_auth/hmacsha256/auth_hmacsha256.c",
+        "crypto_auth/hmacsha512256/auth_hmacsha512256.c",
+        "crypto_auth/hmacsha512/auth_hmacsha512.c",
+        "crypto_box/crypto_box.c",
+        "crypto_box/crypto_box_easy.c",
+        "crypto_box/crypto_box_seal.c",
+        "crypto_box/curve25519xchacha20poly1305/box_curve25519xchacha20poly1305.c",
+        "crypto_box/curve25519xchacha20poly1305/box_seal_curve25519xchacha20poly1305.c",
+        "crypto_box/curve25519xsalsa20poly1305/box_curve25519xsalsa20poly1305.c",
+        "crypto_core/ed25519/core_ed25519.c",
+        "crypto_core/ed25519/core_ristretto255.c",
+        "crypto_core/ed25519/ref10/ed25519_ref10.c",
+        "crypto_core/hchacha20/core_hchacha20.c",
+        "crypto_core/hsalsa20/core_hsalsa20.c",
+        "crypto_core/hsalsa20/ref2/core_hsalsa20_ref2.c",
+        "crypto_core/salsa/ref/core_salsa_ref.c",
+        "crypto_generichash/blake2b/generichash_blake2.c",
+        "crypto_generichash/blake2b/ref/blake2b-compress-avx2.c",
+        "crypto_generichash/blake2b/ref/blake2b-compress-ref.c",
+        "crypto_generichash/blake2b/ref/blake2b-compress-sse41.c",
+        "crypto_generichash/blake2b/ref/blake2b-compress-ssse3.c",
+        "crypto_generichash/blake2b/ref/blake2b-ref.c",
+        "crypto_generichash/blake2b/ref/generichash_blake2b.c",
+        "crypto_generichash/crypto_generichash.c",
+        "crypto_hash/crypto_hash.c",
+        "crypto_hash/sha256/cp/hash_sha256_cp.c",
+        "crypto_hash/sha256/hash_sha256.c",
+        "crypto_hash/sha512/cp/hash_sha512_cp.c",
+        "crypto_hash/sha512/hash_sha512.c",
+        "crypto_kdf/blake2b/kdf_blake2b.c",
+        "crypto_kdf/crypto_kdf.c",
+        "crypto_kx/crypto_kx.c",
+        "crypto_onetimeauth/crypto_onetimeauth.c",
+        "crypto_onetimeauth/poly1305/donna/poly1305_donna.c",
+        "crypto_onetimeauth/poly1305/onetimeauth_poly1305.c",
+        "crypto_onetimeauth/poly1305/sse2/poly1305_sse2.c",
+        "crypto_pwhash/argon2/argon2.c",
+        "crypto_pwhash/argon2/argon2-core.c",
+        "crypto_pwhash/argon2/argon2-encoding.c",
+        "crypto_pwhash/argon2/argon2-fill-block-avx2.c",
+        "crypto_pwhash/argon2/argon2-fill-block-ref.c",
+        "crypto_pwhash/argon2/argon2-fill-block-ssse3.c",
+        "crypto_pwhash/argon2/blake2b-long.c",
+        "crypto_pwhash/argon2/pwhash_argon2i.c",
+        "crypto_pwhash/argon2/pwhash_argon2id.c",
+        "crypto_pwhash/crypto_pwhash.c",
+        "crypto_pwhash/scryptsalsa208sha256/crypto_scrypt-common.c",
+        "crypto_pwhash/scryptsalsa208sha256/nosse/pwhash_scryptsalsa208sha256_nosse.c",
+        "crypto_pwhash/scryptsalsa208sha256/pbkdf2-sha256.c",
+        "crypto_pwhash/scryptsalsa208sha256/pwhash_scryptsalsa208sha256.c",
+        "crypto_pwhash/scryptsalsa208sha256/scrypt_platform.c",
+        "crypto_pwhash/scryptsalsa208sha256/sse/pwhash_scryptsalsa208sha256_sse.c",
+        "crypto_scalarmult/crypto_scalarmult.c",
+        "crypto_scalarmult/curve25519/ref10/x25519_ref10.c",
+        "crypto_scalarmult/curve25519/sandy2x/curve25519_sandy2x.c",
+        "crypto_scalarmult/curve25519/sandy2x/fe51_invert.c",
+        "crypto_scalarmult/curve25519/sandy2x/fe_frombytes_sandy2x.c",
+        "crypto_scalarmult/curve25519/scalarmult_curve25519.c",
+        "crypto_scalarmult/ed25519/ref10/scalarmult_ed25519_ref10.c",
+        "crypto_scalarmult/ristretto255/ref10/scalarmult_ristretto255_ref10.c",
+        "crypto_secretbox/crypto_secretbox.c",
+        "crypto_secretbox/crypto_secretbox_easy.c",
+        "crypto_secretbox/xchacha20poly1305/secretbox_xchacha20poly1305.c",
+        "crypto_secretbox/xsalsa20poly1305/secretbox_xsalsa20poly1305.c",
+        "crypto_secretstream/xchacha20poly1305/secretstream_xchacha20poly1305.c",
+        "crypto_shorthash/crypto_shorthash.c",
+        "crypto_shorthash/siphash24/ref/shorthash_siphash24_ref.c",
+        "crypto_shorthash/siphash24/ref/shorthash_siphashx24_ref.c",
+        "crypto_shorthash/siphash24/shorthash_siphash24.c",
+        "crypto_shorthash/siphash24/shorthash_siphashx24.c",
+        "crypto_sign/crypto_sign.c",
+        "crypto_sign/ed25519/ref10/keypair.c",
+        "crypto_sign/ed25519/ref10/obsolete.c",
+        "crypto_sign/ed25519/ref10/open.c",
+        "crypto_sign/ed25519/ref10/sign.c",
+        "crypto_sign/ed25519/sign_ed25519.c",
+        "crypto_stream/chacha20/dolbeau/chacha20_dolbeau-avx2.c",
+        "crypto_stream/chacha20/dolbeau/chacha20_dolbeau-ssse3.c",
+        "crypto_stream/chacha20/ref/chacha20_ref.c",
+        "crypto_stream/chacha20/stream_chacha20.c",
+        "crypto_stream/crypto_stream.c",
+        "crypto_stream/salsa2012/ref/stream_salsa2012_ref.c",
+        "crypto_stream/salsa2012/stream_salsa2012.c",
+        "crypto_stream/salsa208/ref/stream_salsa208_ref.c",
+        "crypto_stream/salsa208/stream_salsa208.c",
+        "crypto_stream/salsa20/ref/salsa20_ref.c",
+        "crypto_stream/salsa20/stream_salsa20.c",
+        "crypto_stream/salsa20/xmm6int/salsa20_xmm6int-avx2.c",
+        "crypto_stream/salsa20/xmm6int/salsa20_xmm6int-sse2.c",
+        "crypto_stream/salsa20/xmm6/salsa20_xmm6.c",
+        "crypto_stream/xchacha20/stream_xchacha20.c",
+        "crypto_stream/xsalsa20/stream_xsalsa20.c",
+        "crypto_verify/sodium/verify.c",
+        "randombytes/internal/randombytes_internal_random.c",
+        "randombytes/randombytes.c",
+        "randombytes/sysrandom/randombytes_sysrandom.c",
+        "sodium/codecs.c",
+        "sodium/core.c",
+        "sodium/runtime.c",
+        "sodium/utils.c",
+        "sodium/version.c",
+    ];
+    files.into_iter().for_each(|p| {
+        let base = "libsodium-1.0.18/src/libsodium/".to_string();
+        let path = base + p;
+        build.file(path);
+    });
 
-    if lib_dir_isset && use_pkg_isset {
-        panic!("SODIUM_LIB_DIR is incompatible with SODIUM_USE_PKG_CONFIG. Set the only one env variable");
-    }
+    let objects = [
+        "crypto_pwhash/argon2/argon2-fill-block-avx512f.o",
+    ];
 
-    if lib_dir_isset {
-        find_libsodium_env();
-    } else if use_pkg_isset {
-        if shared_isset {
-            println!("cargo:warning=SODIUM_SHARED has no effect with SODIUM_USE_PKG_CONFIG");
-        }
+    objects.into_iter().for_each(|o| {
+        let out = std::env::var("OUT_DIR").unwrap();
+        let base = out + "/libsodium-1.0.18/src/libsodium/";
+        let path = base + o;
+        build.object(path);
+    });
 
-        find_libsodium_pkg();
-    } else {
-        if shared_isset {
-            println!(
-                "cargo:warning=SODIUM_SHARED has no effect for building libsodium from source"
-            );
-        }
-
-        build_libsodium();
-    }
-}
-
-/* Must be called when SODIUM_LIB_DIR is set to any value
-This function will set `cargo` flags.
-*/
-fn find_libsodium_env() {
-    let lib_dir = env::var("SODIUM_LIB_DIR").unwrap(); // cannot fail
-
-    println!("cargo:rustc-link-search=native={}", lib_dir);
-    let mode = if env::var("SODIUM_SHARED").is_ok() {
-        "dylib"
-    } else {
-        "static"
-    };
-    let name = if cfg!(target_env = "msvc") {
-        "libsodium"
-    } else {
-        "sodium"
-    };
-    println!("cargo:rustc-link-lib={}={}", mode, name);
-    println!(
-        "cargo:warning=Using unknown libsodium version.  This crate is tested against \
-         {} and may not be fully compatible with other versions.",
-        VERSION
-    );
-}
-
-/* Must be called when no SODIUM_USE_PKG_CONFIG env var is set
-This function will set `cargo` flags.
-*/
-#[cfg(target_env = "msvc")]
-fn find_libsodium_pkg() {
-    match vcpkg::probe_package("libsodium") {
-        Ok(lib) => {
-            println!(
-                "cargo:warning=Using unknown libsodium version.  This crate is tested against \
-                 {} and may not be fully compatible with other versions.",
-                VERSION
-            );
-            for lib_dir in &lib.link_paths {
-                println!("cargo:lib={}", lib_dir.to_str().unwrap());
-            }
-            for include_dir in &lib.include_paths {
-                println!("cargo:include={}", include_dir.to_str().unwrap());
-            }
-        }
-        Err(e) => {
-            panic!(format!("Error: {:?}", e));
-        }
-    };
-}
-
-/* Must be called when SODIUM_USE_PKG_CONFIG env var is set
-This function will set `cargo` flags.
-*/
-#[cfg(not(target_env = "msvc"))]
-fn find_libsodium_pkg() {
-    match pkg_config::Config::new().probe("libsodium") {
-        Ok(lib) => {
-            if lib.version != VERSION {
-                println!(
-                    "cargo:warning=Using libsodium version {}.  This crate is tested against {} \
-                     and may not be fully compatible with {}.",
-                    lib.version, VERSION, lib.version
-                );
-            }
-            for lib_dir in &lib.link_paths {
-                println!("cargo:lib={}", lib_dir.to_str().unwrap());
-            }
-            for include_dir in &lib.include_paths {
-                println!("cargo:include={}", include_dir.to_str().unwrap());
-            }
-        }
-        Err(e) => {
-            panic!(format!("Error: {:?}", e));
-        }
-    }
-}
-
-#[cfg(windows)]
-fn make_libsodium(_: &str, _: &Path, _: &Path) -> PathBuf {
-    // We don't build anything on windows, we simply linked to precompiled
-    // libs.
-    get_lib_dir()
-}
-
-#[cfg(not(windows))]
-fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBuf {
-    use std::{fs, process::Command, str};
-
-    // Decide on CC, CFLAGS and the --host configure argument
-    let build = cc::Build::new();
-    let mut compiler = build.get_compiler().path().to_str().unwrap().to_string();
-    let mut cflags = env::var("CFLAGS").unwrap_or(String::default());
-    cflags += " -O2";
-    let host_arg;
-    let cross_compiling;
-    let help;
-    if target.contains("-ios") {
-        // Determine Xcode directory path
-        let xcode_select_output = Command::new("xcode-select").arg("-p").output().unwrap();
-        if !xcode_select_output.status.success() {
-            panic!("Failed to run xcode-select -p");
-        }
-        let xcode_dir = str::from_utf8(&xcode_select_output.stdout)
-            .unwrap()
-            .trim()
-            .to_string();
-
-        // Determine SDK directory paths
-        let sdk_dir_simulator = Path::new(&xcode_dir)
-            .join("Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk")
-            .to_str()
-            .unwrap()
-            .to_string();
-        let sdk_dir_ios = Path::new(&xcode_dir)
-            .join("Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk")
-            .to_str()
-            .unwrap()
-            .to_string();
-
-        // Min versions
-        let ios_simulator_version_min = "6.0.0";
-        let ios_version_min = "6.0.0";
-
-        // Roughly based on `dist-build/ios.sh` in the libsodium sources
-        match &*target {
-            "aarch64-apple-ios" => {
-                cflags += " -arch arm64";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
-                cflags += " -fembed-bitcode";
-                host_arg = "--host=arm-apple-darwin10".to_string();
-            }
-            "armv7-apple-ios" => {
-                cflags += " -arch armv7";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
-                cflags += " -mthumb";
-                host_arg = "--host=arm-apple-darwin10".to_string();
-            }
-            "armv7s-apple-ios" => {
-                cflags += " -arch armv7s";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
-                cflags += " -mthumb";
-                host_arg = "--host=arm-apple-darwin10".to_string();
-            }
-            "i386-apple-ios" => {
-                cflags += " -arch i386";
-                cflags += &format!(" -isysroot {}", sdk_dir_simulator);
-                cflags += &format!(" -mios-simulator-version-min={}", ios_simulator_version_min);
-                host_arg = "--host=i686-apple-darwin10".to_string();
-            }
-            "x86_64-apple-ios" => {
-                cflags += " -arch x86_64";
-                cflags += &format!(" -isysroot {}", sdk_dir_simulator);
-                cflags += &format!(" -mios-simulator-version-min={}", ios_simulator_version_min);
-                host_arg = "--host=x86_64-apple-darwin10".to_string();
-            }
-            _ => panic!("Unknown iOS build target: {}", target),
-        }
-        cross_compiling = true;
-        help = "";
-    } else {
-        if target.contains("i686") {
-            compiler += " -m32 -maes";
-            cflags += " -march=i686";
-        }
-        let host = env::var("HOST").unwrap();
-        host_arg = format!("--host={}", target);
-        cross_compiling = target != host;
-        help = if cross_compiling {
-            "***********************************************************\n\
-             Possible missing dependencies.\n\
-             See https://github.com/sodiumoxide/sodiumoxide#cross-compiling\n\
-             ***********************************************************\n\n"
-        } else {
-            ""
-        };
-    }
-
-    // Run `./configure`
-    let prefix_arg = format!("--prefix={}", install_dir.to_str().unwrap());
-    let mut configure_cmd = Command::new(fs::canonicalize(source_dir.join("configure")).unwrap());
-    if !compiler.is_empty() {
-        configure_cmd.env("CC", &compiler);
-    }
-    if !cflags.is_empty() {
-        configure_cmd.env("CFLAGS", &cflags);
-    }
-    if env::var("SODIUM_DISABLE_PIE").is_ok() {
-        configure_cmd.arg("--disable-pie");
-    }
-    let configure_output = configure_cmd
-        .current_dir(&source_dir)
-        .arg(&prefix_arg)
-        .arg(&host_arg)
-        .arg("--enable-shared=no")
-        .output()
-        .unwrap_or_else(|error| {
-            panic!("Failed to run './configure': {}\n{}", error, help);
-        });
-    if !configure_output.status.success() {
-        panic!(
-            "\n{:?}\nCFLAGS={}\nCC={}\n{}\n{}\n{}\n",
-            configure_cmd,
-            cflags,
-            compiler,
-            String::from_utf8_lossy(&configure_output.stdout),
-            String::from_utf8_lossy(&configure_output.stderr),
-            help
-        );
-    }
-
-    // Run `make check`, or `make all` if we're cross-compiling
-    let j_arg = format!("-j{}", env::var("NUM_JOBS").unwrap());
-    let make_arg = if cross_compiling { "all" } else { "check" };
-    let mut make_cmd = Command::new("make");
-    let make_output = make_cmd
-        .current_dir(&source_dir)
-        .env("V", "1")
-        .arg(make_arg)
-        .arg(&j_arg)
-        .output()
-        .unwrap_or_else(|error| {
-            panic!("Failed to run 'make {}': {}\n{}", make_arg, error, help);
-        });
-    if !make_output.status.success() {
-        panic!(
-            "\n{:?}\n{}\n{}\n{}\n{}",
-            make_cmd,
-            String::from_utf8_lossy(&configure_output.stdout),
-            String::from_utf8_lossy(&make_output.stdout),
-            String::from_utf8_lossy(&make_output.stderr),
-            help
-        );
-    }
-
-    // Run `make install`
-    let mut install_cmd = Command::new("make");
-    let install_output = install_cmd
-        .current_dir(&source_dir)
-        .arg("install")
-        .output()
-        .unwrap_or_else(|error| {
-            panic!("Failed to run 'make install': {}", error);
-        });
-    if !install_output.status.success() {
-        panic!(
-            "\n{:?}\n{}\n{}\n{}\n{}\n",
-            install_cmd,
-            String::from_utf8_lossy(&configure_output.stdout),
-            String::from_utf8_lossy(&make_output.stdout),
-            String::from_utf8_lossy(&install_output.stdout),
-            String::from_utf8_lossy(&install_output.stderr)
-        );
-    }
-
-    install_dir.join("lib")
-}
-
-#[cfg(any(windows, target_env = "msvc"))]
-fn get_crate_dir() -> PathBuf {
-    env::var("CARGO_MANIFEST_DIR").unwrap().into()
-}
-
-#[cfg(target_env = "msvc")]
-fn is_release_profile() -> bool {
-    env::var("PROFILE").unwrap() == "release"
-}
-
-#[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
-fn get_lib_dir() -> PathBuf {
-    if is_release_profile() {
-        get_crate_dir().join("msvc/Win32/Release/v140/")
-    } else {
-        get_crate_dir().join("msvc/Win32/Debug/v140/")
-    }
-}
-
-#[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
-fn get_lib_dir() -> PathBuf {
-    if is_release_profile() {
-        get_crate_dir().join("msvc/x64/Release/v140/")
-    } else {
-        get_crate_dir().join("msvc/x64/Debug/v140/")
-    }
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
-fn get_lib_dir() -> PathBuf {
-    get_crate_dir().join("mingw/win32/")
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "64"))]
-fn get_lib_dir() -> PathBuf {
-    get_crate_dir().join("mingw/win64/")
-}
-
-fn get_archive(filename: &str) -> std::io::Cursor<Vec<u8>> {
-    use std::fs::File;
-    use std::io::{BufReader, Read};
-
-    let f = File::open(filename).expect(&format!("Failed to open {}", filename));
-    let mut reader = BufReader::new(f);
-    let mut content = Vec::new();
-    reader
-        .read_to_end(&mut content)
-        .expect(&format!("Failed to read {}", filename));
-
-    std::io::Cursor::new(content)
-}
-
-fn get_install_dir() -> PathBuf {
-    PathBuf::from(env::var("OUT_DIR").unwrap()).join("installed")
-}
-
-fn build_libsodium() {
-    use libflate::gzip::Decoder;
-    use std::fs;
-    use tar::Archive;
-
-    // Determine build target triple
-    let target = env::var("TARGET").unwrap();
-
-    // Determine filenames
-    let basename = format!("libsodium-{}", VERSION);
-    let filename = format!("{}.tar.gz", basename);
-
-    // Determine source and install dir
-    let mut install_dir = get_install_dir();
-    let mut source_dir = PathBuf::from(env::var("OUT_DIR").unwrap()).join("source");
-
-    // Avoid issues with paths containing spaces by falling back to using a tempfile.
-    // See https://github.com/jedisct1/libsodium/issues/207
-    if install_dir.to_str().unwrap().contains(" ") {
-        let fallback_path = PathBuf::from("/tmp/").join(&basename).join(&target);
-        install_dir = fallback_path.clone().join("installed");
-        source_dir = fallback_path.clone().join("/source");
-        println!(
-            "cargo:warning=The path to the usual build directory contains spaces and hence \
-             can't be used to build libsodium.  Falling back to use {}.  If running `cargo \
-             clean`, ensure you also delete this fallback directory",
-            fallback_path.to_str().unwrap()
-        );
-    }
-
-    // Create directories
-    fs::create_dir_all(&install_dir).unwrap();
-    fs::create_dir_all(&source_dir).unwrap();
-
-    // Get sources
-    let compressed_file = get_archive(&filename);
-
-    // Unpack the tarball
-    let gz_decoder = Decoder::new(compressed_file).unwrap();
-    let mut archive = Archive::new(gz_decoder);
-    archive.unpack(&source_dir).unwrap();
-    source_dir.push(basename);
-
-    let lib_dir = make_libsodium(&target, &source_dir, &install_dir);
-
-    if target.contains("msvc") {
-        println!("cargo:rustc-link-lib=static=libsodium");
-    } else {
-        println!("cargo:rustc-link-lib=static=sodium");
-    }
-
-    println!(
-        "cargo:rustc-link-search=native={}",
-        lib_dir.to_str().unwrap()
-    );
-
-    let include_dir = source_dir.join("src/libsodium/include");
-
-    println!("cargo:include={}", include_dir.to_str().unwrap());
-    println!("cargo:lib={}", lib_dir.to_str().unwrap());
+    build
+        .include("libsodium-1.0.18/src/libsodium/include/sodium/")
+        .include("libsodium-1.0.18/builds/msvc/")
+        .warnings(false)
+        .define("DEV_MODE", None)
+        .define("CONFIGURED", None)
+        //.define("HAVE_POSIX_MEMALIGN", None)
+        //.define("HAVE_MPROTECT", None)
+        //.define("HAVE_MMAP", None)
+        //.define("HAVE_MLOCK", None)
+        //.define("MAP_ANONYMOUS", None)
+        //.define("PROT_READ", None)
+        //.define("PROT_WRITE", None)
+        //.define("PROT_NONE", None)
+        .compile("sodium");
 }
