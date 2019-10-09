@@ -162,7 +162,7 @@ mod test {
 
                 match line.len() {
                     0 => break,
-                    1...3 => continue,
+                    1..=3 => continue,
                     _ => {}
                 }
 
