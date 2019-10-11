@@ -191,4 +191,25 @@ mod test {
             assert!(result_hash.as_ref() == expected_hash.as_slice());
         }
     }
+
+    #[test]
+    fn test_digest_equality() {
+        let data1 = [1, 2];
+        let data2 = [3, 4];
+
+        let h1 = {
+            let mut hasher = State::new(32, None).unwrap();
+            hasher.update(&data1).unwrap();
+            hasher.finalize().unwrap()
+        };
+
+        let h2 = {
+            let mut hasher = State::new(32, None).unwrap();
+            hasher.update(&data2).unwrap();
+            hasher.finalize().unwrap()
+        };
+
+        assert_eq!(h1, h1);
+        assert_ne!(h1, h2);
+    }
 }
