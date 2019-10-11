@@ -9,7 +9,7 @@ links = "sodium"
 name = "libsodium-sys"
 repository = "https://github.com/sodiumoxide/sodiumoxide.git"
 categories = ["cryptography", "api-bindings"]
-version = "0.2.4"
+version = "0.2.5"
 
 [badges]
 travis-ci = { repository = "sodiumoxide/sodiumoxide" }
