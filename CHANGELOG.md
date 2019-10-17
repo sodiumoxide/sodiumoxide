@@ -1,4 +1,4 @@
-# 0.2.6 (Oct 11, 2019)
+# 0.2.5 (Oct 11, 2019)
 
 * Fix Digest PartialEq (#381)
 * Fix compiler warnings (#380)
