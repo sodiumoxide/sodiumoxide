@@ -247,6 +247,7 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
 
     // Run `./configure`
     let prefix_arg = format!("--prefix={}", install_dir.to_str().unwrap());
+    let libdir_arg = format!("--libdir={}/lib", install_dir.to_str().unwrap());
     let mut configure_cmd = Command::new(fs::canonicalize(source_dir.join("configure")).unwrap());
     if !compiler.is_empty() {
         configure_cmd.env("CC", &compiler);
@@ -260,6 +261,7 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
     let configure_output = configure_cmd
         .current_dir(&source_dir)
         .arg(&prefix_arg)
+        .arg(&libdir_arg)
         .arg(&host_arg)
         .arg("--enable-shared=no")
         .output()
