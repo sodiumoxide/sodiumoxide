@@ -6,17 +6,16 @@ extern crate libc;
 #[cfg(target_env = "msvc")]
 extern crate vcpkg;
 
-#[cfg(not(target_env = "msvc"))]
 extern crate libflate;
-
-#[cfg(not(target_env = "msvc"))]
+extern crate pkg_config;
 extern crate tar;
 
-extern crate pkg_config;
+use std::{
+    env,
+    path::{Path, PathBuf},
+};
 
-use std::env;
-
-static VERSION: &'static str = "1.0.17";
+static VERSION: &'static str = "1.0.18";
 
 fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
@@ -97,12 +96,18 @@ This function will set `cargo` flags.
 #[cfg(target_env = "msvc")]
 fn find_libsodium_pkg() {
     match vcpkg::probe_package("libsodium") {
-        Ok(_) => {
+        Ok(lib) => {
             println!(
                 "cargo:warning=Using unknown libsodium version.  This crate is tested against \
                  {} and may not be fully compatible with other versions.",
                 VERSION
             );
+            for lib_dir in &lib.link_paths {
+                println!("cargo:lib={}", lib_dir.to_str().unwrap());
+            }
+            for include_dir in &lib.include_paths {
+                println!("cargo:include={}", include_dir.to_str().unwrap());
+            }
         }
         Err(e) => {
             panic!(format!("Error: {:?}", e));
@@ -124,6 +129,12 @@ fn find_libsodium_pkg() {
                     lib.version, VERSION, lib.version
                 );
             }
+            for lib_dir in &lib.link_paths {
+                println!("cargo:lib={}", lib_dir.to_str().unwrap());
+            }
+            for include_dir in &lib.include_paths {
+                println!("cargo:include={}", include_dir.to_str().unwrap());
+            }
         }
         Err(e) => {
             panic!(format!("Error: {:?}", e));
@@ -131,130 +142,16 @@ fn find_libsodium_pkg() {
     }
 }
 
-#[cfg(any(windows, target_env = "msvc"))]
-fn get_crate_dir() -> String {
-    env::var("CARGO_MANIFEST_DIR").unwrap()
-}
-
-#[cfg(target_env = "msvc")]
-fn is_release_profile() -> bool {
-    env::var("PROFILE").unwrap() == "release"
-}
-
-#[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
-fn build_libsodium() {
-    println!("cargo:rustc-link-lib=static=libsodium");
-    if is_release_profile() {
-        println!(
-            "cargo:rustc-link-search=native={}/msvc/Win32/Release/v140/",
-            get_crate_dir()
-        );
-    } else {
-        println!(
-            "cargo:rustc-link-search=native={}/msvc/Win32/Debug/v140/",
-            get_crate_dir()
-        );
-    }
-}
-
-#[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
-fn build_libsodium() {
-    println!("cargo:rustc-link-lib=static=libsodium");
-    if is_release_profile() {
-        println!(
-            "cargo:rustc-link-search=native={}/msvc/x64/Release/v140/",
-            get_crate_dir()
-        );
-    } else {
-        println!(
-            "cargo:rustc-link-search=native={}/msvc/x64/Debug/v140/",
-            get_crate_dir()
-        );
-    }
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
-fn build_libsodium() {
-    println!("cargo:rustc-link-lib=static=sodium");
-    println!(
-        "cargo:rustc-link-search=native={}/mingw/win32/",
-        get_crate_dir()
-    );
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "64"))]
-fn build_libsodium() {
-    println!("cargo:rustc-link-lib=static=sodium");
-    println!(
-        "cargo:rustc-link-search=native={}/mingw/win64/",
-        get_crate_dir()
-    );
+#[cfg(windows)]
+fn make_libsodium(_: &str, _: &Path, _: &Path) -> PathBuf {
+    // We don't build anything on windows, we simply linked to precompiled
+    // libs.
+    get_lib_dir()
 }
 
 #[cfg(not(windows))]
-fn get_archive(filename: &str) -> std::io::Cursor<Vec<u8>> {
-    use std::fs::File;
-    use std::io::{BufReader, Read};
-
-    let f = File::open(filename).expect(&format!("Failed to open {}", filename));
-    let mut reader = BufReader::new(f);
-    let mut content = Vec::new();
-    reader
-        .read_to_end(&mut content)
-        .expect(&format!("Failed to read {}", filename));
-
-    std::io::Cursor::new(content)
-}
-
-#[cfg(not(windows))]
-fn get_install_dir() -> String {
-    env::var("OUT_DIR").unwrap() + "/installed"
-}
-
-#[cfg(not(windows))]
-fn build_libsodium() {
-    use libflate::gzip::Decoder;
-    use std::process::Command;
-    use std::{fs, path::Path, str};
-    use tar::Archive;
-
-    // Determine build target triple
-    let target = env::var("TARGET").unwrap();
-
-    // Determine filenames
-    let basename = format!("libsodium-{}", VERSION);
-    let filename = format!("{}.tar.gz", basename);
-
-    // Determine source and install dir
-    let mut install_dir = get_install_dir();
-    let mut source_dir = env::var("OUT_DIR").unwrap() + "/source";
-
-    // Avoid issues with paths containing spaces by falling back to using a tempfile.
-    // See https://github.com/jedisct1/libsodium/issues/207
-    if install_dir.contains(" ") {
-        let fallback_path = "/tmp/".to_string() + &basename + "/" + &target;
-        install_dir = fallback_path.clone() + "/installed";
-        source_dir = fallback_path.clone() + "/source";
-        println!(
-            "cargo:warning=The path to the usual build directory contains spaces and hence \
-             can't be used to build libsodium.  Falling back to use {}.  If running `cargo \
-             clean`, ensure you also delete this fallback directory",
-            fallback_path
-        );
-    }
-
-    // Create directories
-    fs::create_dir_all(&install_dir).unwrap();
-    fs::create_dir_all(&source_dir).unwrap();
-
-    // Get sources
-    let compressed_file = get_archive(&filename);
-
-    // Unpack the tarball
-    let gz_decoder = Decoder::new(compressed_file).unwrap();
-    let mut archive = Archive::new(gz_decoder);
-    archive.unpack(&source_dir).unwrap();
-    source_dir.push_str(&format!("/{}", basename));
+fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBuf {
+    use std::{fs, process::Command, str};
 
     // Decide on CC, CFLAGS and the --host configure argument
     let build = cc::Build::new();
@@ -349,8 +246,9 @@ fn build_libsodium() {
     }
 
     // Run `./configure`
-    let prefix_arg = format!("--prefix={}", install_dir);
-    let mut configure_cmd = Command::new("./configure");
+    let prefix_arg = format!("--prefix={}", install_dir.to_str().unwrap());
+    let libdir_arg = format!("--libdir={}/lib", install_dir.to_str().unwrap());
+    let mut configure_cmd = Command::new(fs::canonicalize(source_dir.join("configure")).unwrap());
     if !compiler.is_empty() {
         configure_cmd.env("CC", &compiler);
     }
@@ -363,6 +261,7 @@ fn build_libsodium() {
     let configure_output = configure_cmd
         .current_dir(&source_dir)
         .arg(&prefix_arg)
+        .arg(&libdir_arg)
         .arg(&host_arg)
         .arg("--enable-shared=no")
         .output()
@@ -425,6 +324,123 @@ fn build_libsodium() {
         );
     }
 
-    println!("cargo:rustc-link-lib=static=sodium");
-    println!("cargo:rustc-link-search=native={}/lib", install_dir);
+    install_dir.join("lib")
+}
+
+#[cfg(any(windows, target_env = "msvc"))]
+fn get_crate_dir() -> PathBuf {
+    env::var("CARGO_MANIFEST_DIR").unwrap().into()
+}
+
+#[cfg(target_env = "msvc")]
+fn is_release_profile() -> bool {
+    env::var("PROFILE").unwrap() == "release"
+}
+
+#[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
+fn get_lib_dir() -> PathBuf {
+    if is_release_profile() {
+        get_crate_dir().join("msvc/Win32/Release/v140/")
+    } else {
+        get_crate_dir().join("msvc/Win32/Debug/v140/")
+    }
+}
+
+#[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
+fn get_lib_dir() -> PathBuf {
+    if is_release_profile() {
+        get_crate_dir().join("msvc/x64/Release/v140/")
+    } else {
+        get_crate_dir().join("msvc/x64/Debug/v140/")
+    }
+}
+
+#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
+fn get_lib_dir() -> PathBuf {
+    get_crate_dir().join("mingw/win32/")
+}
+
+#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "64"))]
+fn get_lib_dir() -> PathBuf {
+    get_crate_dir().join("mingw/win64/")
+}
+
+fn get_archive(filename: &str) -> std::io::Cursor<Vec<u8>> {
+    use std::fs::File;
+    use std::io::{BufReader, Read};
+
+    let f = File::open(filename).expect(&format!("Failed to open {}", filename));
+    let mut reader = BufReader::new(f);
+    let mut content = Vec::new();
+    reader
+        .read_to_end(&mut content)
+        .expect(&format!("Failed to read {}", filename));
+
+    std::io::Cursor::new(content)
+}
+
+fn get_install_dir() -> PathBuf {
+    PathBuf::from(env::var("OUT_DIR").unwrap()).join("installed")
+}
+
+fn build_libsodium() {
+    use libflate::gzip::Decoder;
+    use std::fs;
+    use tar::Archive;
+
+    // Determine build target triple
+    let target = env::var("TARGET").unwrap();
+
+    // Determine filenames
+    let basename = format!("libsodium-{}", VERSION);
+    let filename = format!("{}.tar.gz", basename);
+
+    // Determine source and install dir
+    let mut install_dir = get_install_dir();
+    let mut source_dir = PathBuf::from(env::var("OUT_DIR").unwrap()).join("source");
+
+    // Avoid issues with paths containing spaces by falling back to using a tempfile.
+    // See https://github.com/jedisct1/libsodium/issues/207
+    if install_dir.to_str().unwrap().contains(" ") {
+        let fallback_path = PathBuf::from("/tmp/").join(&basename).join(&target);
+        install_dir = fallback_path.clone().join("installed");
+        source_dir = fallback_path.clone().join("/source");
+        println!(
+            "cargo:warning=The path to the usual build directory contains spaces and hence \
+             can't be used to build libsodium.  Falling back to use {}.  If running `cargo \
+             clean`, ensure you also delete this fallback directory",
+            fallback_path.to_str().unwrap()
+        );
+    }
+
+    // Create directories
+    fs::create_dir_all(&install_dir).unwrap();
+    fs::create_dir_all(&source_dir).unwrap();
+
+    // Get sources
+    let compressed_file = get_archive(&filename);
+
+    // Unpack the tarball
+    let gz_decoder = Decoder::new(compressed_file).unwrap();
+    let mut archive = Archive::new(gz_decoder);
+    archive.unpack(&source_dir).unwrap();
+    source_dir.push(basename);
+
+    let lib_dir = make_libsodium(&target, &source_dir, &install_dir);
+
+    if target.contains("msvc") {
+        println!("cargo:rustc-link-lib=static=libsodium");
+    } else {
+        println!("cargo:rustc-link-lib=static=sodium");
+    }
+
+    println!(
+        "cargo:rustc-link-search=native={}",
+        lib_dir.to_str().unwrap()
+    );
+
+    let include_dir = source_dir.join("src/libsodium/include");
+
+    println!("cargo:include={}", include_dir.to_str().unwrap());
+    println!("cargo:lib={}", lib_dir.to_str().unwrap());
 }

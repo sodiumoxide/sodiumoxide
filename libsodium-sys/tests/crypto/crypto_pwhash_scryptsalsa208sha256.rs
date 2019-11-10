@@ -71,7 +71,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_str() {
             hashed_password.as_mut_ptr(),
             password.as_ptr() as *const _,
             password.len() as c_ulonglong,
-            crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE as c_ulonglong,
+            u64::from(crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE),
             crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE as size_t,
         )
     };
@@ -190,7 +190,7 @@ fn test_crypto_pwhash_scryptsalsa208sha256_ll_4() {
     // See https://www.tarsnap.com/scrypt/scrypt.pdf Page 16
     let password = "pleaseletmein";
     let salt = "SodiumChloride";
-    let n = 1048576;
+    let n = 1_048_576;
     let r = 8;
     let p = 1;
     let mut buf = [0u8; 64];

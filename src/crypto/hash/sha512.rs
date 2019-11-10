@@ -40,11 +40,10 @@ mod test {
             0xf7, 0xbf, 0xd5, 0xec, 0x64, 0x6d, 0x6c, 0x28,
         ];
         let Digest(h) = hash(&x);
-        assert!(&h[..] == &h_expected[..]);
+        assert!(h[..] == h_expected[..]);
     }
 
     fn test_nist_vector(filename: &str) {
-        use rustc_serialize::hex::FromHex;
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -53,7 +52,7 @@ mod test {
         loop {
             line.clear();
             r.read_line(&mut line).unwrap();
-            if line.len() == 0 {
+            if line.is_empty() {
                 break;
             }
             let starts_with_len = line.starts_with("Len = ");
@@ -61,13 +60,13 @@ mod test {
                 let len: usize = line[6..].trim().parse().unwrap();
                 line.clear();
                 r.read_line(&mut line).unwrap();
-                let rawmsg = line[6..].from_hex().unwrap();
+                let rawmsg = hex::decode(&line[6..].trim()).unwrap();
                 let msg = &rawmsg[..len / 8];
                 line.clear();
                 r.read_line(&mut line).unwrap();
-                let md = line[5..].from_hex().unwrap();
+                let md = hex::decode(&line[5..].trim()).unwrap();
                 let Digest(digest) = hash(msg);
-                assert!(&digest[..] == &md[..]);
+                assert!(digest[..] == md[..]);
             }
         }
     }
@@ -99,6 +98,6 @@ mod test {
             hash_state.update(chunk);
         }
         let Digest(h) = hash_state.finalize();
-        assert!(&h[..] == &h_expected[..]);
+        assert!(h[..] == h_expected[..]);
     }
 }

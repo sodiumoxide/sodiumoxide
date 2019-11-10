@@ -24,6 +24,7 @@
 
 This package aims to provide a type-safe and efficient Rust binding that's just
 as easy to use.
+Rust >= 1.36.0 is required because of mem::MaybeUninit.
 
 ## Basic usage
 
@@ -85,7 +86,7 @@ cargo build
 See https://download.libsodium.org/doc/installation.
 
 ```
-export SODIUM_LIB_DIR=/home/user/libsodium-1.0.17/release/lib/
+export SODIUM_LIB_DIR=/home/user/libsodium-1.0.18/release/lib/
 export SODIUM_SHARED=1
 cargo build
 ```

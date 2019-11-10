@@ -18,9 +18,7 @@ macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
             return None;
         }
         let mut n = $newtype([0; $len]);
-        for (ni, &bsi) in n.0.iter_mut().zip(bs.iter()) {
-            *ni = bsi
-        }
+        n.0.copy_from_slice(bs);
         Some(n)
     }
     ));
@@ -59,7 +57,7 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
                 {
                     let mut res = $newtype([0; $len]);
                     for r in res.0.iter_mut() {
-                        if let Some(value) = try!(visitor.next_element()) {
+                        if let Some(value) = visitor.next_element()? {
                             *r = value;
                         }
                     }

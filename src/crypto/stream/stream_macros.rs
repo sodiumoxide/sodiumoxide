@@ -5,7 +5,7 @@ macro_rules! stream_module (($stream_name:ident,
                              $noncebytes:expr) => (
 
 #[cfg(not(feature = "std"))] use prelude::*;
-use libc::{c_ulonglong, uint64_t};
+use libc::c_ulonglong;
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.
@@ -28,6 +28,10 @@ new_type! {
 }
 
 /// `gen_key()` randomly generates a key for symmetric encryption
+///
+/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_key() -> Key {
     let mut key = [0; KEYBYTES];
     randombytes_into(&mut key);
@@ -35,6 +39,10 @@ pub fn gen_key() -> Key {
 }
 
 /// `gen_nonce()` randomly generates a nonce for symmetric encryption
+///
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 ///
 /// NOTE: When using primitives with short nonces (e.g. salsa20, salsa208, salsa2012)
 /// do not use random nonces since the probability of nonce-collision is not negligible
@@ -114,7 +122,7 @@ pub fn stream_xor_ic(m: &[u8],
                      m.as_ptr(),
                      m.len() as c_ulonglong,
                      n.0.as_ptr(),
-                     ic as uint64_t,
+                     ic as u64,
                      k.0.as_ptr());
         c
     }
@@ -137,7 +145,7 @@ pub fn stream_xor_ic_inplace(m: &mut [u8],
                      m.as_ptr(),
                      m.len() as c_ulonglong,
                      n.0.as_ptr(),
-                     ic as uint64_t,
+                     ic as u64,
                      k.0.as_ptr());
     }
 }

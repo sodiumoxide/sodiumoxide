@@ -95,26 +95,27 @@ fn test_crypto_generichash_multipart() {
     let m = [0u8; 64];
     let key = [0u8; crypto_generichash_KEYBYTES as usize];
 
-    let mut st = vec![0u8; unsafe { crypto_generichash_statebytes() }];
-    let pst = unsafe { mem::transmute::<*mut u8, *mut crypto_generichash_state>(st.as_mut_ptr()) };
+    let mut pst = mem::MaybeUninit::<crypto_generichash_state>::uninit();
 
     assert_eq!(
-        unsafe { crypto_generichash_init(pst, key.as_ptr(), key.len(), out.len()) },
+        unsafe { crypto_generichash_init(pst.as_mut_ptr(), key.as_ptr(), key.len(), out.len()) },
+        0
+    );
+
+    let mut pst = unsafe { pst.assume_init() };
+
+    assert_eq!(
+        unsafe { crypto_generichash_update(&mut pst, m.as_ptr(), m.len() as u64) },
         0
     );
 
     assert_eq!(
-        unsafe { crypto_generichash_update(pst, m.as_ptr(), m.len() as u64) },
+        unsafe { crypto_generichash_update(&mut pst, m.as_ptr(), m.len() as u64) },
         0
     );
 
     assert_eq!(
-        unsafe { crypto_generichash_update(pst, m.as_ptr(), m.len() as u64) },
-        0
-    );
-
-    assert_eq!(
-        unsafe { crypto_generichash_final(pst, out.as_mut_ptr(), out.len()) },
+        unsafe { crypto_generichash_final(&mut pst, out.as_mut_ptr(), out.len()) },
         0
     );
 }

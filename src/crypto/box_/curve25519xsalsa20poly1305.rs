@@ -81,6 +81,10 @@ new_type! {
 }
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public key.
+///
+/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
@@ -91,6 +95,10 @@ pub fn gen_keypair() -> (PublicKey, SecretKey) {
 }
 
 /// `key_pair_from_seed()` deterministically derives a key pair from a single key seed (crypto_box_SEEDBYTES bytes).
+///
+/// THREAD SAFETY: `key_pair_from_seed()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
     unsafe {
         let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
@@ -105,6 +113,10 @@ pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
 }
 
 /// `gen_nonce()` randomly generates a nonce
+///
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
     let mut n = [0; NONCEBYTES];
     randombytes_into(&mut n);
@@ -367,7 +379,7 @@ mod test {
             let mut c = seal(&m, &n, &pk1, &sk2);
             for j in 0..c.len() {
                 c[j] ^= 0x20;
-                assert!(Err(()) == open(&mut c, &n, &pk2, &sk1));
+                assert!(Err(()) == open(&c, &n, &pk2, &sk1));
                 c[j] ^= 0x20;
             }
         }
@@ -386,7 +398,7 @@ mod test {
             let mut c = seal_precomputed(&m, &n, &k1);
             for j in 0..c.len() {
                 c[j] ^= 0x20;
-                assert!(Err(()) == open_precomputed(&mut c, &n, &k2));
+                assert!(Err(()) == open_precomputed(&c, &n, &k2));
                 c[j] ^= 0x20;
             }
         }
@@ -423,7 +435,7 @@ mod test {
             let mut c = seal(&m, &n, &pk1, &sk2);
             for j in 0..c.len() {
                 c[j] ^= 0x20;
-                assert!(Err(()) == open(&mut c, &n, &pk2, &sk1));
+                assert!(Err(()) == open(&c, &n, &pk2, &sk1));
                 c[j] ^= 0x20;
             }
         }

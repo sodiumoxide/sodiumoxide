@@ -53,18 +53,19 @@ impl State {
             }
         }
 
-        let mut state: crypto_generichash_state;
+        let mut state = mem::MaybeUninit::uninit();
 
         let result = unsafe {
-            state = mem::uninitialized();
             if let Some(key) = key {
-                crypto_generichash_init(&mut state, key.as_ptr(), key.len(), out_len)
+                crypto_generichash_init(state.as_mut_ptr(), key.as_ptr(), key.len(), out_len)
             } else {
-                crypto_generichash_init(&mut state, ptr::null(), 0, out_len)
+                crypto_generichash_init(state.as_mut_ptr(), ptr::null(), 0, out_len)
             }
         };
 
         if result == 0 {
+            // result == 0 and state is initialized
+            let state = unsafe { state.assume_init() };
             Ok(State { out_len, state })
         } else {
             Err(())
@@ -145,7 +146,6 @@ mod test {
 
     #[test]
     fn test_blake2b_vectors() {
-        use rustc_serialize::hex::FromHex;
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -155,32 +155,33 @@ mod test {
         loop {
             let msg = {
                 line.clear();
-                if let Err(_) = r.read_line(&mut line) {
+                r.read_line(&mut line).unwrap();
+                if line.is_empty() {
                     break;
                 }
 
                 match line.len() {
                     0 => break,
-                    1...3 => continue,
+                    1..=3 => continue,
                     _ => {}
                 }
 
                 assert!(line.starts_with("in:"));
-                line[3..].trim().from_hex().unwrap()
+                hex::decode(line[3..].trim()).unwrap()
             };
 
             let key = {
                 line.clear();
                 r.read_line(&mut line).unwrap();
                 assert!(line.starts_with("key:"));
-                line[4..].trim().from_hex().unwrap()
+                hex::decode(line[4..].trim()).unwrap()
             };
 
             let expected_hash = {
                 line.clear();
                 r.read_line(&mut line).unwrap();
                 assert!(line.starts_with("hash:"));
-                line[5..].from_hex().unwrap()
+                hex::decode(&line[5..].trim()).unwrap()
             };
 
             let mut hasher = State::new(64, Some(&key)).unwrap();
@@ -189,5 +190,26 @@ mod test {
             let result_hash = hasher.finalize().unwrap();
             assert!(result_hash.as_ref() == expected_hash.as_slice());
         }
+    }
+
+    #[test]
+    fn test_digest_equality() {
+        let data1 = [1, 2];
+        let data2 = [3, 4];
+
+        let h1 = {
+            let mut hasher = State::new(32, None).unwrap();
+            hasher.update(&data1).unwrap();
+            hasher.finalize().unwrap()
+        };
+
+        let h2 = {
+            let mut hasher = State::new(32, None).unwrap();
+            hasher.update(&data2).unwrap();
+            hasher.finalize().unwrap()
+        };
+
+        assert_eq!(h1, h1);
+        assert_ne!(h1, h2);
     }
 }

@@ -17,6 +17,13 @@ matrix:
       - rustup component add rustfmt
     script:
       - cargo fmt --all -- --check
+  - name: clippy
+    os: linux
+    rust: stable
+    before_script:
+      - rustup component add clippy
+    script:
+      - cargo clippy --all --tests
   - name: coverage
     os: linux
     rust: stable
@@ -38,7 +45,7 @@ matrix:
 
 script:
   - cargo build --verbose
-  - cargo test --verbose
+  - cargo test --verbose --all
   - cargo test --verbose --no-default-features --features std
   - cargo doc
 

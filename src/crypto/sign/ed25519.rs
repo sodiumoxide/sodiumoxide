@@ -41,6 +41,17 @@ new_type! {
     secret SecretKey(SECRETKEYBYTES);
 }
 
+impl SecretKey {
+    /// `public_key()` computes the corresponding public key for a given secret key
+    pub fn public_key(&self) -> PublicKey {
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        unsafe {
+            ffi::crypto_sign_ed25519_sk_to_pk(pk.0.as_mut_ptr(), self.0.as_ptr());
+        }
+        pk
+    }
+}
+
 new_type! {
     /// `PublicKey` for signatures
     public PublicKey(PUBLICKEYBYTES);
@@ -53,6 +64,10 @@ new_type! {
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
 /// key.
+///
+/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
 pub fn gen_keypair() -> (PublicKey, SecretKey) {
     let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
     let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
@@ -158,11 +173,12 @@ pub struct State(ffi::crypto_sign_ed25519ph_state);
 impl State {
     /// `init()` initialize a streaming signing state.
     pub fn init() -> State {
-        unsafe {
-            let mut s = mem::uninitialized();
-            ffi::crypto_sign_ed25519ph_init(&mut s);
-            State(s)
-        }
+        let mut s = mem::MaybeUninit::uninit();
+        let state = unsafe {
+            ffi::crypto_sign_ed25519ph_init(s.as_mut_ptr());
+            s.assume_init() // s is definitely initialized
+        };
+        State(state)
     }
 
     /// `update()` can be called more than once in order to compute the digest
@@ -197,7 +213,7 @@ impl State {
         &Signature(ref sig): &Signature,
         &PublicKey(ref pk): &PublicKey,
     ) -> bool {
-        let mut sig = sig.clone();
+        let mut sig = *sig;
         let ret = unsafe {
             ffi::crypto_sign_ed25519ph_final_verify(&mut self.0, sig.as_mut_ptr(), pk.as_ptr())
         };
@@ -275,6 +291,12 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_sk_to_pk() {
+        let (pk, sk) = gen_keypair();
+        assert_eq!(sk.public_key(), pk);
+    }
+
+    #[test]
     fn test_sign_verify() {
         use randombytes::randombytes;
         for i in 0..256usize {
@@ -295,7 +317,7 @@ mod test {
             let mut sm = sign(&m, &sk);
             for j in 0..sm.len() {
                 sm[j] ^= 0x20;
-                assert!(Err(()) == verify(&mut sm, &pk));
+                assert!(Err(()) == verify(&sm, &pk));
                 sm[j] ^= 0x20;
             }
         }
@@ -354,7 +376,7 @@ mod test {
             let mut sm = sign(&m, &sk);
             for j in 0..sm.len() {
                 sm[j] ^= 0x20;
-                assert!(Err(()) == verify(&mut sm, &pk));
+                assert!(Err(()) == verify(&sm, &pk));
                 sm[j] ^= 0x20;
             }
         }
@@ -364,7 +386,6 @@ mod test {
     fn test_vectors() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use rustc_serialize::hex::{FromHex, ToHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -376,18 +397,15 @@ mod test {
             let x1 = x.next().unwrap();
             let x2 = x.next().unwrap();
             let x3 = x.next().unwrap();
-            let seed_bytes = x0[..64].from_hex().unwrap();
-            assert!(seed_bytes.len() == SEEDBYTES);
+            let seed_bytes = hex::decode(&x0[..64]).unwrap();
             let mut seed = Seed([0u8; SEEDBYTES]);
-            for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
-                *s = *b
-            }
+            seed.0.copy_from_slice(&seed_bytes);
             let (pk, sk) = keypair_from_seed(&seed);
-            let m = x2.from_hex().unwrap();
+            let m = hex::decode(x2).unwrap();
             let sm = sign(&m, &sk);
             verify(&sm, &pk).unwrap();
-            assert!(x1 == pk.as_ref().to_hex());
-            assert!(x3 == sm.to_hex());
+            assert!(x1 == hex::encode(pk));
+            assert!(x3 == hex::encode(sm));
         }
     }
 
@@ -395,7 +413,6 @@ mod test {
     fn test_vectors_detached() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use rustc_serialize::hex::{FromHex, ToHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -407,18 +424,18 @@ mod test {
             let x1 = x.next().unwrap();
             let x2 = x.next().unwrap();
             let x3 = x.next().unwrap();
-            let seed_bytes = x0[..64].from_hex().unwrap();
+            let seed_bytes = hex::decode(&x0[..64]).unwrap();
             assert!(seed_bytes.len() == SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
             for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
                 *s = *b
             }
             let (pk, sk) = keypair_from_seed(&seed);
-            let m = x2.from_hex().unwrap();
+            let m = hex::decode(x2).unwrap();
             let sig = sign_detached(&m, &sk);
             assert!(verify_detached(&sig, &m, &pk));
-            assert!(x1 == pk.as_ref().to_hex());
-            let sm = sig.as_ref().to_hex() + x2; // x2 is m hex encoded
+            assert!(x1 == hex::encode(pk));
+            let sm = hex::encode(sig) + x2; // x2 is m hex encoded
             assert!(x3 == sm);
         }
     }
@@ -466,7 +483,6 @@ mod test {
     fn test_streaming_vectors() {
         // test vectors from the Python implementation
         // from the [Ed25519 Homepage](http://ed25519.cr.yp.to/software.html)
-        use rustc_serialize::hex::{FromHex, ToHex};
         use std::fs::File;
         use std::io::{BufRead, BufReader};
 
@@ -477,7 +493,7 @@ mod test {
             let x0 = x.next().unwrap();
             let x1 = x.next().unwrap();
             let x2 = x.next().unwrap();
-            let seed_bytes = x0[..64].from_hex().unwrap();
+            let seed_bytes = hex::decode(&x0[..64]).unwrap();
             assert!(seed_bytes.len() == SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
             for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
@@ -485,7 +501,7 @@ mod test {
             }
             let (pk, sk) = keypair_from_seed(&seed);
 
-            let m = x2.from_hex().unwrap();
+            let m = hex::decode(x2).unwrap();
 
             let mut creation_state = State::init();
             creation_state.update(&m);
@@ -496,7 +512,7 @@ mod test {
 
             assert!(validator_state.verify(&sig, &pk));
 
-            assert_eq!(x1, pk.as_ref().to_hex());
+            assert_eq!(x1, hex::encode(pk));
         }
     }
 
@@ -509,24 +525,8 @@ mod test {
         let mut creation_state = State::init();
         creation_state.update(&m);
 
-        let creation_state_copied = creation_state;
-        let sig = creation_state_copied.finalize(&sk);
-        let mut validator_state = State::init();
-        validator_state.update(&m);
-        assert!(validator_state.verify(&sig, &pk));
-    }
-
-    #[test]
-    fn test_streaming_clone() {
-        use randombytes::randombytes;
-        let i = 256;
-        let (pk, sk) = gen_keypair();
-        let m = randombytes(i);
-        let mut creation_state = State::init();
-        creation_state.update(&m);
-
-        let creation_state_cloned = creation_state.clone();
-        let sig = creation_state_cloned.finalize(&sk);
+        let creation_state_copy = creation_state;
+        let sig = creation_state_copy.finalize(&sk);
         let mut validator_state = State::init();
         validator_state.update(&m);
         assert!(validator_state.verify(&sig, &pk));
