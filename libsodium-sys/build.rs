@@ -6,9 +6,7 @@ extern crate libc;
 #[cfg(target_env = "msvc")]
 extern crate vcpkg;
 
-extern crate libflate;
 extern crate pkg_config;
-extern crate tar;
 
 use std::{
     env,
@@ -248,7 +246,7 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
     // Run `./configure`
     let prefix_arg = format!("--prefix={}", install_dir.to_str().unwrap());
     let libdir_arg = format!("--libdir={}/lib", install_dir.to_str().unwrap());
-    let mut configure_cmd = Command::new(fs::canonicalize(source_dir.join("configure")).unwrap());
+    let mut configure_cmd = Command::new(fs::canonicalize(source_dir.join("configure")).expect("Failed to find configure script! Did you clone the submodule at `libsodium-sys/libsodium`?"));
     if !compiler.is_empty() {
         configure_cmd.env("CC", &compiler);
     }
@@ -365,66 +363,64 @@ fn get_lib_dir() -> PathBuf {
     get_crate_dir().join("mingw/win64/")
 }
 
-fn get_archive(filename: &str) -> std::io::Cursor<Vec<u8>> {
-    use std::fs::File;
-    use std::io::{BufReader, Read};
-
-    let f = File::open(filename).expect(&format!("Failed to open {}", filename));
-    let mut reader = BufReader::new(f);
-    let mut content = Vec::new();
-    reader
-        .read_to_end(&mut content)
-        .expect(&format!("Failed to read {}", filename));
-
-    std::io::Cursor::new(content)
-}
-
-fn get_install_dir() -> PathBuf {
-    PathBuf::from(env::var("OUT_DIR").unwrap()).join("installed")
-}
-
 fn build_libsodium() {
-    use libflate::gzip::Decoder;
-    use std::fs;
-    use tar::Archive;
+    use std::{fs, process::Command};
 
     // Determine build target triple
+    let mut out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
     let target = env::var("TARGET").unwrap();
-
-    // Determine filenames
-    let basename = format!("libsodium-{}", VERSION);
-    let filename = format!("{}.tar.gz", basename);
-
-    // Determine source and install dir
-    let mut install_dir = get_install_dir();
-    let mut source_dir = PathBuf::from(env::var("OUT_DIR").unwrap()).join("source");
+    let profile = env::var("PROFILE").unwrap();
 
     // Avoid issues with paths containing spaces by falling back to using a tempfile.
     // See https://github.com/jedisct1/libsodium/issues/207
-    if install_dir.to_str().unwrap().contains(" ") {
-        let fallback_path = PathBuf::from("/tmp/").join(&basename).join(&target);
-        install_dir = fallback_path.clone().join("installed");
-        source_dir = fallback_path.clone().join("/source");
+    if out_dir.to_str().unwrap().contains(' ') {
+        out_dir = env::temp_dir()
+            .join("libsodium-sys")
+            .join(&target)
+            .join(&profile);
         println!(
             "cargo:warning=The path to the usual build directory contains spaces and hence \
              can't be used to build libsodium.  Falling back to use {}.  If running `cargo \
              clean`, ensure you also delete this fallback directory",
-            fallback_path.to_str().unwrap()
+            out_dir.display()
         );
     }
+
+    // Determine source and install dir
+    let install_dir = out_dir.join("installed");
+    let source_dir = out_dir.join("source").join("libsodium");
 
     // Create directories
     fs::create_dir_all(&install_dir).unwrap();
     fs::create_dir_all(&source_dir).unwrap();
 
-    // Get sources
-    let compressed_file = get_archive(&filename);
+    // Copy sources into build directory
+    let cp_output = if target.contains("msvc") {
+        Command::new("xcopy")
+            .arg("libsodium")
+            .arg(&source_dir)
+            .arg("/E")
+            .output()
+    } else {
+        Command::new("cp")
+            .arg("-r")
+            .arg("libsodium/.")
+            .arg(&source_dir)
+            .output()
+    };
 
-    // Unpack the tarball
-    let gz_decoder = Decoder::new(compressed_file).unwrap();
-    let mut archive = Archive::new(gz_decoder);
-    archive.unpack(&source_dir).unwrap();
-    source_dir.push(basename);
+    match cp_output {
+        Ok(out) if out.status.success() => (),
+        Ok(out) => {
+            panic!(
+                "Failed to copy sources into build directory: {}",
+                String::from_utf8_lossy(&out.stderr)
+            );
+        }
+        Err(err) => {
+            panic!("Failed to copy sources into build directory: {}", err);
+        }
+    };
 
     let lib_dir = make_libsodium(&target, &source_dir, &install_dir);
 
