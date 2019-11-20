@@ -1,11 +1,64 @@
 //! Libsodium utility functions
 use ffi;
+use std::{
+    mem,
+    ops::{Deref, DerefMut},
+    ptr,
+};
 
 /// `memzero()` tries to effectively zero out the data in `x` even if
 /// optimizations are being applied to the code.
 pub fn memzero(x: &mut [u8]) {
     unsafe {
         ffi::sodium_memzero(x.as_mut_ptr() as *mut _, x.len());
+    }
+}
+
+/// Wrapper type that tries to effectively zero out the contained data
+/// during drop. This should not be used with types containing indirections
+/// like heap-allocated memory as it cannot be effective in these cases.
+pub struct Memzero<T>(mem::MaybeUninit<T>);
+
+impl<T> Memzero<T> {
+    /// Create a wrapped value
+    pub fn new(val: T) -> Self {
+        Self(mem::MaybeUninit::new(val))
+    }
+
+    /// Consume a wrapped value using the given closure
+    pub fn consume<F, R>(self, f: F) -> R
+    where
+        F: FnOnce(T) -> R,
+    {
+        // SAFETY: We will only deinitialize `self.0` inside `drop`
+        f(unsafe { ptr::read(self.0.as_ptr()) })
+    }
+}
+
+impl<T> Deref for Memzero<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        // SAFETY: We will only deinitialize `self.0` inside `drop`.
+        unsafe { &*self.0.as_ptr() }
+    }
+}
+
+impl<T> DerefMut for Memzero<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        // SAFETY: We will only deinitialize `self.0` inside `drop`.
+        unsafe { &mut *self.0.as_mut_ptr() }
+    }
+}
+
+impl<T> Drop for Memzero<T> {
+    fn drop(&mut self) {
+        // SAFETY: `self.0` will not be accessed anymore after this.
+        unsafe {
+            ptr::drop_in_place(self.0.as_mut_ptr());
+
+            ffi::sodium_memzero(self.0.as_mut_ptr() as _, mem::size_of::<T>());
+        }
     }
 }
 
@@ -270,5 +323,28 @@ mod test {
 
         let mut x = vec![0; 5 * LOCK_LIMIT as usize];
         assert!(mlock(&mut x).is_err());
+    }
+
+    #[test]
+    fn test_memzero_wrapper_with_generichash() {
+        use crypto::generichash::State;
+
+        // The quick brown fox jumps over the lazy dog
+        let x = [
+            0x54, 0x68, 0x65, 0x20, 0x71, 0x75, 0x69, 0x63, 0x6b, 0x20, 0x62, 0x72, 0x6f, 0x77,
+            0x6e, 0x20, 0x66, 0x6f, 0x78, 0x20, 0x6a, 0x75, 0x6d, 0x70, 0x73, 0x20, 0x6f, 0x76,
+            0x65, 0x72, 0x20, 0x74, 0x68, 0x65, 0x20, 0x6c, 0x61, 0x7a, 0x79, 0x20, 0x64, 0x6f,
+            0x67,
+        ];
+        let h_expected = [
+            0x01, 0x71, 0x8c, 0xec, 0x35, 0xcd, 0x3d, 0x79, 0x6d, 0xd0, 0x00, 0x20, 0xe0, 0xbf,
+            0xec, 0xb4, 0x73, 0xad, 0x23, 0x45, 0x7d, 0x06, 0x3b, 0x75, 0xef, 0xf2, 0x9c, 0x0f,
+            0xfa, 0x2e, 0x58, 0xa9,
+        ];
+
+        let mut hasher = Memzero::new(State::new(32, None).unwrap());
+        hasher.update(&x).unwrap();
+        let h = Memzero::new(hasher.consume(State::finalize).unwrap());
+        assert!(h.as_ref() == h_expected);
     }
 }
