@@ -237,6 +237,7 @@ impl Default for State {
 #[cfg(test)]
 mod test {
     use super::*;
+    use hex;
 
     #[test]
     fn test_sk_to_pk() {

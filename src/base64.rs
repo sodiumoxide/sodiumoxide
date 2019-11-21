@@ -26,8 +26,8 @@ pub fn encode<T: AsRef<[u8]>>(bin: T, variant: Variant) -> String {
     let mut b64 = vec![0; encoded_len];
 
     // SAFETY: `sodium_base64_encoded_len` ensures space for `bin.len()` bytes
-    // and `Variant` contains only valid variant codes.
-    // and `sodium_bin2base64` writes only single byte ASCII characters
+    // and `Variant` contains only valid variant codes
+    // and `sodium_bin2base64` writes only single byte ASCII characters.
     unsafe {
         ffi::sodium_bin2base64(
             b64.as_mut_ptr().cast(),
@@ -43,7 +43,7 @@ pub fn encode<T: AsRef<[u8]>>(bin: T, variant: Variant) -> String {
 
 /// Decodes a Base64 string into a byte sequence using the given variant.
 ///
-/// Fails if an the decoded length overflows
+/// Fails if the decoded length overflows
 /// or if `b64` contains invalid characters.
 pub fn decode<T: AsRef<[u8]>>(b64: T, variant: Variant) -> Result<Vec<u8>, ()> {
     let b64 = b64.as_ref();
