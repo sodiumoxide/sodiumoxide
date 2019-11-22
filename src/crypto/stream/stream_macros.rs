@@ -46,7 +46,7 @@ pub fn gen_key() -> Key {
 ///
 /// NOTE: When using primitives with short nonces (e.g. salsa20, salsa208, salsa2012)
 /// do not use random nonces since the probability of nonce-collision is not negligible
-pub(crate) fn gen_nonce_internal() -> Nonce {
+fn gen_nonce_internal() -> Nonce {
     let mut nonce = [0; NONCEBYTES];
     randombytes_into(&mut nonce);
     Nonce(nonce)
