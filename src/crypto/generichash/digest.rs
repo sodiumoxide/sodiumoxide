@@ -26,7 +26,7 @@ impl PartialEq for Digest {
         if other.len != self.len {
             return false;
         }
-        memcmp(self.as_ref(), self.as_ref())
+        memcmp(self.as_ref(), other.as_ref())
     }
 }
 

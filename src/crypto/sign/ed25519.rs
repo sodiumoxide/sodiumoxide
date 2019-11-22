@@ -237,6 +237,7 @@ impl Default for State {
 #[cfg(test)]
 mod test {
     use super::*;
+    use hex;
 
     #[test]
     fn test_sk_to_pk() {
@@ -346,11 +347,8 @@ mod test {
             let x2 = x.next().unwrap();
             let x3 = x.next().unwrap();
             let seed_bytes = hex::decode(&x0[..64]).unwrap();
-            assert!(seed_bytes.len() == SEEDBYTES);
             let mut seed = Seed([0u8; SEEDBYTES]);
-            for (s, b) in seed.0.iter_mut().zip(seed_bytes.iter()) {
-                *s = *b
-            }
+            seed.0.copy_from_slice(&seed_bytes);
             let (pk, sk) = keypair_from_seed(&seed);
             let m = hex::decode(x2).unwrap();
             let sm = sign(&m, &sk);

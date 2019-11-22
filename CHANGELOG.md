@@ -1,4 +1,11 @@
+# 0.2.5 (Oct 11, 2019)
+
+* Fix Digest PartialEq (#381)
+* Fix compiler warnings (#380)
+* Use copy_from_slice instead of manual loop where possible (#378)
+
 # 0.2.4 (Sep 3, 2019)
+
 * Fixed erronoeus dependency on older libsodium-sys
 * Fixed use of deprecated try! macro (#369)
 
