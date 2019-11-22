@@ -15,3 +15,12 @@ stream_module!(
     crypto_stream_xchacha20_KEYBYTES as usize,
     crypto_stream_xchacha20_NONCEBYTES as usize
 );
+
+/// `gen_nonce` randomly generates a nonce
+///
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
+pub fn gen_nonce() -> Nonce {
+    gen_nonce_internal()
+}

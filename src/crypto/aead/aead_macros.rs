@@ -50,12 +50,12 @@ pub fn gen_key() -> Key {
     k
 }
 
-/// `gen_nonce()` randomly generates a nonce
+/// `gen_nonce_internal` randomly generates a nonce
 ///
-/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
+/// THREAD SAFETY: `gen_nonce_internal()` is thread-safe provided that you have
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
-pub fn gen_nonce() -> Nonce {
+fn gen_nonce_internal() -> Nonce {
     let mut n = Nonce([0u8; NONCEBYTES]);
     randombytes_into(&mut n.0);
     n
@@ -178,7 +178,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..256usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_nonce_internal();
             let ad = randombytes(i);
             let m = randombytes(i);
             let c = seal(&m, Some(&ad), &n, &k);
@@ -192,7 +192,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..32usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_nonce_internal();
             let mut ad = randombytes(i);
             let m = randombytes(i);
             let mut c = seal(&m, Some(&ad), &n, &k);
@@ -216,7 +216,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..256usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_nonce_internal();
             let ad = randombytes(i);
             let mut m = randombytes(i);
             let m2 = m.clone();
@@ -231,7 +231,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..32usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_nonce_internal();
             let mut ad = randombytes(i);
             let mut m = randombytes(i);
             let mut t = seal_detached(&mut m, Some(&ad), &n, &k);
@@ -261,7 +261,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..256usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_nonce_internal();
             let ad = randombytes(i);
             let mut m = randombytes(i);
 
