@@ -8,7 +8,7 @@ name = "sodiumoxide"
 readme = "README.md"
 repository = "https://github.com/sodiumoxide/sodiumoxide"
 categories = ["cryptography"]
-version = "0.2.4"
+version = "0.2.5"
 exclude = [
     "**/.gitignore",
     ".travis.yml",
@@ -25,11 +25,10 @@ coveralls = { repository = "sodiumoxide/sodiumoxide" }
 
 [dependencies]
 libc = { version = "^0.2.41" , default-features = false }
-libsodium-sys = { version = "0.2.4", path = "libsodium-sys" }
+libsodium-sys = { version = "0.2.5", path = "libsodium-sys" }
 serde = { version = "^1.0.59", default-features = false, optional = true }
 
 [dev-dependencies]
-hex = "0.3"
 serde = "^1.0.59"
 serde_json = "^1.0.17"
 rmp-serde = "^0.13.7"
