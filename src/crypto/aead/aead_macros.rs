@@ -55,6 +55,7 @@ pub fn gen_key() -> Key {
 /// THREAD SAFETY: `gen_nonce_internal()` is thread-safe provided that you have
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
+#[allow(unused)]
 fn gen_nonce_internal() -> Nonce {
     let mut n = Nonce([0u8; NONCEBYTES]);
     randombytes_into(&mut n.0);
