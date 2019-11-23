@@ -5,6 +5,7 @@
 //! This function is conjectured to meet the standard notions of privacy and
 //! authenticity.
 
+use crypto::nonce::gen_random_nonce;
 use ffi;
 #[cfg(not(feature = "std"))]
 use prelude::*;
@@ -58,9 +59,7 @@ pub fn gen_key() -> Key {
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
-    let mut nonce = [0; NONCEBYTES];
-    randombytes_into(&mut nonce);
-    Nonce(nonce)
+    gen_random_nonce()
 }
 
 /// `seal()` encrypts and authenticates a message `m` using a secret key `k` and a
@@ -323,6 +322,11 @@ mod test {
             round_trip(k);
             round_trip(n);
         }
+    }
+
+    #[test]
+    fn test_nonce_length() {
+        assert_eq!(192 / 8, gen_nonce().as_ref().len());
     }
 }
 
