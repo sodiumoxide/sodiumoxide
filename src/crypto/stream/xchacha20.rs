@@ -25,3 +25,13 @@ stream_module!(
 pub fn gen_nonce() -> Nonce {
     gen_random_nonce()
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_nonce_length() {
+        assert_eq!(192 / 8, gen_nonce().as_ref().len());
+    }
+}

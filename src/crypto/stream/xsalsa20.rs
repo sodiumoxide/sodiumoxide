@@ -115,4 +115,9 @@ mod test {
         ];
         assert!(c[32..] == c_expected[..]);
     }
+
+    #[test]
+    fn test_nonce_length() {
+        assert_eq!(192 / 8, gen_nonce().as_ref().len());
+    }
 }

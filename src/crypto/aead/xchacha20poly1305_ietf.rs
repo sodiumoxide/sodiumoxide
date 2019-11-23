@@ -79,4 +79,9 @@ mod test {
         let c = seal(m, Some(ad), &n, &k);
         assert_eq!(&c[..], &c_expected[..]);
     }
+
+    #[test]
+    fn test_nonce_length() {
+        assert_eq!(192 / 8, gen_nonce().as_ref().len());
+    }
 }
