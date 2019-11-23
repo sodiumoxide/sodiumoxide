@@ -14,6 +14,15 @@ pub struct Digest {
     pub(super) data: [u8; crypto_generichash_BYTES_MAX as usize],
 }
 
+impl Digest {
+    pub(super) fn new(len: usize) -> Self {
+        Self {
+            len,
+            data: [0u8; crypto_generichash_BYTES_MAX as usize],
+        }
+    }
+}
+
 impl Debug for Digest {
     fn fmt(&self, formatter: &mut Formatter) -> ::std::fmt::Result {
         write!(formatter, "Digest({:?})", &self[..])
