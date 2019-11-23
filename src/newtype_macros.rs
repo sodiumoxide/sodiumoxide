@@ -286,6 +286,12 @@ macro_rules! new_type {
             }
 
         }
+        impl crate::crypto::nonce::Nonce for $name {
+            type Bytes = [u8; $bytes];
+            fn from_bytes(bytes: Self::Bytes) -> Self {
+                Self(bytes)
+            }
+        }
         impl ::std::fmt::Debug for $name {
             fn fmt(&self,
                    formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {

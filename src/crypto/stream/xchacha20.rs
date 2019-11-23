@@ -3,6 +3,7 @@
 //! This cipher is conjectured to meet the standard notion of
 //! unpredictability.
 
+use crypto::nonce::gen_random_nonce;
 use ffi::{
     crypto_stream_xchacha20, crypto_stream_xchacha20_KEYBYTES, crypto_stream_xchacha20_NONCEBYTES,
     crypto_stream_xchacha20_xor, crypto_stream_xchacha20_xor_ic,
@@ -22,5 +23,5 @@ stream_module!(
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
-    gen_nonce_internal()
+    gen_random_nonce()
 }

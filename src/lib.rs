@@ -115,6 +115,7 @@ pub mod crypto {
     pub mod generichash;
     pub mod hash;
     pub mod kx;
+    mod nonce;
     pub mod onetimeauth;
     pub mod pwhash;
     pub mod scalarmult;

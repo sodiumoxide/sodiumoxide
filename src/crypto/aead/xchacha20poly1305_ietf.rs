@@ -8,6 +8,7 @@
 //! For this reason, and if interoperability with other libraries is not a
 //! concern, this is the recommended AEAD construction.
 
+use crypto::nonce::gen_random_nonce;
 use ffi::{
     crypto_aead_xchacha20poly1305_ietf_ABYTES, crypto_aead_xchacha20poly1305_ietf_KEYBYTES,
     crypto_aead_xchacha20poly1305_ietf_NPUBBYTES, crypto_aead_xchacha20poly1305_ietf_decrypt,
@@ -15,6 +16,7 @@ use ffi::{
     crypto_aead_xchacha20poly1305_ietf_encrypt,
     crypto_aead_xchacha20poly1305_ietf_encrypt_detached,
 };
+
 aead_module!(
     crypto_aead_xchacha20poly1305_ietf_encrypt,
     crypto_aead_xchacha20poly1305_ietf_decrypt,
@@ -31,7 +33,7 @@ aead_module!(
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
-    gen_nonce_internal()
+    gen_random_nonce()
 }
 
 #[cfg(test)]
