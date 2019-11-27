@@ -156,7 +156,7 @@ linker = "arm-buildroot-linux-musleabihf-gcc"
 2. Dockerfile:
 
 ```
-FROM rust:1.30.1
+FROM rust:1.36.0
 
 ENV TARGET="armv7-unknown-linux-musleabihf"
 

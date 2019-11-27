@@ -18,9 +18,7 @@ macro_rules! newtype_from_slice (($newtype:ident, $len:expr) => (
             return None;
         }
         let mut n = $newtype([0; $len]);
-        for (ni, &bsi) in n.0.iter_mut().zip(bs.iter()) {
-            *ni = bsi
-        }
+        n.0.copy_from_slice(bs);
         Some(n)
     }
     ));
@@ -287,6 +285,12 @@ macro_rules! new_type {
                 increment_le(&mut self.0);
             }
 
+        }
+        impl crate::crypto::nonce::Nonce for $name {
+            type Bytes = [u8; $bytes];
+            fn from_bytes(bytes: Self::Bytes) -> Self {
+                Self(bytes)
+            }
         }
         impl ::std::fmt::Debug for $name {
             fn fmt(&self,

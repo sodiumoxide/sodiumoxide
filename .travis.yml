@@ -23,7 +23,7 @@ matrix:
     before_script:
       - rustup component add clippy
     script:
-      - cargo clippy --all --tests
+      - cargo clippy --all --lib --tests -- --deny warnings
   - name: coverage
     os: linux
     rust: stable

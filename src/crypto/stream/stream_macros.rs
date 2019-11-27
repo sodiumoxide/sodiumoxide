@@ -163,13 +163,14 @@ pub fn stream_xor_ic_inplace(m: &mut [u8],
 #[cfg(test)]
 mod test_m {
     use super::*;
+    use crypto::nonce::gen_random_nonce;
 
     #[test]
     fn test_encrypt_decrypt() {
         use randombytes::randombytes;
         for i in 0..1024usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let m = randombytes(i);
             let c = stream_xor(&m, &n, &k);
             let m2 = stream_xor(&c, &n, &k);
@@ -182,7 +183,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..1024usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let m = randombytes(i);
             let mut c = m.clone();
             let s = stream(c.len(), &n, &k);
@@ -199,7 +200,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..1024usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let mut m = randombytes(i);
             let mut c = m.clone();
             let s = stream(c.len(), &n, &k);
@@ -216,7 +217,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..1024usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let m = randombytes(i);
             let c = stream_xor(&m, &n, &k);
             let c_ic = stream_xor_ic(&m, &n, 0, &k);
@@ -229,7 +230,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..1024usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             for j in 0..10 {
                 let mut m = randombytes(i);
                 let c = stream_xor_ic(&m, &n, j, &k);
@@ -245,7 +246,7 @@ mod test_m {
         use test_utils::round_trip;
         for _ in 0..1024usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n: Nonce = gen_random_nonce();
             round_trip(k);
             round_trip(n);
         }
@@ -264,7 +265,7 @@ mod bench_m {
     #[bench]
     fn bench_stream(b: &mut test::Bencher) {
         let k = gen_key();
-        let n = gen_nonce();
+        let n = gen_random_nonce();
         b.iter(|| {
             for size in BENCH_SIZES.iter() {
                 stream(*size, &n, &k);

@@ -25,6 +25,8 @@ hash_module!(
 #[cfg(test)]
 mod test {
     use super::*;
+    use hex;
+
     #[cfg(all(not(feature = "std"), feature = "alloc"))]
     use prelude::*;
 

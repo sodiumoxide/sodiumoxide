@@ -62,8 +62,6 @@
 
 extern crate libsodium_sys as ffi;
 
-#[cfg(test)]
-extern crate hex;
 extern crate libc;
 #[cfg(any(test, feature = "serde"))]
 extern crate serde;
@@ -98,6 +96,8 @@ pub fn init() -> Result<(), ()> {
 
 #[macro_use]
 mod newtype_macros;
+pub mod base64;
+pub mod hex;
 pub mod randombytes;
 pub mod utils;
 pub mod version;
@@ -113,6 +113,7 @@ pub mod crypto {
     pub mod generichash;
     pub mod hash;
     pub mod kx;
+    mod nonce;
     pub mod onetimeauth;
     pub mod pwhash;
     pub mod scalarmult;
