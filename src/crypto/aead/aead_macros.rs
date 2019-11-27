@@ -50,17 +50,6 @@ pub fn gen_key() -> Key {
     k
 }
 
-/// `gen_nonce()` randomly generates a nonce
-///
-/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
-pub fn gen_nonce() -> Nonce {
-    let mut n = Nonce([0u8; NONCEBYTES]);
-    randombytes_into(&mut n.0);
-    n
-}
-
 #[cfg(feature = "alloc")]
 /// `seal()` encrypts and authenticates a message `m` together with optional plaintext data `ad`
 /// using a secret key `k` and a nonce `n`. It returns a ciphertext `c`.

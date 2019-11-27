@@ -65,6 +65,7 @@ mod test {
 #[cfg(all(test, feature = "std"))]
 mod nist_vectors {
     use super::*;
+    use hex;
 
     // TODO: replace this with a macro that uses the include!(filename) macro to avoid heap
     // allocation

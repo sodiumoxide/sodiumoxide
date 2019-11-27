@@ -38,20 +38,6 @@ pub fn gen_key() -> Key {
     Key(key)
 }
 
-/// `gen_nonce()` randomly generates a nonce for symmetric encryption
-///
-/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
-///
-/// NOTE: When using primitives with short nonces (e.g. salsa20, salsa208, salsa2012)
-/// do not use random nonces since the probability of nonce-collision is not negligible
-pub fn gen_nonce() -> Nonce {
-    let mut nonce = [0; NONCEBYTES];
-    randombytes_into(&mut nonce);
-    Nonce(nonce)
-}
-
 #[cfg(feature = "alloc")]
 /// `stream()` produces a `len`-byte stream `c` as a function of a
 /// secret key `k` and a nonce `n`.
