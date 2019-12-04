@@ -152,10 +152,9 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
     use std::{fs, process::Command, str};
 
     // Decide on CC, CFLAGS and the --host configure argument
-    let build = cc::Build::new();
-    let mut compiler = build.get_compiler().path().to_str().unwrap().to_string();
-    let mut cflags = env::var("CFLAGS").unwrap_or(String::default());
-    cflags += " -O2";
+    let build_compiler = cc::Build::new().get_compiler();
+    let mut compiler = build_compiler.path().to_str().unwrap().to_string();
+    let mut cflags = build_compiler.cflags_env().into_string().unwrap();
     let host_arg;
     let cross_compiling;
     let help;
