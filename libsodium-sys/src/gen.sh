@@ -4,9 +4,10 @@
 # a whitelist regex to generate entities
 REGEX="(SODIUM|sodium|crypto|randombytes)_.*"
 
-bindgen PATH_TO/libsodium-1.0.18/src/libsodium/include/sodium.h -o sodium_bindings.rs \
+bindgen ../libsodium/src/libsodium/include/sodium.h -o sodium_bindings.rs \
   --ctypes-prefix=libc --use-core \
   --generate=functions,types,vars \
+  --no-layout-tests \
   --whitelist-function=$REGEX \
   --whitelist-type=$REGEX \
   --whitelist-var=$REGEX
