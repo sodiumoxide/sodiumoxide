@@ -255,25 +255,20 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
     if env::var("SODIUM_DISABLE_PIE").is_ok() {
         configure_cmd.arg("--disable-pie");
     }
-    let configure_output = configure_cmd
+    let configure_status = configure_cmd
         .current_dir(&source_dir)
         .arg(&prefix_arg)
         .arg(&libdir_arg)
         .arg(&host_arg)
         .arg("--enable-shared=no")
-        .output()
+        .status()
         .unwrap_or_else(|error| {
             panic!("Failed to run './configure': {}\n{}", error, help);
         });
-    if !configure_output.status.success() {
+    if !configure_status.success() {
         panic!(
-            "\n{:?}\nCFLAGS={}\nCC={}\n{}\n{}\n{}\n",
-            configure_cmd,
-            cflags,
-            compiler,
-            String::from_utf8_lossy(&configure_output.stdout),
-            String::from_utf8_lossy(&configure_output.stderr),
-            help
+            "\nFailed to configure libsodium using {:?}\nCFLAGS={}\nCC={}\n{}\n",
+            configure_cmd, cflags, compiler, help
         );
     }
 
@@ -281,44 +276,30 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
     let j_arg = format!("-j{}", env::var("NUM_JOBS").unwrap());
     let make_arg = if cross_compiling { "all" } else { "check" };
     let mut make_cmd = Command::new("make");
-    let make_output = make_cmd
+    let make_status = make_cmd
         .current_dir(&source_dir)
         .env("V", "1")
         .arg(make_arg)
         .arg(&j_arg)
-        .output()
+        .status()
         .unwrap_or_else(|error| {
             panic!("Failed to run 'make {}': {}\n{}", make_arg, error, help);
         });
-    if !make_output.status.success() {
-        panic!(
-            "\n{:?}\n{}\n{}\n{}\n{}",
-            make_cmd,
-            String::from_utf8_lossy(&configure_output.stdout),
-            String::from_utf8_lossy(&make_output.stdout),
-            String::from_utf8_lossy(&make_output.stderr),
-            help
-        );
+    if !make_status.success() {
+        panic!("\nFailed to build libsodium using {:?}\n{}", make_cmd, help);
     }
 
     // Run `make install`
     let mut install_cmd = Command::new("make");
-    let install_output = install_cmd
+    let install_status = install_cmd
         .current_dir(&source_dir)
         .arg("install")
-        .output()
+        .status()
         .unwrap_or_else(|error| {
             panic!("Failed to run 'make install': {}", error);
         });
-    if !install_output.status.success() {
-        panic!(
-            "\n{:?}\n{}\n{}\n{}\n{}\n",
-            install_cmd,
-            String::from_utf8_lossy(&configure_output.stdout),
-            String::from_utf8_lossy(&make_output.stdout),
-            String::from_utf8_lossy(&install_output.stdout),
-            String::from_utf8_lossy(&install_output.stderr)
-        );
+    if !install_status.success() {
+        panic!("\nFailed to install libsodium using {:?}", install_cmd);
     }
 
     install_dir.join("lib")
@@ -394,27 +375,24 @@ fn build_libsodium() {
     fs::create_dir_all(&source_dir).unwrap();
 
     // Copy sources into build directory
-    let cp_output = if target.contains("msvc") {
+    let cp_status = if target.contains("msvc") {
         Command::new("xcopy")
             .arg("libsodium")
             .arg(&source_dir)
             .arg("/E")
-            .output()
+            .status()
     } else {
         Command::new("cp")
             .arg("-r")
             .arg("libsodium/.")
             .arg(&source_dir)
-            .output()
+            .status()
     };
 
-    match cp_output {
-        Ok(out) if out.status.success() => (),
-        Ok(out) => {
-            panic!(
-                "Failed to copy sources into build directory: {}",
-                String::from_utf8_lossy(&out.stderr)
-            );
+    match cp_status {
+        Ok(status) if status.success() => (),
+        Ok(status) => {
+            panic!("Failed to copy sources into build directory: {}", status);
         }
         Err(err) => {
             panic!("Failed to copy sources into build directory: {}", err);
