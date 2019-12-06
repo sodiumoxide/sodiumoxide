@@ -13,7 +13,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-static VERSION: &'static str = "1.0.18";
+static VERSION: &str = "1.0.18";
 
 fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
@@ -155,9 +155,8 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
     let build_compiler = cc::Build::new().get_compiler();
     let mut compiler = build_compiler.path().to_str().unwrap().to_string();
     let mut cflags = build_compiler.cflags_env().into_string().unwrap();
-    let host_arg;
-    let cross_compiling;
-    let help;
+    let mut host_arg = format!("--host={}", target);
+    let mut cross_compiling = target != env::var("HOST").unwrap();
     if target.contains("-ios") {
         // Determine Xcode directory path
         let xcode_select_output = Command::new("xcode-select").arg("-p").output().unwrap();
@@ -223,24 +222,19 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
             _ => panic!("Unknown iOS build target: {}", target),
         }
         cross_compiling = true;
-        help = "";
-    } else {
-        if target.contains("i686") {
-            compiler += " -m32 -maes";
-            cflags += " -march=i686";
-        }
-        let host = env::var("HOST").unwrap();
-        host_arg = format!("--host={}", target);
-        cross_compiling = target != host;
-        help = if cross_compiling {
-            "***********************************************************\n\
-             Possible missing dependencies.\n\
-             See https://github.com/sodiumoxide/sodiumoxide#cross-compiling\n\
-             ***********************************************************\n\n"
-        } else {
-            ""
-        };
+    } else if target.contains("i686") {
+        compiler += " -m32 -maes";
+        cflags += " -march=i686";
     }
+
+    let help = if cross_compiling {
+        "***********************************************************\n\
+         Possible missing dependencies.\n\
+         See https://github.com/sodiumoxide/sodiumoxide#cross-compiling\n\
+         ***********************************************************\n\n"
+    } else {
+        ""
+    };
 
     // Run `./configure`
     let prefix_arg = format!("--prefix={}", install_dir.to_str().unwrap());
