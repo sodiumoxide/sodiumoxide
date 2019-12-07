@@ -314,31 +314,6 @@ extern "C" {
 pub struct crypto_aead_aes256gcm_state_ {
     pub opaque: [libc::c_uchar; 512usize],
 }
-#[test]
-fn bindgen_test_layout_crypto_aead_aes256gcm_state_() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_aead_aes256gcm_state_>(),
-        512usize,
-        concat!("Size of: ", stringify!(crypto_aead_aes256gcm_state_))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_aead_aes256gcm_state_>(),
-        16usize,
-        concat!("Alignment of ", stringify!(crypto_aead_aes256gcm_state_))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_aead_aes256gcm_state_>())).opaque as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_aead_aes256gcm_state_),
-            "::",
-            stringify!(opaque)
-        )
-    );
-}
 pub type crypto_aead_aes256gcm_state = crypto_aead_aes256gcm_state_;
 extern "C" {
     pub fn crypto_aead_aes256gcm_statebytes() -> usize;
@@ -678,49 +653,6 @@ pub struct crypto_hash_sha512_state {
     pub count: [u64; 2usize],
     pub buf: [u8; 128usize],
 }
-#[test]
-fn bindgen_test_layout_crypto_hash_sha512_state() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_hash_sha512_state>(),
-        208usize,
-        concat!("Size of: ", stringify!(crypto_hash_sha512_state))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_hash_sha512_state>(),
-        8usize,
-        concat!("Alignment of ", stringify!(crypto_hash_sha512_state))
-    );
-    assert_eq!(
-        unsafe { &(*(::core::ptr::null::<crypto_hash_sha512_state>())).state as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_hash_sha512_state),
-            "::",
-            stringify!(state)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::core::ptr::null::<crypto_hash_sha512_state>())).count as *const _ as usize },
-        64usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_hash_sha512_state),
-            "::",
-            stringify!(count)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::core::ptr::null::<crypto_hash_sha512_state>())).buf as *const _ as usize },
-        80usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_hash_sha512_state),
-            "::",
-            stringify!(buf)
-        )
-    );
-}
 extern "C" {
     pub fn crypto_hash_sha512_statebytes() -> usize;
 }
@@ -777,43 +709,6 @@ extern "C" {
 pub struct crypto_auth_hmacsha512_state {
     pub ictx: crypto_hash_sha512_state,
     pub octx: crypto_hash_sha512_state,
-}
-#[test]
-fn bindgen_test_layout_crypto_auth_hmacsha512_state() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_auth_hmacsha512_state>(),
-        416usize,
-        concat!("Size of: ", stringify!(crypto_auth_hmacsha512_state))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_auth_hmacsha512_state>(),
-        8usize,
-        concat!("Alignment of ", stringify!(crypto_auth_hmacsha512_state))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_auth_hmacsha512_state>())).ictx as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_auth_hmacsha512_state),
-            "::",
-            stringify!(ictx)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_auth_hmacsha512_state>())).octx as *const _ as usize
-        },
-        208usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_auth_hmacsha512_state),
-            "::",
-            stringify!(octx)
-        )
-    );
 }
 extern "C" {
     pub fn crypto_auth_hmacsha512_statebytes() -> usize;
@@ -925,49 +820,6 @@ pub struct crypto_hash_sha256_state {
     pub count: u64,
     pub buf: [u8; 64usize],
 }
-#[test]
-fn bindgen_test_layout_crypto_hash_sha256_state() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_hash_sha256_state>(),
-        104usize,
-        concat!("Size of: ", stringify!(crypto_hash_sha256_state))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_hash_sha256_state>(),
-        8usize,
-        concat!("Alignment of ", stringify!(crypto_hash_sha256_state))
-    );
-    assert_eq!(
-        unsafe { &(*(::core::ptr::null::<crypto_hash_sha256_state>())).state as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_hash_sha256_state),
-            "::",
-            stringify!(state)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::core::ptr::null::<crypto_hash_sha256_state>())).count as *const _ as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_hash_sha256_state),
-            "::",
-            stringify!(count)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::core::ptr::null::<crypto_hash_sha256_state>())).buf as *const _ as usize },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_hash_sha256_state),
-            "::",
-            stringify!(buf)
-        )
-    );
-}
 extern "C" {
     pub fn crypto_hash_sha256_statebytes() -> usize;
 }
@@ -1024,43 +876,6 @@ extern "C" {
 pub struct crypto_auth_hmacsha256_state {
     pub ictx: crypto_hash_sha256_state,
     pub octx: crypto_hash_sha256_state,
-}
-#[test]
-fn bindgen_test_layout_crypto_auth_hmacsha256_state() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_auth_hmacsha256_state>(),
-        208usize,
-        concat!("Size of: ", stringify!(crypto_auth_hmacsha256_state))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_auth_hmacsha256_state>(),
-        8usize,
-        concat!("Alignment of ", stringify!(crypto_auth_hmacsha256_state))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_auth_hmacsha256_state>())).ictx as *const _ as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_auth_hmacsha256_state),
-            "::",
-            stringify!(ictx)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_auth_hmacsha256_state>())).octx as *const _ as usize
-        },
-        104usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_auth_hmacsha256_state),
-            "::",
-            stringify!(octx)
-        )
-    );
 }
 extern "C" {
     pub fn crypto_auth_hmacsha256_statebytes() -> usize;
@@ -1503,35 +1318,6 @@ extern "C" {
 pub struct crypto_generichash_blake2b_state {
     pub opaque: [libc::c_uchar; 384usize],
 }
-#[test]
-fn bindgen_test_layout_crypto_generichash_blake2b_state() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_generichash_blake2b_state>(),
-        384usize,
-        concat!("Size of: ", stringify!(crypto_generichash_blake2b_state))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_generichash_blake2b_state>(),
-        64usize,
-        concat!(
-            "Alignment of ",
-            stringify!(crypto_generichash_blake2b_state)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_generichash_blake2b_state>())).opaque as *const _
-                as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_generichash_blake2b_state),
-            "::",
-            stringify!(opaque)
-        )
-    );
-}
 extern "C" {
     pub fn crypto_generichash_blake2b_bytes_min() -> usize;
 }
@@ -1785,35 +1571,6 @@ extern "C" {
 #[derive(Copy, Clone)]
 pub struct crypto_onetimeauth_poly1305_state {
     pub opaque: [libc::c_uchar; 256usize],
-}
-#[test]
-fn bindgen_test_layout_crypto_onetimeauth_poly1305_state() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_onetimeauth_poly1305_state>(),
-        256usize,
-        concat!("Size of: ", stringify!(crypto_onetimeauth_poly1305_state))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_onetimeauth_poly1305_state>(),
-        16usize,
-        concat!(
-            "Alignment of ",
-            stringify!(crypto_onetimeauth_poly1305_state)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_onetimeauth_poly1305_state>())).opaque as *const _
-                as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_onetimeauth_poly1305_state),
-            "::",
-            stringify!(opaque)
-        )
-    );
 }
 extern "C" {
     pub fn crypto_onetimeauth_poly1305_statebytes() -> usize;
@@ -2465,64 +2222,6 @@ pub struct crypto_secretstream_xchacha20poly1305_state {
     pub nonce: [libc::c_uchar; 12usize],
     pub _pad: [libc::c_uchar; 8usize],
 }
-#[test]
-fn bindgen_test_layout_crypto_secretstream_xchacha20poly1305_state() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_secretstream_xchacha20poly1305_state>(),
-        52usize,
-        concat!(
-            "Size of: ",
-            stringify!(crypto_secretstream_xchacha20poly1305_state)
-        )
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_secretstream_xchacha20poly1305_state>(),
-        1usize,
-        concat!(
-            "Alignment of ",
-            stringify!(crypto_secretstream_xchacha20poly1305_state)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_secretstream_xchacha20poly1305_state>())).k as *const _
-                as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_secretstream_xchacha20poly1305_state),
-            "::",
-            stringify!(k)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_secretstream_xchacha20poly1305_state>())).nonce
-                as *const _ as usize
-        },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_secretstream_xchacha20poly1305_state),
-            "::",
-            stringify!(nonce)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<crypto_secretstream_xchacha20poly1305_state>()))._pad
-                as *const _ as usize
-        },
-        44usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_secretstream_xchacha20poly1305_state),
-            "::",
-            stringify!(_pad)
-        )
-    );
-}
 extern "C" {
     pub fn crypto_secretstream_xchacha20poly1305_statebytes() -> usize;
 }
@@ -2624,29 +2323,6 @@ extern "C" {
 #[derive(Copy, Clone)]
 pub struct crypto_sign_ed25519ph_state {
     pub hs: crypto_hash_sha512_state,
-}
-#[test]
-fn bindgen_test_layout_crypto_sign_ed25519ph_state() {
-    assert_eq!(
-        ::core::mem::size_of::<crypto_sign_ed25519ph_state>(),
-        208usize,
-        concat!("Size of: ", stringify!(crypto_sign_ed25519ph_state))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<crypto_sign_ed25519ph_state>(),
-        8usize,
-        concat!("Alignment of ", stringify!(crypto_sign_ed25519ph_state))
-    );
-    assert_eq!(
-        unsafe { &(*(::core::ptr::null::<crypto_sign_ed25519ph_state>())).hs as *const _ as usize },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(crypto_sign_ed25519ph_state),
-            "::",
-            stringify!(hs)
-        )
-    );
 }
 extern "C" {
     pub fn crypto_sign_ed25519ph_statebytes() -> usize;
@@ -2953,90 +2629,6 @@ pub struct randombytes_implementation {
     pub uniform: ::core::option::Option<unsafe extern "C" fn(upper_bound: u32) -> u32>,
     pub buf: ::core::option::Option<unsafe extern "C" fn(buf: *mut libc::c_void, size: usize)>,
     pub close: ::core::option::Option<unsafe extern "C" fn() -> libc::c_int>,
-}
-#[test]
-fn bindgen_test_layout_randombytes_implementation() {
-    assert_eq!(
-        ::core::mem::size_of::<randombytes_implementation>(),
-        48usize,
-        concat!("Size of: ", stringify!(randombytes_implementation))
-    );
-    assert_eq!(
-        ::core::mem::align_of::<randombytes_implementation>(),
-        8usize,
-        concat!("Alignment of ", stringify!(randombytes_implementation))
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<randombytes_implementation>())).implementation_name as *const _
-                as usize
-        },
-        0usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(randombytes_implementation),
-            "::",
-            stringify!(implementation_name)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<randombytes_implementation>())).random as *const _ as usize
-        },
-        8usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(randombytes_implementation),
-            "::",
-            stringify!(random)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<randombytes_implementation>())).stir as *const _ as usize
-        },
-        16usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(randombytes_implementation),
-            "::",
-            stringify!(stir)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<randombytes_implementation>())).uniform as *const _ as usize
-        },
-        24usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(randombytes_implementation),
-            "::",
-            stringify!(uniform)
-        )
-    );
-    assert_eq!(
-        unsafe { &(*(::core::ptr::null::<randombytes_implementation>())).buf as *const _ as usize },
-        32usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(randombytes_implementation),
-            "::",
-            stringify!(buf)
-        )
-    );
-    assert_eq!(
-        unsafe {
-            &(*(::core::ptr::null::<randombytes_implementation>())).close as *const _ as usize
-        },
-        40usize,
-        concat!(
-            "Offset of field: ",
-            stringify!(randombytes_implementation),
-            "::",
-            stringify!(close)
-        )
-    );
 }
 extern "C" {
     pub fn randombytes_seedbytes() -> usize;
