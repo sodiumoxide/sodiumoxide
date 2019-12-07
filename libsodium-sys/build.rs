@@ -1,413 +1,348 @@
-#[cfg(not(windows))]
-extern crate cc;
+    use std::env::var;
+use std::path::PathBuf;
 
-#[cfg(target_env = "msvc")]
-extern crate libc;
-#[cfg(target_env = "msvc")]
-extern crate vcpkg;
-
-extern crate pkg_config;
-
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
-
-static VERSION: &str = "1.0.18";
+const VERSION: &str = "1.0.18";
 
 fn main() {
-    println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
-    println!("cargo:rerun-if-env-changed=SODIUM_SHARED");
-    println!("cargo:rerun-if-env-changed=SODIUM_USE_PKG_CONFIG");
-
-    if cfg!(target_env = "msvc") {
-        // vcpkg requires to set env VCPKGRS_DYNAMIC
-        println!("cargo:rerun-if-env-changed=VCPKGRS_DYNAMIC");
-    }
-    if cfg!(not(windows)) {
-        println!("cargo:rerun-if-env-changed=SODIUM_DISABLE_PIE");
+    if var("SODIUM_SHARED").is_ok() {
+        panic!("`SODIUM_SHARED` is deprecated. Use `SODIUM_DYNAMIC` or `VCPKGRS_DYNAMIC` instead.");
     }
 
-    if env::var("SODIUM_STATIC").is_ok() {
-        panic!("SODIUM_STATIC is deprecated. Use SODIUM_SHARED instead.");
+    if find_env() {
+        return;
     }
 
-    let lib_dir_isset = env::var("SODIUM_LIB_DIR").is_ok();
-    let use_pkg_isset = if cfg!(feature = "use-pkg-config") {
-        true
-    } else {
-        env::var("SODIUM_USE_PKG_CONFIG").is_ok()
-    };
-    let shared_isset = env::var("SODIUM_SHARED").is_ok();
-
-    if lib_dir_isset && use_pkg_isset {
-        panic!("SODIUM_LIB_DIR is incompatible with SODIUM_USE_PKG_CONFIG. Set the only one env variable");
+    if find_vcpkg() {
+        return;
     }
 
-    if lib_dir_isset {
-        find_libsodium_env();
-    } else if use_pkg_isset {
-        if shared_isset {
-            println!("cargo:warning=SODIUM_SHARED has no effect with SODIUM_USE_PKG_CONFIG");
-        }
-
-        find_libsodium_pkg();
-    } else {
-        if shared_isset {
-            println!(
-                "cargo:warning=SODIUM_SHARED has no effect for building libsodium from source"
-            );
-        }
-
-        build_libsodium();
+    if find_pkg_config() {
+        return;
     }
+
+    if link_prebuilt() {
+        return;
+    }
+
+    if build_from_source() {
+        return;
+    }
+
+    panic!("Failed to find or build libsodium. Specify `SODIUM_LIB_DIR` or enable at least one of the `pkg-config`, `vcpkg` or `cc` features.");
 }
 
-/* Must be called when SODIUM_LIB_DIR is set to any value
-This function will set `cargo` flags.
-*/
-fn find_libsodium_env() {
-    let lib_dir = env::var("SODIUM_LIB_DIR").unwrap(); // cannot fail
-
-    println!("cargo:rustc-link-search=native={}", lib_dir);
-    let mode = if env::var("SODIUM_SHARED").is_ok() {
-        "dylib"
-    } else {
-        "static"
-    };
-    let name = if cfg!(target_env = "msvc") {
+fn lib_name() -> &'static str {
+    if cfg!(target_env = "msvc") {
         "libsodium"
     } else {
         "sodium"
-    };
-    println!("cargo:rustc-link-lib={}={}", mode, name);
-    println!(
-        "cargo:warning=Using unknown libsodium version.  This crate is tested against \
-         {} and may not be fully compatible with other versions.",
-        VERSION
-    );
-}
-
-/* Must be called when no SODIUM_USE_PKG_CONFIG env var is set
-This function will set `cargo` flags.
-*/
-#[cfg(target_env = "msvc")]
-fn find_libsodium_pkg() {
-    match vcpkg::probe_package("libsodium") {
-        Ok(lib) => {
-            println!(
-                "cargo:warning=Using unknown libsodium version.  This crate is tested against \
-                 {} and may not be fully compatible with other versions.",
-                VERSION
-            );
-            for lib_dir in &lib.link_paths {
-                println!("cargo:lib={}", lib_dir.to_str().unwrap());
-            }
-            for include_dir in &lib.include_paths {
-                println!("cargo:include={}", include_dir.to_str().unwrap());
-            }
-        }
-        Err(e) => {
-            panic!(format!("Error: {:?}", e));
-        }
-    };
-}
-
-/* Must be called when SODIUM_USE_PKG_CONFIG env var is set
-This function will set `cargo` flags.
-*/
-#[cfg(not(target_env = "msvc"))]
-fn find_libsodium_pkg() {
-    match pkg_config::Config::new().probe("libsodium") {
-        Ok(lib) => {
-            if lib.version != VERSION {
-                println!(
-                    "cargo:warning=Using libsodium version {}.  This crate is tested against {} \
-                     and may not be fully compatible with {}.",
-                    lib.version, VERSION, lib.version
-                );
-            }
-            for lib_dir in &lib.link_paths {
-                println!("cargo:lib={}", lib_dir.to_str().unwrap());
-            }
-            for include_dir in &lib.include_paths {
-                println!("cargo:include={}", include_dir.to_str().unwrap());
-            }
-        }
-        Err(e) => {
-            panic!(format!("Error: {:?}", e));
-        }
     }
 }
 
-#[cfg(windows)]
-fn make_libsodium(_: &str, _: &Path, _: &Path) -> PathBuf {
-    // We don't build anything on windows, we simply linked to precompiled
-    // libs.
-    get_lib_dir()
-}
+fn find_env() -> bool {
+    println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
 
-#[cfg(not(windows))]
-fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBuf {
-    use std::{fs, process::Command, str};
+    let lib_dir = match var("SODIUM_LIB_DIR") {
+        Ok(lib_dir) => lib_dir,
+        _ => return false,
+    };
 
-    // Decide on CC, CFLAGS and the --host configure argument
-    let build_compiler = cc::Build::new().get_compiler();
-    let mut compiler = build_compiler.path().to_str().unwrap().to_string();
-    let mut cflags = build_compiler.cflags_env().into_string().unwrap();
-    let mut host_arg = format!("--host={}", target);
-    let mut cross_compiling = target != env::var("HOST").unwrap();
-    if target.contains("-ios") {
-        // Determine Xcode directory path
-        let xcode_select_output = Command::new("xcode-select").arg("-p").output().unwrap();
-        if !xcode_select_output.status.success() {
-            panic!("Failed to run xcode-select -p");
-        }
-        let xcode_dir = str::from_utf8(&xcode_select_output.stdout)
-            .unwrap()
-            .trim()
-            .to_string();
+    println!("cargo:rerun-if-env-changed=SODIUM_STATIC");
+    println!("cargo:rerun-if-env-changed=SODIUM_DYNAMIC");
 
-        // Determine SDK directory paths
-        let sdk_dir_simulator = Path::new(&xcode_dir)
-            .join("Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk")
-            .to_str()
-            .unwrap()
-            .to_string();
-        let sdk_dir_ios = Path::new(&xcode_dir)
-            .join("Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk")
-            .to_str()
-            .unwrap()
-            .to_string();
-
-        // Min versions
-        let ios_simulator_version_min = "6.0.0";
-        let ios_version_min = "6.0.0";
-
-        // Roughly based on `dist-build/ios.sh` in the libsodium sources
-        match &*target {
-            "aarch64-apple-ios" => {
-                cflags += " -arch arm64";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
-                cflags += " -fembed-bitcode";
-                host_arg = "--host=arm-apple-darwin10".to_string();
-            }
-            "armv7-apple-ios" => {
-                cflags += " -arch armv7";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
-                cflags += " -mthumb";
-                host_arg = "--host=arm-apple-darwin10".to_string();
-            }
-            "armv7s-apple-ios" => {
-                cflags += " -arch armv7s";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
-                cflags += " -mthumb";
-                host_arg = "--host=arm-apple-darwin10".to_string();
-            }
-            "i386-apple-ios" => {
-                cflags += " -arch i386";
-                cflags += &format!(" -isysroot {}", sdk_dir_simulator);
-                cflags += &format!(" -mios-simulator-version-min={}", ios_simulator_version_min);
-                host_arg = "--host=i686-apple-darwin10".to_string();
-            }
-            "x86_64-apple-ios" => {
-                cflags += " -arch x86_64";
-                cflags += &format!(" -isysroot {}", sdk_dir_simulator);
-                cflags += &format!(" -mios-simulator-version-min={}", ios_simulator_version_min);
-                host_arg = "--host=x86_64-apple-darwin10".to_string();
-            }
-            _ => panic!("Unknown iOS build target: {}", target),
-        }
-        cross_compiling = true;
-    } else if target.contains("i686") {
-        compiler += " -m32 -maes";
-        cflags += " -march=i686";
-    }
-
-    let help = if cross_compiling {
-        "***********************************************************\n\
-         Possible missing dependencies.\n\
-         See https://github.com/sodiumoxide/sodiumoxide#cross-compiling\n\
-         ***********************************************************\n\n"
+    let linkage = if var("SODIUM_STATIC").is_ok() {
+        "static="
+    } else if var("SODIUM_DYNAMIC").is_ok() {
+        "dylib="
     } else {
         ""
     };
 
-    // Run `./configure`
-    let prefix_arg = format!("--prefix={}", install_dir.to_str().unwrap());
-    let libdir_arg = format!("--libdir={}/lib", install_dir.to_str().unwrap());
-    let mut configure_cmd = Command::new(fs::canonicalize(source_dir.join("configure")).expect("Failed to find configure script! Did you clone the submodule at `libsodium-sys/libsodium`?"));
-    if !compiler.is_empty() {
-        configure_cmd.env("CC", &compiler);
+    println!("cargo:rustc-link-search=native={}", lib_dir);
+    println!("cargo:rustc-link-lib={}{}", linkage, lib_name());
+
+    println!(
+        "cargo:warning=\
+         Using unknown libsodium version. This crate is tested against \
+         {} and may not be fully compatible with other versions.",
+        VERSION
+    );
+
+    true
+}
+
+#[cfg(all(target_env = "msvc", feature = "vcpkg"))]
+fn find_vcpkg() -> bool {
+    let lib = match vcpkg::probe_package("libsodium") {
+        Ok(lib) => lib,
+        Err(err) => {
+            eprintln!("Failed to probe Vcpkg tree for libsodium: {}", err);
+
+            return false;
+        }
+    };
+
+    for lib_dir in &lib.link_paths {
+        println!("cargo:lib={}", lib_dir.display());
     }
-    if !cflags.is_empty() {
-        configure_cmd.env("CFLAGS", &cflags);
+
+    for include_dir in &lib.include_paths {
+        println!("cargo:include={}", include_dir.display());
     }
-    if env::var("SODIUM_DISABLE_PIE").is_ok() {
-        configure_cmd.arg("--disable-pie");
+
+    println!(
+        "cargo:warning=\
+         Using unknown libsodium version. This crate is tested against \
+         {} and may not be fully compatible with other versions.",
+        VERSION
+    );
+
+    true
+}
+
+#[cfg(not(all(target_env = "msvc", feature = "vcpkg")))]
+fn find_vcpkg() -> bool {
+    false
+}
+
+#[cfg(feature = "pkg-config")]
+fn find_pkg_config() -> bool {
+    let lib = match pkg_config::Config::new().probe("libsodium") {
+        Ok(lib) => lib,
+        Err(err) => {
+            eprintln!("Failed to probe libsodium using pkg-config: {}", err);
+            return false;
+        }
+    };
+
+    for lib_dir in &lib.link_paths {
+        println!("cargo:lib={}", lib_dir.display());
     }
-    let configure_status = configure_cmd
-        .current_dir(&source_dir)
-        .arg(&prefix_arg)
-        .arg(&libdir_arg)
-        .arg(&host_arg)
-        .arg("--enable-shared=no")
-        .status()
-        .unwrap_or_else(|error| {
-            panic!("Failed to run './configure': {}\n{}", error, help);
-        });
-    if !configure_status.success() {
-        panic!(
-            "\nFailed to configure libsodium using {:?}\nCFLAGS={}\nCC={}\n{}\n",
-            configure_cmd, cflags, compiler, help
+
+    for include_dir in &lib.include_paths {
+        println!("cargo:include={}", include_dir.display());
+    }
+
+    if lib.version != VERSION {
+        println!(
+            "cargo:warning=\
+             Using libsodium version {}. This crate is tested against \
+             {} and may not be fully compatible with {}.",
+            lib.version, VERSION, lib.version
         );
     }
 
-    // Run `make check`, or `make all` if we're cross-compiling
-    let j_arg = format!("-j{}", env::var("NUM_JOBS").unwrap());
-    let make_arg = if cross_compiling { "all" } else { "check" };
-    let mut make_cmd = Command::new("make");
-    let make_status = make_cmd
-        .current_dir(&source_dir)
-        .env("V", "1")
-        .arg(make_arg)
-        .arg(&j_arg)
-        .status()
-        .unwrap_or_else(|error| {
-            panic!("Failed to run 'make {}': {}\n{}", make_arg, error, help);
-        });
-    if !make_status.success() {
-        panic!("\nFailed to build libsodium using {:?}\n{}", make_cmd, help);
+    true
+}
+
+#[cfg(not(feature = "pkg-config"))]
+fn find_pkg_config() -> bool {
+    false
+}
+
+fn link_prebuilt() -> bool {
+    let target = var("TARGET").unwrap();
+    let profile = var("PROFILE").unwrap();
+
+    let lib_dir = match (target.as_str(), profile.as_str()) {
+        ("x86_64-pc-windows-msvc", "release") => "msvc/x64/Release/v140",
+        ("x86_64-pc-windows-msvc", _) => "msvc/x64/Debug/v140",
+        ("i686-pc-windows-msvc", "release") => "msvc/Win32/Release/v140",
+        ("i686-pc-windows-msvc", _) => "msvc/Win32/Debug/v140",
+        ("x86_64-pc-windows-gnu", _) => "mingw/win64",
+        ("i686-pc-windows-gnu", _) => "mingw/win32",
+        _ => return false,
+    };
+
+    let manifest_dir: PathBuf = var("CARGO_MANIFEST_DIR").unwrap().into();
+    let include_dir = manifest_dir.join("libsodium/src/libsodium/include");
+    let lib_dir = manifest_dir.join(lib_dir);
+
+    if var("SODIUM_DYNAMIC").is_ok() {
+        println!("cargo:warning=`SODIUM_DYNAMIC` has no effect when linking prebuilt libraries.");
     }
 
-    // Run `make install`
-    let mut install_cmd = Command::new("make");
-    let install_status = install_cmd
-        .current_dir(&source_dir)
-        .arg("install")
-        .status()
-        .unwrap_or_else(|error| {
-            panic!("Failed to run 'make install': {}", error);
-        });
-    if !install_status.success() {
-        panic!("\nFailed to install libsodium using {:?}", install_cmd);
+    println!("cargo:rustc-link-search=native={}", lib_dir.display());
+    println!("cargo:rustc-link-lib=static={}", lib_name());
+
+    println!("cargo:include={}", include_dir.display());
+    println!("cargo:lib={}", lib_dir.display());
+
+    true
+}
+
+#[cfg(all(not(target_env = "msvc"), feature = "cc"))]
+fn build_from_source() -> bool {
+    use std::env::temp_dir;
+    use std::fs::{canonicalize, create_dir_all};
+    use std::process::Command;
+    use std::str::from_utf8;
+
+    fn check_status(mut cmd: Command) {
+        match cmd.status() {
+            Ok(status) if status.success() => (),
+            Ok(status) => panic!("Failed to run `{:?}`: {}", cmd, status),
+            Err(error) => panic!("Failed to run `{:?}`: {}", cmd, error),
+        }
     }
 
-    install_dir.join("lib")
-}
+    let target = var("TARGET").unwrap();
+    let profile = var("PROFILE").unwrap();
+    let host = var("HOST").unwrap();
 
-#[cfg(any(windows, target_env = "msvc"))]
-fn get_crate_dir() -> PathBuf {
-    env::var("CARGO_MANIFEST_DIR").unwrap().into()
-}
-
-#[cfg(target_env = "msvc")]
-fn is_release_profile() -> bool {
-    env::var("PROFILE").unwrap() == "release"
-}
-
-#[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
-fn get_lib_dir() -> PathBuf {
-    if is_release_profile() {
-        get_crate_dir().join("msvc/Win32/Release/v140/")
-    } else {
-        get_crate_dir().join("msvc/Win32/Debug/v140/")
+    if target != host {
+        println!("See https://github.com/sodiumoxide/sodiumoxide#cross-compiling for more information on cross-compiling.");
     }
-}
 
-#[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
-fn get_lib_dir() -> PathBuf {
-    if is_release_profile() {
-        get_crate_dir().join("msvc/x64/Release/v140/")
-    } else {
-        get_crate_dir().join("msvc/x64/Debug/v140/")
-    }
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
-fn get_lib_dir() -> PathBuf {
-    get_crate_dir().join("mingw/win32/")
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "64"))]
-fn get_lib_dir() -> PathBuf {
-    get_crate_dir().join("mingw/win64/")
-}
-
-fn build_libsodium() {
-    use std::{fs, process::Command};
-
-    // Determine build target triple
-    let mut out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let target = env::var("TARGET").unwrap();
-    let profile = env::var("PROFILE").unwrap();
+    let mut out_dir: PathBuf = var("OUT_DIR").unwrap().into();
 
     // Avoid issues with paths containing spaces by falling back to using a tempfile.
     // See https://github.com/jedisct1/libsodium/issues/207
     if out_dir.to_str().unwrap().contains(' ') {
-        out_dir = env::temp_dir()
+        out_dir = temp_dir()
             .join("libsodium-sys")
             .join(&target)
             .join(&profile);
+
         println!(
-            "cargo:warning=The path to the usual build directory contains spaces and hence \
-             can't be used to build libsodium.  Falling back to use {}.  If running `cargo \
-             clean`, ensure you also delete this fallback directory",
+            "cargo:warning=The path to the default build directory contains spaces and hence \
+             can't be used to build libsodium. Falling back to use {}. If running `cargo \
+             clean`, ensure you also delete that directory.",
             out_dir.display()
         );
     }
 
-    // Determine source and install dir
     let install_dir = out_dir.join("installed");
-    let source_dir = out_dir.join("source").join("libsodium");
+    create_dir_all(&install_dir).unwrap();
 
-    // Create directories
-    fs::create_dir_all(&install_dir).unwrap();
-    fs::create_dir_all(&source_dir).unwrap();
+    let source_dir = out_dir.join("source");
+    create_dir_all(&source_dir).unwrap();
 
-    // Copy sources into build directory
-    let cp_status = if target.contains("msvc") {
-        Command::new("xcopy")
-            .arg("libsodium")
-            .arg(&source_dir)
-            .args(&["/s", "/e", "/i", "/q", "/y"])
-            .status()
-    } else {
-        Command::new("cp")
-            .arg("-r")
-            .arg("libsodium/.")
-            .arg(&source_dir)
-            .status()
-    };
+    let mut copy_cmd = Command::new("cp");
+    copy_cmd.arg("-r").arg("libsodium").arg(&source_dir);
+    check_status(copy_cmd);
 
-    match cp_status {
-        Ok(status) if status.success() => (),
-        Ok(status) => {
-            panic!("Failed to copy sources into build directory: {}", status);
+    let source_dir = source_dir.join("libsodium");
+
+    // Decide on CC, CFLAGS environment variables and --host argument
+    let build_compiler = cc::Build::new().get_compiler();
+    let cc_env = build_compiler.path().to_str().unwrap().to_string();
+    let mut cflags_env = build_compiler.cflags_env().into_string().unwrap();
+    let mut host_arg = format!("--host={}", target);
+
+    if target.contains("-ios") {
+        // Determine Xcode directory path
+        let xcode_dir: PathBuf = match Command::new("xcode-select").arg("-p").output() {
+            Ok(ref output) if output.status.success() => {
+                from_utf8(&output.stdout).unwrap().trim().to_string().into()
+            }
+            Ok(output) => panic!("Failed to run `xcode-select -p`: {}", output.status),
+            Err(error) => panic!("Failed to run `xcode-select -p`: {}", error),
+        };
+
+        // Determine SDK directory paths
+        let sdk_dir_simulator =
+            xcode_dir.join("Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk");
+        let sdk_dir_ios = xcode_dir.join("Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk");
+
+        // Roughly based on `dist-build/ios.sh` in the libsodium sources
+        const IOS_SIMULATOR_VERSION_MIN: &str = "6.0.0";
+        const IOS_VERSION_MIN: &str = "6.0.0";
+
+        match target.as_str() {
+            "aarch64-apple-ios" => {
+                cflags_env += " -arch arm64";
+                cflags_env += &format!(" -isysroot {}", sdk_dir_ios.display());
+                cflags_env += &format!(" -mios-version-min={}", IOS_VERSION_MIN);
+                cflags_env += " -fembed-bitcode";
+                host_arg = "--host=arm-apple-darwin10".to_string();
+            }
+            "armv7-apple-ios" => {
+                cflags_env += " -arch armv7";
+                cflags_env += &format!(" -isysroot {}", sdk_dir_ios.display());
+                cflags_env += &format!(" -mios-version-min={}", IOS_VERSION_MIN);
+                cflags_env += " -mthumb";
+                host_arg = "--host=arm-apple-darwin10".to_string();
+            }
+            "armv7s-apple-ios" => {
+                cflags_env += " -arch armv7s";
+                cflags_env += &format!(" -isysroot {}", sdk_dir_ios.display());
+                cflags_env += &format!(" -mios-version-min={}", IOS_VERSION_MIN);
+                cflags_env += " -mthumb";
+                host_arg = "--host=arm-apple-darwin10".to_string();
+            }
+            "i386-apple-ios" => {
+                cflags_env += " -arch i386";
+                cflags_env += &format!(" -isysroot {}", sdk_dir_simulator.display());
+                cflags_env +=
+                    &format!(" -mios-simulator-version-min={}", IOS_SIMULATOR_VERSION_MIN);
+                host_arg = "--host=i686-apple-darwin10".to_string();
+            }
+            "x86_64-apple-ios" => {
+                cflags_env += " -arch x86_64";
+                cflags_env += &format!(" -isysroot {}", sdk_dir_simulator.display());
+                cflags_env +=
+                    &format!(" -mios-simulator-version-min={}", IOS_SIMULATOR_VERSION_MIN);
+                host_arg = "--host=x86_64-apple-darwin10".to_string();
+            }
+            target => panic!("Unknown iOS build target: {}", target),
         }
-        Err(err) => {
-            panic!("Failed to copy sources into build directory: {}", err);
-        }
-    };
-
-    let lib_dir = make_libsodium(&target, &source_dir, &install_dir);
-
-    if target.contains("msvc") {
-        println!("cargo:rustc-link-lib=static=libsodium");
-    } else {
-        println!("cargo:rustc-link-lib=static=sodium");
+    } else if target.contains("i686") {
+        cflags_env += " -m32 -maes -march=i686";
     }
 
-    println!(
-        "cargo:rustc-link-search=native={}",
-        lib_dir.to_str().unwrap()
-    );
+    // Run `./configure`
+    let mut configure_cmd = Command::new(canonicalize(source_dir.join("configure")).expect("Failed to find configure script! Did you clone the submodule at `libsodium-sys/libsodium`?"));
+
+    configure_cmd
+        .current_dir(&source_dir)
+        .env("CC", cc_env)
+        .env("CFLAGS", cflags_env)
+        .arg(&host_arg)
+        .arg(&format!("--prefix={}", install_dir.display()))
+        .arg(&format!("--libdir={}/lib", install_dir.display()))
+        .arg("--disable-shared")
+        .arg("--disable-dependency-tracking");
+
+    // Disable PIE if requested
+    println!("cargo:rerun-if-env-changed=SODIUM_DISABLE_PIE");
+
+    if var("SODIUM_DISABLE_PIE").is_ok() {
+        configure_cmd.arg("--disable-pie");
+    }
+
+    check_status(configure_cmd);
+
+    // Run `make install`
+    let mut make_cmd = Command::new("make");
+
+    make_cmd
+        .current_dir(&source_dir)
+        .env("V", "1")
+        .arg(&format!("-j{}", var("NUM_JOBS").unwrap()))
+        .arg("install");
+
+    check_status(make_cmd);
 
     let include_dir = source_dir.join("src/libsodium/include");
+    let lib_dir = install_dir.join("lib");
 
-    println!("cargo:include={}", include_dir.to_str().unwrap());
-    println!("cargo:lib={}", lib_dir.to_str().unwrap());
+    if var("SODIUM_DYNAMIC").is_ok() {
+        println!(
+            "cargo:warning=`SODIUM_DYNAMIC` has no effect when building libsodium from source."
+        );
+    }
+
+    println!("cargo:rustc-link-search=native={}", lib_dir.display());
+    println!("cargo:rustc-link-lib=static=sodium");
+
+    println!("cargo:include={}", include_dir.display());
+    println!("cargo:lib={}", lib_dir.display());
+
+    true
+}
+
+#[cfg(any(target_env = "msvc", not(feature = "cc")))]
+fn build_from_source() -> bool {
+    false
 }

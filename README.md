@@ -28,13 +28,6 @@ Rust >= 1.36.0 is required because of mem::MaybeUninit.
 
 ## Basic usage
 
-### Cloning
-```
-git clone https://github.com/sodiumoxide/sodiumoxide.git
-cd sodiumoxide
-git submodule update --init --recursive
-```
-
 ### Building
 ```
 cargo build
@@ -67,15 +60,19 @@ Although it is highly recommended to use the default way with the pinned version
 * link it against the library installed on your system
 * link it against a precompiled library that you built on your own
 
-You can do this by setting environment variables.
+You can do this by enabling features and setting environment variables.
 
 |Name|Description|Example value|Notes|
 | :- | :-------- | :---------- | :-- |
+|`use-pkg-config`|Cargo feature to enable probing via `pkg-config`|||
+|`use-vcpkg`|Cargo feature to enable probing via `vcpkg`|||
 |`SODIUM_LIB_DIR`|Where to find a precompiled library|`/usr/lib/x86_64-linux-gnu/`|The value should be set to the directory containing `.so`,`.a`,`.la`,`.dll` or `.lib`|
-|`SODIUM_SHARED`|Tell `rustc` to link the library dynamically|`1`|Works only with `SODIUM_LIB_DIR`. We check only the presence|
-|`SODIUM_USE_PKG_CONFIG`|Tell build.rs to find system library using pkg-config or vcpkg|`1`|We check only the presence|
-|`SODIUM_DISABLE_PIE`|Build with `--disable-pie`|`1`|Certain situations may require building libsodium configured with `--disable-pie`. Useful for !Windows only and when building libsodium from source. We check only the presence|
-|`VCPKGRS_DYNAMIC`|Tell `vcpkg` to find libsodium|`1`|Usefull for Windows only with `SODIUM_USE_PKG_CONFIG`. More info: https://docs.rs/vcpkg/|
+|`SODIUM_DYNAMIC`|Tell `rustc` to link the library dynamically|`1`|Works only with `SODIUM_LIB_DIR` and `pkg-config`. We check only the presence|
+|`SODIUM_STATIC`|Tell `rustc` to link the library statically|`1`|Works only with `SODIUM_LIB_DIR` and `pkg-config`. We check only the presence|
+|`SODIUM_NO_PKG_CONFIG`|Tell `pkg-config` to ignore libsodium even if found|`1`||
+|`VCPKGRS_DYNAMIC`|Tell `vcpkg` to link DLL builds|`1`|Usefull for Windows only with `vcpkg`. More info: https://docs.rs/vcpkg/|
+|`VCPKGRS_NO_SODIUM`|Tell `vcpkg` to ignore libsodium even if found|`1`||
+|`SODIUM_DISABLE_PIE`|Build with `--disable-pie`|`1`|Certain situations may require building libsodium configured with `--disable-pie`. Useful for Windows only and when building libsodium from source. We check only the presence|
 
 ### Examples on *nix
 
@@ -84,8 +81,7 @@ You can do this by setting environment variables.
 (Ubuntu: `apt install pkg-config`, OSX: `brew install pkg-config`, ...)
 
 ```
-export SODIUM_USE_PKG_CONFIG=1
-cargo build
+cargo build --features use-pkg-config
 ```
 
 #### Using precompiled library
@@ -94,7 +90,7 @@ See https://download.libsodium.org/doc/installation.
 
 ```
 export SODIUM_LIB_DIR=/home/user/libsodium-1.0.18/release/lib/
-export SODIUM_SHARED=1
+export SODIUM_DYNAMIC=1
 cargo build
 ```
 
@@ -106,9 +102,8 @@ See https://github.com/Microsoft/vcpkg.
 
 ```
 C:\Users\user\dev\vcpkg\vcpkg.exe install libsodium --triplet x64-windows
-set SODIUM_USE_PKG_CONFIG=1
 set VCPKGRS_DYNAMIC=1
-cargo build
+cargo build --features use-vcpkg
 ```
 
 ## Optional features
@@ -223,9 +218,12 @@ Sodiumoxide has been tested on:
 
 File bugs in the issue tracker
 
-Master git repository
-
-    git clone https://github.com/sodiumoxide/sodiumoxide.git
+Clone repository using
+```
+git clone https://github.com/sodiumoxide/sodiumoxide.git
+cd sodiumoxide
+git submodule update --init --recursive
+```
 
 ## License
 

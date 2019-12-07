@@ -21,7 +21,6 @@ environment:
   - TARGET: x86_64-pc-windows-msvc
     RUST_CHANNEL: stable
     VCPKG_TARGET: x64-windows
-    SODIUM_USE_PKG_CONFIG: 1
     VCPKGRS_DYNAMIC: 1
     RUST_BACKTRACE: 1
 
@@ -33,7 +32,7 @@ install:
       cmd.exe /c .\rustup-init.exe -y --profile minimal --default-host "$env:TARGET" --default-toolchain "$env:RUST_CHANNEL" 2`>`&1
       $env:PATH += ";$env:USERPROFILE\.cargo\bin"
 
-      If ($env:SODIUM_USE_PKG_CONFIG -eq '1') {
+      If ($env:VCPKG_TARGET -ne '') {
         # Install libsodium via vcpkg
         vcpkg install "libsodium:$env:VCPKG_TARGET"
       }
@@ -46,5 +45,5 @@ cache:
 
 build: false
 test_script:
-  - cargo test --all --target %TARGET%
-  - cargo test --all --release --target %TARGET%
+  - cargo test --all --features use-vcpkg --target %TARGET%
+  - cargo test --all --features use-vcpkg --release --target %TARGET%

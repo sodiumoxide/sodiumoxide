@@ -50,7 +50,7 @@ matrix:
 
 script:
   - cargo test --all --verbose
-  - cargo test --all --verbose --no-default-features --features std
+  - cargo test --all --verbose --no-default-features --features std --features bundled
   - cargo doc
 
 branches:
