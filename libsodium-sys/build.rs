@@ -373,7 +373,7 @@ fn build_libsodium() {
         Command::new("xcopy")
             .arg("libsodium")
             .arg(&source_dir)
-            .arg("/E")
+            .args(&["/s", "/e", "/i", "/q"])
             .status()
     } else {
         Command::new("cp")
