@@ -30,7 +30,7 @@ pub fn encode<T: AsRef<[u8]>>(bin: T, variant: Variant) -> String {
     // and `sodium_bin2base64` writes only single byte ASCII characters.
     unsafe {
         ffi::sodium_bin2base64(
-            b64.as_mut_ptr().cast(),
+            b64.as_mut_ptr() as *mut _,
             b64.len(),
             bin.as_ptr(),
             bin.len(),
@@ -59,7 +59,7 @@ pub fn decode<T: AsRef<[u8]>>(b64: T, variant: Variant) -> Result<Vec<u8>, ()> {
         let rc = ffi::sodium_base642bin(
             bin.as_mut_ptr(),
             bin.len(),
-            b64.as_ptr().cast(),
+            b64.as_ptr() as *const _,
             b64.len(),
             ptr::null(),
             &mut bin_len,

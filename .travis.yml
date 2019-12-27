@@ -42,6 +42,11 @@ matrix:
       - cargo install cargo-travis --debug || echo "cargo-travis has been already installed"
       - mkdir target # fix for cargo-coveralls
       - cargo coveralls --exclude-pattern "$PWD/target/,$PWD/libsodium-sys/src/sodium_bindings.rs"
+  - name: minimum-supported-rust-version
+    os: linux
+    rust: 1.36.0
+    script:
+      - cargo check --all --verbose
 
 script:
   - cargo test --all --verbose

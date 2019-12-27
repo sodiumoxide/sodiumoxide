@@ -16,7 +16,12 @@ pub fn encode<T: AsRef<[u8]>>(bin: T) -> String {
     // SAFETY: `sodium_bin2hex` writes `2 * bin.len() + 1`
     // characters from [0-9a-f] and a nul byte to `bin`.
     unsafe {
-        ffi::sodium_bin2hex(hex.as_mut_ptr().cast(), hex.len(), bin.as_ptr(), bin.len());
+        ffi::sodium_bin2hex(
+            hex.as_mut_ptr() as *mut _,
+            hex.len(),
+            bin.as_ptr(),
+            bin.len(),
+        );
         hex.pop();
         String::from_utf8_unchecked(hex)
     }
@@ -41,7 +46,7 @@ pub fn decode<T: AsRef<[u8]>>(hex: T) -> Result<Vec<u8>, ()> {
         let rc = ffi::sodium_hex2bin(
             bin.as_mut_ptr(),
             bin.len(),
-            hex.as_ptr().cast(),
+            hex.as_ptr() as *const _,
             hex.len(),
             ptr::null(),
             &mut bin_len,
