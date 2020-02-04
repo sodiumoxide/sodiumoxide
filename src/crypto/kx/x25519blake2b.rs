@@ -1,6 +1,8 @@
 //! `x25519blake2b` is the current default key exchange scheme of `libsodium`.
 
+use crate::crypto::sign::{PublicKey as EdPublicKey, SecretKey as EdSecretKey};
 use ffi;
+use std::convert::TryFrom;
 
 /// Number of bytes in a `PublicKey`.
 pub const PUBLICKEYBYTES: usize = ffi::crypto_kx_PUBLICKEYBYTES as usize;
@@ -40,6 +42,44 @@ new_type! {
     /// `SessionKey` is returned by `client_session_keys` and `server_session_keys` and is the
     /// exchanged secret between the client and server.
     secret SessionKey(SESSIONKEYBYTES);
+}
+
+/// converts a public key, generated from the sign module used in Ed25519,
+/// into a public key in X25519
+impl TryFrom<&EdPublicKey> for PublicKey {
+    type Error = ();
+
+    fn try_from(ed_pk: &EdPublicKey) -> Result<Self, Self::Error> {
+        let mut pk = PublicKey([0u8; PUBLICKEYBYTES]);
+        unsafe {
+            let result =
+                ffi::crypto_sign_ed25519_pk_to_curve25519(pk.0.as_mut_ptr(), ed_pk.0.as_ptr());
+            if result == 0 {
+                Ok(pk)
+            } else {
+                Err(())
+            }
+        }
+    }
+}
+
+/// converts a secret key, generated from the sign module used in Ed25519,
+/// into a secret key in X25519
+impl TryFrom<&EdSecretKey> for SecretKey {
+    type Error = ();
+
+    fn try_from(ed_sk: &EdSecretKey) -> Result<Self, Self::Error> {
+        let mut sk = SecretKey([0u8; SECRETKEYBYTES]);
+        unsafe {
+            let result =
+                ffi::crypto_sign_ed25519_sk_to_curve25519(sk.0.as_mut_ptr(), ed_sk.0.as_ptr());
+            if result == 0 {
+                Ok(sk)
+            } else {
+                Err(())
+            }
+        }
+    }
 }
 
 /// `gen_keypair()` randomly generates a secret key and a corresponding public
