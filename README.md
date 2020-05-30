@@ -55,6 +55,24 @@ Documentation will be generated in target/doc/...
 Most documentation is taken from NaCl, with minor modification where the API
 differs between the C and Rust versions.
 
+### Support for the AES AEAD Variant
+
+The AES AEAD variant `crypto_aead_aes256gcm` requires hardware support for the
+`AES` and `CLMUL` instruction set extensions to x86; you can read why that's the
+case
+[here](https://doc.libsodium.org/secret-key_cryptography/aead/aes-256-gcm#limitations). These instruction set extensions were first made
+available in Intel Westmere (early 2010) and at the time of writing x86 hardware
+support for them is near universal.
+
+Libsodium exposes an API for runtime feature detection and doesn't prevent
+you from calling `crypto_aead_aes256gcm` on a machine lacking `AES` and
+`CMUL` expressions; doing so will result in a runtime `SIGILL` (illegal
+instruction). By contrast sodiumoxide exposes an API that precludes the use of
+the `crypto_aead_aes256gcm_*` family of functions without performing the runtime
+check. It's important to note that the use of `sodiumoxide::init()` is mandatory
+when using AES; unless you call `init` calls `aead::aes256gcm::Aes256Gcm::new()`
+will always return `Err(_)` even if your runtime hardware supports AES.
+
 ## Dependencies
 
 C compiler (`cc`, `clang`, ...) must be installed in order to build libsodium from source.

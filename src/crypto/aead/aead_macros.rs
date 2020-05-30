@@ -4,7 +4,8 @@ macro_rules! aead_module (($seal_name:ident,
                            $open_detached_name:ident,
                            $keybytes:expr,
                            $noncebytes:expr,
-                           $tagbytes:expr) => (
+                           $tagbytes:expr,
+                           $test_gate:expr) => (
 
 #[cfg(not(feature = "std"))] use prelude::*;
 use libc::c_ulonglong;
@@ -166,6 +167,9 @@ mod test_m {
     #[test]
     fn test_seal_open() {
         use randombytes::randombytes;
+        if !$test_gate {
+          return
+        }
         for i in 0..256usize {
             let k = gen_key();
             let n = gen_random_nonce();
@@ -180,6 +184,9 @@ mod test_m {
     #[test]
     fn test_seal_open_tamper() {
         use randombytes::randombytes;
+        if !$test_gate {
+          return
+        }
         for i in 0..32usize {
             let k = gen_key();
             let n = gen_random_nonce();
@@ -204,6 +211,9 @@ mod test_m {
     #[test]
     fn test_seal_open_detached() {
         use randombytes::randombytes;
+        if !$test_gate {
+          return
+        }
         for i in 0..256usize {
             let k = gen_key();
             let n = gen_random_nonce();
@@ -219,6 +229,9 @@ mod test_m {
     #[test]
     fn test_seal_open_detached_tamper() {
         use randombytes::randombytes;
+        if !$test_gate {
+          return
+        }
         for i in 0..32usize {
             let k = gen_key();
             let n = gen_random_nonce();
@@ -249,6 +262,9 @@ mod test_m {
     #[test]
     fn test_seal_open_detached_same() {
         use randombytes::randombytes;
+        if !$test_gate {
+          return
+        }
         for i in 0..256usize {
             let k = gen_key();
             let n = gen_random_nonce();
