@@ -291,7 +291,7 @@ impl Stream<Pull> {
         let state = unsafe { state.assume_init() };
 
         Ok(Stream::<Pull> {
-            state: state,
+            state,
             finalized: false,
             phantom: core::marker::PhantomData,
         })
