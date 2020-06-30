@@ -1,7 +1,13 @@
 //! `SipHash-2-4`
 
 use ffi;
+
+#[cfg(feature = "libc")]
 use libc::c_ulonglong;
+
+#[cfg(feature = "cty")]
+use cty::c_ulonglong;
+
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Digest`.

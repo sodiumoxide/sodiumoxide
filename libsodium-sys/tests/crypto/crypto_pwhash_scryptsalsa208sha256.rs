@@ -1,6 +1,11 @@
 // crypto_pwhash_scryptsalsa208sha256.h
 
+#[cfg(feature = "libc")]
 use libc::{c_ulonglong, size_t};
+
+#[cfg(feature = "cty")]
+use cty::{c_ulonglong, size_t};
+
 use libsodium_sys::*;
 use std::ffi::CStr;
 

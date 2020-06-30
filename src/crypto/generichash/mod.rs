@@ -7,7 +7,12 @@ use ffi::{
     crypto_generichash_update,
 };
 
+#[cfg(feature = "libc")]
 use libc::c_ulonglong;
+
+#[cfg(feature = "cty")]
+use cty::c_ulonglong;
+
 use std::mem;
 use std::ptr;
 

@@ -7,8 +7,15 @@ macro_rules! aead_module (($seal_name:ident,
                            $tagbytes:expr,
                            $test_gate:expr) => (
 
-#[cfg(not(feature = "std"))] use prelude::*;
-use libc::c_ulonglong;
+#[cfg(feature = "libc")]
+use libc::{c_ulonglong};
+
+#[cfg(feature = "cty")]
+use cty::{c_ulonglong};
+
+#[cfg(not(feature = "std"))]
+use prelude::*;
+
 use std::ptr;
 use randombytes::randombytes_into;
 

@@ -4,8 +4,16 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
-#[cfg(not(feature = "std"))] use prelude::*;
-use libc::c_ulonglong;
+#[cfg(feature = "libc")]
+use libc::{c_ulonglong};
+
+#[cfg(feature = "cty")]
+use cty::{c_ulonglong};
+
+#[cfg(not(feature = "std"))]
+use prelude::*;
+
+
 use randombytes::randombytes_into;
 
 /// Number of bytes in a `Key`.

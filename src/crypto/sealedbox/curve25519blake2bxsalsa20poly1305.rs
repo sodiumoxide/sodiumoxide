@@ -4,7 +4,11 @@ use ffi;
 #[cfg(not(feature = "std"))]
 use prelude::*;
 
+#[cfg(feature = "libc")]
 use libc::c_ulonglong;
+
+#[cfg(feature = "cty")]
+use cty::c_ulonglong;
 
 use super::super::box_::curve25519xsalsa20poly1305 as box_;
 
