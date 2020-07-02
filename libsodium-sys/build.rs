@@ -312,18 +312,18 @@ fn is_release_profile() -> bool {
 #[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
 fn get_lib_dir() -> PathBuf {
     if is_release_profile() {
-        get_crate_dir().join("msvc/Win32/Release/v140/")
+        get_crate_dir().join("msvc/Win32/Release/v142/")
     } else {
-        get_crate_dir().join("msvc/Win32/Debug/v140/")
+        get_crate_dir().join("msvc/Win32/Debug/v142/")
     }
 }
 
 #[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
 fn get_lib_dir() -> PathBuf {
     if is_release_profile() {
-        get_crate_dir().join("msvc/x64/Release/v140/")
+        get_crate_dir().join("msvc/x64/Release/v142/")
     } else {
-        get_crate_dir().join("msvc/x64/Debug/v140/")
+        get_crate_dir().join("msvc/x64/Debug/v142/")
     }
 }
 
