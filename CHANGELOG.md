@@ -1,3 +1,16 @@
+# 0.2.6 (Jul 19, 2020)
+
+* Remove support for using vcpkg for windows (msvc) builds since it was undertested
+* Update prebuilt windows binaries to those published at 2020-06-30 at libsodium.org
+* Update libsodium submodule to latest stable branch commit. (#420, #400)
+* Avoid ptr_cast feature as it was not yet stable in Rust 1.36. (#408)
+* Fix build script by using the correct arguments for xcopy (#407)
+* Avoid dev dependencies on tar and libflate by including libsodium as a Git submodule. (#393)
+* Add bindings to KDF functions (#351)
+* Expose libsodium's hexadecimal encoding/decoding helper functions (#390)
+* Expose libsodium's Base64 encoding/decoding helper functions (#391)
+* remove ill-advised gen_nonce functions (#395)
+
 # 0.2.5 (Oct 11, 2019)
 
 * Fix Digest PartialEq (#381)
