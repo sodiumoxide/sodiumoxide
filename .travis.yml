@@ -23,7 +23,7 @@ matrix:
     before_script:
       - rustup component add clippy
     script:
-      - cargo clippy --all --tests
+      - cargo clippy --all --lib --tests -- --deny warnings
   - name: coverage
     os: linux
     rust: stable
@@ -41,12 +41,16 @@ matrix:
     script:
       - cargo install cargo-travis --debug || echo "cargo-travis has been already installed"
       - mkdir target # fix for cargo-coveralls
-      - cargo coveralls
+      - cargo coveralls --exclude-pattern "$PWD/target/,$PWD/libsodium-sys/src/sodium_bindings.rs"
+  - name: minimum-supported-rust-version
+    os: linux
+    rust: 1.36.0
+    script:
+      - cargo check --all --verbose
 
 script:
-  - cargo build --verbose
-  - cargo test --verbose --all
-  - cargo test --verbose --no-default-features --features std
+  - cargo test --all --verbose
+  - cargo test --all --verbose --no-default-features --features std
   - cargo doc
 
 branches:

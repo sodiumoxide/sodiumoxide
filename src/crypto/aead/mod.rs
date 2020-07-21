@@ -41,7 +41,7 @@
 //! assert_eq!(m, m2);
 //! ```
 
-pub use self::chacha20poly1305_ietf::*;
+pub use self::xchacha20poly1305_ietf::*;
 #[macro_use]
 mod aead_macros;
 pub mod chacha20poly1305;

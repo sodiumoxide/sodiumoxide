@@ -3,6 +3,7 @@
 //! This cipher is conjectured to meet the standard notion of
 //! unpredictability.
 
+use crypto::nonce::gen_random_nonce;
 use ffi::{
     crypto_stream_xsalsa20, crypto_stream_xsalsa20_KEYBYTES, crypto_stream_xsalsa20_NONCEBYTES,
     crypto_stream_xsalsa20_xor, crypto_stream_xsalsa20_xor_ic,
@@ -15,6 +16,15 @@ stream_module!(
     crypto_stream_xsalsa20_KEYBYTES as usize,
     crypto_stream_xsalsa20_NONCEBYTES as usize
 );
+
+/// `gen_nonce` randomly generates a nonce
+///
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
+pub fn gen_nonce() -> Nonce {
+    gen_random_nonce()
+}
 
 #[cfg(test)]
 mod test {
@@ -104,5 +114,10 @@ mod test {
             0x5a, 0x74, 0xe3, 0x55, 0xa5,
         ];
         assert!(c[32..] == c_expected[..]);
+    }
+
+    #[test]
+    fn test_nonce_length() {
+        assert_eq!(192 / 8, gen_nonce().as_ref().len());
     }
 }

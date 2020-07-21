@@ -1,5 +1,22 @@
-# 0.2.3 (???)
+# 0.2.5 (Oct 11, 2019)
 
+* Fix Digest PartialEq (#381)
+* Fix compiler warnings (#380)
+* Use copy_from_slice instead of manual loop where possible (#378)
+
+# 0.2.4 (Sep 3, 2019)
+
+* Fixed erronoeus dependency on older libsodium-sys
+* Fixed use of deprecated try! macro (#369)
+
+# 0.2.3 (Sep 1, 2019)
+
+* Allow reusing Vec for secretstream (#357)
+* Replace mem::uninitialized with MaybeUninit (#350, #356)
+* Fix warning about deprecated uint64_t (#358)
+* Fix path to ./configure script (#355)
+* Add API to derive Ed25519 public keys from secret keys (#345)
+* Add DEP_SODIUM_INCLUDE & DEP_SODIUM_LIB env variables (#344)
 * Update libsodium to 1.0.18 (#342)
 
 # 0.2.2 (May 16, 2019)

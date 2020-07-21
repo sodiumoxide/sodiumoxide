@@ -28,6 +28,13 @@ Rust >= 1.36.0 is required because of mem::MaybeUninit.
 
 ## Basic usage
 
+### Cloning
+```
+git clone https://github.com/sodiumoxide/sodiumoxide.git
+cd sodiumoxide
+git submodule update --init --recursive
+```
+
 ### Building
 ```
 cargo build
@@ -54,7 +61,7 @@ C compiler (`cc`, `clang`, ...) must be installed in order to build libsodium fr
 
 ## Extended usage
 
-This project downloads and builds libsodium by default, favouring a statically-built, fixed version of the native library.
+This project contains a snapshot of libsodium and builds it by default, favouring a statically-built, fixed version of the native library.
 
 Although it is highly recommended to use the default way with the pinned version, there are several ways you may want to use this crate:
 * link it against the library installed on your system
@@ -156,7 +163,7 @@ linker = "arm-buildroot-linux-musleabihf-gcc"
 2. Dockerfile:
 
 ```
-FROM rust:1.30.1
+FROM rust:1.36.0
 
 ENV TARGET="armv7-unknown-linux-musleabihf"
 

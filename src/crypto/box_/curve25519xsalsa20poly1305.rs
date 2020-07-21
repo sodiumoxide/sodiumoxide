@@ -5,10 +5,10 @@
 //! This function is conjectured to meet the standard notions of privacy and
 //! third-party unforgeability.
 
+use crypto::nonce::gen_random_nonce;
 use ffi;
 #[cfg(not(feature = "std"))]
 use prelude::*;
-use randombytes::randombytes_into;
 
 /// Number of bytes in a `Seed`.
 pub const SEEDBYTES: usize = ffi::crypto_box_curve25519xsalsa20poly1305_SEEDBYTES as usize;
@@ -118,9 +118,7 @@ pub fn keypair_from_seed(seed: &Seed) -> (PublicKey, SecretKey) {
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
 pub fn gen_nonce() -> Nonce {
-    let mut n = [0; NONCEBYTES];
-    randombytes_into(&mut n);
-    Nonce(n)
+    gen_random_nonce()
 }
 
 /// `seal()` encrypts and authenticates a message `m` using the senders secret key `sk`,
@@ -751,6 +749,11 @@ mod test {
             round_trip(sk);
             round_trip(n);
         }
+    }
+
+    #[test]
+    fn test_nonce_length() {
+        assert_eq!(192 / 8, gen_nonce().as_ref().len());
     }
 }
 

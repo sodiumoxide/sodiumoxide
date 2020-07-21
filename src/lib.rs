@@ -46,6 +46,8 @@
 //! # Low-level functions
 //!  [`crypto::hash`](crypto/hash/index.html)
 //!
+//!  [`crypto::kdf`](crypto/kdf/index.html)
+//!
 //!  [`crypto::verify`](crypto/verify/index.html)
 //!
 //!  [`crypto::shorthash`](crypto/shorthash/index.html)
@@ -62,8 +64,6 @@
 
 extern crate libsodium_sys as ffi;
 
-#[cfg(test)]
-extern crate hex;
 extern crate libc;
 #[cfg(any(test, feature = "serde"))]
 extern crate serde;
@@ -100,6 +100,8 @@ pub fn init() -> Result<(), ()> {
 
 #[macro_use]
 mod newtype_macros;
+pub mod base64;
+pub mod hex;
 pub mod randombytes;
 pub mod utils;
 pub mod version;
@@ -114,7 +116,9 @@ pub mod crypto {
     pub mod box_;
     pub mod generichash;
     pub mod hash;
+    pub mod kdf;
     pub mod kx;
+    mod nonce;
     pub mod onetimeauth;
     pub mod pwhash;
     pub mod scalarmult;

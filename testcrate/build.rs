@@ -7,7 +7,7 @@ fn main() {
 
     // Skip the test when `SODIUM_LIB_DIR` is set since there is no
     // build metadata.
-    if let Ok(_) = env::var("SODIUM_LIB_DIR") {
+    if env::var("SODIUM_LIB_DIR").is_ok() {
         return;
     }
 

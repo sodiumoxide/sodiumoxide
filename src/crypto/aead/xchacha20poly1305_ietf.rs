@@ -8,6 +8,7 @@
 //! For this reason, and if interoperability with other libraries is not a
 //! concern, this is the recommended AEAD construction.
 
+use crypto::nonce::gen_random_nonce;
 use ffi::{
     crypto_aead_xchacha20poly1305_ietf_ABYTES, crypto_aead_xchacha20poly1305_ietf_KEYBYTES,
     crypto_aead_xchacha20poly1305_ietf_NPUBBYTES, crypto_aead_xchacha20poly1305_ietf_decrypt,
@@ -15,6 +16,7 @@ use ffi::{
     crypto_aead_xchacha20poly1305_ietf_encrypt,
     crypto_aead_xchacha20poly1305_ietf_encrypt_detached,
 };
+
 aead_module!(
     crypto_aead_xchacha20poly1305_ietf_encrypt,
     crypto_aead_xchacha20poly1305_ietf_decrypt,
@@ -24,6 +26,15 @@ aead_module!(
     crypto_aead_xchacha20poly1305_ietf_NPUBBYTES as usize,
     crypto_aead_xchacha20poly1305_ietf_ABYTES as usize
 );
+
+/// `gen_nonce` randomly generates a nonce
+///
+/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have
+/// called `sodiumoxide::init()` once before using any other function
+/// from sodiumoxide.
+pub fn gen_nonce() -> Nonce {
+    gen_random_nonce()
+}
 
 #[cfg(test)]
 mod test {
@@ -67,5 +78,10 @@ mod test {
         ];
         let c = seal(m, Some(ad), &n, &k);
         assert_eq!(&c[..], &c_expected[..]);
+    }
+
+    #[test]
+    fn test_nonce_length() {
+        assert_eq!(192 / 8, gen_nonce().as_ref().len());
     }
 }

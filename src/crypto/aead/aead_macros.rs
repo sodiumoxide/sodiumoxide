@@ -50,17 +50,6 @@ pub fn gen_key() -> Key {
     k
 }
 
-/// `gen_nonce()` randomly generates a nonce
-///
-/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have
-/// called `sodiumoxide::init()` once before using any other function
-/// from sodiumoxide.
-pub fn gen_nonce() -> Nonce {
-    let mut n = Nonce([0u8; NONCEBYTES]);
-    randombytes_into(&mut n.0);
-    n
-}
-
 /// `seal()` encrypts and authenticates a message `m` together with optional plaintext data `ad`
 /// using a secret key `k` and a nonce `n`. It returns a ciphertext `c`.
 pub fn seal(m: &[u8], ad: Option<&[u8]>, n: &Nonce, k: &Key) -> Vec<u8> {
@@ -172,13 +161,14 @@ pub fn open_detached(c: &mut [u8], ad: Option<&[u8]>, t: &Tag, n: &Nonce, k: &Ke
 #[cfg(test)]
 mod test_m {
     use super::*;
+    use crypto::nonce::gen_random_nonce;
 
     #[test]
     fn test_seal_open() {
         use randombytes::randombytes;
         for i in 0..256usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let ad = randombytes(i);
             let m = randombytes(i);
             let c = seal(&m, Some(&ad), &n, &k);
@@ -192,7 +182,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..32usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let mut ad = randombytes(i);
             let m = randombytes(i);
             let mut c = seal(&m, Some(&ad), &n, &k);
@@ -216,7 +206,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..256usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let ad = randombytes(i);
             let mut m = randombytes(i);
             let m2 = m.clone();
@@ -231,7 +221,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..32usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let mut ad = randombytes(i);
             let mut m = randombytes(i);
             let mut t = seal_detached(&mut m, Some(&ad), &n, &k);
@@ -261,7 +251,7 @@ mod test_m {
         use randombytes::randombytes;
         for i in 0..256usize {
             let k = gen_key();
-            let n = gen_nonce();
+            let n = gen_random_nonce();
             let ad = randombytes(i);
             let mut m = randombytes(i);
 

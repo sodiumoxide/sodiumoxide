@@ -26,10 +26,11 @@ environment:
     RUST_BACKTRACE: 1
 
 install:
+  - git submodule update --init --recursive
   - ps: |
       # Install Rust
       appveyor-retry appveyor DownloadFile https://win.rustup.rs/ -FileName rustup-init.exe
-      cmd.exe /c .\rustup-init.exe -y --default-host "$env:TARGET" --default-toolchain "$env:RUST_CHANNEL" 2`>`&1
+      cmd.exe /c .\rustup-init.exe -y --profile minimal --default-host "$env:TARGET" --default-toolchain "$env:RUST_CHANNEL" 2`>`&1
       $env:PATH += ";$env:USERPROFILE\.cargo\bin"
 
       If ($env:SODIUM_USE_PKG_CONFIG -eq '1') {
@@ -44,7 +45,6 @@ cache:
   - target
 
 build: false
-
 test_script:
-  - cargo test --target %TARGET%
-  - cargo test --release --target %TARGET%
+  - cargo test --all --target %TARGET%
+  - cargo test --all --release --target %TARGET%

@@ -64,7 +64,7 @@ const TAG_FINAL: u8 = $tag_final as u8;
 /// code is generated over all data. A typical encrypted stream simply attaches
 /// `0` as a tag to all messages, except the last one which is tagged as
 /// `Tag::Final`. When decrypting the tag is retrieved and may be used.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Tag {
     /// Message, the most common tag, that doesn't add any information about the
     /// nature of the message.
@@ -199,6 +199,26 @@ impl Stream<Push> {
     /// message `m` and its `tag`. Optionally includes additional data `ad`,
     /// which is not encrypted.
     pub fn push(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag) -> Result<Vec<u8>, ()> {
+        let buf_len = self.push_check(m, tag)?;
+
+        let mut buf = Vec::with_capacity(buf_len);
+        self.push_impl(m, ad, tag, &mut buf)?;
+        Ok(buf)
+    }
+
+    /// All data (including optional fields) is authenticated. Encrypts a
+    /// message `m` and its `tag`. Optionally includes additional data `ad`,
+    /// which is not encrypted.
+    ///
+    /// The encrypted message is written to the `out` vector, overwriting any existing data there.
+    pub fn push_to_vec(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, out: &mut Vec<u8>) -> Result<(), ()> {
+        let buf_len = self.push_check(m, tag)?;
+        out.clear();
+        out.reserve(buf_len);
+        self.push_impl(m, ad, tag, out)
+    }
+
+    fn push_check(&mut self, m: &[u8], tag: Tag) -> Result<usize, ()> {
         if self.finalized {
             return Err(());
         }
@@ -209,30 +229,31 @@ impl Stream<Push> {
         if tag == Tag::Final {
             self.finalized = true;
         }
+        Ok(m_len + ABYTES)
+    }
 
+    fn push_impl(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, buf: &mut Vec<u8>) -> Result<(), ()> {
         let (ad_p, ad_len) = ad
             .map(|ad| (ad.as_ptr(), ad.len()))
             .unwrap_or((ptr::null(), 0));
-
-        let buf_len = m_len + ABYTES;
-        let mut buf = Vec::with_capacity(buf_len);
-        let rc = unsafe {
-            buf.set_len(buf_len);
-            $push_name(
+        let mut c_len: c_ulonglong = 0;
+        unsafe {
+            let rc = $push_name(
                 &mut self.state,
                 buf.as_mut_ptr(),
-                &mut (buf_len as c_ulonglong),
+                &mut c_len,
                 m.as_ptr(),
-                m_len as c_ulonglong,
+                m.len() as c_ulonglong,
                 ad_p,
                 ad_len as c_ulonglong,
                 tag as u8,
-            )
-        };
-        if rc != 0 {
-            return Err(());
+                );
+            if rc != 0 {
+                return Err(());
+            }
+            buf.set_len(c_len as usize);
         }
-        Ok(buf)
+        Ok(())
     }
 
     /// Create a ciphertext for an empty message with the `TAG_FINAL` added
@@ -241,6 +262,7 @@ impl Stream<Push> {
     pub fn finalize(mut self, ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
         self.push(&[], ad, Tag::Final)
     }
+
 }
 
 impl Stream<Pull> {
@@ -269,7 +291,7 @@ impl Stream<Pull> {
         let state = unsafe { state.assume_init() };
 
         Ok(Stream::<Pull> {
-            state: state,
+            state,
             finalized: false,
             phantom: core::marker::PhantomData,
         })
@@ -287,6 +309,33 @@ impl Stream<Pull> {
     /// Applications will typically use a `while stream.is_not_finalized()`
     /// loop to authenticate and decrypt a stream of messages.
     pub fn pull(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag), ()> {
+        let m_len = self.pull_check(c)?;
+        let mut buf = Vec::with_capacity(m_len);
+        let tag = self.pull_impl(c, ad, &mut buf)?;
+        Ok((buf, tag))
+    }
+
+    /// Verifies that `c` is a valid ciphertext with a correct authentication tag
+    /// given the internal state of the `Stream` (ciphertext streams cannot be
+    /// decrypted out of order for this reason). Also may validate the optional
+    /// unencrypted additional data `ad` using the authentication tag attached to
+    /// `c`. Finally decrypts the ciphertext and tag, and checks the tag
+    /// validity.
+    /// If any authentication fails, the stream has already been finalized, or if
+    /// the tag byte for some reason does not correspond to a valid `Tag`,
+    /// returns `Err(())`. Otherwise returns the plaintext and the tag.
+    /// Applications will typically use a `while stream.is_not_finalized()`
+    /// loop to authenticate and decrypt a stream of messages.
+    ///
+    /// The decrypted message is written to the `out` vector, overwriting any existing data there.
+    pub fn pull_to_vec(&mut self, c: &[u8], ad: Option<&[u8]>, out: &mut Vec<u8>) -> Result<Tag, ()> {
+        let m_len = self.pull_check(c)?;
+        out.clear();
+        out.reserve(m_len);
+        self.pull_impl(c, ad, out)
+    }
+
+    fn pull_check(&self, c: &[u8]) -> Result<usize, ()> {
         if self.finalized {
             return Err(());
         }
@@ -299,35 +348,38 @@ impl Stream<Pull> {
         if m_len > messagebytes_max() {
             return Err(());
         }
+        Ok(m_len)
+    }
+
+    fn pull_impl(&mut self, c: &[u8], ad: Option<&[u8]>, buf: &mut Vec<u8>) -> Result<Tag, ()> {
+        let mut tag: u8 = 0;
+        let mut m_len: c_ulonglong = 0;
         let (ad_p, ad_len) = ad
             .map(|ad| (ad.as_ptr(), ad.len()))
             .unwrap_or((ptr::null(), 0));
-        let mut tag = mem::MaybeUninit::uninit();
-        let mut buf = Vec::with_capacity(m_len);
-        let rc = unsafe {
-            buf.set_len(m_len);
-            $pull_name(
+        unsafe {
+            let rc = $pull_name(
                 &mut self.state,
                 buf.as_mut_ptr(),
-                &mut (m_len as c_ulonglong),
-                tag.as_mut_ptr(),
+                &mut m_len,
+                &mut tag,
                 c.as_ptr(),
-                c_len as c_ulonglong,
+                c.len() as c_ulonglong,
                 ad_p,
                 ad_len as c_ulonglong,
-            )
-        };
-        if rc != 0 {
-            return Err(());
+                );
+            if rc != 0 {
+                return Err(());
+            }
+            // rc == 0 and tag is initialized
+            buf.set_len(m_len as usize);
         }
-        // rc == 0 and tag is initialized
-        let tag = unsafe { tag.assume_init() };
 
         let tag = Tag::from_u8(tag)?;
         if tag == Tag::Final {
             self.finalized = true;
         }
-        Ok((buf, tag))
+        Ok(tag)
     }
 }
 

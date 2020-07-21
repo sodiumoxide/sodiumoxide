@@ -197,7 +197,7 @@ mod test {
             server_session_keys(&server_pk, &server_sk, &small_order_p),
             Err(())
         );
-        server_session_keys(&server_pk, &server_sk, &client_pk).unwrap();
+        let _ = server_session_keys(&server_pk, &server_sk, &client_pk).unwrap();
 
         client_pk.0[0] += 1;
 
