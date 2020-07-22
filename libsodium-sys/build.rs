@@ -3,8 +3,6 @@ extern crate cc;
 
 #[cfg(target_env = "msvc")]
 extern crate libc;
-#[cfg(target_env = "msvc")]
-extern crate vcpkg;
 
 extern crate pkg_config;
 
@@ -20,10 +18,6 @@ fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_SHARED");
     println!("cargo:rerun-if-env-changed=SODIUM_USE_PKG_CONFIG");
 
-    if cfg!(target_env = "msvc") {
-        // vcpkg requires to set env VCPKGRS_DYNAMIC
-        println!("cargo:rerun-if-env-changed=VCPKGRS_DYNAMIC");
-    }
     if cfg!(not(windows)) {
         println!("cargo:rerun-if-env-changed=SODIUM_DISABLE_PIE");
     }
@@ -93,24 +87,7 @@ This function will set `cargo` flags.
 */
 #[cfg(target_env = "msvc")]
 fn find_libsodium_pkg() {
-    match vcpkg::probe_package("libsodium") {
-        Ok(lib) => {
-            println!(
-                "cargo:warning=Using unknown libsodium version.  This crate is tested against \
-                 {} and may not be fully compatible with other versions.",
-                VERSION
-            );
-            for lib_dir in &lib.link_paths {
-                println!("cargo:lib={}", lib_dir.to_str().unwrap());
-            }
-            for include_dir in &lib.include_paths {
-                println!("cargo:include={}", include_dir.to_str().unwrap());
-            }
-        }
-        Err(e) => {
-            panic!(format!("Error: {:?}", e));
-        }
-    };
+    panic!("SODIUM_USE_PKG_CONFIG is not supported on msvc");
 }
 
 /* Must be called when SODIUM_USE_PKG_CONFIG env var is set

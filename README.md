@@ -73,9 +73,8 @@ You can do this by setting environment variables.
 | :- | :-------- | :---------- | :-- |
 |`SODIUM_LIB_DIR`|Where to find a precompiled library|`/usr/lib/x86_64-linux-gnu/`|The value should be set to the directory containing `.so`,`.a`,`.la`,`.dll` or `.lib`|
 |`SODIUM_SHARED`|Tell `rustc` to link the library dynamically|`1`|Works only with `SODIUM_LIB_DIR`. We check only the presence|
-|`SODIUM_USE_PKG_CONFIG`|Tell build.rs to find system library using pkg-config or vcpkg|`1`|We check only the presence|
+|`SODIUM_USE_PKG_CONFIG`|Tell build.rs to find system library using pkg-config|`1`|We check only the presence|
 |`SODIUM_DISABLE_PIE`|Build with `--disable-pie`|`1`|Certain situations may require building libsodium configured with `--disable-pie`. Useful for !Windows only and when building libsodium from source. We check only the presence|
-|`VCPKGRS_DYNAMIC`|Tell `vcpkg` to find libsodium|`1`|Usefull for Windows only with `SODIUM_USE_PKG_CONFIG`. More info: https://docs.rs/vcpkg/|
 
 ### Examples on *nix
 
@@ -95,19 +94,6 @@ See https://download.libsodium.org/doc/installation.
 ```
 export SODIUM_LIB_DIR=/home/user/libsodium-1.0.18/release/lib/
 export SODIUM_SHARED=1
-cargo build
-```
-
-### Examples on Windows
-
-#### Using vcpkg
-
-See https://github.com/Microsoft/vcpkg.
-
-```
-C:\Users\user\dev\vcpkg\vcpkg.exe install libsodium --triplet x64-windows
-set SODIUM_USE_PKG_CONFIG=1
-set VCPKGRS_DYNAMIC=1
 cargo build
 ```
 
