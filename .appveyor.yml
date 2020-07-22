@@ -2,27 +2,24 @@ image: Visual Studio 2017
 
 environment:
   matrix:
-    # stable x86_64 with static libsodium from sources
+    # stable x86_64 with static libsodium from binary release
   - TARGET: x86_64-pc-windows-msvc
     RUST_CHANNEL: stable
     RUST_BACKTRACE: 1
 
-    # stable x86 with static libsodium from sources
+    # stable x86 with static libsodium from binary release
   - TARGET: i686-pc-windows-msvc
     RUST_CHANNEL: stable
     RUST_BACKTRACE: 1
 
-  # stable x86_64 with static libsodium from sources
+  # stable x86_64 with static libsodium from binary release
   - TARGET: x86_64-pc-windows-gnu
     RUST_CHANNEL: stable
     RUST_BACKTRACE: 1
 
-    # stable x86_64 with dynamic libsodium from vcpkg
+    # stable x86_64 with static libsodium from binary release
   - TARGET: x86_64-pc-windows-msvc
     RUST_CHANNEL: stable
-    VCPKG_TARGET: x64-windows
-    SODIUM_USE_PKG_CONFIG: 1
-    VCPKGRS_DYNAMIC: 1
     RUST_BACKTRACE: 1
 
 install:
