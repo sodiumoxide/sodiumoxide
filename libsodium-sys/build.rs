@@ -350,11 +350,10 @@ fn build_libsodium() {
     // Skip .git because it's marked read-only and that causes problems re-building
     for entry in walkdir::WalkDir::new("libsodium")
         .into_iter()
-        .filter_entry(|e| e.file_name() == OsStr::new(".git"))
+        .filter_entry(|e| e.file_name() != OsStr::new(".git"))
         .filter_map(Result::ok)
     {
         let outpath = out_dir.join("source").join(entry.path());
-        //println!("{:?}", &outpath);
         if let Err(e) = if entry.file_type().is_dir() {
             fs::create_dir_all(outpath)
         } else {
