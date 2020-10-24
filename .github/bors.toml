@@ -1,0 +1,8 @@
+status = [
+    "test (ubuntu-latest, stable)",
+    "test (macos-latest, stable)",
+    "test (windows-latest, stable)",
+    "rustfmt",
+    "clippy",
+]
+delete_merged_branches = true
