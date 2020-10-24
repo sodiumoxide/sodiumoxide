@@ -1,6 +1,6 @@
 status = [
-	"continuous-integration/appveyor/branch"
-	"Build"
-	"Rustfmt"
+	"continuous-integration/appveyor/branch",
+	"Build",
+	"Rustfmt",
 	"Clippy"
 ]
