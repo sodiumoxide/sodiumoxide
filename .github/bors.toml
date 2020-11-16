@@ -1,8 +1,2 @@
-status = [
-    "test (ubuntu-latest, stable)",
-    "test (macos-latest, stable)",
-    "test (windows-latest, stable)",
-    "rustfmt",
-    "clippy",
-]
+status = ["bors build finished"]
 delete_merged_branches = true
