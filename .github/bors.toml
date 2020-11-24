@@ -1,0 +1,2 @@
+status = ["bors build finished"]
+delete_merged_branches = true

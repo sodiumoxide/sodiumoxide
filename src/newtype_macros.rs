@@ -86,7 +86,6 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     /// by using `x[a..b] == y[a..b]`. This will open up for timing attacks
     /// when comparing for example authenticator tags. Because of this only
     /// use the comparison functions exposed by the sodiumoxide API.
-    #[deprecated(since="0.2.2", note="Use the `AsRef` or `AsMut` implementation instead")]
     impl ::std::ops::Index<::std::ops::Range<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::Range<usize>) -> &[u8] {
@@ -99,7 +98,6 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     /// by using `x[..b] == y[..b]`. This will open up for timing attacks
     /// when comparing for example authenticator tags. Because of this only
     /// use the comparison functions exposed by the sodiumoxide API.
-    #[deprecated(since="0.2.2", note="Use the `AsRef` or `AsMut` implementation instead")]
     impl ::std::ops::Index<::std::ops::RangeTo<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeTo<usize>) -> &[u8] {
@@ -112,7 +110,6 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     /// by using `x[a..] == y[a..]`. This will open up for timing attacks
     /// when comparing for example authenticator tags. Because of this only
     /// use the comparison functions exposed by the sodiumoxide API.
-    #[deprecated(since="0.2.2", note="Use the `AsRef` or `AsMut` implementation instead")]
     impl ::std::ops::Index<::std::ops::RangeFrom<usize>> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeFrom<usize>) -> &[u8] {
@@ -125,7 +122,6 @@ macro_rules! newtype_traits (($newtype:ident, $len:expr) => (
     /// by using `x[] == y[]`. This will open up for timing attacks
     /// when comparing for example authenticator tags. Because of this only
     /// use the comparison functions exposed by the sodiumoxide API.
-    #[deprecated(since="0.2.2", note="Use the `AsRef` or `AsMut` implementation instead")]
     impl ::std::ops::Index<::std::ops::RangeFull> for $newtype {
         type Output = [u8];
         fn index(&self, _index: ::std::ops::RangeFull) -> &[u8] {
