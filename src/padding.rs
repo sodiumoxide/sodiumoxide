@@ -18,8 +18,6 @@
 //! side channels for a given length & <block size mask> value.
 
 use ffi;
-#[cfg(not(feature = "std"))]
-use prelude::*;
 
 /// The `pad()` function adds padding data to a buffer buf whose original size is `unpadded_buflen`
 /// in order to extend its total length to a multiple of blocksize.
