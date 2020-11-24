@@ -102,6 +102,7 @@ pub fn init() -> Result<(), ()> {
 mod newtype_macros;
 pub mod base64;
 pub mod hex;
+pub mod padding;
 pub mod randombytes;
 pub mod utils;
 pub mod version;
