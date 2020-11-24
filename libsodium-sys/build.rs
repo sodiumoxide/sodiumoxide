@@ -5,6 +5,7 @@ extern crate cc;
 extern crate libc;
 
 extern crate pkg_config;
+extern crate walkdir;
 
 use std::{
     env,
@@ -331,7 +332,7 @@ fn get_lib_dir() -> PathBuf {
 }
 
 fn build_libsodium() {
-    use std::{fs, process::Command};
+    use std::{ffi::OsStr, fs};
 
     // Determine build target triple
     let mut out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
@@ -362,29 +363,21 @@ fn build_libsodium() {
     fs::create_dir_all(&source_dir).unwrap();
 
     // Copy sources into build directory
-    let cp_status = if target.contains("msvc") {
-        Command::new("xcopy")
-            .arg("libsodium")
-            .arg(&source_dir)
-            .args(&["/s", "/e", "/i", "/q", "/y"])
-            .status()
-    } else {
-        Command::new("cp")
-            .arg("-r")
-            .arg("libsodium/.")
-            .arg(&source_dir)
-            .status()
-    };
-
-    match cp_status {
-        Ok(status) if status.success() => (),
-        Ok(status) => {
-            panic!("Failed to copy sources into build directory: {}", status);
+    // Skip .git because it's marked read-only and that causes problems re-building
+    for entry in walkdir::WalkDir::new("libsodium")
+        .into_iter()
+        .filter_entry(|e| e.file_name() != OsStr::new(".git"))
+        .filter_map(Result::ok)
+    {
+        let outpath = out_dir.join("source").join(entry.path());
+        if let Err(e) = if entry.file_type().is_dir() {
+            fs::create_dir_all(outpath)
+        } else {
+            fs::copy(entry.path(), outpath).map(|_| ())
+        } {
+            panic!("Failed to copy sources into build directory: {}", e);
         }
-        Err(err) => {
-            panic!("Failed to copy sources into build directory: {}", err);
-        }
-    };
+    }
 
     let lib_dir = make_libsodium(&target, &source_dir, &install_dir);
 
