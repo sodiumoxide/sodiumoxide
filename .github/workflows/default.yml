@@ -76,6 +76,37 @@ jobs:
           command: clippy
           args: --all --lib --tests -- --deny warnings
 
+  cross:
+    name: cross
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+        - x86_64-unknown-linux-musl
+        - i686-unknown-linux-gnu
+        - armv5te-unknown-linux-gnueabi
+        - armv7-unknown-linux-gnueabihf
+        - aarch64-unknown-linux-gnu
+        - powerpc64le-unknown-linux-gnu
+        - mipsel-unknown-linux-gnu
+        - mips64el-unknown-linux-gnuabi64
+        - s390x-unknown-linux-gnu
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: ${{ matrix.arch }}
+        override: true
+    - uses: actions-rs/cargo@v1
+      with:
+        use-cross: true
+        command: build
+        args: --target ${{ matrix.arch }}
+
   # These jobs doesn't actually test anything, but they're only used to tell
   # bors the build completed, as there is no practical way to detect when a
   # workflow is successful listening to webhooks only.
@@ -90,6 +121,7 @@ jobs:
     - test
     - fmt
     - clippy
+    - cross
     steps:
     - name: Mark the job as successful
       run: exit 0
@@ -102,6 +134,7 @@ jobs:
     - test
     - fmt
     - clippy
+    - cross
     steps:
     - name: Mark the job as a failure
       run: exit 1
