@@ -112,7 +112,23 @@ fn find_libsodium_pkg() {
             }
         }
         Err(e) => {
-            panic!(format!("Error: {:?}", e));
+            panic!(
+                "
+Failed to run pkg-config:
+{:?}
+
+You can try fixing this by installing pkg-config:
+
+    # On Ubuntu
+    sudo apt install pkg-config
+    # On Arch Linux
+    sudo pacman -S pkgconf
+    # On Fedora
+    sudo dnf install pkgconf-pkg-config
+
+",
+                e
+            );
         }
     }
 }
