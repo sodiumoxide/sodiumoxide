@@ -220,7 +220,7 @@ Sodiumoxide has been tested on:
 - Windows: Yes (MSVC)
 - Mac OS: Yes
 - IOS: TODO
-- Android: TODO
+- Android: Yes
 
 
 # Join in
