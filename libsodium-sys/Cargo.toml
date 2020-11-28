@@ -11,9 +11,6 @@ repository = "https://github.com/sodiumoxide/sodiumoxide.git"
 categories = ["cryptography", "api-bindings"]
 version = "0.2.6"
 
-[badges]
-travis-ci = { repository = "sodiumoxide/sodiumoxide" }
-
 [build-dependencies]
 pkg-config = "0.3"
 walkdir = "2"
