@@ -17,11 +17,6 @@ exclude = [
 [workspace]
 members = ["libsodium-sys", "testcrate"]
 
-[badges]
-travis-ci = { repository = "sodiumoxide/sodiumoxide" }
-appveyor = { repository = "Dylan-DPC/sodiumoxide", id = "u05iy6wufw9ncdi7" }
-coveralls = { repository = "sodiumoxide/sodiumoxide" }
-
 [dependencies]
 libc = { version = "^0.2.41" , default-features = false }
 libsodium-sys = { version = "0.2.5", path = "libsodium-sys" }
