@@ -59,7 +59,6 @@
 #![warn(non_camel_case_types)]
 #![warn(unused_qualifications)]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(not(feature = "std"), feature(alloc))]
 #![deny(clippy::all)]
 
 extern crate libsodium_sys as ffi;
