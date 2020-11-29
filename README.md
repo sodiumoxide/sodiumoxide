@@ -115,7 +115,6 @@ Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-prod
 
 * `std` (default: **enabled**). When this feature is disabled,
   sodiumoxide builds using `#![no_std]`. Some functionality may be lost.
-  Requires a nightly build of Rust.
 
 * `serde` (default: **enabled**). Allows serialization and deserialization of
   keys, authentication tags, etc. using the
