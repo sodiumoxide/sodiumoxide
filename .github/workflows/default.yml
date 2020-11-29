@@ -76,6 +76,23 @@ jobs:
           command: clippy
           args: --all --lib --tests -- --deny warnings
 
+  nostd:
+    name: no_std
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+    - uses: actions-rs/cargo@v1
+      with:
+        command: build
+        args: --no-default-features
+
   cross:
     name: cross
     runs-on: ubuntu-latest
