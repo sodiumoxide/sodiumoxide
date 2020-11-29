@@ -236,6 +236,8 @@ mod test {
 
     #[test]
     fn test_mlock_munlock() {
+        #[cfg(not(feature = "std"))]
+        use prelude::*;
         let t = b"hello world";
         let mut x = Vec::new();
         x.extend_from_slice(t);

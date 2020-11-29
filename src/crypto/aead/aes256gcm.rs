@@ -190,6 +190,7 @@ mod aes_api {
         use super::*;
         use crate::init;
 
+        #[cfg(feature = "std")]
         #[test]
         fn test_is_available() {
             init().unwrap();

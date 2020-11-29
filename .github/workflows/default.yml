@@ -90,7 +90,7 @@ jobs:
         toolchain: stable
     - uses: actions-rs/cargo@v1
       with:
-        command: build
+        command: test
         args: --no-default-features
 
   cross:
