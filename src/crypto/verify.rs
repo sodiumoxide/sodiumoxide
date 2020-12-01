@@ -44,8 +44,6 @@ pub fn verify_64(x: &[u8; 64], y: &[u8; 64]) -> bool {
 #[cfg(test)]
 mod test {
     use super::*;
-    #[cfg(not(feature = "std"))]
-    use prelude::*;
 
     #[test]
     fn test_verify_16() {
