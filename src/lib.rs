@@ -63,6 +63,7 @@
 
 extern crate libsodium_sys as ffi;
 
+extern crate ed25519;
 extern crate libc;
 #[cfg(any(test, feature = "serde"))]
 extern crate serde;
