@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ master ]
 
+env:
+  SYSTEM_DEPS_LIBSODIUM_BUILD_INTERNAL: always
+
 jobs:
   test:
     name: test
