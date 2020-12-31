@@ -42,13 +42,13 @@ impl State {
     /// a custom key can be used for the computation of the hash.
     /// The size of the key must be in the interval [`KEY_MIN`, `KEY_MAX`].
     pub fn new(out_len: usize, key: Option<&[u8]>) -> Result<State, ()> {
-        if out_len < DIGEST_MIN || out_len > DIGEST_MAX {
+        if !(DIGEST_MIN..=DIGEST_MAX).contains(&out_len) {
             return Err(());
         }
 
         if let Some(key) = key {
             let len = key.len();
-            if len < KEY_MIN || len > KEY_MAX {
+            if !(KEY_MIN..=KEY_MAX).contains(&len) {
                 return Err(());
             }
         }
@@ -194,7 +194,27 @@ mod test {
     }
 
     #[test]
-    fn test_digest_equality() {
+    fn test_digest_equal() {
+        let data1 = [1, 2];
+        let data2 = [1, 2];
+
+        let h1 = {
+            let mut hasher = State::new(32, None).unwrap();
+            hasher.update(&data1).unwrap();
+            hasher.finalize().unwrap()
+        };
+
+        let h2 = {
+            let mut hasher = State::new(32, None).unwrap();
+            hasher.update(&data2).unwrap();
+            hasher.finalize().unwrap()
+        };
+
+        assert_eq!(h1, h2);
+    }
+
+    #[test]
+    fn test_digest_not_equal() {
         let data1 = [1, 2];
         let data2 = [3, 4];
 
@@ -210,7 +230,6 @@ mod test {
             hasher.finalize().unwrap()
         };
 
-        assert_eq!(h1, h1);
         assert_ne!(h1, h2);
     }
 }
