@@ -258,7 +258,7 @@ impl Stream<Push> {
 
     /// Create a ciphertext for an empty message with the `TAG_FINAL` added
     /// to signal the end of the stream. Since the `Stream` is not usable
-    /// after this point, this method consumes the `Stream.
+    /// after this point, this method consumes the `Stream`.
     pub fn finalize(mut self, ad: Option<&[u8]>) -> Result<Vec<u8>, ()> {
         self.push(&[], ad, Tag::Final)
     }
