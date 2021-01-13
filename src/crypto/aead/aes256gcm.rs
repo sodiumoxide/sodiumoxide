@@ -80,6 +80,8 @@ mod aes_impl {
 mod aes_api {
     use super::aes_impl;
     use crypto::nonce::gen_random_nonce;
+    #[cfg(not(feature = "std"))]
+    use prelude::Vec;
 
     /// The Aes256Gcm struct encapsulates the crypto_aead_aes256gcm_* family of
     /// functions in a way that ensures safe usage of the API at runtime
@@ -188,6 +190,7 @@ mod aes_api {
         use super::*;
         use crate::init;
 
+        #[cfg(feature = "std")]
         #[test]
         fn test_is_available() {
             init().unwrap();

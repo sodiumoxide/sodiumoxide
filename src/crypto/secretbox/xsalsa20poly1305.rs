@@ -68,7 +68,6 @@ pub fn seal(m: &[u8], n: &Nonce, k: &Key) -> Vec<u8> {
     let clen = m.len() + MACBYTES;
     let mut c = Vec::with_capacity(clen);
     unsafe {
-        c.set_len(clen);
         ffi::crypto_secretbox_easy(
             c.as_mut_ptr(),
             m.as_ptr(),
@@ -76,6 +75,7 @@ pub fn seal(m: &[u8], n: &Nonce, k: &Key) -> Vec<u8> {
             n.0.as_ptr(),
             k.0.as_ptr(),
         );
+        c.set_len(clen);
     }
     c
 }
@@ -107,20 +107,20 @@ pub fn open(c: &[u8], n: &Nonce, k: &Key) -> Result<Vec<u8>, ()> {
     }
     let mlen = c.len() - MACBYTES;
     let mut m = Vec::with_capacity(mlen);
-    let ret = unsafe {
-        m.set_len(mlen);
-        ffi::crypto_secretbox_open_easy(
+    unsafe {
+        let ret = ffi::crypto_secretbox_open_easy(
             m.as_mut_ptr(),
             c.as_ptr(),
             c.len() as u64,
             n.0.as_ptr(),
             k.0.as_ptr(),
-        )
-    };
-    if ret == 0 {
-        Ok(m)
-    } else {
-        Err(())
+        );
+        if ret == 0 {
+            m.set_len(mlen);
+            Ok(m)
+        } else {
+            Err(())
+        }
     }
 }
 

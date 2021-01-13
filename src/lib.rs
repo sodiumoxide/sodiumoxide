@@ -59,11 +59,13 @@
 #![warn(non_camel_case_types)]
 #![warn(unused_qualifications)]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(not(feature = "std"), feature(alloc))]
 #![deny(clippy::all)]
+// Remove this after https://github.com/sodiumoxide/sodiumoxide/issues/221 is done
+#![allow(clippy::result_unit_err)]
 
 extern crate libsodium_sys as ffi;
 
+extern crate ed25519;
 extern crate libc;
 #[cfg(any(test, feature = "serde"))]
 extern crate serde;
@@ -81,6 +83,7 @@ mod std {
 #[cfg(not(feature = "std"))]
 mod prelude {
     pub use alloc::string::String;
+    pub use alloc::string::ToString;
     pub use alloc::vec::Vec;
 }
 
@@ -102,6 +105,7 @@ pub fn init() -> Result<(), ()> {
 mod newtype_macros;
 pub mod base64;
 pub mod hex;
+pub mod padding;
 pub mod randombytes;
 pub mod utils;
 pub mod version;

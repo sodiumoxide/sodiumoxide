@@ -1,19 +1,13 @@
 # sodiumoxide
 
-|Crate|Documentation|Linux/OS X|Windows|Coverage|Gitter|
+|Crate|Documentation|Gitter|
 |:---:|:-----------:|:--------:|:-----:|:------:|:----:|
-|[![Crates.io][crates-badge]][crates-url]|[![Docs][doc-badge]][doc-url]|[![TravisCI][travis-badge]][travis-url]|[![AppveyorCI][appveyor-badge]][appveyor-url]|[![Coverage Status][coverage-badge]][coverage-url]|[![Gitter][gitter-badge]][gitter-url]|
+|[![Crates.io][crates-badge]][crates-url]|[![Docs][doc-badge]][doc-url]|[![Gitter][gitter-badge]][gitter-url]|
 
 [crates-badge]: https://img.shields.io/crates/v/sodiumoxide.svg
 [crates-url]: https://crates.io/crates/sodiumoxide
 [doc-badge]: https://docs.rs/sodiumoxide/badge.svg
 [doc-url]: https://docs.rs/sodiumoxide
-[travis-badge]: https://travis-ci.org/sodiumoxide/sodiumoxide.svg?branch=master
-[travis-url]: https://travis-ci.org/sodiumoxide/sodiumoxide/branches
-[appveyor-badge]: https://ci.appveyor.com/api/projects/status/u05iy6wufw9ncdi7/branch/master?svg=true
-[appveyor-url]: https://ci.appveyor.com/project/Dylan-DPC/sodiumoxide/branch/master
-[coverage-badge]: https://coveralls.io/repos/github/sodiumoxide/sodiumoxide/badge.svg
-[coverage-url]: https://coveralls.io/github/sodiumoxide/sodiumoxide
 [gitter-badge]: https://badges.gitter.im/rust-sodiumoxide/Lobby.svg
 [gitter-url]: https://gitter.im/rust-sodiumoxide/Lobby
 
@@ -121,7 +115,6 @@ Several [optional features](http://doc.crates.io/manifest.html#usage-in-end-prod
 
 * `std` (default: **enabled**). When this feature is disabled,
   sodiumoxide builds using `#![no_std]`. Some functionality may be lost.
-  Requires a nightly build of Rust.
 
 * `serde` (default: **enabled**). Allows serialization and deserialization of
   keys, authentication tags, etc. using the
@@ -220,7 +213,7 @@ Sodiumoxide has been tested on:
 - Windows: Yes (MSVC)
 - Mac OS: Yes
 - IOS: TODO
-- Android: TODO
+- Android: Yes
 
 
 # Join in

@@ -1,9 +1,10 @@
 //! `GenericHash`.
 //!
 use ffi::{
-    crypto_generichash_BYTES_MAX, crypto_generichash_BYTES_MIN, crypto_generichash_KEYBYTES_MAX,
-    crypto_generichash_KEYBYTES_MIN, crypto_generichash_final, crypto_generichash_init,
-    crypto_generichash_state, crypto_generichash_update,
+    crypto_generichash, crypto_generichash_BYTES, crypto_generichash_BYTES_MAX,
+    crypto_generichash_BYTES_MIN, crypto_generichash_KEYBYTES_MAX, crypto_generichash_KEYBYTES_MIN,
+    crypto_generichash_final, crypto_generichash_init, crypto_generichash_state,
+    crypto_generichash_update,
 };
 
 use libc::c_ulonglong;
@@ -37,31 +38,20 @@ impl State {
     ///
     /// `out_len` specifies the resulting hash size.
     /// Only values in the interval [`DIGEST_MIN`, `DIGEST_MAX`] are allowed.
+    /// If omitted, a minimum recommended output size is used which makes it
+    /// practically impossible for two messages to produce the same fingerprint.
     ///
     /// `key` is an optional parameter, which when given,
     /// a custom key can be used for the computation of the hash.
     /// The size of the key must be in the interval [`KEY_MIN`, `KEY_MAX`].
-    pub fn new(out_len: usize, key: Option<&[u8]>) -> Result<State, ()> {
-        if out_len < DIGEST_MIN || out_len > DIGEST_MAX {
-            return Err(());
-        }
-
-        if let Some(key) = key {
-            let len = key.len();
-            if len < KEY_MIN || len > KEY_MAX {
-                return Err(());
-            }
-        }
+    pub fn new(out_len: Option<usize>, key: Option<&[u8]>) -> Result<State, ()> {
+        let out_len = unwrap_out_len(out_len)?;
+        let (key_ptr, key_len) = unwrap_key(key)?;
 
         let mut state = mem::MaybeUninit::uninit();
 
-        let result = unsafe {
-            if let Some(key) = key {
-                crypto_generichash_init(state.as_mut_ptr(), key.as_ptr(), key.len(), out_len)
-            } else {
-                crypto_generichash_init(state.as_mut_ptr(), ptr::null(), 0, out_len)
-            }
-        };
+        let result =
+            unsafe { crypto_generichash_init(state.as_mut_ptr(), key_ptr, key_len, out_len) };
 
         if result == 0 {
             // result == 0 and state is initialized
@@ -88,10 +78,7 @@ impl State {
     /// `finalize` finalizes the state and returns the digest value. `finalize` consumes the
     /// `State` so that it cannot be accidentally reused.
     pub fn finalize(mut self) -> Result<Digest, ()> {
-        let mut result = Digest {
-            len: self.out_len,
-            data: [0u8; crypto_generichash_BYTES_MAX as usize],
-        };
+        let mut result = Digest::new(self.out_len);
         let rc = unsafe {
             crypto_generichash_final(&mut self.state, result.data.as_mut_ptr(), result.len)
         };
@@ -100,6 +87,61 @@ impl State {
         } else {
             Err(())
         }
+    }
+}
+
+/// `hash` computes a fingerprint of `data`.
+///
+/// `out_len` specifies the resulting hash size.
+/// Only values in the interval [`DIGEST_MIN`, `DIGEST_MAX`] are allowed.
+/// If omitted, a minimum recommended output size is used which makes it
+/// practically impossible for two messages to produce the same fingerprint.
+///
+/// `key` is an optional parameter, which when given,
+/// a custom key can be used for the computation of the hash.
+/// The size of the key must be in the interval [`KEY_MIN`, `KEY_MAX`].
+pub fn hash(data: &[u8], out_len: Option<usize>, key: Option<&[u8]>) -> Result<Digest, ()> {
+    let out_len = unwrap_out_len(out_len)?;
+    let (key_ptr, key_len) = unwrap_key(key)?;
+
+    let mut result = Digest::new(out_len);
+    let rc = unsafe {
+        crypto_generichash(
+            result.data.as_mut_ptr(),
+            result.len,
+            data.as_ptr(),
+            data.len() as c_ulonglong,
+            key_ptr,
+            key_len,
+        )
+    };
+    if rc == 0 {
+        Ok(result)
+    } else {
+        Err(())
+    }
+}
+
+fn unwrap_out_len(out_len: Option<usize>) -> Result<usize, ()> {
+    if let Some(out_len) = out_len {
+        if !(DIGEST_MIN..=DIGEST_MAX).contains(&out_len) {
+            return Err(());
+        }
+        Ok(out_len)
+    } else {
+        Ok(crypto_generichash_BYTES as usize)
+    }
+}
+
+fn unwrap_key(key: Option<&[u8]>) -> Result<(*const u8, usize), ()> {
+    if let Some(key) = key {
+        let len = key.len();
+        if !(KEY_MIN..=KEY_MAX).contains(&len) {
+            return Err(());
+        }
+        Ok((key.as_ptr(), len))
+    } else {
+        Ok((ptr::null(), 0))
     }
 }
 
@@ -119,9 +161,12 @@ mod test {
             0xda, 0xa1, 0xd1, 0xe5, 0xdf, 0x47, 0x77, 0x8f, 0x77, 0x87, 0xfa, 0xab, 0x45, 0xcd,
             0xf1, 0x2f, 0xe3, 0xa8,
         ];
-        let mut hasher = State::new(32, None).unwrap();
+        let mut hasher = State::new(Some(32), None).unwrap();
         hasher.update(&x).unwrap();
         let h = hasher.finalize().unwrap();
+        assert!(h.as_ref() == h_expected);
+
+        let h = hash(&x, Some(32), None).unwrap();
         assert!(h.as_ref() == h_expected);
     }
 
@@ -139,9 +184,12 @@ mod test {
             0xec, 0xb4, 0x73, 0xad, 0x23, 0x45, 0x7d, 0x06, 0x3b, 0x75, 0xef, 0xf2, 0x9c, 0x0f,
             0xfa, 0x2e, 0x58, 0xa9,
         ];
-        let mut hasher = State::new(32, None).unwrap();
+        let mut hasher = State::new(Some(32), None).unwrap();
         hasher.update(&x).unwrap();
         let h = hasher.finalize().unwrap();
+        assert!(h.as_ref() == h_expected);
+
+        let h = hash(&x, Some(32), None).unwrap();
         assert!(h.as_ref() == h_expected);
     }
 
@@ -185,32 +233,61 @@ mod test {
                 hex::decode(&line[5..].trim()).unwrap()
             };
 
-            let mut hasher = State::new(64, Some(&key)).unwrap();
+            let mut hasher = State::new(Some(64), Some(&key)).unwrap();
             hasher.update(&msg).unwrap();
 
             let result_hash = hasher.finalize().unwrap();
+            assert!(result_hash.as_ref() == expected_hash.as_slice());
+
+            let result_hash = hash(&msg, Some(64), Some(&key)).unwrap();
             assert!(result_hash.as_ref() == expected_hash.as_slice());
         }
     }
 
     #[test]
-    fn test_digest_equality() {
+    fn test_digest_equal() {
         let data1 = [1, 2];
-        let data2 = [3, 4];
+        let data2 = [1, 2];
 
         let h1 = {
-            let mut hasher = State::new(32, None).unwrap();
+            let mut hasher = State::new(None, None).unwrap();
             hasher.update(&data1).unwrap();
             hasher.finalize().unwrap()
         };
 
         let h2 = {
-            let mut hasher = State::new(32, None).unwrap();
+            let mut hasher = State::new(None, None).unwrap();
             hasher.update(&data2).unwrap();
             hasher.finalize().unwrap()
         };
 
-        assert_eq!(h1, h1);
+        assert_eq!(h1, h2);
+    }
+
+    #[test]
+    fn test_digest_not_equal() {
+        let data1 = [1, 2];
+        let data2 = [3, 4];
+
+        let h1 = {
+            let mut hasher = State::new(None, None).unwrap();
+            hasher.update(&data1).unwrap();
+            hasher.finalize().unwrap()
+        };
+
+        let h2 = {
+            let mut hasher = State::new(None, None).unwrap();
+            hasher.update(&data2).unwrap();
+            hasher.finalize().unwrap()
+        };
+
+        let h3 = {
+            let mut hasher = State::new(None, None).unwrap();
+            hasher.update(&data1).unwrap();
+            hasher.finalize().unwrap()
+        };
+
         assert_ne!(h1, h2);
+        assert_eq!(h1, h3);
     }
 }
