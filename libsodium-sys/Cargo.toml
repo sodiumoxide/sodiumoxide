@@ -12,7 +12,7 @@ categories = ["cryptography", "api-bindings"]
 version = "0.2.6"
 
 [build-dependencies]
-system-deps = "2.0"
+system-deps = { git = "https://github.com/gdesmott/system-deps.git", branch = "system-lib" }
 walkdir = "2"
 
 [target.'cfg(target_env = "msvc")'.build-dependencies]

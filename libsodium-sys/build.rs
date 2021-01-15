@@ -28,36 +28,38 @@ fn configure_manual_lib(dir: &str) {
 fn main() {
     println!("cargo:rerun-if-env-changed=SODIUM_LIB_DIR");
 
-    let deps = system_deps::Config::new().add_build_internal("libsodium", |lib, version| {
-        #[cfg(windows)]
-        {
-            // We don't build anything on windows, we simply linked to precompiled
-            // libs.
-            use std::collections::HashMap;
+    let deps = system_deps::Config::new()
+        .preserve_system_libs()
+        .add_build_internal("libsodium", |lib, version| {
+            #[cfg(windows)]
+            {
+                // We don't build anything on windows, we simply linked to precompiled
+                // libs.
+                use std::collections::HashMap;
 
-            let dir = get_lib_dir();
+                let dir = get_lib_dir();
 
-            Ok(system_deps::Library {
-                name: lib.to_string(),
-                source: system_deps::Source::EnvVariables, // HACK: add source
-                libs: vec![get_lib_name().to_string()],
-                link_paths: vec![dir],
-                frameworks: vec![],
-                framework_paths: vec![],
-                include_paths: vec![],
-                defines: HashMap::new(),
-                version: version.to_string(),
-            })
-        }
-        #[cfg(not(windows))]
-        {
-            let mut dir = build_libsodium();
-            dir.push("lib");
-            dir.push("pkgconfig");
+                Ok(system_deps::Library {
+                    name: lib.to_string(),
+                    source: system_deps::Source::EnvVariables, // HACK: add source
+                    libs: vec![get_lib_name().to_string()],
+                    link_paths: vec![dir],
+                    frameworks: vec![],
+                    framework_paths: vec![],
+                    include_paths: vec![],
+                    defines: HashMap::new(),
+                    version: version.to_string(),
+                })
+            }
+            #[cfg(not(windows))]
+            {
+                let mut dir = build_libsodium();
+                dir.push("lib");
+                dir.push("pkgconfig");
 
-            system_deps::Library::from_internal_pkg_config(&dir, lib, version)
-        }
-    });
+                system_deps::Library::from_internal_pkg_config(&dir, lib, version)
+            }
+        });
 
     if let Ok(dir) = env::var("SODIUM_LIB_DIR") {
         configure_manual_lib(&dir);
@@ -85,6 +87,8 @@ You can try fixing this by installing pkg-config:
         }
         Ok(libs) => {
             let lib = libs.get("libsodium").unwrap();
+            dbg!("aaaaaaaaaaaaaaaaaaaa");
+            dbg!(&lib);
 
             if lib.version != VERSION {
                 println!(
@@ -92,6 +96,11 @@ You can try fixing this by installing pkg-config:
                      and may not be fully compatible with {}.",
                     lib.version, VERSION, lib.version
                 );
+            }
+
+            // Manually export DEP_SODIUM_LIB
+            for lib_dir in &lib.link_paths {
+                println!("cargo:lib={}", lib_dir.to_str().unwrap());
             }
         }
     }
