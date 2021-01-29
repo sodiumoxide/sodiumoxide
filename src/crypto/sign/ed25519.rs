@@ -246,6 +246,38 @@ impl Default for State {
     }
 }
 
+use crate::crypto::box_;
+
+/// Converts a ed25519 [PublicKey]  into a curve25519 [box_::PublicKey]
+pub fn to_curve25519_pk(ed25519_pk: &PublicKey) -> Result<box_::PublicKey, ()> {
+    let mut x25519_pk = box_::PublicKey([0u8; box_::PUBLICKEYBYTES]);
+
+    let ret = unsafe {
+        ffi::crypto_sign_ed25519_pk_to_curve25519(x25519_pk.0.as_mut_ptr(), ed25519_pk.0.as_ptr())
+    };
+
+    if ret == 0 {
+        Ok(x25519_pk)
+    } else {
+        Err(())
+    }
+}
+
+/// Converts an ed25519 [SecretKey] into a curve25519 [box_::SecretKey]
+pub fn to_curve25519_sk(ed25519_sk: &SecretKey) -> Result<box_::SecretKey, ()> {
+    let mut x25519_sk = box_::SecretKey([0u8; box_::SECRETKEYBYTES]);
+
+    let ret = unsafe {
+        ffi::crypto_sign_ed25519_sk_to_curve25519(x25519_sk.0.as_mut_ptr(), ed25519_sk.0.as_ptr())
+    };
+
+    if ret == 0 {
+        Ok(x25519_sk)
+    } else {
+        Err(())
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -513,6 +545,14 @@ mod test {
         }
         let sig = creation_state.finalize(&sk);
         assert!(validator_state.verify(&sig, &pk));
+    }
+
+    #[test]
+    fn test_convert_keys() {
+        let (pk, sk) = gen_keypair();
+
+        let _pk2 = to_curve25519_pk(&pk).unwrap();
+        let _sk2 = to_curve25519_sk(&sk).unwrap();
     }
 }
 
