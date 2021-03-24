@@ -8,10 +8,6 @@ macro_rules! hash_module (($hash_name:ident,
 
 use std::mem;
 
-#[cfg(feature = "libc")]
-use libc::{c_ulonglong};
-
-#[cfg(feature = "cty")]
 use cty::{c_ulonglong};
 
 /// Number of bytes in a `Digest`.

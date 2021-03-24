@@ -4,10 +4,6 @@ macro_rules! stream_module (($stream_name:ident,
                              $keybytes:expr,
                              $noncebytes:expr) => (
 
-#[cfg(feature = "libc")]
-use libc::{c_ulonglong};
-
-#[cfg(feature = "cty")]
 use cty::{c_ulonglong};
 
 #[cfg(not(feature = "std"))]

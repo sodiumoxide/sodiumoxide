@@ -3,10 +3,6 @@ macro_rules! auth_module (($auth_name:ident,
                            $keybytes:expr,
                            $tagbytes:expr) => (
 
-#[cfg(feature = "libc")]
-use libc::{c_ulonglong};
-
-#[cfg(feature = "cty")]
 use cty::{c_ulonglong};
 
 use randombytes::randombytes_into;

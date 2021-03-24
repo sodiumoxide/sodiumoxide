@@ -67,10 +67,6 @@ pub extern crate libsodium_sys as ffi;
 
 extern crate ed25519;
 
-#[cfg(feature = "libc")]
-extern crate libc;
-
-#[cfg(feature = "cty")]
 extern crate cty;
 
 #[cfg(any(test, feature = "serde"))]

@@ -7,10 +7,6 @@ macro_rules! aead_module (($seal_name:ident,
                            $tagbytes:expr,
                            $test_gate:expr) => (
 
-#[cfg(feature = "libc")]
-use libc::{c_ulonglong};
-
-#[cfg(feature = "cty")]
 use cty::{c_ulonglong};
 
 #[cfg(not(feature = "std"))]

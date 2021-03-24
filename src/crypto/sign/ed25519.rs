@@ -10,10 +10,6 @@ pub use ed25519::{
 
 use ffi;
 
-#[cfg(feature = "libc")]
-use libc::c_ulonglong;
-
-#[cfg(feature = "cty")]
 use cty::c_ulonglong;
 
 #[cfg(not(feature = "std"))]
