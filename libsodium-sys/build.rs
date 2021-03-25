@@ -2,7 +2,7 @@
 extern crate cc;
 
 #[cfg(target_env = "msvc")]
-extern crate libc;
+extern crate cty as libc;
 
 extern crate pkg_config;
 extern crate walkdir;
