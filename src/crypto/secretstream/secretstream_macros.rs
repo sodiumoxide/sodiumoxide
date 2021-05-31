@@ -226,6 +226,26 @@ impl Stream<Push> {
         }
     }
 
+    /// All data (including optional fields) is authenticated. Encrypts a
+    /// message `m` and its `tag`. Optionally includes additional data `ad`,
+    /// which is not encrypted.
+    ///
+    /// The encrypted message is written to the `out` slice, which must be at least `m.len()` +
+    /// [`ABYTES`](crate::crypto::secretstream::ABYTES) long, overwriting the first `m.len() +
+    /// ABYTES` bytes. An error will be returned if the slice is not long enough. If the push is
+    /// successful, the length of data written to the slice will be returned.
+    pub fn push_to_slice(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, out: &mut [u8]) -> Result<usize, ()> {
+        let buf_len = self.push_check(m, tag)?;
+        if out.len() < buf_len {
+            return Err(());
+        }
+        // SAFETY: The previous if block ensures that the slice has at least m.len() + $abytes of
+        // capacity.
+        unsafe {
+            self.push_impl_ptr(m, ad, tag, out.as_mut_ptr())
+        }
+    }
+
     fn push_check(&mut self, m: &[u8], tag: Tag) -> Result<usize, ()> {
         if self.finalized {
             return Err(());
@@ -355,6 +375,36 @@ impl Stream<Pull> {
         // c.len() - $abytes of capacity.
         unsafe {
             self.pull_impl(c, ad, out)
+        }
+    }
+
+    /// Verifies that `c` is a valid ciphertext with a correct authentication tag
+    /// given the internal state of the `Stream` (ciphertext streams cannot be
+    /// decrypted out of order for this reason). Also may validate the optional
+    /// unencrypted additional data `ad` using the authentication tag attached to
+    /// `c`. Finally decrypts the ciphertext and tag, and checks the tag
+    /// validity.
+    ///
+    /// If any authentication fails, the stream has already been finalized, or if
+    /// the tag byte for some reason does not correspond to a valid `Tag`,
+    /// returns `Err(())`. Otherwise returns the plaintext and the tag.
+    /// Applications will typically use a `while stream.is_not_finalized()`
+    /// loop to authenticate and decrypt a stream of messages.
+    ///
+    /// The decrypted message is written to the `out` slice, which must be at least `c.len()` -
+    /// [`ABYTES`](crate::crypto::secretstream::ABYTES) long, overwriting the first `c.len() -
+    /// ABYTES` bytes. An error will be returned if the slice is not long enough. If the pull is
+    /// successful, the length of the data written to the slice will be returned, alongside the
+    /// decrypted message tag.
+    pub fn pull_to_slice(&mut self, c: &[u8], ad: Option<&[u8]>, out: &mut [u8]) -> Result<(Tag, usize), ()> {
+        let m_len = self.pull_check(c)?;
+        if out.len() < m_len {
+            return Err(());
+        }
+        // SAFETY: The previous if block ensures that the slice has at least c.len() - $abytes of
+        // capacity.
+        unsafe {
+            self.pull_impl_ptr(c, ad, out.as_mut_ptr())
         }
     }
 
