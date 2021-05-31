@@ -202,7 +202,11 @@ impl Stream<Push> {
         let buf_len = self.push_check(m, tag)?;
 
         let mut buf = Vec::with_capacity(buf_len);
-        self.push_impl(m, ad, tag, &mut buf)?;
+        // SAFETY: The initialisation of buf via Vec::with_capacity(buf_len) ensures that the
+        // vector has at least m.len() + $abytes of capacity.
+        unsafe {
+            self.push_impl(m, ad, tag, &mut buf)?;
+        }
         Ok(buf)
     }
 
@@ -215,7 +219,11 @@ impl Stream<Push> {
         let buf_len = self.push_check(m, tag)?;
         out.clear();
         out.reserve(buf_len);
-        self.push_impl(m, ad, tag, out)
+        // SAFETY: The previous call to out.reserve(buf_len) ensures that the vector has at least
+        // m.len() + $abytes of capacity.
+        unsafe {
+            self.push_impl(m, ad, tag, out)
+        }
     }
 
     fn push_check(&mut self, m: &[u8], tag: Tag) -> Result<usize, ()> {
@@ -232,28 +240,35 @@ impl Stream<Push> {
         Ok(m_len + ABYTES)
     }
 
-    fn push_impl(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, buf: &mut Vec<u8>) -> Result<(), ()> {
+    // SAFETY: buf must have a capacity of at least m.len() + $abytes.
+    unsafe fn push_impl(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, buf: &mut Vec<u8>) -> Result<(), ()> {
+        let c_len = self.push_impl_ptr(m, ad, tag, buf.as_mut_ptr())?;
+        buf.set_len(c_len);
+        Ok(())
+    }
+
+    // SAFETY: buf must be a mutable pointer to at least m.len() + $abytes of allocated memory, to
+    // which the ciphertext can be written.
+    unsafe fn push_impl_ptr(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, buf: *mut u8) -> Result<usize, ()> {
         let (ad_p, ad_len) = ad
             .map(|ad| (ad.as_ptr(), ad.len()))
             .unwrap_or((ptr::null(), 0));
         let mut c_len: c_ulonglong = 0;
-        unsafe {
-            let rc = $push_name(
-                &mut self.state,
-                buf.as_mut_ptr(),
-                &mut c_len,
-                m.as_ptr(),
-                m.len() as c_ulonglong,
-                ad_p,
-                ad_len as c_ulonglong,
-                tag as u8,
-                );
-            if rc != 0 {
-                return Err(());
-            }
-            buf.set_len(c_len as usize);
+
+        let rc = $push_name(
+            &mut self.state,
+            buf,
+            &mut c_len,
+            m.as_ptr(),
+            m.len() as c_ulonglong,
+            ad_p,
+            ad_len as c_ulonglong,
+            tag as u8,
+            );
+        if rc != 0 {
+            return Err(());
         }
-        Ok(())
+        Ok(c_len as usize)
     }
 
     /// Create a ciphertext for an empty message with the `TAG_FINAL` added
@@ -311,7 +326,11 @@ impl Stream<Pull> {
     pub fn pull(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag), ()> {
         let m_len = self.pull_check(c)?;
         let mut buf = Vec::with_capacity(m_len);
-        let tag = self.pull_impl(c, ad, &mut buf)?;
+        // SAFETY: The initialisation of buf via Vec::with_capacity(m_len) ensures that the vector
+        // has at least c.len() - $abytes of capacity.
+        let tag = unsafe {
+            self.pull_impl(c, ad, &mut buf)?
+        };
         Ok((buf, tag))
     }
 
@@ -332,7 +351,11 @@ impl Stream<Pull> {
         let m_len = self.pull_check(c)?;
         out.clear();
         out.reserve(m_len);
-        self.pull_impl(c, ad, out)
+        // SAFETY: The previous call to out.reserve(m_len) ensures that the vector has at least
+        // c.len() - $abytes of capacity.
+        unsafe {
+            self.pull_impl(c, ad, out)
+        }
     }
 
     fn pull_check(&self, c: &[u8]) -> Result<usize, ()> {
@@ -351,35 +374,41 @@ impl Stream<Pull> {
         Ok(m_len)
     }
 
-    fn pull_impl(&mut self, c: &[u8], ad: Option<&[u8]>, buf: &mut Vec<u8>) -> Result<Tag, ()> {
+    // SAFETY: buf must have a capacity of at least c.len() - $abytes.
+    unsafe fn pull_impl(&mut self, c: &[u8], ad: Option<&[u8]>, buf: &mut Vec<u8>) -> Result<Tag, ()> {
+        let (tag, m_len) = self.pull_impl_ptr(c, ad, buf.as_mut_ptr())?;
+        buf.set_len(m_len);
+        Ok(tag)
+    }
+
+    // SAFETY: buf must be a mutable pointer to at least c.len() - $abytes of allocated memory, to
+    // which the plaintext can be written.
+    unsafe fn pull_impl_ptr(&mut self, c: &[u8], ad: Option<&[u8]>, buf: *mut u8) -> Result<(Tag, usize), ()> {
         let mut tag: u8 = 0;
         let mut m_len: c_ulonglong = 0;
         let (ad_p, ad_len) = ad
             .map(|ad| (ad.as_ptr(), ad.len()))
             .unwrap_or((ptr::null(), 0));
-        unsafe {
-            let rc = $pull_name(
-                &mut self.state,
-                buf.as_mut_ptr(),
-                &mut m_len,
-                &mut tag,
-                c.as_ptr(),
-                c.len() as c_ulonglong,
-                ad_p,
-                ad_len as c_ulonglong,
-                );
-            if rc != 0 {
-                return Err(());
-            }
-            // rc == 0 and tag is initialized
-            buf.set_len(m_len as usize);
+
+        let rc = $pull_name(
+            &mut self.state,
+            buf,
+            &mut m_len,
+            &mut tag,
+            c.as_ptr(),
+            c.len() as c_ulonglong,
+            ad_p,
+            ad_len as c_ulonglong,
+            );
+        if rc != 0 {
+            return Err(());
         }
 
         let tag = Tag::from_u8(tag)?;
         if tag == Tag::Final {
             self.finalized = true;
         }
-        Ok(tag)
+        Ok((tag, m_len as usize))
     }
 }
 
