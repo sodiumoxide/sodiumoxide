@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["decode","Parses a hexadecimal string into a byte sequence."],["encode","Encodes byte sequence into a hexadecimal string."]]});

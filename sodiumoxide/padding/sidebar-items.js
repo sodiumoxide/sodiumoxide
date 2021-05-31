@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["pad","The `pad()` function adds padding data to a buffer buf whose original size is `unpadded_buflen` in order to extend its total length to a multiple of blocksize."],["unpad","The `unpad()` function computes the original, unpadded length of a message previously padded using [`pad()`]. The original length is returned upon success."]]});

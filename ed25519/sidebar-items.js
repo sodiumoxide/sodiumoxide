@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["SIGNATURE_LENGTH","Length of an Ed25519 signature"]],"struct":[["Error","Signature errors."],["Signature","Ed25519 signature."]]});

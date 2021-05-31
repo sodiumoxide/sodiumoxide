@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/crypto/box_/curve25519xsalsa20poly1305.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>curve25519xsalsa20poly1305.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/crypto/box_/curve25519xsalsa20poly1305.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>curve25519xsalsa20poly1305.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../sodiumoxide/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button">?</button>
+                <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -791,48 +794,43 @@
 <span id="791">791</span>
 <span id="792">792</span>
 <span id="793">793</span>
-<span id="794">794</span>
-<span id="795">795</span>
-<span id="796">796</span>
-<span id="797">797</span>
-<span id="798">798</span>
-<span id="799">799</span>
-<span id="800">800</span>
-<span id="801">801</span>
-<span id="802">802</span>
-<span id="803">803</span>
-</pre><pre class="rust ">
+</pre><pre class="rust">
 <span class="doccomment">//! `crypto_box_curve25519xsalsa20poly1305` , a particular</span>
 <span class="doccomment">//! combination of Curve25519, Salsa20, and Poly1305 specified in</span>
-<span class="doccomment">//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html).</span>
+<span class="doccomment">//! [Cryptography in `NaCl`](http://nacl.cr.yp.to/valid.html).</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This function is conjectured to meet the standard notions of privacy and</span>
 <span class="doccomment">//! third-party unforgeability.</span>
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span> <span class="kw">use</span> <span class="ident">prelude</span>::<span class="kw-2">*</span>;
+
+<span class="kw">use</span> <span class="ident">crypto::nonce::gen_random_nonce</span>;
 <span class="kw">use</span> <span class="ident">ffi</span>;
-<span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes_into</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
+<span class="kw">use</span> <span class="ident">prelude</span>::<span class="kw-2">*</span>;
 
 <span class="doccomment">/// Number of bytes in a `Seed`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SEEDBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_SEEDBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SEEDBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_SEEDBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 <span class="doccomment">/// Number of bytes in a `PublicKey`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PUBLICKEYBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PUBLICKEYBYTES</span>: <span class="ident">usize</span> <span class="op">=</span>
+    <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_PUBLICKEYBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 <span class="doccomment">/// Number of bytes in a `SecretKey`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SECRETKEYBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SECRETKEYBYTES</span>: <span class="ident">usize</span> <span class="op">=</span>
+    <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_SECRETKEYBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 <span class="doccomment">/// Number of bytes in a `Nonce`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NONCEBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_NONCEBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NONCEBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_NONCEBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 <span class="doccomment">/// Number of bytes in a `PrecomputedKey`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PRECOMPUTEDKEYBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">PRECOMPUTEDKEYBYTES</span>: <span class="ident">usize</span> <span class="op">=</span>
+    <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_BEFORENMBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 <span class="doccomment">/// Number of bytes in the authenticator tag of an encrypted message</span>
 <span class="doccomment">/// i.e. the number of bytes by which the ciphertext is larger than the</span>
 <span class="doccomment">/// plaintext.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MACBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_MACBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MACBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_MACBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `Seed` that can be used for keypair generation</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The `Seed` is used by `keypair_from_seed()` to generate</span>
@@ -843,7 +841,7 @@
     <span class="ident">secret</span> <span class="ident">Seed</span>(<span class="ident">SEEDBYTES</span>);
 }
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `SecretKey` for asymmetric authenticated encryption</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// When a `SecretKey` goes out of scope its contents</span>
@@ -851,30 +849,30 @@
     <span class="ident">secret</span> <span class="ident">SecretKey</span>(<span class="ident">SECRETKEYBYTES</span>);
 }
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `PublicKey` for asymmetric authenticated encryption</span>
     <span class="ident">public</span> <span class="ident">PublicKey</span>(<span class="ident">PUBLICKEYBYTES</span>);
 }
 
 <span class="kw">impl</span> <span class="ident">SecretKey</span> {
     <span class="doccomment">/// `public_key()` computes the corresponding public key for a given secret key</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">public_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="ident">PublicKey</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">public_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PublicKey</span> {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pk</span> <span class="op">=</span> <span class="ident">PublicKey</span>([<span class="number">0u8</span>; <span class="ident">PUBLICKEYBYTES</span>]);
-            <span class="ident">ffi</span>::<span class="ident">crypto_scalarmult_base</span>(<span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>(), <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
+            <span class="ident">ffi::crypto_scalarmult_base</span>(<span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>(), <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
             <span class="ident">pk</span>
         }
     }
 }
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// Authentication `Tag` for the detached encryption mode</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// In the combined mode, the tag occupies the first MACBYTES bytes of the ciphertext.</span>
     <span class="ident">public</span> <span class="ident">Tag</span>(<span class="ident">MACBYTES</span>);
 }
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `Nonce` for asymmetric authenticated encryption</span>
     <span class="ident">nonce</span> <span class="ident">Nonce</span>(<span class="ident">NONCEBYTES</span>);
 }
@@ -884,13 +882,11 @@
 <span class="doccomment">/// THREAD SAFETY: `gen_keypair()` is thread-safe provided that you have</span>
 <span class="doccomment">/// called `sodiumoxide::init()` once before using any other function</span>
 <span class="doccomment">/// from sodiumoxide.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_keypair</span>() <span class="op">-&gt;</span> (<span class="ident">PublicKey</span>, <span class="ident">SecretKey</span>) {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_keypair</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">PublicKey</span>, <span class="ident">SecretKey</span>) {
     <span class="kw">unsafe</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pk</span> <span class="op">=</span> <span class="ident">PublicKey</span>([<span class="number">0u8</span>; <span class="ident">PUBLICKEYBYTES</span>]);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sk</span> <span class="op">=</span> <span class="ident">SecretKey</span>([<span class="number">0u8</span>; <span class="ident">SECRETKEYBYTES</span>]);
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_keypair</span>(
-            <span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>(),
-            <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>());
+        <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_keypair</span>(<span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>());
         (<span class="ident">pk</span>, <span class="ident">sk</span>)
     }
 }
@@ -900,11 +896,11 @@
 <span class="doccomment">/// THREAD SAFETY: `key_pair_from_seed()` is thread-safe provided that you have</span>
 <span class="doccomment">/// called `sodiumoxide::init()` once before using any other function</span>
 <span class="doccomment">/// from sodiumoxide.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">keypair_from_seed</span>(<span class="ident">seed</span>: <span class="kw-2">&amp;</span><span class="ident">Seed</span>) <span class="op">-&gt;</span> (<span class="ident">PublicKey</span>, <span class="ident">SecretKey</span>) {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">keypair_from_seed</span>(<span class="ident">seed</span>: <span class="kw-2">&amp;</span><span class="ident">Seed</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">PublicKey</span>, <span class="ident">SecretKey</span>) {
     <span class="kw">unsafe</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pk</span> <span class="op">=</span> <span class="ident">PublicKey</span>([<span class="number">0u8</span>; <span class="ident">PUBLICKEYBYTES</span>]);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sk</span> <span class="op">=</span> <span class="ident">SecretKey</span>([<span class="number">0u8</span>; <span class="ident">SECRETKEYBYTES</span>]);
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_seed_keypair</span>(
+        <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_seed_keypair</span>(
             <span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>(),
             <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>(),
             <span class="ident">seed</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
@@ -913,34 +909,30 @@
     }
 }
 
-
 <span class="doccomment">/// `gen_nonce()` randomly generates a nonce</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have</span>
 <span class="doccomment">/// called `sodiumoxide::init()` once before using any other function</span>
 <span class="doccomment">/// from sodiumoxide.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_nonce</span>() <span class="op">-&gt;</span> <span class="ident">Nonce</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">NONCEBYTES</span>];
-    <span class="ident">randombytes_into</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">n</span>);
-    <span class="ident">Nonce</span>(<span class="ident">n</span>)
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_nonce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Nonce</span> {
+    <span class="ident">gen_random_nonce</span>()
 }
 
 <span class="doccomment">/// `seal()` encrypts and authenticates a message `m` using the senders secret key `sk`,</span>
 <span class="doccomment">/// the receivers public key `pk` and a nonce `n`. It returns a ciphertext `c`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seal</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-            <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-            <span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>,
-            <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seal</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>, <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">clen</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">MACBYTES</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">clen</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">clen</span>);
     <span class="kw">unsafe</span> {
         <span class="ident">c</span>.<span class="ident">set_len</span>(<span class="ident">clen</span>);
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_easy</span>(<span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
-                             <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
-                             <span class="ident">m</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
-                             <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                             <span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                             <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
+        <span class="ident">ffi::crypto_box_easy</span>(
+            <span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
+            <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">m</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
+            <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+        );
     }
     <span class="ident">c</span>
 }
@@ -949,13 +941,10 @@
 <span class="doccomment">/// the receivers public key `pk` and a nonce `n`. `m` is encrypted in place, so after this</span>
 <span class="doccomment">/// function returns it will contain the ciphertext. The detached authentication tag is returned by</span>
 <span class="doccomment">/// value.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seal_detached</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-                     <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-                     <span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>,
-                     <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-&gt;</span> <span class="ident">Tag</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seal_detached</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>, <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tag</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">MACBYTES</span>];
     <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_detached</span>(
+        <span class="ident">ffi::crypto_box_detached</span>(
             <span class="ident">m</span>.<span class="ident">as_mut_ptr</span>(),
             <span class="ident">tag</span>.<span class="ident">as_mut_ptr</span>(),
             <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
@@ -971,25 +960,24 @@
 <span class="doccomment">/// `open()` verifies and decrypts a ciphertext `c` using the receiver&#39;s secret key `sk`,</span>
 <span class="doccomment">/// the senders public key `pk`, and a nonce `n`. It returns a plaintext `Ok(m)`.</span>
 <span class="doccomment">/// If the ciphertext fails verification, `open()` returns `Err(())`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-            <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-            <span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>,
-            <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>, <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">MACBYTES</span> {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(());
     }
     <span class="kw">let</span> <span class="ident">mlen</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">MACBYTES</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">mlen</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">mlen</span>);
     <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
         <span class="ident">m</span>.<span class="ident">set_len</span>(<span class="ident">mlen</span>);
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_open_easy</span>(<span class="ident">m</span>.<span class="ident">as_mut_ptr</span>(),
-                                  <span class="ident">c</span>.<span class="ident">as_ptr</span>(),
-                                  <span class="ident">c</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
-                                  <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                                  <span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                                  <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>())
+        <span class="ident">ffi::crypto_box_open_easy</span>(
+            <span class="ident">m</span>.<span class="ident">as_mut_ptr</span>(),
+            <span class="ident">c</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">c</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
+            <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+        )
     };
-    <span class="kw">if</span> <span class="ident">ret</span> <span class="op">==</span> <span class="number">0</span> {
+    <span class="kw">if</span> <span class="ident">ret</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">m</span>)
     } <span class="kw">else</span> {
         <span class="prelude-val">Err</span>(())
@@ -1000,13 +988,15 @@
 <span class="doccomment">/// the senders public key `pk`, and a nonce `n`. `c` is decrypted in place, so if this function is</span>
 <span class="doccomment">/// successful it will contain the plaintext. If the ciphertext fails verification,</span>
 <span class="doccomment">/// `open_detached()` returns `Err(())`, and the ciphertext is not modified.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_detached</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-                     <span class="ident">mac</span>: <span class="kw-2">&amp;</span><span class="ident">Tag</span>,
-                     <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-                     <span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>,
-                     <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_detached</span>(
+    <span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
+    <span class="ident">mac</span>: <span class="kw-2">&amp;</span><span class="ident">Tag</span>,
+    <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
+    <span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>,
+    <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_open_detached</span>(
+        <span class="ident">ffi::crypto_box_open_detached</span>(
             <span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
             <span class="ident">c</span>.<span class="ident">as_ptr</span>(),
             <span class="ident">mac</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
@@ -1016,14 +1006,14 @@
             <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
         )
     };
-    <span class="kw">if</span> <span class="ident">ret</span> <span class="op">==</span> <span class="number">0</span> {
+    <span class="kw">if</span> <span class="ident">ret</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
         <span class="prelude-val">Ok</span>(())
     } <span class="kw">else</span> {
         <span class="prelude-val">Err</span>(())
     }
 }
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// Applications that send several messages to the same receiver can gain speed by</span>
     <span class="doccomment">/// splitting `seal()` into two steps, `precompute()` and `seal_precomputed()`.</span>
     <span class="doccomment">/// Similarly, applications that receive several messages from the same sender can gain</span>
@@ -1035,31 +1025,32 @@
 
 <span class="doccomment">/// `precompute()` computes an intermediate key that can be used by `seal_precomputed()`</span>
 <span class="doccomment">/// and `open_precomputed()`</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">precompute</span>(<span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>,
-                  <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-&gt;</span> <span class="ident">PrecomputedKey</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">precompute</span>(<span class="ident">pk</span>: <span class="kw-2">&amp;</span><span class="ident">PublicKey</span>, <span class="ident">sk</span>: <span class="kw-2">&amp;</span><span class="ident">SecretKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PrecomputedKey</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">PrecomputedKey</span>([<span class="number">0u8</span>; <span class="ident">PRECOMPUTEDKEYBYTES</span>]);
     <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_curve25519xsalsa20poly1305_beforenm</span>(<span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>(),
-                                                            <span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                                                            <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
+        <span class="ident">ffi::crypto_box_curve25519xsalsa20poly1305_beforenm</span>(
+            <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>(),
+            <span class="ident">pk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">sk</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+        );
     }
     <span class="ident">k</span>
 }
 
 <span class="doccomment">/// `seal_precomputed()` encrypts and authenticates a message `m` using a precomputed key `k`,</span>
 <span class="doccomment">/// and a nonce `n`. It returns a ciphertext `c`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seal_precomputed</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-                        <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-                        <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">PrecomputedKey</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seal_precomputed</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">PrecomputedKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">clen</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">MACBYTES</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">clen</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">clen</span>);
     <span class="kw">unsafe</span> {
+        <span class="ident">ffi::crypto_box_easy_afternm</span>(
+            <span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
+            <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">m</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
+            <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+        );
         <span class="ident">c</span>.<span class="ident">set_len</span>(<span class="ident">clen</span>);
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_easy_afternm</span>(<span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
-                                     <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
-                                     <span class="ident">m</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
-                                     <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                                     <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
     }
     <span class="ident">c</span>
 }
@@ -1067,12 +1058,10 @@
 <span class="doccomment">/// `seal_detached_precomputed()` encrypts and authenticates a message `m` using a precomputed key</span>
 <span class="doccomment">/// `k` and a nonce `n`. `m` is encrypted in place, so after this function returns it will contain</span>
 <span class="doccomment">/// the ciphertext. The detached authentication tag is returned by value.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seal_detached_precomputed</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-                                 <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-                                 <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">PrecomputedKey</span>) <span class="op">-&gt;</span> <span class="ident">Tag</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">seal_detached_precomputed</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">PrecomputedKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tag</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">MACBYTES</span>];
     <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_detached_afternm</span>(
+        <span class="ident">ffi::crypto_box_detached_afternm</span>(
             <span class="ident">m</span>.<span class="ident">as_mut_ptr</span>(),
             <span class="ident">tag</span>.<span class="ident">as_mut_ptr</span>(),
             <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
@@ -1087,26 +1076,26 @@
 <span class="doccomment">/// `open_precomputed()` verifies and decrypts a ciphertext `c` using a precomputed</span>
 <span class="doccomment">/// key `k` and a nonce `n`. It returns a plaintext `Ok(m)`.</span>
 <span class="doccomment">/// If the ciphertext fails verification, `open_precomputed()` returns `Err(())`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_precomputed</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-                        <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-                        <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">PrecomputedKey</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_precomputed</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>, <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">PrecomputedKey</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">c</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">MACBYTES</span> {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(());
     }
     <span class="kw">let</span> <span class="ident">mlen</span> <span class="op">=</span> <span class="ident">c</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">MACBYTES</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="ident">with_capacity</span>(<span class="ident">mlen</span>);
-    <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-        <span class="ident">m</span>.<span class="ident">set_len</span>(<span class="ident">mlen</span>);
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_open_easy_afternm</span>(<span class="ident">m</span>.<span class="ident">as_mut_ptr</span>(),
-                                          <span class="ident">c</span>.<span class="ident">as_ptr</span>(),
-                                          <span class="ident">c</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
-                                          <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                                          <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>())
-    };
-    <span class="kw">if</span> <span class="ident">ret</span> <span class="op">==</span> <span class="number">0</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">m</span>)
-    } <span class="kw">else</span> {
-        <span class="prelude-val">Err</span>(())
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">mlen</span>);
+    <span class="kw">unsafe</span> {
+        <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">ffi::crypto_box_open_easy_afternm</span>(
+            <span class="ident">m</span>.<span class="ident">as_mut_ptr</span>(),
+            <span class="ident">c</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">c</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
+            <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+        );
+        <span class="kw">if</span> <span class="ident">ret</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="ident">m</span>.<span class="ident">set_len</span>(<span class="ident">mlen</span>);
+            <span class="prelude-val">Ok</span>(<span class="ident">m</span>)
+        } <span class="kw">else</span> {
+            <span class="prelude-val">Err</span>(())
+        }
     }
 }
 
@@ -1114,12 +1103,14 @@
 <span class="doccomment">/// `k` and a nonce `n`. `c` is decrypted in place, so if this function is successful it will</span>
 <span class="doccomment">/// contain the plaintext. If the ciphertext fails verification, `open_detached()` returns</span>
 <span class="doccomment">/// `Err(())`, and the ciphertext is not modified.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_detached_precomputed</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-                                 <span class="ident">mac</span>: <span class="kw-2">&amp;</span><span class="ident">Tag</span>,
-                                 <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-                                 <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">PrecomputedKey</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_detached_precomputed</span>(
+    <span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
+    <span class="ident">mac</span>: <span class="kw-2">&amp;</span><span class="ident">Tag</span>,
+    <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
+    <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">PrecomputedKey</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_box_open_detached_afternm</span>(
+        <span class="ident">ffi::crypto_box_open_detached_afternm</span>(
             <span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
             <span class="ident">c</span>.<span class="ident">as_ptr</span>(),
             <span class="ident">mac</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
@@ -1128,7 +1119,7 @@
             <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
         )
     };
-    <span class="kw">if</span> <span class="ident">ret</span> <span class="op">==</span> <span class="number">0</span> {
+    <span class="kw">if</span> <span class="ident">ret</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
         <span class="prelude-val">Ok</span>(())
     } <span class="kw">else</span> {
         <span class="prelude-val">Err</span>(())
@@ -1141,7 +1132,7 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_open</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1149,13 +1140,13 @@
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
             <span class="kw">let</span> <span class="ident">opened</span> <span class="op">=</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>) <span class="op">==</span> <span class="ident">opened</span>);
+            <span class="macro">assert!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">opened</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_open_precomputed</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1163,18 +1154,18 @@
             <span class="kw">let</span> <span class="ident">PrecomputedKey</span>(<span class="ident">k1buf</span>) <span class="op">=</span> <span class="ident">k1</span>;
             <span class="kw">let</span> <span class="ident">k2</span> <span class="op">=</span> <span class="ident">precompute</span>(<span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>);
             <span class="kw">let</span> <span class="ident">PrecomputedKey</span>(<span class="ident">k2buf</span>) <span class="op">=</span> <span class="ident">k2</span>;
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">k1buf</span> <span class="op">==</span> <span class="ident">k2buf</span>);
+            <span class="macro">assert!</span>(<span class="ident">k1buf</span> <span class="op">=</span><span class="op">=</span> <span class="ident">k2buf</span>);
             <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal_precomputed</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k1</span>);
             <span class="kw">let</span> <span class="ident">opened</span> <span class="op">=</span> <span class="ident">open_precomputed</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>) <span class="op">==</span> <span class="ident">opened</span>);
+            <span class="macro">assert!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">opened</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_open_tamper</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">32usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1182,16 +1173,16 @@
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">c</span>.<span class="ident">len</span>() {
-                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
-                <span class="macro">assert</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(()) <span class="op">==</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>));
-                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
+                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
+                <span class="macro">assert!</span>(<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">=</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>));
+                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
             }
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_open_precomputed_tamper</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">32usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1201,9 +1192,9 @@
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal_precomputed</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k1</span>);
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">c</span>.<span class="ident">len</span>() {
-                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
-                <span class="macro">assert</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(()) <span class="op">==</span> <span class="ident">open_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>));
-                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
+                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
+                <span class="macro">assert!</span>(<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">=</span> <span class="ident">open_precomputed</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>));
+                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
             }
         }
     }
@@ -1221,7 +1212,7 @@
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
             <span class="kw">let</span> <span class="ident">opened</span> <span class="op">=</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>) <span class="op">==</span> <span class="ident">opened</span>);
+            <span class="macro">assert!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">opened</span>);
         }
     }
 
@@ -1238,16 +1229,16 @@
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">c</span>.<span class="ident">len</span>() {
-                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
-                <span class="macro">assert</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(()) <span class="op">==</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>));
-                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
+                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
+                <span class="macro">assert!</span>(<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">=</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>));
+                <span class="ident">c</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
             }
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_open_detached</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1256,46 +1247,46 @@
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">seal_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
             <span class="ident">open_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>).<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">m</span>, <span class="ident">buf</span>);
+            <span class="macro">assert_eq!</span>(<span class="ident">m</span>, <span class="ident">buf</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_combined_then_open_detached</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
-            <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">Tag</span>::<span class="ident">from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>[..<span class="ident">MACBYTES</span>]).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">Tag::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>[..<span class="ident">MACBYTES</span>]).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">c</span>[<span class="ident">MACBYTES</span>..];
             <span class="ident">open_detached</span>(<span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>).<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">m</span>);
+            <span class="macro">assert_eq!</span>(<span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">m</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_detached_then_open_combined</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>; <span class="ident">MACBYTES</span>];
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">MACBYTES</span>];
             <span class="ident">buf</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>);
             <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">seal_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>[<span class="ident">MACBYTES</span>..], <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
             <span class="ident">buf</span>[..<span class="ident">MACBYTES</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tag</span>.<span class="number">0</span>[..]);
             <span class="kw">let</span> <span class="ident">opened</span> <span class="op">=</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>);
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>), <span class="ident">opened</span>);
+            <span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>), <span class="ident">opened</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_open_detached_tamper</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">32usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1303,14 +1294,14 @@
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">seal_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">m</span>.<span class="ident">len</span>() {
-                <span class="ident">m</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
-                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(()), <span class="ident">open_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>));
-                <span class="ident">m</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
+                <span class="ident">m</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
+                <span class="macro">assert_eq!</span>(<span class="prelude-val">Err</span>(()), <span class="ident">open_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>));
+                <span class="ident">m</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
             }
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">tag</span>.<span class="number">0</span>.<span class="ident">len</span>() {
-                <span class="ident">tag</span>.<span class="number">0</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
-                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(()), <span class="ident">open_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>));
-                <span class="ident">tag</span>.<span class="number">0</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
+                <span class="ident">tag</span>.<span class="number">0</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
+                <span class="macro">assert_eq!</span>(<span class="prelude-val">Err</span>(()), <span class="ident">open_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>));
+                <span class="ident">tag</span>.<span class="number">0</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
             }
         }
     }
@@ -1323,19 +1314,22 @@
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
         <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">seal_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk1</span>, <span class="kw-2">&amp;</span><span class="ident">sk2</span>);
         <span class="comment">// Flip the last bit in the ciphertext, to break authentication.</span>
-        <span class="kw-2">*</span><span class="ident">buf</span>.<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">^=</span> <span class="number">1</span>;
+        <span class="kw-2">*</span><span class="ident">buf</span>.<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">^</span><span class="op">=</span> <span class="number">1</span>;
         <span class="comment">// Make a copy that we can compare against after the failure below.</span>
         <span class="kw">let</span> <span class="ident">copy</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">clone</span>();
         <span class="comment">// Now try to open the message. This will fail.</span>
         <span class="kw">let</span> <span class="ident">failure</span> <span class="op">=</span> <span class="ident">open_detached</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">failure</span>.<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">failure</span>.<span class="ident">is_err</span>());
         <span class="comment">// Make sure the input hasn&#39;t been touched.</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">buf</span>, <span class="ident">copy</span>, <span class="string">&quot;input should not be modified if authentication fails&quot;</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">buf</span>, <span class="ident">copy</span>,
+            <span class="string">&quot;input should not be modified if authentication fails&quot;</span>
+        );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_open_detached_precomputed</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1346,13 +1340,13 @@
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">seal_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k1</span>);
             <span class="ident">open_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>).<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">m</span>, <span class="ident">buf</span>);
+            <span class="macro">assert_eq!</span>(<span class="ident">m</span>, <span class="ident">buf</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_combined_then_open_detached_precomputed</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1361,16 +1355,16 @@
             <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal_precomputed</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k1</span>);
-            <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">Tag</span>::<span class="ident">from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>[..<span class="ident">MACBYTES</span>]).<span class="ident">unwrap</span>();
+            <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">Tag::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>[..<span class="ident">MACBYTES</span>]).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">c</span>[<span class="ident">MACBYTES</span>..];
             <span class="ident">open_detached_precomputed</span>(<span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>).<span class="ident">unwrap</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">m</span>);
+            <span class="macro">assert_eq!</span>(<span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">m</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_detached_precomputed_then_open_combined</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1378,18 +1372,18 @@
             <span class="kw">let</span> <span class="ident">k2</span> <span class="op">=</span> <span class="ident">precompute</span>(<span class="kw-2">&amp;</span><span class="ident">pk2</span>, <span class="kw-2">&amp;</span><span class="ident">sk1</span>);
             <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
-            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0</span>; <span class="ident">MACBYTES</span>];
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">MACBYTES</span>];
             <span class="ident">buf</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>);
             <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">seal_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>[<span class="ident">MACBYTES</span>..], <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k1</span>);
             <span class="ident">buf</span>[..<span class="ident">MACBYTES</span>].<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">tag</span>.<span class="number">0</span>[..]);
             <span class="kw">let</span> <span class="ident">opened</span> <span class="op">=</span> <span class="ident">open_precomputed</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>);
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>), <span class="ident">opened</span>);
+            <span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(<span class="ident">m</span>), <span class="ident">opened</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_seal_open_detached_precomputed_tamper</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">32usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk1</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> (<span class="ident">pk2</span>, <span class="ident">sk2</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
@@ -1399,14 +1393,14 @@
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">seal_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k1</span>);
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">m</span>.<span class="ident">len</span>() {
-                <span class="ident">m</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
-                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(()), <span class="ident">open_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>));
-                <span class="ident">m</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
+                <span class="ident">m</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
+                <span class="macro">assert_eq!</span>(<span class="prelude-val">Err</span>(()), <span class="ident">open_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>));
+                <span class="ident">m</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
             }
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">tag</span>.<span class="number">0</span>.<span class="ident">len</span>() {
-                <span class="ident">tag</span>.<span class="number">0</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
-                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="prelude-val">Err</span>(()), <span class="ident">open_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>));
-                <span class="ident">tag</span>.<span class="number">0</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
+                <span class="ident">tag</span>.<span class="number">0</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
+                <span class="macro">assert_eq!</span>(<span class="prelude-val">Err</span>(()), <span class="ident">open_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>));
+                <span class="ident">tag</span>.<span class="number">0</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
             }
         }
     }
@@ -1421,128 +1415,115 @@
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
         <span class="kw">let</span> <span class="ident">tag</span> <span class="op">=</span> <span class="ident">seal_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k1</span>);
         <span class="comment">// Flip the last bit in the ciphertext, to break authentication.</span>
-        <span class="kw-2">*</span><span class="ident">buf</span>.<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">^=</span> <span class="number">1</span>;
+        <span class="kw-2">*</span><span class="ident">buf</span>.<span class="ident">last_mut</span>().<span class="ident">unwrap</span>() <span class="op">^</span><span class="op">=</span> <span class="number">1</span>;
         <span class="comment">// Make a copy that we can compare against after the failure below.</span>
         <span class="kw">let</span> <span class="ident">copy</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">clone</span>();
         <span class="comment">// Now try to open the message. This will fail.</span>
         <span class="kw">let</span> <span class="ident">failure</span> <span class="op">=</span> <span class="ident">open_detached_precomputed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="kw-2">&amp;</span><span class="ident">tag</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k2</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">failure</span>.<span class="ident">is_err</span>());
+        <span class="macro">assert!</span>(<span class="ident">failure</span>.<span class="ident">is_err</span>());
         <span class="comment">// Make sure the input hasn&#39;t been touched.</span>
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">buf</span>, <span class="ident">copy</span>, <span class="string">&quot;input should not be modified if authentication fails&quot;</span>);
+        <span class="macro">assert_eq!</span>(
+            <span class="ident">buf</span>, <span class="ident">copy</span>,
+            <span class="string">&quot;input should not be modified if authentication fails&quot;</span>
+        );
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_vector_1</span>() {
         <span class="comment">// corresponding to tests/box.c and tests/box3.cpp from NaCl</span>
-        <span class="kw">let</span> <span class="ident">alicesk</span> <span class="op">=</span> <span class="ident">SecretKey</span>([<span class="number">0x77</span>,<span class="number">0x07</span>,<span class="number">0x6d</span>,<span class="number">0x0a</span>,<span class="number">0x73</span>,<span class="number">0x18</span>,<span class="number">0xa5</span>,<span class="number">0x7d</span>,
-                                 <span class="number">0x3c</span>,<span class="number">0x16</span>,<span class="number">0xc1</span>,<span class="number">0x72</span>,<span class="number">0x51</span>,<span class="number">0xb2</span>,<span class="number">0x66</span>,<span class="number">0x45</span>,
-                                 <span class="number">0xdf</span>,<span class="number">0x4c</span>,<span class="number">0x2f</span>,<span class="number">0x87</span>,<span class="number">0xeb</span>,<span class="number">0xc0</span>,<span class="number">0x99</span>,<span class="number">0x2a</span>,
-                                 <span class="number">0xb1</span>,<span class="number">0x77</span>,<span class="number">0xfb</span>,<span class="number">0xa5</span>,<span class="number">0x1d</span>,<span class="number">0xb9</span>,<span class="number">0x2c</span>,<span class="number">0x2a</span>]);
-        <span class="kw">let</span> <span class="ident">bobpk</span>   <span class="op">=</span> <span class="ident">PublicKey</span>([<span class="number">0xde</span>,<span class="number">0x9e</span>,<span class="number">0xdb</span>,<span class="number">0x7d</span>,<span class="number">0x7b</span>,<span class="number">0x7d</span>,<span class="number">0xc1</span>,<span class="number">0xb4</span>,
-                                 <span class="number">0xd3</span>,<span class="number">0x5b</span>,<span class="number">0x61</span>,<span class="number">0xc2</span>,<span class="number">0xec</span>,<span class="number">0xe4</span>,<span class="number">0x35</span>,<span class="number">0x37</span>,
-                                 <span class="number">0x3f</span>,<span class="number">0x83</span>,<span class="number">0x43</span>,<span class="number">0xc8</span>,<span class="number">0x5b</span>,<span class="number">0x78</span>,<span class="number">0x67</span>,<span class="number">0x4d</span>,
-                                 <span class="number">0xad</span>,<span class="number">0xfc</span>,<span class="number">0x7e</span>,<span class="number">0x14</span>,<span class="number">0x6f</span>,<span class="number">0x88</span>,<span class="number">0x2b</span>,<span class="number">0x4f</span>]);
-        <span class="kw">let</span> <span class="ident">nonce</span>   <span class="op">=</span> <span class="ident">Nonce</span>([<span class="number">0x69</span>,<span class="number">0x69</span>,<span class="number">0x6e</span>,<span class="number">0xe9</span>,<span class="number">0x55</span>,<span class="number">0xb6</span>,<span class="number">0x2b</span>,<span class="number">0x73</span>,
-                             <span class="number">0xcd</span>,<span class="number">0x62</span>,<span class="number">0xbd</span>,<span class="number">0xa8</span>,<span class="number">0x75</span>,<span class="number">0xfc</span>,<span class="number">0x73</span>,<span class="number">0xd6</span>,
-                             <span class="number">0x82</span>,<span class="number">0x19</span>,<span class="number">0xe0</span>,<span class="number">0x03</span>,<span class="number">0x6b</span>,<span class="number">0x7a</span>,<span class="number">0x0b</span>,<span class="number">0x37</span>]);
-        <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> [<span class="number">0xbe</span>,<span class="number">0x07</span>,<span class="number">0x5f</span>,<span class="number">0xc5</span>,<span class="number">0x3c</span>,<span class="number">0x81</span>,<span class="number">0xf2</span>,<span class="number">0xd5</span>,
-                 <span class="number">0xcf</span>,<span class="number">0x14</span>,<span class="number">0x13</span>,<span class="number">0x16</span>,<span class="number">0xeb</span>,<span class="number">0xeb</span>,<span class="number">0x0c</span>,<span class="number">0x7b</span>,
-                 <span class="number">0x52</span>,<span class="number">0x28</span>,<span class="number">0xc5</span>,<span class="number">0x2a</span>,<span class="number">0x4c</span>,<span class="number">0x62</span>,<span class="number">0xcb</span>,<span class="number">0xd4</span>,
-                 <span class="number">0x4b</span>,<span class="number">0x66</span>,<span class="number">0x84</span>,<span class="number">0x9b</span>,<span class="number">0x64</span>,<span class="number">0x24</span>,<span class="number">0x4f</span>,<span class="number">0xfc</span>,
-                 <span class="number">0xe5</span>,<span class="number">0xec</span>,<span class="number">0xba</span>,<span class="number">0xaf</span>,<span class="number">0x33</span>,<span class="number">0xbd</span>,<span class="number">0x75</span>,<span class="number">0x1a</span>,
-                 <span class="number">0x1a</span>,<span class="number">0xc7</span>,<span class="number">0x28</span>,<span class="number">0xd4</span>,<span class="number">0x5e</span>,<span class="number">0x6c</span>,<span class="number">0x61</span>,<span class="number">0x29</span>,
-                 <span class="number">0x6c</span>,<span class="number">0xdc</span>,<span class="number">0x3c</span>,<span class="number">0x01</span>,<span class="number">0x23</span>,<span class="number">0x35</span>,<span class="number">0x61</span>,<span class="number">0xf4</span>,
-                 <span class="number">0x1d</span>,<span class="number">0xb6</span>,<span class="number">0x6c</span>,<span class="number">0xce</span>,<span class="number">0x31</span>,<span class="number">0x4a</span>,<span class="number">0xdb</span>,<span class="number">0x31</span>,
-                 <span class="number">0x0e</span>,<span class="number">0x3b</span>,<span class="number">0xe8</span>,<span class="number">0x25</span>,<span class="number">0x0c</span>,<span class="number">0x46</span>,<span class="number">0xf0</span>,<span class="number">0x6d</span>,
-                 <span class="number">0xce</span>,<span class="number">0xea</span>,<span class="number">0x3a</span>,<span class="number">0x7f</span>,<span class="number">0xa1</span>,<span class="number">0x34</span>,<span class="number">0x80</span>,<span class="number">0x57</span>,
-                 <span class="number">0xe2</span>,<span class="number">0xf6</span>,<span class="number">0x55</span>,<span class="number">0x6a</span>,<span class="number">0xd6</span>,<span class="number">0xb1</span>,<span class="number">0x31</span>,<span class="number">0x8a</span>,
-                 <span class="number">0x02</span>,<span class="number">0x4a</span>,<span class="number">0x83</span>,<span class="number">0x8f</span>,<span class="number">0x21</span>,<span class="number">0xaf</span>,<span class="number">0x1f</span>,<span class="number">0xde</span>,
-                 <span class="number">0x04</span>,<span class="number">0x89</span>,<span class="number">0x77</span>,<span class="number">0xeb</span>,<span class="number">0x48</span>,<span class="number">0xf5</span>,<span class="number">0x9f</span>,<span class="number">0xfd</span>,
-                 <span class="number">0x49</span>,<span class="number">0x24</span>,<span class="number">0xca</span>,<span class="number">0x1c</span>,<span class="number">0x60</span>,<span class="number">0x90</span>,<span class="number">0x2e</span>,<span class="number">0x52</span>,
-                 <span class="number">0xf0</span>,<span class="number">0xa0</span>,<span class="number">0x89</span>,<span class="number">0xbc</span>,<span class="number">0x76</span>,<span class="number">0x89</span>,<span class="number">0x70</span>,<span class="number">0x40</span>,
-                 <span class="number">0xe0</span>,<span class="number">0x82</span>,<span class="number">0xf9</span>,<span class="number">0x37</span>,<span class="number">0x76</span>,<span class="number">0x38</span>,<span class="number">0x48</span>,<span class="number">0x64</span>,
-                 <span class="number">0x5e</span>,<span class="number">0x07</span>,<span class="number">0x05</span>];
+        <span class="kw">let</span> <span class="ident">alicesk</span> <span class="op">=</span> <span class="ident">SecretKey</span>([
+            <span class="number">0x77</span>, <span class="number">0x07</span>, <span class="number">0x6d</span>, <span class="number">0x0a</span>, <span class="number">0x73</span>, <span class="number">0x18</span>, <span class="number">0xa5</span>, <span class="number">0x7d</span>, <span class="number">0x3c</span>, <span class="number">0x16</span>, <span class="number">0xc1</span>, <span class="number">0x72</span>, <span class="number">0x51</span>, <span class="number">0xb2</span>,
+            <span class="number">0x66</span>, <span class="number">0x45</span>, <span class="number">0xdf</span>, <span class="number">0x4c</span>, <span class="number">0x2f</span>, <span class="number">0x87</span>, <span class="number">0xeb</span>, <span class="number">0xc0</span>, <span class="number">0x99</span>, <span class="number">0x2a</span>, <span class="number">0xb1</span>, <span class="number">0x77</span>, <span class="number">0xfb</span>, <span class="number">0xa5</span>,
+            <span class="number">0x1d</span>, <span class="number">0xb9</span>, <span class="number">0x2c</span>, <span class="number">0x2a</span>,
+        ]);
+        <span class="kw">let</span> <span class="ident">bobpk</span> <span class="op">=</span> <span class="ident">PublicKey</span>([
+            <span class="number">0xde</span>, <span class="number">0x9e</span>, <span class="number">0xdb</span>, <span class="number">0x7d</span>, <span class="number">0x7b</span>, <span class="number">0x7d</span>, <span class="number">0xc1</span>, <span class="number">0xb4</span>, <span class="number">0xd3</span>, <span class="number">0x5b</span>, <span class="number">0x61</span>, <span class="number">0xc2</span>, <span class="number">0xec</span>, <span class="number">0xe4</span>,
+            <span class="number">0x35</span>, <span class="number">0x37</span>, <span class="number">0x3f</span>, <span class="number">0x83</span>, <span class="number">0x43</span>, <span class="number">0xc8</span>, <span class="number">0x5b</span>, <span class="number">0x78</span>, <span class="number">0x67</span>, <span class="number">0x4d</span>, <span class="number">0xad</span>, <span class="number">0xfc</span>, <span class="number">0x7e</span>, <span class="number">0x14</span>,
+            <span class="number">0x6f</span>, <span class="number">0x88</span>, <span class="number">0x2b</span>, <span class="number">0x4f</span>,
+        ]);
+        <span class="kw">let</span> <span class="ident">nonce</span> <span class="op">=</span> <span class="ident">Nonce</span>([
+            <span class="number">0x69</span>, <span class="number">0x69</span>, <span class="number">0x6e</span>, <span class="number">0xe9</span>, <span class="number">0x55</span>, <span class="number">0xb6</span>, <span class="number">0x2b</span>, <span class="number">0x73</span>, <span class="number">0xcd</span>, <span class="number">0x62</span>, <span class="number">0xbd</span>, <span class="number">0xa8</span>, <span class="number">0x75</span>, <span class="number">0xfc</span>,
+            <span class="number">0x73</span>, <span class="number">0xd6</span>, <span class="number">0x82</span>, <span class="number">0x19</span>, <span class="number">0xe0</span>, <span class="number">0x03</span>, <span class="number">0x6b</span>, <span class="number">0x7a</span>, <span class="number">0x0b</span>, <span class="number">0x37</span>,
+        ]);
+        <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> [
+            <span class="number">0xbe</span>, <span class="number">0x07</span>, <span class="number">0x5f</span>, <span class="number">0xc5</span>, <span class="number">0x3c</span>, <span class="number">0x81</span>, <span class="number">0xf2</span>, <span class="number">0xd5</span>, <span class="number">0xcf</span>, <span class="number">0x14</span>, <span class="number">0x13</span>, <span class="number">0x16</span>, <span class="number">0xeb</span>, <span class="number">0xeb</span>,
+            <span class="number">0x0c</span>, <span class="number">0x7b</span>, <span class="number">0x52</span>, <span class="number">0x28</span>, <span class="number">0xc5</span>, <span class="number">0x2a</span>, <span class="number">0x4c</span>, <span class="number">0x62</span>, <span class="number">0xcb</span>, <span class="number">0xd4</span>, <span class="number">0x4b</span>, <span class="number">0x66</span>, <span class="number">0x84</span>, <span class="number">0x9b</span>,
+            <span class="number">0x64</span>, <span class="number">0x24</span>, <span class="number">0x4f</span>, <span class="number">0xfc</span>, <span class="number">0xe5</span>, <span class="number">0xec</span>, <span class="number">0xba</span>, <span class="number">0xaf</span>, <span class="number">0x33</span>, <span class="number">0xbd</span>, <span class="number">0x75</span>, <span class="number">0x1a</span>, <span class="number">0x1a</span>, <span class="number">0xc7</span>,
+            <span class="number">0x28</span>, <span class="number">0xd4</span>, <span class="number">0x5e</span>, <span class="number">0x6c</span>, <span class="number">0x61</span>, <span class="number">0x29</span>, <span class="number">0x6c</span>, <span class="number">0xdc</span>, <span class="number">0x3c</span>, <span class="number">0x01</span>, <span class="number">0x23</span>, <span class="number">0x35</span>, <span class="number">0x61</span>, <span class="number">0xf4</span>,
+            <span class="number">0x1d</span>, <span class="number">0xb6</span>, <span class="number">0x6c</span>, <span class="number">0xce</span>, <span class="number">0x31</span>, <span class="number">0x4a</span>, <span class="number">0xdb</span>, <span class="number">0x31</span>, <span class="number">0x0e</span>, <span class="number">0x3b</span>, <span class="number">0xe8</span>, <span class="number">0x25</span>, <span class="number">0x0c</span>, <span class="number">0x46</span>,
+            <span class="number">0xf0</span>, <span class="number">0x6d</span>, <span class="number">0xce</span>, <span class="number">0xea</span>, <span class="number">0x3a</span>, <span class="number">0x7f</span>, <span class="number">0xa1</span>, <span class="number">0x34</span>, <span class="number">0x80</span>, <span class="number">0x57</span>, <span class="number">0xe2</span>, <span class="number">0xf6</span>, <span class="number">0x55</span>, <span class="number">0x6a</span>,
+            <span class="number">0xd6</span>, <span class="number">0xb1</span>, <span class="number">0x31</span>, <span class="number">0x8a</span>, <span class="number">0x02</span>, <span class="number">0x4a</span>, <span class="number">0x83</span>, <span class="number">0x8f</span>, <span class="number">0x21</span>, <span class="number">0xaf</span>, <span class="number">0x1f</span>, <span class="number">0xde</span>, <span class="number">0x04</span>, <span class="number">0x89</span>,
+            <span class="number">0x77</span>, <span class="number">0xeb</span>, <span class="number">0x48</span>, <span class="number">0xf5</span>, <span class="number">0x9f</span>, <span class="number">0xfd</span>, <span class="number">0x49</span>, <span class="number">0x24</span>, <span class="number">0xca</span>, <span class="number">0x1c</span>, <span class="number">0x60</span>, <span class="number">0x90</span>, <span class="number">0x2e</span>, <span class="number">0x52</span>,
+            <span class="number">0xf0</span>, <span class="number">0xa0</span>, <span class="number">0x89</span>, <span class="number">0xbc</span>, <span class="number">0x76</span>, <span class="number">0x89</span>, <span class="number">0x70</span>, <span class="number">0x40</span>, <span class="number">0xe0</span>, <span class="number">0x82</span>, <span class="number">0xf9</span>, <span class="number">0x37</span>, <span class="number">0x76</span>, <span class="number">0x38</span>,
+            <span class="number">0x48</span>, <span class="number">0x64</span>, <span class="number">0x5e</span>, <span class="number">0x07</span>, <span class="number">0x05</span>,
+        ];
         <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">seal</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">nonce</span>, <span class="kw-2">&amp;</span><span class="ident">bobpk</span>, <span class="kw-2">&amp;</span><span class="ident">alicesk</span>);
         <span class="kw">let</span> <span class="ident">pk</span> <span class="op">=</span> <span class="ident">precompute</span>(<span class="kw-2">&amp;</span><span class="ident">bobpk</span>, <span class="kw-2">&amp;</span><span class="ident">alicesk</span>);
         <span class="kw">let</span> <span class="ident">cpre</span> <span class="op">=</span> <span class="ident">seal_precomputed</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">nonce</span>, <span class="kw-2">&amp;</span><span class="ident">pk</span>);
-        <span class="kw">let</span> <span class="ident">cexp</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0xf3</span>,<span class="number">0xff</span>,<span class="number">0xc7</span>,<span class="number">0x70</span>,<span class="number">0x3f</span>,<span class="number">0x94</span>,<span class="number">0x00</span>,<span class="number">0xe5</span>,
-                        <span class="number">0x2a</span>,<span class="number">0x7d</span>,<span class="number">0xfb</span>,<span class="number">0x4b</span>,<span class="number">0x3d</span>,<span class="number">0x33</span>,<span class="number">0x05</span>,<span class="number">0xd9</span>,
-                        <span class="number">0x8e</span>,<span class="number">0x99</span>,<span class="number">0x3b</span>,<span class="number">0x9f</span>,<span class="number">0x48</span>,<span class="number">0x68</span>,<span class="number">0x12</span>,<span class="number">0x73</span>,
-                        <span class="number">0xc2</span>,<span class="number">0x96</span>,<span class="number">0x50</span>,<span class="number">0xba</span>,<span class="number">0x32</span>,<span class="number">0xfc</span>,<span class="number">0x76</span>,<span class="number">0xce</span>,
-                        <span class="number">0x48</span>,<span class="number">0x33</span>,<span class="number">0x2e</span>,<span class="number">0xa7</span>,<span class="number">0x16</span>,<span class="number">0x4d</span>,<span class="number">0x96</span>,<span class="number">0xa4</span>,
-                        <span class="number">0x47</span>,<span class="number">0x6f</span>,<span class="number">0xb8</span>,<span class="number">0xc5</span>,<span class="number">0x31</span>,<span class="number">0xa1</span>,<span class="number">0x18</span>,<span class="number">0x6a</span>,
-                        <span class="number">0xc0</span>,<span class="number">0xdf</span>,<span class="number">0xc1</span>,<span class="number">0x7c</span>,<span class="number">0x98</span>,<span class="number">0xdc</span>,<span class="number">0xe8</span>,<span class="number">0x7b</span>,
-                        <span class="number">0x4d</span>,<span class="number">0xa7</span>,<span class="number">0xf0</span>,<span class="number">0x11</span>,<span class="number">0xec</span>,<span class="number">0x48</span>,<span class="number">0xc9</span>,<span class="number">0x72</span>,
-                        <span class="number">0x71</span>,<span class="number">0xd2</span>,<span class="number">0xc2</span>,<span class="number">0x0f</span>,<span class="number">0x9b</span>,<span class="number">0x92</span>,<span class="number">0x8f</span>,<span class="number">0xe2</span>,
-                        <span class="number">0x27</span>,<span class="number">0x0d</span>,<span class="number">0x6f</span>,<span class="number">0xb8</span>,<span class="number">0x63</span>,<span class="number">0xd5</span>,<span class="number">0x17</span>,<span class="number">0x38</span>,
-                        <span class="number">0xb4</span>,<span class="number">0x8e</span>,<span class="number">0xee</span>,<span class="number">0xe3</span>,<span class="number">0x14</span>,<span class="number">0xa7</span>,<span class="number">0xcc</span>,<span class="number">0x8a</span>,
-                        <span class="number">0xb9</span>,<span class="number">0x32</span>,<span class="number">0x16</span>,<span class="number">0x45</span>,<span class="number">0x48</span>,<span class="number">0xe5</span>,<span class="number">0x26</span>,<span class="number">0xae</span>,
-                        <span class="number">0x90</span>,<span class="number">0x22</span>,<span class="number">0x43</span>,<span class="number">0x68</span>,<span class="number">0x51</span>,<span class="number">0x7a</span>,<span class="number">0xcf</span>,<span class="number">0xea</span>,
-                        <span class="number">0xbd</span>,<span class="number">0x6b</span>,<span class="number">0xb3</span>,<span class="number">0x73</span>,<span class="number">0x2b</span>,<span class="number">0xc0</span>,<span class="number">0xe9</span>,<span class="number">0xda</span>,
-                        <span class="number">0x99</span>,<span class="number">0x83</span>,<span class="number">0x2b</span>,<span class="number">0x61</span>,<span class="number">0xca</span>,<span class="number">0x01</span>,<span class="number">0xb6</span>,<span class="number">0xde</span>,
-                        <span class="number">0x56</span>,<span class="number">0x24</span>,<span class="number">0x4a</span>,<span class="number">0x9e</span>,<span class="number">0x88</span>,<span class="number">0xd5</span>,<span class="number">0xf9</span>,<span class="number">0xb3</span>,
-                        <span class="number">0x79</span>,<span class="number">0x73</span>,<span class="number">0xf6</span>,<span class="number">0x22</span>,<span class="number">0xa4</span>,<span class="number">0x3d</span>,<span class="number">0x14</span>,<span class="number">0xa6</span>,
-                        <span class="number">0x59</span>,<span class="number">0x9b</span>,<span class="number">0x1f</span>,<span class="number">0x65</span>,<span class="number">0x4c</span>,<span class="number">0xb4</span>,<span class="number">0x5a</span>,<span class="number">0x74</span>,
-                        <span class="number">0xe3</span>,<span class="number">0x55</span>,<span class="number">0xa5</span>];
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">c</span> <span class="op">==</span> <span class="ident">cexp</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">cpre</span> <span class="op">==</span> <span class="ident">cexp</span>);
+        <span class="kw">let</span> <span class="ident">cexp</span> <span class="op">=</span> <span class="macro">vec!</span>[
+            <span class="number">0xf3</span>, <span class="number">0xff</span>, <span class="number">0xc7</span>, <span class="number">0x70</span>, <span class="number">0x3f</span>, <span class="number">0x94</span>, <span class="number">0x00</span>, <span class="number">0xe5</span>, <span class="number">0x2a</span>, <span class="number">0x7d</span>, <span class="number">0xfb</span>, <span class="number">0x4b</span>, <span class="number">0x3d</span>, <span class="number">0x33</span>,
+            <span class="number">0x05</span>, <span class="number">0xd9</span>, <span class="number">0x8e</span>, <span class="number">0x99</span>, <span class="number">0x3b</span>, <span class="number">0x9f</span>, <span class="number">0x48</span>, <span class="number">0x68</span>, <span class="number">0x12</span>, <span class="number">0x73</span>, <span class="number">0xc2</span>, <span class="number">0x96</span>, <span class="number">0x50</span>, <span class="number">0xba</span>,
+            <span class="number">0x32</span>, <span class="number">0xfc</span>, <span class="number">0x76</span>, <span class="number">0xce</span>, <span class="number">0x48</span>, <span class="number">0x33</span>, <span class="number">0x2e</span>, <span class="number">0xa7</span>, <span class="number">0x16</span>, <span class="number">0x4d</span>, <span class="number">0x96</span>, <span class="number">0xa4</span>, <span class="number">0x47</span>, <span class="number">0x6f</span>,
+            <span class="number">0xb8</span>, <span class="number">0xc5</span>, <span class="number">0x31</span>, <span class="number">0xa1</span>, <span class="number">0x18</span>, <span class="number">0x6a</span>, <span class="number">0xc0</span>, <span class="number">0xdf</span>, <span class="number">0xc1</span>, <span class="number">0x7c</span>, <span class="number">0x98</span>, <span class="number">0xdc</span>, <span class="number">0xe8</span>, <span class="number">0x7b</span>,
+            <span class="number">0x4d</span>, <span class="number">0xa7</span>, <span class="number">0xf0</span>, <span class="number">0x11</span>, <span class="number">0xec</span>, <span class="number">0x48</span>, <span class="number">0xc9</span>, <span class="number">0x72</span>, <span class="number">0x71</span>, <span class="number">0xd2</span>, <span class="number">0xc2</span>, <span class="number">0x0f</span>, <span class="number">0x9b</span>, <span class="number">0x92</span>,
+            <span class="number">0x8f</span>, <span class="number">0xe2</span>, <span class="number">0x27</span>, <span class="number">0x0d</span>, <span class="number">0x6f</span>, <span class="number">0xb8</span>, <span class="number">0x63</span>, <span class="number">0xd5</span>, <span class="number">0x17</span>, <span class="number">0x38</span>, <span class="number">0xb4</span>, <span class="number">0x8e</span>, <span class="number">0xee</span>, <span class="number">0xe3</span>,
+            <span class="number">0x14</span>, <span class="number">0xa7</span>, <span class="number">0xcc</span>, <span class="number">0x8a</span>, <span class="number">0xb9</span>, <span class="number">0x32</span>, <span class="number">0x16</span>, <span class="number">0x45</span>, <span class="number">0x48</span>, <span class="number">0xe5</span>, <span class="number">0x26</span>, <span class="number">0xae</span>, <span class="number">0x90</span>, <span class="number">0x22</span>,
+            <span class="number">0x43</span>, <span class="number">0x68</span>, <span class="number">0x51</span>, <span class="number">0x7a</span>, <span class="number">0xcf</span>, <span class="number">0xea</span>, <span class="number">0xbd</span>, <span class="number">0x6b</span>, <span class="number">0xb3</span>, <span class="number">0x73</span>, <span class="number">0x2b</span>, <span class="number">0xc0</span>, <span class="number">0xe9</span>, <span class="number">0xda</span>,
+            <span class="number">0x99</span>, <span class="number">0x83</span>, <span class="number">0x2b</span>, <span class="number">0x61</span>, <span class="number">0xca</span>, <span class="number">0x01</span>, <span class="number">0xb6</span>, <span class="number">0xde</span>, <span class="number">0x56</span>, <span class="number">0x24</span>, <span class="number">0x4a</span>, <span class="number">0x9e</span>, <span class="number">0x88</span>, <span class="number">0xd5</span>,
+            <span class="number">0xf9</span>, <span class="number">0xb3</span>, <span class="number">0x79</span>, <span class="number">0x73</span>, <span class="number">0xf6</span>, <span class="number">0x22</span>, <span class="number">0xa4</span>, <span class="number">0x3d</span>, <span class="number">0x14</span>, <span class="number">0xa6</span>, <span class="number">0x59</span>, <span class="number">0x9b</span>, <span class="number">0x1f</span>, <span class="number">0x65</span>,
+            <span class="number">0x4c</span>, <span class="number">0xb4</span>, <span class="number">0x5a</span>, <span class="number">0x74</span>, <span class="number">0xe3</span>, <span class="number">0x55</span>, <span class="number">0xa5</span>,
+        ];
+        <span class="macro">assert!</span>(<span class="ident">c</span> <span class="op">=</span><span class="op">=</span> <span class="ident">cexp</span>);
+        <span class="macro">assert!</span>(<span class="ident">cpre</span> <span class="op">=</span><span class="op">=</span> <span class="ident">cexp</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_vector_2</span>() {
         <span class="comment">// corresponding to tests/box2.c and tests/box4.cpp from NaCl</span>
-        <span class="kw">let</span> <span class="ident">bobsk</span> <span class="op">=</span> <span class="ident">SecretKey</span>([<span class="number">0x5d</span>,<span class="number">0xab</span>,<span class="number">0x08</span>,<span class="number">0x7e</span>,<span class="number">0x62</span>,<span class="number">0x4a</span>,<span class="number">0x8a</span>,<span class="number">0x4b</span>,
-                               <span class="number">0x79</span>,<span class="number">0xe1</span>,<span class="number">0x7f</span>,<span class="number">0x8b</span>,<span class="number">0x83</span>,<span class="number">0x80</span>,<span class="number">0x0e</span>,<span class="number">0xe6</span>,
-                               <span class="number">0x6f</span>,<span class="number">0x3b</span>,<span class="number">0xb1</span>,<span class="number">0x29</span>,<span class="number">0x26</span>,<span class="number">0x18</span>,<span class="number">0xb6</span>,<span class="number">0xfd</span>,
-                               <span class="number">0x1c</span>,<span class="number">0x2f</span>,<span class="number">0x8b</span>,<span class="number">0x27</span>,<span class="number">0xff</span>,<span class="number">0x88</span>,<span class="number">0xe0</span>,<span class="number">0xeb</span>]);
-        <span class="kw">let</span> <span class="ident">alicepk</span> <span class="op">=</span> <span class="ident">PublicKey</span>([<span class="number">0x85</span>,<span class="number">0x20</span>,<span class="number">0xf0</span>,<span class="number">0x09</span>,<span class="number">0x89</span>,<span class="number">0x30</span>,<span class="number">0xa7</span>,<span class="number">0x54</span>,
-                                 <span class="number">0x74</span>,<span class="number">0x8b</span>,<span class="number">0x7d</span>,<span class="number">0xdc</span>,<span class="number">0xb4</span>,<span class="number">0x3e</span>,<span class="number">0xf7</span>,<span class="number">0x5a</span>,
-                                 <span class="number">0x0d</span>,<span class="number">0xbf</span>,<span class="number">0x3a</span>,<span class="number">0x0d</span>,<span class="number">0x26</span>,<span class="number">0x38</span>,<span class="number">0x1a</span>,<span class="number">0xf4</span>,
-                                 <span class="number">0xeb</span>,<span class="number">0xa4</span>,<span class="number">0xa9</span>,<span class="number">0x8e</span>,<span class="number">0xaa</span>,<span class="number">0x9b</span>,<span class="number">0x4e</span>,<span class="number">0x6a</span>]);
-        <span class="kw">let</span> <span class="ident">nonce</span> <span class="op">=</span> <span class="ident">Nonce</span>([<span class="number">0x69</span>,<span class="number">0x69</span>,<span class="number">0x6e</span>,<span class="number">0xe9</span>,<span class="number">0x55</span>,<span class="number">0xb6</span>,<span class="number">0x2b</span>,<span class="number">0x73</span>,
-                           <span class="number">0xcd</span>,<span class="number">0x62</span>,<span class="number">0xbd</span>,<span class="number">0xa8</span>,<span class="number">0x75</span>,<span class="number">0xfc</span>,<span class="number">0x73</span>,<span class="number">0xd6</span>,
-                           <span class="number">0x82</span>,<span class="number">0x19</span>,<span class="number">0xe0</span>,<span class="number">0x03</span>,<span class="number">0x6b</span>,<span class="number">0x7a</span>,<span class="number">0x0b</span>,<span class="number">0x37</span>]);
-        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> [<span class="number">0xf3</span>,<span class="number">0xff</span>,<span class="number">0xc7</span>,<span class="number">0x70</span>,<span class="number">0x3f</span>,<span class="number">0x94</span>,<span class="number">0x00</span>,<span class="number">0xe5</span>,
-                 <span class="number">0x2a</span>,<span class="number">0x7d</span>,<span class="number">0xfb</span>,<span class="number">0x4b</span>,<span class="number">0x3d</span>,<span class="number">0x33</span>,<span class="number">0x05</span>,<span class="number">0xd9</span>,
-                 <span class="number">0x8e</span>,<span class="number">0x99</span>,<span class="number">0x3b</span>,<span class="number">0x9f</span>,<span class="number">0x48</span>,<span class="number">0x68</span>,<span class="number">0x12</span>,<span class="number">0x73</span>,
-                 <span class="number">0xc2</span>,<span class="number">0x96</span>,<span class="number">0x50</span>,<span class="number">0xba</span>,<span class="number">0x32</span>,<span class="number">0xfc</span>,<span class="number">0x76</span>,<span class="number">0xce</span>,
-                 <span class="number">0x48</span>,<span class="number">0x33</span>,<span class="number">0x2e</span>,<span class="number">0xa7</span>,<span class="number">0x16</span>,<span class="number">0x4d</span>,<span class="number">0x96</span>,<span class="number">0xa4</span>,
-                 <span class="number">0x47</span>,<span class="number">0x6f</span>,<span class="number">0xb8</span>,<span class="number">0xc5</span>,<span class="number">0x31</span>,<span class="number">0xa1</span>,<span class="number">0x18</span>,<span class="number">0x6a</span>,
-                 <span class="number">0xc0</span>,<span class="number">0xdf</span>,<span class="number">0xc1</span>,<span class="number">0x7c</span>,<span class="number">0x98</span>,<span class="number">0xdc</span>,<span class="number">0xe8</span>,<span class="number">0x7b</span>,
-                 <span class="number">0x4d</span>,<span class="number">0xa7</span>,<span class="number">0xf0</span>,<span class="number">0x11</span>,<span class="number">0xec</span>,<span class="number">0x48</span>,<span class="number">0xc9</span>,<span class="number">0x72</span>,
-                 <span class="number">0x71</span>,<span class="number">0xd2</span>,<span class="number">0xc2</span>,<span class="number">0x0f</span>,<span class="number">0x9b</span>,<span class="number">0x92</span>,<span class="number">0x8f</span>,<span class="number">0xe2</span>,
-                 <span class="number">0x27</span>,<span class="number">0x0d</span>,<span class="number">0x6f</span>,<span class="number">0xb8</span>,<span class="number">0x63</span>,<span class="number">0xd5</span>,<span class="number">0x17</span>,<span class="number">0x38</span>,
-                 <span class="number">0xb4</span>,<span class="number">0x8e</span>,<span class="number">0xee</span>,<span class="number">0xe3</span>,<span class="number">0x14</span>,<span class="number">0xa7</span>,<span class="number">0xcc</span>,<span class="number">0x8a</span>,
-                 <span class="number">0xb9</span>,<span class="number">0x32</span>,<span class="number">0x16</span>,<span class="number">0x45</span>,<span class="number">0x48</span>,<span class="number">0xe5</span>,<span class="number">0x26</span>,<span class="number">0xae</span>,
-                 <span class="number">0x90</span>,<span class="number">0x22</span>,<span class="number">0x43</span>,<span class="number">0x68</span>,<span class="number">0x51</span>,<span class="number">0x7a</span>,<span class="number">0xcf</span>,<span class="number">0xea</span>,
-                 <span class="number">0xbd</span>,<span class="number">0x6b</span>,<span class="number">0xb3</span>,<span class="number">0x73</span>,<span class="number">0x2b</span>,<span class="number">0xc0</span>,<span class="number">0xe9</span>,<span class="number">0xda</span>,
-                 <span class="number">0x99</span>,<span class="number">0x83</span>,<span class="number">0x2b</span>,<span class="number">0x61</span>,<span class="number">0xca</span>,<span class="number">0x01</span>,<span class="number">0xb6</span>,<span class="number">0xde</span>,
-                 <span class="number">0x56</span>,<span class="number">0x24</span>,<span class="number">0x4a</span>,<span class="number">0x9e</span>,<span class="number">0x88</span>,<span class="number">0xd5</span>,<span class="number">0xf9</span>,<span class="number">0xb3</span>,
-                 <span class="number">0x79</span>,<span class="number">0x73</span>,<span class="number">0xf6</span>,<span class="number">0x22</span>,<span class="number">0xa4</span>,<span class="number">0x3d</span>,<span class="number">0x14</span>,<span class="number">0xa6</span>,
-                 <span class="number">0x59</span>,<span class="number">0x9b</span>,<span class="number">0x1f</span>,<span class="number">0x65</span>,<span class="number">0x4c</span>,<span class="number">0xb4</span>,<span class="number">0x5a</span>,<span class="number">0x74</span>,
-                 <span class="number">0xe3</span>,<span class="number">0x55</span>,<span class="number">0xa5</span>];
-        <span class="kw">let</span> <span class="ident">mexp</span> <span class="op">=</span> <span class="prelude-val">Ok</span>(<span class="macro">vec</span><span class="macro">!</span>[<span class="number">0xbe</span>,<span class="number">0x07</span>,<span class="number">0x5f</span>,<span class="number">0xc5</span>,<span class="number">0x3c</span>,<span class="number">0x81</span>,<span class="number">0xf2</span>,<span class="number">0xd5</span>,
-                             <span class="number">0xcf</span>,<span class="number">0x14</span>,<span class="number">0x13</span>,<span class="number">0x16</span>,<span class="number">0xeb</span>,<span class="number">0xeb</span>,<span class="number">0x0c</span>,<span class="number">0x7b</span>,
-                             <span class="number">0x52</span>,<span class="number">0x28</span>,<span class="number">0xc5</span>,<span class="number">0x2a</span>,<span class="number">0x4c</span>,<span class="number">0x62</span>,<span class="number">0xcb</span>,<span class="number">0xd4</span>,
-                             <span class="number">0x4b</span>,<span class="number">0x66</span>,<span class="number">0x84</span>,<span class="number">0x9b</span>,<span class="number">0x64</span>,<span class="number">0x24</span>,<span class="number">0x4f</span>,<span class="number">0xfc</span>,
-                             <span class="number">0xe5</span>,<span class="number">0xec</span>,<span class="number">0xba</span>,<span class="number">0xaf</span>,<span class="number">0x33</span>,<span class="number">0xbd</span>,<span class="number">0x75</span>,<span class="number">0x1a</span>,
-                             <span class="number">0x1a</span>,<span class="number">0xc7</span>,<span class="number">0x28</span>,<span class="number">0xd4</span>,<span class="number">0x5e</span>,<span class="number">0x6c</span>,<span class="number">0x61</span>,<span class="number">0x29</span>,
-                             <span class="number">0x6c</span>,<span class="number">0xdc</span>,<span class="number">0x3c</span>,<span class="number">0x01</span>,<span class="number">0x23</span>,<span class="number">0x35</span>,<span class="number">0x61</span>,<span class="number">0xf4</span>,
-                             <span class="number">0x1d</span>,<span class="number">0xb6</span>,<span class="number">0x6c</span>,<span class="number">0xce</span>,<span class="number">0x31</span>,<span class="number">0x4a</span>,<span class="number">0xdb</span>,<span class="number">0x31</span>,
-                             <span class="number">0x0e</span>,<span class="number">0x3b</span>,<span class="number">0xe8</span>,<span class="number">0x25</span>,<span class="number">0x0c</span>,<span class="number">0x46</span>,<span class="number">0xf0</span>,<span class="number">0x6d</span>,
-                             <span class="number">0xce</span>,<span class="number">0xea</span>,<span class="number">0x3a</span>,<span class="number">0x7f</span>,<span class="number">0xa1</span>,<span class="number">0x34</span>,<span class="number">0x80</span>,<span class="number">0x57</span>,
-                             <span class="number">0xe2</span>,<span class="number">0xf6</span>,<span class="number">0x55</span>,<span class="number">0x6a</span>,<span class="number">0xd6</span>,<span class="number">0xb1</span>,<span class="number">0x31</span>,<span class="number">0x8a</span>,
-                             <span class="number">0x02</span>,<span class="number">0x4a</span>,<span class="number">0x83</span>,<span class="number">0x8f</span>,<span class="number">0x21</span>,<span class="number">0xaf</span>,<span class="number">0x1f</span>,<span class="number">0xde</span>,
-                             <span class="number">0x04</span>,<span class="number">0x89</span>,<span class="number">0x77</span>,<span class="number">0xeb</span>,<span class="number">0x48</span>,<span class="number">0xf5</span>,<span class="number">0x9f</span>,<span class="number">0xfd</span>,
-                             <span class="number">0x49</span>,<span class="number">0x24</span>,<span class="number">0xca</span>,<span class="number">0x1c</span>,<span class="number">0x60</span>,<span class="number">0x90</span>,<span class="number">0x2e</span>,<span class="number">0x52</span>,
-                             <span class="number">0xf0</span>,<span class="number">0xa0</span>,<span class="number">0x89</span>,<span class="number">0xbc</span>,<span class="number">0x76</span>,<span class="number">0x89</span>,<span class="number">0x70</span>,<span class="number">0x40</span>,
-                             <span class="number">0xe0</span>,<span class="number">0x82</span>,<span class="number">0xf9</span>,<span class="number">0x37</span>,<span class="number">0x76</span>,<span class="number">0x38</span>,<span class="number">0x48</span>,<span class="number">0x64</span>,
-                             <span class="number">0x5e</span>,<span class="number">0x07</span>,<span class="number">0x05</span>]);
+        <span class="kw">let</span> <span class="ident">bobsk</span> <span class="op">=</span> <span class="ident">SecretKey</span>([
+            <span class="number">0x5d</span>, <span class="number">0xab</span>, <span class="number">0x08</span>, <span class="number">0x7e</span>, <span class="number">0x62</span>, <span class="number">0x4a</span>, <span class="number">0x8a</span>, <span class="number">0x4b</span>, <span class="number">0x79</span>, <span class="number">0xe1</span>, <span class="number">0x7f</span>, <span class="number">0x8b</span>, <span class="number">0x83</span>, <span class="number">0x80</span>,
+            <span class="number">0x0e</span>, <span class="number">0xe6</span>, <span class="number">0x6f</span>, <span class="number">0x3b</span>, <span class="number">0xb1</span>, <span class="number">0x29</span>, <span class="number">0x26</span>, <span class="number">0x18</span>, <span class="number">0xb6</span>, <span class="number">0xfd</span>, <span class="number">0x1c</span>, <span class="number">0x2f</span>, <span class="number">0x8b</span>, <span class="number">0x27</span>,
+            <span class="number">0xff</span>, <span class="number">0x88</span>, <span class="number">0xe0</span>, <span class="number">0xeb</span>,
+        ]);
+        <span class="kw">let</span> <span class="ident">alicepk</span> <span class="op">=</span> <span class="ident">PublicKey</span>([
+            <span class="number">0x85</span>, <span class="number">0x20</span>, <span class="number">0xf0</span>, <span class="number">0x09</span>, <span class="number">0x89</span>, <span class="number">0x30</span>, <span class="number">0xa7</span>, <span class="number">0x54</span>, <span class="number">0x74</span>, <span class="number">0x8b</span>, <span class="number">0x7d</span>, <span class="number">0xdc</span>, <span class="number">0xb4</span>, <span class="number">0x3e</span>,
+            <span class="number">0xf7</span>, <span class="number">0x5a</span>, <span class="number">0x0d</span>, <span class="number">0xbf</span>, <span class="number">0x3a</span>, <span class="number">0x0d</span>, <span class="number">0x26</span>, <span class="number">0x38</span>, <span class="number">0x1a</span>, <span class="number">0xf4</span>, <span class="number">0xeb</span>, <span class="number">0xa4</span>, <span class="number">0xa9</span>, <span class="number">0x8e</span>,
+            <span class="number">0xaa</span>, <span class="number">0x9b</span>, <span class="number">0x4e</span>, <span class="number">0x6a</span>,
+        ]);
+        <span class="kw">let</span> <span class="ident">nonce</span> <span class="op">=</span> <span class="ident">Nonce</span>([
+            <span class="number">0x69</span>, <span class="number">0x69</span>, <span class="number">0x6e</span>, <span class="number">0xe9</span>, <span class="number">0x55</span>, <span class="number">0xb6</span>, <span class="number">0x2b</span>, <span class="number">0x73</span>, <span class="number">0xcd</span>, <span class="number">0x62</span>, <span class="number">0xbd</span>, <span class="number">0xa8</span>, <span class="number">0x75</span>, <span class="number">0xfc</span>,
+            <span class="number">0x73</span>, <span class="number">0xd6</span>, <span class="number">0x82</span>, <span class="number">0x19</span>, <span class="number">0xe0</span>, <span class="number">0x03</span>, <span class="number">0x6b</span>, <span class="number">0x7a</span>, <span class="number">0x0b</span>, <span class="number">0x37</span>,
+        ]);
+        <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> [
+            <span class="number">0xf3</span>, <span class="number">0xff</span>, <span class="number">0xc7</span>, <span class="number">0x70</span>, <span class="number">0x3f</span>, <span class="number">0x94</span>, <span class="number">0x00</span>, <span class="number">0xe5</span>, <span class="number">0x2a</span>, <span class="number">0x7d</span>, <span class="number">0xfb</span>, <span class="number">0x4b</span>, <span class="number">0x3d</span>, <span class="number">0x33</span>,
+            <span class="number">0x05</span>, <span class="number">0xd9</span>, <span class="number">0x8e</span>, <span class="number">0x99</span>, <span class="number">0x3b</span>, <span class="number">0x9f</span>, <span class="number">0x48</span>, <span class="number">0x68</span>, <span class="number">0x12</span>, <span class="number">0x73</span>, <span class="number">0xc2</span>, <span class="number">0x96</span>, <span class="number">0x50</span>, <span class="number">0xba</span>,
+            <span class="number">0x32</span>, <span class="number">0xfc</span>, <span class="number">0x76</span>, <span class="number">0xce</span>, <span class="number">0x48</span>, <span class="number">0x33</span>, <span class="number">0x2e</span>, <span class="number">0xa7</span>, <span class="number">0x16</span>, <span class="number">0x4d</span>, <span class="number">0x96</span>, <span class="number">0xa4</span>, <span class="number">0x47</span>, <span class="number">0x6f</span>,
+            <span class="number">0xb8</span>, <span class="number">0xc5</span>, <span class="number">0x31</span>, <span class="number">0xa1</span>, <span class="number">0x18</span>, <span class="number">0x6a</span>, <span class="number">0xc0</span>, <span class="number">0xdf</span>, <span class="number">0xc1</span>, <span class="number">0x7c</span>, <span class="number">0x98</span>, <span class="number">0xdc</span>, <span class="number">0xe8</span>, <span class="number">0x7b</span>,
+            <span class="number">0x4d</span>, <span class="number">0xa7</span>, <span class="number">0xf0</span>, <span class="number">0x11</span>, <span class="number">0xec</span>, <span class="number">0x48</span>, <span class="number">0xc9</span>, <span class="number">0x72</span>, <span class="number">0x71</span>, <span class="number">0xd2</span>, <span class="number">0xc2</span>, <span class="number">0x0f</span>, <span class="number">0x9b</span>, <span class="number">0x92</span>,
+            <span class="number">0x8f</span>, <span class="number">0xe2</span>, <span class="number">0x27</span>, <span class="number">0x0d</span>, <span class="number">0x6f</span>, <span class="number">0xb8</span>, <span class="number">0x63</span>, <span class="number">0xd5</span>, <span class="number">0x17</span>, <span class="number">0x38</span>, <span class="number">0xb4</span>, <span class="number">0x8e</span>, <span class="number">0xee</span>, <span class="number">0xe3</span>,
+            <span class="number">0x14</span>, <span class="number">0xa7</span>, <span class="number">0xcc</span>, <span class="number">0x8a</span>, <span class="number">0xb9</span>, <span class="number">0x32</span>, <span class="number">0x16</span>, <span class="number">0x45</span>, <span class="number">0x48</span>, <span class="number">0xe5</span>, <span class="number">0x26</span>, <span class="number">0xae</span>, <span class="number">0x90</span>, <span class="number">0x22</span>,
+            <span class="number">0x43</span>, <span class="number">0x68</span>, <span class="number">0x51</span>, <span class="number">0x7a</span>, <span class="number">0xcf</span>, <span class="number">0xea</span>, <span class="number">0xbd</span>, <span class="number">0x6b</span>, <span class="number">0xb3</span>, <span class="number">0x73</span>, <span class="number">0x2b</span>, <span class="number">0xc0</span>, <span class="number">0xe9</span>, <span class="number">0xda</span>,
+            <span class="number">0x99</span>, <span class="number">0x83</span>, <span class="number">0x2b</span>, <span class="number">0x61</span>, <span class="number">0xca</span>, <span class="number">0x01</span>, <span class="number">0xb6</span>, <span class="number">0xde</span>, <span class="number">0x56</span>, <span class="number">0x24</span>, <span class="number">0x4a</span>, <span class="number">0x9e</span>, <span class="number">0x88</span>, <span class="number">0xd5</span>,
+            <span class="number">0xf9</span>, <span class="number">0xb3</span>, <span class="number">0x79</span>, <span class="number">0x73</span>, <span class="number">0xf6</span>, <span class="number">0x22</span>, <span class="number">0xa4</span>, <span class="number">0x3d</span>, <span class="number">0x14</span>, <span class="number">0xa6</span>, <span class="number">0x59</span>, <span class="number">0x9b</span>, <span class="number">0x1f</span>, <span class="number">0x65</span>,
+            <span class="number">0x4c</span>, <span class="number">0xb4</span>, <span class="number">0x5a</span>, <span class="number">0x74</span>, <span class="number">0xe3</span>, <span class="number">0x55</span>, <span class="number">0xa5</span>,
+        ];
+        <span class="kw">let</span> <span class="ident">mexp</span> <span class="op">=</span> <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[
+            <span class="number">0xbe</span>, <span class="number">0x07</span>, <span class="number">0x5f</span>, <span class="number">0xc5</span>, <span class="number">0x3c</span>, <span class="number">0x81</span>, <span class="number">0xf2</span>, <span class="number">0xd5</span>, <span class="number">0xcf</span>, <span class="number">0x14</span>, <span class="number">0x13</span>, <span class="number">0x16</span>, <span class="number">0xeb</span>, <span class="number">0xeb</span>,
+            <span class="number">0x0c</span>, <span class="number">0x7b</span>, <span class="number">0x52</span>, <span class="number">0x28</span>, <span class="number">0xc5</span>, <span class="number">0x2a</span>, <span class="number">0x4c</span>, <span class="number">0x62</span>, <span class="number">0xcb</span>, <span class="number">0xd4</span>, <span class="number">0x4b</span>, <span class="number">0x66</span>, <span class="number">0x84</span>, <span class="number">0x9b</span>,
+            <span class="number">0x64</span>, <span class="number">0x24</span>, <span class="number">0x4f</span>, <span class="number">0xfc</span>, <span class="number">0xe5</span>, <span class="number">0xec</span>, <span class="number">0xba</span>, <span class="number">0xaf</span>, <span class="number">0x33</span>, <span class="number">0xbd</span>, <span class="number">0x75</span>, <span class="number">0x1a</span>, <span class="number">0x1a</span>, <span class="number">0xc7</span>,
+            <span class="number">0x28</span>, <span class="number">0xd4</span>, <span class="number">0x5e</span>, <span class="number">0x6c</span>, <span class="number">0x61</span>, <span class="number">0x29</span>, <span class="number">0x6c</span>, <span class="number">0xdc</span>, <span class="number">0x3c</span>, <span class="number">0x01</span>, <span class="number">0x23</span>, <span class="number">0x35</span>, <span class="number">0x61</span>, <span class="number">0xf4</span>,
+            <span class="number">0x1d</span>, <span class="number">0xb6</span>, <span class="number">0x6c</span>, <span class="number">0xce</span>, <span class="number">0x31</span>, <span class="number">0x4a</span>, <span class="number">0xdb</span>, <span class="number">0x31</span>, <span class="number">0x0e</span>, <span class="number">0x3b</span>, <span class="number">0xe8</span>, <span class="number">0x25</span>, <span class="number">0x0c</span>, <span class="number">0x46</span>,
+            <span class="number">0xf0</span>, <span class="number">0x6d</span>, <span class="number">0xce</span>, <span class="number">0xea</span>, <span class="number">0x3a</span>, <span class="number">0x7f</span>, <span class="number">0xa1</span>, <span class="number">0x34</span>, <span class="number">0x80</span>, <span class="number">0x57</span>, <span class="number">0xe2</span>, <span class="number">0xf6</span>, <span class="number">0x55</span>, <span class="number">0x6a</span>,
+            <span class="number">0xd6</span>, <span class="number">0xb1</span>, <span class="number">0x31</span>, <span class="number">0x8a</span>, <span class="number">0x02</span>, <span class="number">0x4a</span>, <span class="number">0x83</span>, <span class="number">0x8f</span>, <span class="number">0x21</span>, <span class="number">0xaf</span>, <span class="number">0x1f</span>, <span class="number">0xde</span>, <span class="number">0x04</span>, <span class="number">0x89</span>,
+            <span class="number">0x77</span>, <span class="number">0xeb</span>, <span class="number">0x48</span>, <span class="number">0xf5</span>, <span class="number">0x9f</span>, <span class="number">0xfd</span>, <span class="number">0x49</span>, <span class="number">0x24</span>, <span class="number">0xca</span>, <span class="number">0x1c</span>, <span class="number">0x60</span>, <span class="number">0x90</span>, <span class="number">0x2e</span>, <span class="number">0x52</span>,
+            <span class="number">0xf0</span>, <span class="number">0xa0</span>, <span class="number">0x89</span>, <span class="number">0xbc</span>, <span class="number">0x76</span>, <span class="number">0x89</span>, <span class="number">0x70</span>, <span class="number">0x40</span>, <span class="number">0xe0</span>, <span class="number">0x82</span>, <span class="number">0xf9</span>, <span class="number">0x37</span>, <span class="number">0x76</span>, <span class="number">0x38</span>,
+            <span class="number">0x48</span>, <span class="number">0x64</span>, <span class="number">0x5e</span>, <span class="number">0x07</span>, <span class="number">0x05</span>,
+        ]);
         <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">nonce</span>, <span class="kw-2">&amp;</span><span class="ident">alicepk</span>, <span class="kw-2">&amp;</span><span class="ident">bobsk</span>);
         <span class="kw">let</span> <span class="ident">pk</span> <span class="op">=</span> <span class="ident">precompute</span>(<span class="kw-2">&amp;</span><span class="ident">alicepk</span>, <span class="kw-2">&amp;</span><span class="ident">bobsk</span>);
         <span class="kw">let</span> <span class="ident">m_pre</span> <span class="op">=</span> <span class="ident">open_precomputed</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">nonce</span>, <span class="kw-2">&amp;</span><span class="ident">pk</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">m</span> <span class="op">==</span> <span class="ident">mexp</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">m_pre</span> <span class="op">==</span> <span class="ident">mexp</span>);
+        <span class="macro">assert!</span>(<span class="ident">m</span> <span class="op">=</span><span class="op">=</span> <span class="ident">mexp</span>);
+        <span class="macro">assert!</span>(<span class="ident">m_pre</span> <span class="op">=</span><span class="op">=</span> <span class="ident">mexp</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1550,14 +1531,14 @@
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk1</span>, <span class="ident">sk</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> <span class="ident">pk2</span> <span class="op">=</span> <span class="ident">sk</span>.<span class="ident">public_key</span>();
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">pk1</span>, <span class="ident">pk2</span>);
+            <span class="macro">assert_eq!</span>(<span class="ident">pk1</span>, <span class="ident">pk2</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_serialisation</span>() {
-        <span class="kw">use</span> <span class="ident">test_utils</span>::<span class="ident">round_trip</span>;
+        <span class="kw">use</span> <span class="ident">test_utils::round_trip</span>;
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">256usize</span> {
             <span class="kw">let</span> (<span class="ident">pk</span>, <span class="ident">sk</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
             <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
@@ -1566,26 +1547,28 @@
             <span class="ident">round_trip</span>(<span class="ident">n</span>);
         }
     }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_nonce_length</span>() {
+        <span class="macro">assert_eq!</span>(<span class="number">192</span> <span class="op">/</span> <span class="number">8</span>, <span class="ident">gen_nonce</span>().<span class="ident">as_ref</span>().<span class="ident">len</span>());
+    }
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;benchmarks&quot;</span>)]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">bench</span> {
     <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">test</span>;
-    <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
 
-    <span class="kw">const</span> <span class="ident">BENCH_SIZES</span>: [<span class="ident">usize</span>; <span class="number">14</span>] <span class="op">=</span> [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">16</span>, <span class="number">32</span>, <span class="number">64</span>,
-                                      <span class="number">128</span>, <span class="number">256</span>, <span class="number">512</span>, <span class="number">1024</span>, <span class="number">2048</span>, <span class="number">4096</span>];
+    <span class="kw">const</span> <span class="ident">BENCH_SIZES</span>: [<span class="ident">usize</span>; <span class="number">14</span>] <span class="op">=</span> [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">4</span>, <span class="number">8</span>, <span class="number">16</span>, <span class="number">32</span>, <span class="number">64</span>, <span class="number">128</span>, <span class="number">256</span>, <span class="number">512</span>, <span class="number">1024</span>, <span class="number">2048</span>, <span class="number">4096</span>];
 
     <span class="attribute">#[<span class="ident">bench</span>]</span>
-    <span class="kw">fn</span> <span class="ident">bench_seal_open</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test</span>::<span class="ident">Bencher</span>) {
+    <span class="kw">fn</span> <span class="ident">bench_seal_open</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test::Bencher</span>) {
         <span class="kw">let</span> (<span class="ident">pk</span>, <span class="ident">sk</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
-        <span class="kw">let</span> <span class="ident">ms</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;&gt;</span> <span class="op">=</span> <span class="ident">BENCH_SIZES</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> {
-            <span class="ident">randombytes</span>(<span class="kw-2">*</span><span class="ident">s</span>)
-        }).<span class="ident">collect</span>();
-        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">||</span> {
+        <span class="kw">let</span> <span class="ident">ms</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">BENCH_SIZES</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">randombytes</span>(<span class="kw-2">*</span><span class="ident">s</span>)).<span class="ident">collect</span>();
+        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="kw">for</span> <span class="ident">m</span> <span class="kw">in</span> <span class="ident">ms</span>.<span class="ident">iter</span>() {
                 <span class="ident">open</span>(<span class="kw-2">&amp;</span><span class="ident">seal</span>(<span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk</span>, <span class="kw-2">&amp;</span><span class="ident">sk</span>), <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">pk</span>, <span class="kw-2">&amp;</span><span class="ident">sk</span>).<span class="ident">unwrap</span>();
             }
@@ -1593,9 +1576,9 @@
     }
 
     <span class="attribute">#[<span class="ident">bench</span>]</span>
-    <span class="kw">fn</span> <span class="ident">bench_precompute</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test</span>::<span class="ident">Bencher</span>) {
+    <span class="kw">fn</span> <span class="ident">bench_precompute</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test::Bencher</span>) {
         <span class="kw">let</span> (<span class="ident">pk</span>, <span class="ident">sk</span>) <span class="op">=</span> <span class="ident">gen_keypair</span>();
-        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">||</span> {
+        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="comment">// we do this benchmark as many times as the other benchmarks so</span>
             <span class="comment">// that we can compare the times</span>
             <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="ident">BENCH_SIZES</span>.<span class="ident">iter</span>() {
@@ -1605,5 +1588,6 @@
         });
     }
 }
-</pre>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../../";window.currentCrate = "sodiumoxide";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+</pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="sodiumoxide" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script></body></html>

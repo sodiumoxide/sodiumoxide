@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Variant","Supported variants of Base64 encoding/decoding"]],"fn":[["decode","Decodes a Base64 string into a byte sequence using the given variant."],["encode","Encodes a byte sequence as a Base64 string using the given variant."]]});

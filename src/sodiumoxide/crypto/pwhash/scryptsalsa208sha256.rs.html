@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/crypto/pwhash/scryptsalsa208sha256.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>scryptsalsa208sha256.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/crypto/pwhash/scryptsalsa208sha256.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>scryptsalsa208sha256.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../sodiumoxide/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button">?</button>
+                <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -234,37 +237,87 @@
 <span id="234">234</span>
 <span id="235">235</span>
 <span id="236">236</span>
-</pre><pre class="rust ">
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+</pre><pre class="rust">
 <span class="doccomment">//! `crypto_pwhash_scryptsalsa208sha256`, a particular combination of Scrypt, Salsa20/8</span>
 <span class="doccomment">//! and SHA-256</span>
+
 <span class="kw">use</span> <span class="ident">ffi</span>;
-<span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes_into</span>;
-<span class="kw">use</span> <span class="ident">libc</span>::<span class="ident">c_ulonglong</span>;
+<span class="kw">use</span> <span class="ident">libc::c_ulonglong</span>;
+<span class="kw">use</span> <span class="ident">randombytes::randombytes_into</span>;
 
 <span class="doccomment">/// Number of bytes in a `Salt`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SALTBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_SALTBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SALTBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_SALTBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 <span class="doccomment">/// Number of bytes in a `HashedPassword`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HASHEDPASSWORDBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_STRBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">HASHEDPASSWORDBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_STRBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 <span class="doccomment">/// All `HashedPasswords` start with this string.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STRPREFIX</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;$7$&quot;</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STRPREFIX</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_STRPREFIX</span>;
 
 <span class="doccomment">/// Safe base line for `OpsLimit` for interactive password hashing.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OPSLIMIT_INTERACTIVE</span>: <span class="ident">OpsLimit</span> <span class="op">=</span>
-    <span class="ident">OpsLimit</span>(<span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE</span> <span class="kw">as</span> <span class="ident">usize</span>);
+    <span class="ident">OpsLimit</span>(<span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE</span> <span class="kw">as</span> <span class="ident">usize</span>);
 
 <span class="doccomment">/// Safe base line for `MemLimit` for interactive password hashing.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MEMLIMIT_INTERACTIVE</span>: <span class="ident">MemLimit</span> <span class="op">=</span>
-    <span class="ident">MemLimit</span>(<span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE</span> <span class="kw">as</span> <span class="ident">usize</span>);
+    <span class="ident">MemLimit</span>(<span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE</span> <span class="kw">as</span> <span class="ident">usize</span>);
 
 <span class="doccomment">/// `OpsLimit` for highly sensitive data.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">OPSLIMIT_SENSITIVE</span>: <span class="ident">OpsLimit</span> <span class="op">=</span>
-    <span class="ident">OpsLimit</span>(<span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE</span> <span class="kw">as</span> <span class="ident">usize</span>);
+    <span class="ident">OpsLimit</span>(<span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_SENSITIVE</span> <span class="kw">as</span> <span class="ident">usize</span>);
 
 <span class="doccomment">/// `MemLimit` for highly sensitive data.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MEMLIMIT_SENSITIVE</span>: <span class="ident">MemLimit</span> <span class="op">=</span>
-    <span class="ident">MemLimit</span>(<span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE</span> <span class="kw">as</span> <span class="ident">usize</span>);
+    <span class="ident">MemLimit</span>(<span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_SENSITIVE</span> <span class="kw">as</span> <span class="ident">usize</span>);
 
 <span class="doccomment">/// `OpsLimit` represents the maximum number of computations to perform when</span>
 <span class="doccomment">/// using the functions in this module.</span>
@@ -282,12 +335,12 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MemLimit</span>(<span class="kw">pub</span> <span class="ident">usize</span>);
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `Salt` used for password hashing</span>
     <span class="ident">public</span> <span class="ident">Salt</span>(<span class="ident">SALTBYTES</span>);
 }
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `HashedPassword`is a password verifier generated from a password</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// A `HashedPassword` is zero-terminated, includes only ASCII characters and can</span>
@@ -300,7 +353,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// THREAD SAFETY: `gen_salt()` is thread-safe provided that you have called</span>
 <span class="doccomment">/// `sodiumoxide::init()` once before using any other function from sodiumoxide.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_salt</span>() <span class="op">-&gt;</span> <span class="ident">Salt</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_salt</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Salt</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">salt</span> <span class="op">=</span> <span class="ident">Salt</span>([<span class="number">0</span>; <span class="ident">SALTBYTES</span>]);
     <span class="ident">randombytes_into</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">salt</span>.<span class="number">0</span>);
     <span class="ident">salt</span>
@@ -335,22 +388,57 @@
 <span class="doccomment">/// The function returns `Ok(key)` on success and `Err(())` if the computation didn&#39;t</span>
 <span class="doccomment">/// complete, usually because the operating system refused to allocate the</span>
 <span class="doccomment">/// amount of requested memory.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_key</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">salt</span>: <span class="kw-2">&amp;</span><span class="ident">Salt</span>,
-                      <span class="ident">OpsLimit</span>(<span class="ident">opslimit</span>): <span class="ident">OpsLimit</span>,
-                      <span class="ident">MemLimit</span>(<span class="ident">memlimit</span>): <span class="ident">MemLimit</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_key</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
+    <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>],
+    <span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">salt</span>: <span class="kw-2">&amp;</span><span class="ident">Salt</span>,
+    <span class="ident">OpsLimit</span>(<span class="ident">opslimit</span>): <span class="ident">OpsLimit</span>,
+    <span class="ident">MemLimit</span>(<span class="ident">memlimit</span>): <span class="ident">MemLimit</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], ()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256</span>(<span class="ident">key</span>.<span class="ident">as_mut_ptr</span>(),
-                                                <span class="ident">key</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
-                                                <span class="ident">passwd</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
-                                                <span class="ident">passwd</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
-                                                <span class="ident">salt</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                                                <span class="ident">opslimit</span> <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
-                                                <span class="ident">memlimit</span>)
-    } <span class="op">==</span> <span class="number">0</span> {
+        <span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256</span>(
+            <span class="ident">key</span>.<span class="ident">as_mut_ptr</span>(),
+            <span class="ident">key</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
+            <span class="ident">passwd</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
+            <span class="ident">passwd</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
+            <span class="ident">salt</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
+            <span class="ident">opslimit</span> <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
+            <span class="ident">memlimit</span>,
+        )
+    } <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+    {
         <span class="prelude-val">Ok</span>(<span class="ident">key</span>)
     } <span class="kw">else</span> {
         <span class="prelude-val">Err</span>(())
     }
+}
+
+<span class="doccomment">/// `derive_key_interactive()` is a shortcut function for `derive_key()` with</span>
+<span class="doccomment">/// interactive limits (i.e. using `derive_key()` with `OPSLIMIT_INTERACTIVE`</span>
+<span class="doccomment">/// and `MEMLIMIT_INTERACTIVE`)</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_key_interactive</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
+    <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>],
+    <span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">salt</span>: <span class="kw-2">&amp;</span><span class="ident">Salt</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], ()<span class="op">&gt;</span> {
+    <span class="ident">derive_key</span>(
+        <span class="ident">key</span>,
+        <span class="ident">passwd</span>,
+        <span class="ident">salt</span>,
+        <span class="ident">OPSLIMIT_INTERACTIVE</span>,
+        <span class="ident">MEMLIMIT_INTERACTIVE</span>,
+    )
+}
+
+<span class="doccomment">/// `derive_key_sensitive()` is a shortcut function for `derive_key()` with</span>
+<span class="doccomment">/// sensitive limits (i.e. using `derive_key()` with `OPSLIMIT_SENSITIVE`</span>
+<span class="doccomment">/// and `MEMLIMIT_SENSITIVE`)</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_key_sensitive</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
+    <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>],
+    <span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">salt</span>: <span class="kw-2">&amp;</span><span class="ident">Salt</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], ()<span class="op">&gt;</span> {
+    <span class="ident">derive_key</span>(<span class="ident">key</span>, <span class="ident">passwd</span>, <span class="ident">salt</span>, <span class="ident">OPSLIMIT_SENSITIVE</span>, <span class="ident">MEMLIMIT_SENSITIVE</span>)
 }
 
 <span class="doccomment">/// The `pwhash()` returns a `HashedPassword` which</span>
@@ -367,33 +455,53 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The function returns `Ok(hashed_password)` on success and `Err(())` if it didn&#39;t complete</span>
 <span class="doccomment">/// successfully</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pwhash</span>(<span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">OpsLimit</span>(<span class="ident">opslimit</span>): <span class="ident">OpsLimit</span>,
-              <span class="ident">MemLimit</span>(<span class="ident">memlimit</span>): <span class="ident">MemLimit</span>) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashedPassword</span>, ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pwhash</span>(
+    <span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
+    <span class="ident">OpsLimit</span>(<span class="ident">opslimit</span>): <span class="ident">OpsLimit</span>,
+    <span class="ident">MemLimit</span>(<span class="ident">memlimit</span>): <span class="ident">MemLimit</span>,
+) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashedPassword</span>, ()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hp</span> <span class="op">=</span> <span class="ident">HashedPassword</span>([<span class="number">0</span>; <span class="ident">HASHEDPASSWORDBYTES</span>]);
     <span class="kw">if</span> <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_str</span>(<span class="ident">hp</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>,
-                                                    <span class="ident">passwd</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
-                                                    <span class="ident">passwd</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
-                                                    <span class="ident">opslimit</span> <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
-                                                    <span class="ident">memlimit</span>)
-    } <span class="op">==</span> <span class="number">0</span> {
+        <span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_str</span>(
+            <span class="ident">hp</span>.<span class="number">0</span>.<span class="ident">as_mut_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>,
+            <span class="ident">passwd</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
+            <span class="ident">passwd</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
+            <span class="ident">opslimit</span> <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
+            <span class="ident">memlimit</span>,
+        )
+    } <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+    {
         <span class="prelude-val">Ok</span>(<span class="ident">hp</span>)
     } <span class="kw">else</span> {
         <span class="prelude-val">Err</span>(())
     }
 }
 
+<span class="doccomment">/// `pwhash_interactive()` is a shortcut function for `pwhash()` with</span>
+<span class="doccomment">/// interactive limits (i.e. using `pwhash()` with `OPSLIMIT_INTERACTIVE`</span>
+<span class="doccomment">/// and `MEMLIMIT_INTERACTIVE`)</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pwhash_interactive</span>(<span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashedPassword</span>, ()<span class="op">&gt;</span> {
+    <span class="ident">pwhash</span>(<span class="ident">passwd</span>, <span class="ident">OPSLIMIT_INTERACTIVE</span>, <span class="ident">MEMLIMIT_INTERACTIVE</span>)
+}
+
+<span class="doccomment">/// `pwhash_sensitive()` is a shortcut function for `pwhash()` with</span>
+<span class="doccomment">/// sensitive limits (i.e. using `pwhash()` with `OPSLIMIT_SENSITIVE`</span>
+<span class="doccomment">/// and `MEMLIMIT_SENSITIVE`)</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pwhash_sensitive</span>(<span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashedPassword</span>, ()<span class="op">&gt;</span> {
+    <span class="ident">pwhash</span>(<span class="ident">passwd</span>, <span class="ident">OPSLIMIT_SENSITIVE</span>, <span class="ident">MEMLIMIT_SENSITIVE</span>)
+}
+
 <span class="doccomment">/// `pwhash_verify()` verifies that the password `str_` is a valid password</span>
 <span class="doccomment">/// verification string (as generated by `pwhash()`) for `passwd`</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// It returns `true` if the verification succeeds, and `false` on error.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pwhash_verify</span>(<span class="ident">hp</span>: <span class="kw-2">&amp;</span><span class="ident">HashedPassword</span>,
-                     <span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pwhash_verify</span>(<span class="ident">hp</span>: <span class="kw-2">&amp;</span><span class="ident">HashedPassword</span>, <span class="ident">passwd</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
     <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_str_verify</span>(<span class="ident">hp</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
-                                                           <span class="ident">passwd</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="op">*</span> <span class="kw">const</span> <span class="kw">_</span>,
-                                                           <span class="ident">passwd</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>)
-            <span class="op">==</span> <span class="number">0</span>
+        <span class="ident">ffi::crypto_pwhash_scryptsalsa208sha256_str_verify</span>(
+            <span class="ident">hp</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
+            <span class="ident">passwd</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
+            <span class="ident">passwd</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
+        ) <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
     }
 }
 
@@ -402,57 +510,50 @@
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
-    <span class="kw">fn</span> <span class="ident">test_match_strprefix</span>() {
-        <span class="comment">// Make sure that the hardcoded STRPREFIX matches with the prefix provided by</span>
-        <span class="comment">// the libsodium bindings.</span>
-        <span class="comment">// Note: The reason why we have to hardcode the STRPREFIX is because of a type</span>
-        <span class="comment">//       mismatch (and the issue of converting it to a str in</span>
-        <span class="comment">//       a constant expression):</span>
-        <span class="comment">//       &amp;&#39;static [u8; 4usize] != &amp;&#39;static str</span>
-        <span class="kw">let</span> <span class="ident">tmp</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_pwhash_scryptsalsa208sha256_STRPREFIX</span>;
-        <span class="macro">assert_eq</span><span class="macro">!</span>(
-            <span class="comment">// Trim null byte and convert to an str</span>
-            ::<span class="ident">std</span>::<span class="ident">str</span>::<span class="ident">from_utf8</span>(<span class="kw-2">&amp;</span><span class="ident">tmp</span>[..<span class="ident">tmp</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>]).<span class="ident">unwrap</span>(),
-            <span class="ident">STRPREFIX</span>
-        );
-    }
-
-    <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_derive_key</span>() {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">kb</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">32</span>];
-        <span class="kw">let</span> <span class="ident">salt</span> <span class="op">=</span> <span class="ident">Salt</span>([<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>,
-                         <span class="number">16</span>, <span class="number">17</span>, <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>, <span class="number">24</span>, <span class="number">25</span>, <span class="number">26</span>, <span class="number">27</span>, <span class="number">28</span>, <span class="number">29</span>, <span class="number">30</span>, <span class="number">31</span>]);
+        <span class="kw">let</span> <span class="ident">salt</span> <span class="op">=</span> <span class="ident">Salt</span>([
+            <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">10</span>, <span class="number">11</span>, <span class="number">12</span>, <span class="number">13</span>, <span class="number">14</span>, <span class="number">15</span>, <span class="number">16</span>, <span class="number">17</span>, <span class="number">18</span>, <span class="number">19</span>, <span class="number">20</span>, <span class="number">21</span>, <span class="number">22</span>, <span class="number">23</span>,
+            <span class="number">24</span>, <span class="number">25</span>, <span class="number">26</span>, <span class="number">27</span>, <span class="number">28</span>, <span class="number">29</span>, <span class="number">30</span>, <span class="number">31</span>,
+        ]);
         <span class="kw">let</span> <span class="ident">pw</span> <span class="op">=</span> <span class="string">b&quot;Correct Horse Battery Staple&quot;</span>;
         <span class="comment">// test vector generated by using libsodium</span>
-        <span class="kw">let</span> <span class="ident">key_expected</span> <span class="op">=</span> [<span class="number">0xf1</span>, <span class="number">0xbb</span>, <span class="number">0xb8</span>, <span class="number">0x7c</span>, <span class="number">0x43</span>, <span class="number">0x36</span>, <span class="number">0x5b</span>, <span class="number">0x03</span>,
-                            <span class="number">0x3b</span>, <span class="number">0x9a</span>, <span class="number">0xe8</span>, <span class="number">0x3e</span>, <span class="number">0x05</span>, <span class="number">0xef</span>, <span class="number">0xad</span>, <span class="number">0x25</span>,
-                            <span class="number">0xdb</span>, <span class="number">0x8d</span>, <span class="number">0x83</span>, <span class="number">0xb8</span>, <span class="number">0x3d</span>, <span class="number">0xb1</span>, <span class="number">0xde</span>, <span class="number">0xe3</span>,
-                            <span class="number">0x6b</span>, <span class="number">0xdb</span>, <span class="number">0xf5</span>, <span class="number">0x4d</span>, <span class="number">0xcd</span>, <span class="number">0x3a</span>, <span class="number">0x1a</span>, <span class="number">0x11</span>];
-        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">derive_key</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">kb</span>, <span class="ident">pw</span>, <span class="kw-2">&amp;</span><span class="ident">salt</span>,
-                             <span class="ident">OPSLIMIT_INTERACTIVE</span>, <span class="ident">MEMLIMIT_INTERACTIVE</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">key</span>, <span class="ident">key_expected</span>);
+        <span class="kw">let</span> <span class="ident">key_expected</span> <span class="op">=</span> [
+            <span class="number">0xf1</span>, <span class="number">0xbb</span>, <span class="number">0xb8</span>, <span class="number">0x7c</span>, <span class="number">0x43</span>, <span class="number">0x36</span>, <span class="number">0x5b</span>, <span class="number">0x03</span>, <span class="number">0x3b</span>, <span class="number">0x9a</span>, <span class="number">0xe8</span>, <span class="number">0x3e</span>, <span class="number">0x05</span>, <span class="number">0xef</span>,
+            <span class="number">0xad</span>, <span class="number">0x25</span>, <span class="number">0xdb</span>, <span class="number">0x8d</span>, <span class="number">0x83</span>, <span class="number">0xb8</span>, <span class="number">0x3d</span>, <span class="number">0xb1</span>, <span class="number">0xde</span>, <span class="number">0xe3</span>, <span class="number">0x6b</span>, <span class="number">0xdb</span>, <span class="number">0xf5</span>, <span class="number">0x4d</span>,
+            <span class="number">0xcd</span>, <span class="number">0x3a</span>, <span class="number">0x1a</span>, <span class="number">0x11</span>,
+        ];
+        <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">derive_key</span>(
+            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">kb</span>,
+            <span class="ident">pw</span>,
+            <span class="kw-2">&amp;</span><span class="ident">salt</span>,
+            <span class="ident">OPSLIMIT_INTERACTIVE</span>,
+            <span class="ident">MEMLIMIT_INTERACTIVE</span>,
+        )
+        .<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">key</span>, <span class="ident">key_expected</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_pwhash_verify</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">32usize</span> {
             <span class="kw">let</span> <span class="ident">pw</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">pwh</span> <span class="op">=</span> <span class="ident">pwhash</span>(<span class="kw-2">&amp;</span><span class="ident">pw</span>, <span class="ident">OPSLIMIT_INTERACTIVE</span>, <span class="ident">MEMLIMIT_INTERACTIVE</span>).<span class="ident">unwrap</span>();
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">pwhash_verify</span>(<span class="kw-2">&amp;</span><span class="ident">pwh</span>, <span class="kw-2">&amp;</span><span class="ident">pw</span>));
+            <span class="macro">assert!</span>(<span class="ident">pwhash_verify</span>(<span class="kw-2">&amp;</span><span class="ident">pwh</span>, <span class="kw-2">&amp;</span><span class="ident">pw</span>));
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_pwhash_verify_tamper</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">16usize</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pw</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">pwh</span> <span class="op">=</span> <span class="ident">pwhash</span>(<span class="kw-2">&amp;</span><span class="ident">pw</span>, <span class="ident">OPSLIMIT_INTERACTIVE</span>, <span class="ident">MEMLIMIT_INTERACTIVE</span>).<span class="ident">unwrap</span>();
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">pw</span>.<span class="ident">len</span>() {
-                <span class="ident">pw</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
-                <span class="macro">assert</span><span class="macro">!</span>(<span class="op">!</span><span class="ident">pwhash_verify</span>(<span class="kw-2">&amp;</span><span class="ident">pwh</span>, <span class="kw-2">&amp;</span><span class="ident">pw</span>));
-                <span class="ident">pw</span>[<span class="ident">j</span>] <span class="op">^=</span> <span class="number">0x20</span>;
+                <span class="ident">pw</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
+                <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">pwhash_verify</span>(<span class="kw-2">&amp;</span><span class="ident">pwh</span>, <span class="kw-2">&amp;</span><span class="ident">pw</span>));
+                <span class="ident">pw</span>[<span class="ident">j</span>] <span class="op">^</span><span class="op">=</span> <span class="number">0x20</span>;
             }
         }
     }
@@ -460,8 +561,8 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_serialisation</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
-        <span class="kw">use</span> <span class="ident">test_utils</span>::<span class="ident">round_trip</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
+        <span class="kw">use</span> <span class="ident">test_utils::round_trip</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">32usize</span> {
             <span class="kw">let</span> <span class="ident">pw</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">pwh</span> <span class="op">=</span> <span class="ident">pwhash</span>(<span class="kw-2">&amp;</span><span class="ident">pw</span>, <span class="ident">OPSLIMIT_INTERACTIVE</span>, <span class="ident">MEMLIMIT_INTERACTIVE</span>).<span class="ident">unwrap</span>();
@@ -471,5 +572,6 @@
         }
     }
 }
-</pre>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../../";window.currentCrate = "sodiumoxide";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+</pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="sodiumoxide" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script></body></html>

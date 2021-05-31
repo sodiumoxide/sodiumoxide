@@ -12,21 +12,6 @@ included, and carry their own copyright notices and license terms:
     Licensed under the SIL Open Font License, Version 1.1.
     See FiraSans-LICENSE.txt.
 
-* Heuristica (Heuristica-Italic.woff):
-
-    Copyright 1989, 1991 Adobe Systems Incorporated. All rights reserved.
-    Utopia is either a registered trademark or trademark of Adobe Systems
-    Incorporated in the United States and/or other countries. Used under
-    license.
-
-    Copyright 2006 Han The Thanh, Vntopia font family, http://vntex.sf.net
-
-    Copyright (c) 2008-2012, Andrey V. Panov (panov@canopus.iacp.dvo.ru),
-    with Reserved Font Name Heuristica.
-
-    Licensed under the SIL Open Font License, Version 1.1.
-    See Heuristica-LICENSE.txt.
-
 * rustdoc.css, main.js, and playpen.js:
 
     Copyright 2015 The Rust Developers.
@@ -38,7 +23,8 @@ included, and carry their own copyright notices and license terms:
     Copyright (c) Nicolas Gallagher and Jonathan Neal.
     Licensed under the MIT license (see LICENSE-MIT.txt).
 
-* Source Code Pro (SourceCodePro-Regular.woff, SourceCodePro-Semibold.woff):
+* Source Code Pro (SourceCodePro-Regular.ttf.woff,
+    SourceCodePro-Semibold.ttf.woff, SourceCodePro-It.ttf.woff):
 
     Copyright 2010, 2012 Adobe Systems Incorporated (http://www.adobe.com/),
     with Reserved Font Name 'Source'. All Rights Reserved. Source is a trademark
@@ -47,13 +33,14 @@ included, and carry their own copyright notices and license terms:
     Licensed under the SIL Open Font License, Version 1.1.
     See SourceCodePro-LICENSE.txt.
 
-* Source Serif Pro (SourceSerifPro-Regular.woff, SourceSerifPro-Bold.woff):
+* Source Serif 4 (SourceSerif4-Regular.ttf.woff, SourceSerif4-Bold.ttf.woff,
+    SourceSerif4-It.ttf.woff):
 
-    Copyright 2014 Adobe Systems Incorporated (http://www.adobe.com/), with
-    Reserved Font Name 'Source'. All Rights Reserved. Source is a trademark of
-    Adobe Systems Incorporated in the United States and/or other countries.
+    Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name
+    'Source'. All Rights Reserved. Source is a trademark of Adobe in the United
+    States and/or other countries.
 
     Licensed under the SIL Open Font License, Version 1.1.
-    See SourceSerifPro-LICENSE.txt.
+    See SourceSerif4-LICENSE.md.
 
 This copyright file is intended to be distributed with rustdoc output.

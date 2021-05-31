@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["sodiumoxide"] = [{"text":"impl <a class=\"trait\" href=\"sodiumoxide/crypto/sign/ed25519/trait.Verifier.html\" title=\"trait sodiumoxide::crypto::sign::ed25519::Verifier\">Verifier</a>&lt;<a class=\"struct\" href=\"sodiumoxide/crypto/sign/ed25519/struct.Signature.html\" title=\"struct sodiumoxide::crypto::sign::ed25519::Signature\">Signature</a>&gt; for <a class=\"struct\" href=\"sodiumoxide/crypto/sign/ed25519/struct.PublicKey.html\" title=\"struct sodiumoxide::crypto::sign::ed25519::PublicKey\">PublicKey</a>","synthetic":false,"types":["sodiumoxide::crypto::sign::ed25519::PublicKey"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

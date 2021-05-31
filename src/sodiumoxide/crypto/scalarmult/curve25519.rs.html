@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/crypto/scalarmult/curve25519.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>curve25519.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/crypto/scalarmult/curve25519.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>curve25519.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../sodiumoxide/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button">?</button>
+                <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -168,46 +171,38 @@
 <span id="168">168</span>
 <span id="169">169</span>
 <span id="170">170</span>
-<span id="171">171</span>
-<span id="172">172</span>
-<span id="173">173</span>
-<span id="174">174</span>
-</pre><pre class="rust ">
+</pre><pre class="rust">
 <span class="doccomment">//! `crypto_scalarmult_curve25519` specified in</span>
-<span class="doccomment">//! [Cryptography in NaCl](http://nacl.cr.yp.to/valid.html), Sections 2, 3, and 4.</span>
+<span class="doccomment">//! [Cryptography in `NaCl`](http://nacl.cr.yp.to/valid.html), Sections 2, 3, and 4.</span>
 <span class="doccomment">//! This function is conjectured to be strong. For background see Bernstein,</span>
 <span class="doccomment">//! &quot;Curve25519: new Diffie-Hellman speed records,&quot; Lecture Notes in Computer</span>
-<span class="doccomment">//! Science 3958 (2006), 207–228, http://cr.yp.to/papers.html#curve25519.</span>
+<span class="doccomment">//! Science 3958 (2006), 207–228, &lt;http://cr.yp.to/papers.html#curve25519&gt;.</span>
 <span class="kw">use</span> <span class="ident">ffi</span>;
 
 <span class="doccomment">/// Number of bytes in a `GroupElement`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GROUPELEMENTBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_scalarmult_curve25519_BYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">GROUPELEMENTBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi::crypto_scalarmult_curve25519_BYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 <span class="doccomment">/// Number of bytes in a `Scalar`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SCALARBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi</span>::<span class="ident">crypto_scalarmult_curve25519_SCALARBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">SCALARBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">ffi::crypto_scalarmult_curve25519_SCALARBYTES</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `Scalar` value (integer in byte representation)</span>
     <span class="ident">secret</span> <span class="ident">Scalar</span>(<span class="ident">SCALARBYTES</span>);
 }
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `GroupElement`</span>
     <span class="ident">secret</span> <span class="ident">GroupElement</span>(<span class="ident">GROUPELEMENTBYTES</span>);
 }
 
 <span class="doccomment">/// `scalarmult()` multiplies a group element `p`</span>
-<span class="doccomment">/// by an integer `n`. It returns the resulting group element</span>
-<span class="doccomment">/// `Ok(q)`.</span>
+<span class="doccomment">/// by an integer `n`. It returns the resulting group element `Ok(q)`.</span>
 <span class="doccomment">/// If the the `GroupElement` is all zero, `scalarmult()` returns `Err(())` since</span>
 <span class="doccomment">/// the resulting `GroupElement` would be all zero, no matter the `Scalar`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">scalarmult</span>(
-    <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>,
-    <span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="ident">GroupElement</span>,
-) <span class="op">-&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">GroupElement</span>, ()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">scalarmult</span>(<span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>, <span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="ident">GroupElement</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">GroupElement</span>, ()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">q</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">GROUPELEMENTBYTES</span>];
     <span class="kw">unsafe</span> {
-        <span class="kw">if</span> <span class="ident">ffi</span>::<span class="ident">crypto_scalarmult_curve25519</span>(<span class="ident">q</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(), <span class="ident">p</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>()) <span class="op">!=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">ffi::crypto_scalarmult_curve25519</span>(<span class="ident">q</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(), <span class="ident">p</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>()) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
             <span class="prelude-val">Err</span>(())
         } <span class="kw">else</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">GroupElement</span>(<span class="ident">q</span>))
@@ -218,10 +213,10 @@
 <span class="doccomment">/// `scalarmult_base()` computes the scalar product of a standard</span>
 <span class="doccomment">/// group element and an integer `n`. It returns the resulting</span>
 <span class="doccomment">/// group element `q`/</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">scalarmult_base</span>(<span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) <span class="op">-&gt;</span> <span class="ident">GroupElement</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">scalarmult_base</span>(<span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Scalar</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GroupElement</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">q</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">GROUPELEMENTBYTES</span>];
     <span class="kw">unsafe</span> {
-        <span class="ident">ffi</span>::<span class="ident">crypto_scalarmult_curve25519_base</span>(<span class="ident">q</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
+        <span class="ident">ffi::crypto_scalarmult_curve25519_base</span>(<span class="ident">q</span>.<span class="ident">as_mut_ptr</span>(), <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
     }
     <span class="ident">GroupElement</span>(<span class="ident">q</span>)
 }
@@ -229,7 +224,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes_into</span>;
+    <span class="kw">use</span> <span class="ident">randombytes::randombytes_into</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_vector_1</span>() {
@@ -245,7 +240,7 @@
             <span class="number">0xaa</span>, <span class="number">0x9b</span>, <span class="number">0x4e</span>, <span class="number">0x6a</span>,
         ];
         <span class="kw">let</span> <span class="ident">GroupElement</span>(<span class="ident">alicepk</span>) <span class="op">=</span> <span class="ident">scalarmult_base</span>(<span class="kw-2">&amp;</span><span class="ident">alicesk</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">alicepk</span> <span class="op">==</span> <span class="ident">alicepk_expected</span>);
+        <span class="macro">assert!</span>(<span class="ident">alicepk</span> <span class="op">=</span><span class="op">=</span> <span class="ident">alicepk_expected</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -262,7 +257,7 @@
             <span class="number">0x6f</span>, <span class="number">0x88</span>, <span class="number">0x2b</span>, <span class="number">0x4f</span>,
         ];
         <span class="kw">let</span> <span class="ident">GroupElement</span>(<span class="ident">bobpk</span>) <span class="op">=</span> <span class="ident">scalarmult_base</span>(<span class="kw-2">&amp;</span><span class="ident">bobsk</span>);
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">bobpk</span> <span class="op">==</span> <span class="ident">bobpk_expected</span>);
+        <span class="macro">assert!</span>(<span class="ident">bobpk</span> <span class="op">=</span><span class="op">=</span> <span class="ident">bobpk_expected</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -284,7 +279,7 @@
             <span class="number">0x1e</span>, <span class="number">0x16</span>, <span class="number">0x17</span>, <span class="number">0x42</span>,
         ];
         <span class="kw">let</span> <span class="ident">GroupElement</span>(<span class="ident">k</span>) <span class="op">=</span> <span class="ident">scalarmult</span>(<span class="kw-2">&amp;</span><span class="ident">alicesk</span>, <span class="kw-2">&amp;</span><span class="ident">bobpk</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">k</span> <span class="op">==</span> <span class="ident">k_expected</span>);
+        <span class="macro">assert!</span>(<span class="ident">k</span> <span class="op">=</span><span class="op">=</span> <span class="ident">k_expected</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -306,7 +301,7 @@
             <span class="number">0x1e</span>, <span class="number">0x16</span>, <span class="number">0x17</span>, <span class="number">0x42</span>,
         ];
         <span class="kw">let</span> <span class="ident">GroupElement</span>(<span class="ident">k</span>) <span class="op">=</span> <span class="ident">scalarmult</span>(<span class="kw-2">&amp;</span><span class="ident">bobsk</span>, <span class="kw-2">&amp;</span><span class="ident">alicepk</span>).<span class="ident">unwrap</span>();
-        <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">k</span> <span class="op">==</span> <span class="ident">k_expected</span>);
+        <span class="macro">assert!</span>(<span class="ident">k</span> <span class="op">=</span><span class="op">=</span> <span class="ident">k_expected</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
@@ -325,27 +320,28 @@
 <span class="kw">mod</span> <span class="ident">bench</span> {
     <span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">test</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-    <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes_into</span>;
+    <span class="kw">use</span> <span class="ident">randombytes::randombytes_into</span>;
 
     <span class="attribute">#[<span class="ident">bench</span>]</span>
-    <span class="kw">fn</span> <span class="ident">bench_scalarmult</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test</span>::<span class="ident">Bencher</span>) {
+    <span class="kw">fn</span> <span class="ident">bench_scalarmult</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test::Bencher</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">g</span> <span class="op">=</span> <span class="ident">GroupElement</span>([<span class="number">0u8</span>; <span class="ident">GROUPELEMENTBYTES</span>]);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">Scalar</span>([<span class="number">0u8</span>; <span class="ident">SCALARBYTES</span>]);
         <span class="ident">randombytes_into</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">g</span>.<span class="number">0</span>);
         <span class="ident">randombytes_into</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">s</span>.<span class="number">0</span>);
-        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">||</span> {
+        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="ident">scalarmult</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>, <span class="kw-2">&amp;</span><span class="ident">g</span>);
         });
     }
 
     <span class="attribute">#[<span class="ident">bench</span>]</span>
-    <span class="kw">fn</span> <span class="ident">bench_scalarmult_base</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test</span>::<span class="ident">Bencher</span>) {
+    <span class="kw">fn</span> <span class="ident">bench_scalarmult_base</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test::Bencher</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">Scalar</span>([<span class="number">0u8</span>; <span class="ident">SCALARBYTES</span>]);
         <span class="ident">randombytes_into</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">s</span>.<span class="number">0</span>);
-        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">||</span> {
+        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="ident">scalarmult_base</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>);
         });
     }
 }
-</pre>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../../";window.currentCrate = "sodiumoxide";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+</pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="sodiumoxide" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script></body></html>

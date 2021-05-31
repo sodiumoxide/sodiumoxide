@@ -1,77 +1,52 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `sodiumoxide` crate."><meta name="keywords" content="rust, rustlang, rust-lang, sodiumoxide"><title>sodiumoxide - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Crate sodiumoxide</p><div class="sidebar-elems"><a id='all-types' href='all.html'><p>See all sodiumoxide's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#functions">Functions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'sodiumoxide', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/sodiumoxide/lib.rs.html#1-127' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>sodiumoxide</a></span></h1><div class='docblock'><p>Rust bindings to the <a href="https://github.com/jedisct1/libsodium">sodium library</a>.</p>
-<p>Sodium is a portable implementation of Dan Bernsteins <a href="http://nacl.cr.yp.to">NaCl: Networking and
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Rust bindings to the sodium library."><meta name="keywords" content="rust, rustlang, rust-lang, sodiumoxide"><title>sodiumoxide - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings"></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../sodiumoxide/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><p class="location">Crate sodiumoxide</p><div class="block version"><p>Version 0.2.6</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all sodiumoxide's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#functions">Functions</a></li></ul></div><p class="location"></p><div id="sidebar-vars" data-name="sodiumoxide" data-ty="mod" data-relpath="../"></div><script defer src="../sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button">?</button>
+                <a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="">sodiumoxide</a><button id="copy-path" onclick="copy_path(this)"><img src="../clipboard.svg" width="19" height="18" alt="Copy item import"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/sodiumoxide/lib.rs.html#1-136" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Rust bindings to the <a href="https://github.com/jedisct1/libsodium">sodium library</a>.</p>
+<p>Sodium is a portable implementation of Dan Bernsteins <a href="http://nacl.cr.yp.to"><code>NaCl</code>: Networking and
 Cryptography library</a></p>
 <p>For most users, if you want public-key (asymmetric) cryptography you should use
-the functions in <code>crypto::box_</code> for encryption/decryption.</p>
+the functions in <a href="crypto/box_/index.html"><code>crypto::box_</code></a> for encryption/decryption.</p>
 <p>If you want secret-key (symmetric) cryptography you should be using the
-functions in <code>crypto::secretbox</code> for encryption/decryption.</p>
-<p>For public-key signatures you should use the functions in <code>crypto::sign</code> for
-signature creation and verification.</p>
-<p>Unless you know what you're doing you most certainly don't want to use the
-functions in <code>crypto::scalarmult</code>, <code>crypto::stream</code>, <code>crypto::auth</code> and
-<code>crypto::onetimeauth</code>.</p>
+functions in <a href="crypto/secretbox/index.html"><code>crypto::secretbox</code></a> for encryption/decryption.</p>
+<p>For public-key signatures you should use the functions in
+<a href="crypto/sign/index.html"><code>crypto::sign</code></a> for signature creation and verification.</p>
+<p>Unless you know what you’re doing you most certainly don’t want to use the
+functions in <a href="crypto/scalarmult/index.html"><code>crypto::scalarmult</code></a>,
+<a href="crypto/stream/index.html"><code>crypto::stream</code></a>, <a href="crypto/auth/index.html"><code>crypto::auth</code></a> and
+<a href="crypto/onetimeauth/index.html"><code>crypto::onetimeauth</code></a>.</p>
 <h2 id="thread-safety" class="section-header"><a href="#thread-safety">Thread Safety</a></h2>
-<p>All functions in this library are thread-safe provided that the <code>init()</code>
+<p>All functions in this library are thread-safe provided that the <a href="fn.init.html"><code>init()</code></a>
 function has been called during program execution.</p>
-<p>If <code>init()</code> hasn't been called then all functions except the random-number
+<p>If <a href="fn.init.html"><code>init()</code></a> hasn’t been called then all functions except the random-number
 generation functions and the key-generation functions are thread-safe.</p>
 <h1 id="public-key-cryptography" class="section-header"><a href="#public-key-cryptography">Public-key cryptography</a></h1>
-<p><code>crypto::box_</code></p>
-<p><code>crypto::sign</code></p>
+<p><a href="crypto/box_/index.html"><code>crypto::box_</code></a></p>
+<p><a href="crypto/sign/index.html"><code>crypto::sign</code></a></p>
 <h1 id="sealed-boxes" class="section-header"><a href="#sealed-boxes">Sealed boxes</a></h1>
-<p><code>crypto::sealedbox</code></p>
+<p><a href="crypto/sealedbox/index.html"><code>crypto::sealedbox</code></a></p>
 <h1 id="secret-key-cryptography" class="section-header"><a href="#secret-key-cryptography">Secret-key cryptography</a></h1>
-<p><code>crypto::secretbox</code></p>
-<p><code>crypto::stream</code></p>
-<p><code>crypto::auth</code></p>
-<p><code>crypto::onetimeauth</code></p>
+<p><a href="crypto/secretbox/index.html"><code>crypto::secretbox</code></a></p>
+<p><a href="crypto/secretstream/index.html"><code>crypto::secretstream</code></a></p>
+<p><a href="crypto/stream/index.html"><code>crypto::stream</code></a></p>
+<p><a href="crypto/auth/index.html"><code>crypto::auth</code></a></p>
+<p><a href="crypto/onetimeauth/index.html"><code>crypto::onetimeauth</code></a></p>
 <h1 id="low-level-functions" class="section-header"><a href="#low-level-functions">Low-level functions</a></h1>
-<p><code>crypto::hash</code></p>
-<p><code>crypto::verify</code></p>
-<p><code>crypto::shorthash</code></p>
-</div><h2 id='modules' class='section-header'><a href="#modules">Modules</a></h2>
-<table>
-                       <tr class=' module-item'>
-                           <td><a class="mod" href="crypto/index.html"
-                                  title='mod sodiumoxide::crypto'>crypto</a></td>
-                           <td class='docblock-short'>
-                                <p>Cryptographic functions</p>
-
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class="mod" href="randombytes/index.html"
-                                  title='mod sodiumoxide::randombytes'>randombytes</a></td>
-                           <td class='docblock-short'>
-                                <p>Cryptographic random number generation.</p>
-
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class="mod" href="utils/index.html"
-                                  title='mod sodiumoxide::utils'>utils</a></td>
-                           <td class='docblock-short'>
-                                <p>Libsodium utility functions</p>
-
-                           </td>
-                       </tr>
-                       <tr class=' module-item'>
-                           <td><a class="mod" href="version/index.html"
-                                  title='mod sodiumoxide::version'>version</a></td>
-                           <td class='docblock-short'>
-                                <p>Libsodium version functions</p>
-
-                           </td>
-                       </tr></table><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
-<table>
-                       <tr class=' module-item'>
-                           <td><a class="fn" href="fn.init.html"
-                                  title='fn sodiumoxide::init'>init</a></td>
-                           <td class='docblock-short'>
-                                <p><code>init()</code> initializes the sodium library and chooses faster versions of
+<p><a href="crypto/hash/index.html"><code>crypto::hash</code></a></p>
+<p><a href="crypto/kdf/index.html"><code>crypto::kdf</code></a></p>
+<p><a href="crypto/verify/index.html"><code>crypto::verify</code></a></p>
+<p><a href="crypto/shorthash/index.html"><code>crypto::shorthash</code></a></p>
+</div></details><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
+<table><tr class="module-item"><td><a class="mod" href="base64/index.html" title="sodiumoxide::base64 mod">base64</a></td><td class="docblock-short"><p>Libsodium Base64 encoding/decoding helper functions</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="crypto/index.html" title="sodiumoxide::crypto mod">crypto</a></td><td class="docblock-short"><p>Cryptographic functions</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="hex/index.html" title="sodiumoxide::hex mod">hex</a></td><td class="docblock-short"><p>Libsodium hexadecimal encoding/decoding helper functions</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="padding/index.html" title="sodiumoxide::padding mod">padding</a></td><td class="docblock-short"><p>Cryptographic padding routines</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="randombytes/index.html" title="sodiumoxide::randombytes mod">randombytes</a></td><td class="docblock-short"><p>Cryptographic random number generation.</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="utils/index.html" title="sodiumoxide::utils mod">utils</a></td><td class="docblock-short"><p>Libsodium utility functions</p>
+</td></tr><tr class="module-item"><td><a class="mod" href="version/index.html" title="sodiumoxide::version mod">version</a></td><td class="docblock-short"><p>Libsodium version functions</p>
+</td></tr></table><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<table><tr class="module-item"><td><a class="fn" href="fn.init.html" title="sodiumoxide::init fn">init</a></td><td class="docblock-short"><p><code>init()</code> initializes the sodium library and chooses faster versions of
 the primitives if possible. <code>init()</code> also makes the random number generation
 functions (<code>gen_key</code>, <code>gen_keypair</code>, <code>gen_nonce</code>, <code>randombytes</code>, <code>randombytes_into</code>)
 thread-safe</p>
-
-                           </td>
-                       </tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../";window.currentCrate = "sodiumoxide";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>
+</td></tr></table></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="sodiumoxide" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+    <script src="../main.js"></script></body></html>

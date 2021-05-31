@@ -1,4 +1,7 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source to the Rust file `src/crypto/stream/stream_macros.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>stream_macros.rs.html -- source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script src="../../../../storage.js"></script></head><body class="rustdoc source"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/crypto/stream/stream_macros.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>stream_macros.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings"></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png">
+<link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../sodiumoxide/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu"><img src="../../../../brush.svg" width="18" height="18" alt="Pick another theme!"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button">?</button>
+                <a id="settings-menu" href="../../../../settings.html"><img src="../../../../wheel.svg" width="18" height="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -252,37 +255,24 @@
 <span id="252">252</span>
 <span id="253">253</span>
 <span id="254">254</span>
-<span id="255">255</span>
-<span id="256">256</span>
-<span id="257">257</span>
-<span id="258">258</span>
-<span id="259">259</span>
-<span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
-</pre><pre class="rust ">
-<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">stream_module</span> ((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">stream_name</span>:<span class="ident">ident</span>,
+</pre><pre class="rust">
+<span class="macro">macro_rules!</span> <span class="ident">stream_module</span> ((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">stream_name</span>:<span class="ident">ident</span>,
                              <span class="macro-nonterminal">$</span><span class="macro-nonterminal">xor_name</span>:<span class="ident">ident</span>,
                              <span class="macro-nonterminal">$</span><span class="macro-nonterminal">xor_ic_name</span>:<span class="ident">ident</span>,
                              <span class="macro-nonterminal">$</span><span class="macro-nonterminal">keybytes</span>:<span class="ident">expr</span>,
-                             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">noncebytes</span>:<span class="ident">expr</span>) <span class="op">=&gt;</span> (
+                             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">noncebytes</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> (
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span> <span class="kw">use</span> <span class="ident">prelude</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">libc</span>::{<span class="ident">c_ulonglong</span>, <span class="ident">uint64_t</span>};
-<span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes_into</span>;
+<span class="kw">use</span> <span class="ident">libc::c_ulonglong</span>;
+<span class="kw">use</span> <span class="ident">randombytes::randombytes_into</span>;
 
 <span class="doccomment">/// Number of bytes in a `Key`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">KEYBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">keybytes</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">KEYBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">keybytes</span>;
 
 <span class="doccomment">/// Number of bytes in a `Nonce`.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NONCEBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">noncebytes</span> <span class="kw">as</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NONCEBYTES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">noncebytes</span>;
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `Key` for symmetric encryption</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// When a `Key` goes out of scope its contents</span>
@@ -290,7 +280,7 @@
     <span class="ident">secret</span> <span class="ident">Key</span>(<span class="ident">KEYBYTES</span>);
 }
 
-<span class="macro">new_type</span><span class="macro">!</span> {
+<span class="macro">new_type!</span> {
     <span class="doccomment">/// `Nonce` for symmetric encryption</span>
     <span class="ident">nonce</span> <span class="ident">Nonce</span>(<span class="ident">NONCEBYTES</span>);
 }
@@ -300,33 +290,19 @@
 <span class="doccomment">/// THREAD SAFETY: `gen_key()` is thread-safe provided that you have</span>
 <span class="doccomment">/// called `sodiumoxide::init()` once before using any other function</span>
 <span class="doccomment">/// from sodiumoxide.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_key</span>() <span class="op">-&gt;</span> <span class="ident">Key</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_key</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Key</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">key</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">KEYBYTES</span>];
     <span class="ident">randombytes_into</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">key</span>);
     <span class="ident">Key</span>(<span class="ident">key</span>)
-}
-
-<span class="doccomment">/// `gen_nonce()` randomly generates a nonce for symmetric encryption</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// THREAD SAFETY: `gen_nonce()` is thread-safe provided that you have</span>
-<span class="doccomment">/// called `sodiumoxide::init()` once before using any other function</span>
-<span class="doccomment">/// from sodiumoxide.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// NOTE: When using primitives with short nonces (e.g. salsa20, salsa208, salsa2012)</span>
-<span class="doccomment">/// do not use random nonces since the probability of nonce-collision is not negligible</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_nonce</span>() <span class="op">-&gt;</span> <span class="ident">Nonce</span> {
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nonce</span> <span class="op">=</span> [<span class="number">0</span>; <span class="ident">NONCEBYTES</span>];
-    <span class="ident">randombytes_into</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">nonce</span>);
-    <span class="ident">Nonce</span>(<span class="ident">nonce</span>)
 }
 
 <span class="doccomment">/// `stream()` produces a `len`-byte stream `c` as a function of a</span>
 <span class="doccomment">/// secret key `k` and a nonce `n`.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stream</span>(<span class="ident">len</span>: <span class="ident">usize</span>,
               <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-              <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+              <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
     <span class="kw">unsafe</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="ident">len</span>];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">len</span>];
         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">stream_name</span>(<span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
                      <span class="ident">c</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
                      <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
@@ -343,9 +319,9 @@
 <span class="doccomment">/// Consequently `stream_xor()` can also be used to decrypt.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stream_xor</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
                   <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
-                  <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+                  <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
     <span class="kw">unsafe</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="ident">m</span>.<span class="ident">len</span>()];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">m</span>.<span class="ident">len</span>()];
         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">xor_name</span>(<span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
                   <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
                   <span class="ident">m</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
@@ -383,14 +359,14 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stream_xor_ic</span>(<span class="ident">m</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
                      <span class="ident">n</span>: <span class="kw-2">&amp;</span><span class="ident">Nonce</span>,
                      <span class="ident">ic</span>: <span class="ident">u64</span>,
-                     <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) <span class="op">-&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+                     <span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">Key</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
     <span class="kw">unsafe</span> {
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="macro">vec</span><span class="macro">!</span>[<span class="number">0u8</span>; <span class="ident">m</span>.<span class="ident">len</span>()];
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">m</span>.<span class="ident">len</span>()];
         <span class="macro-nonterminal">$</span><span class="macro-nonterminal">xor_ic_name</span>(<span class="ident">c</span>.<span class="ident">as_mut_ptr</span>(),
                      <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
                      <span class="ident">m</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
                      <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                     <span class="ident">ic</span> <span class="kw">as</span> <span class="ident">uint64_t</span>,
+                     <span class="ident">ic</span> <span class="kw">as</span> <span class="ident">u64</span>,
                      <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
         <span class="ident">c</span>
     }
@@ -413,7 +389,7 @@
                      <span class="ident">m</span>.<span class="ident">as_ptr</span>(),
                      <span class="ident">m</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_ulonglong</span>,
                      <span class="ident">n</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>(),
-                     <span class="ident">ic</span> <span class="kw">as</span> <span class="ident">uint64_t</span>,
+                     <span class="ident">ic</span> <span class="kw">as</span> <span class="ident">u64</span>,
                      <span class="ident">k</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>());
     }
 }
@@ -422,78 +398,79 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test_m</span> {
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident">crypto::nonce::gen_random_nonce</span>;
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_encrypt_decrypt</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1024usize</span> {
             <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">gen_key</span>();
-            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
+            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_random_nonce</span>();
             <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">stream_xor</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
             <span class="kw">let</span> <span class="ident">m2</span> <span class="op">=</span> <span class="ident">stream_xor</span>(<span class="kw-2">&amp;</span><span class="ident">c</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">m</span> <span class="op">==</span> <span class="ident">m2</span>);
+            <span class="macro">assert!</span>(<span class="ident">m</span> <span class="op">=</span><span class="op">=</span> <span class="ident">m2</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_stream_xor</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1024usize</span> {
             <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">gen_key</span>();
-            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
+            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_random_nonce</span>();
             <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">stream</span>(<span class="ident">c</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
             <span class="kw">for</span> (<span class="ident">e</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="ident">c</span>.<span class="ident">iter_mut</span>().<span class="ident">zip</span>(<span class="ident">s</span>.<span class="ident">iter</span>()) {
-                <span class="kw-2">*</span><span class="ident">e</span> <span class="op">^=</span> <span class="kw-2">*</span><span class="ident">v</span>;
+                <span class="kw-2">*</span><span class="ident">e</span> <span class="op">^</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">v</span>;
             }
             <span class="kw">let</span> <span class="ident">c2</span> <span class="op">=</span> <span class="ident">stream_xor</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">c</span> <span class="op">==</span> <span class="ident">c2</span>);
+            <span class="macro">assert!</span>(<span class="ident">c</span> <span class="op">=</span><span class="op">=</span> <span class="ident">c2</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_stream_xor_inplace</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1024usize</span> {
             <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">gen_key</span>();
-            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
+            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_random_nonce</span>();
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">clone</span>();
             <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">stream</span>(<span class="ident">c</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
             <span class="kw">for</span> (<span class="ident">e</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="ident">c</span>.<span class="ident">iter_mut</span>().<span class="ident">zip</span>(<span class="ident">s</span>.<span class="ident">iter</span>()) {
-                <span class="kw-2">*</span><span class="ident">e</span> <span class="op">^=</span> <span class="kw-2">*</span><span class="ident">v</span>;
+                <span class="kw-2">*</span><span class="ident">e</span> <span class="op">^</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">v</span>;
             }
             <span class="ident">stream_xor_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
-            <span class="macro">assert</span><span class="macro">!</span>(<span class="ident">c</span> <span class="op">==</span> <span class="ident">m</span>);
+            <span class="macro">assert!</span>(<span class="ident">c</span> <span class="op">=</span><span class="op">=</span> <span class="ident">m</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_stream_xor_ic_same</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1024usize</span> {
             <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">gen_key</span>();
-            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
+            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_random_nonce</span>();
             <span class="kw">let</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
             <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">stream_xor</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
             <span class="kw">let</span> <span class="ident">c_ic</span> <span class="op">=</span> <span class="ident">stream_xor_ic</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
-            <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">c</span>, <span class="ident">c_ic</span>);
+            <span class="macro">assert_eq!</span>(<span class="ident">c</span>, <span class="ident">c_ic</span>);
         }
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_stream_xor_ic_inplace</span>() {
-        <span class="kw">use</span> <span class="ident">randombytes</span>::<span class="ident">randombytes</span>;
+        <span class="kw">use</span> <span class="ident">randombytes::randombytes</span>;
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1024usize</span> {
             <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">gen_key</span>();
-            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
+            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_random_nonce</span>();
             <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">10</span> {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">randombytes</span>(<span class="ident">i</span>);
                 <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">stream_xor_ic</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="ident">j</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
                 <span class="ident">stream_xor_ic_inplace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="ident">j</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
-                <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">m</span>, <span class="ident">c</span>);
+                <span class="macro">assert_eq!</span>(<span class="ident">m</span>, <span class="ident">c</span>);
             }
         }
     }
@@ -501,10 +478,10 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;serde&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_serialisation</span>() {
-        <span class="kw">use</span> <span class="ident">test_utils</span>::<span class="ident">round_trip</span>;
+        <span class="kw">use</span> <span class="ident">test_utils::round_trip</span>;
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1024usize</span> {
             <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">gen_key</span>();
-            <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
+            <span class="kw">let</span> <span class="ident">n</span>: <span class="ident">Nonce</span> <span class="op">=</span> <span class="ident">gen_random_nonce</span>();
             <span class="ident">round_trip</span>(<span class="ident">k</span>);
             <span class="ident">round_trip</span>(<span class="ident">n</span>);
         }
@@ -521,10 +498,10 @@
                                       <span class="number">128</span>, <span class="number">256</span>, <span class="number">512</span>, <span class="number">1024</span>, <span class="number">2048</span>, <span class="number">4096</span>];
 
     <span class="attribute">#[<span class="ident">bench</span>]</span>
-    <span class="kw">fn</span> <span class="ident">bench_stream</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test</span>::<span class="ident">Bencher</span>) {
+    <span class="kw">fn</span> <span class="ident">bench_stream</span>(<span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">test::Bencher</span>) {
         <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="ident">gen_key</span>();
-        <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_nonce</span>();
-        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">||</span> {
+        <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">gen_random_nonce</span>();
+        <span class="ident">b</span>.<span class="ident">iter</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="kw">for</span> <span class="ident">size</span> <span class="kw">in</span> <span class="ident">BENCH_SIZES</span>.<span class="ident">iter</span>() {
                 <span class="ident">stream</span>(<span class="kw-2">*</span><span class="ident">size</span>, <span class="kw-2">&amp;</span><span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="ident">k</span>);
             }
@@ -533,5 +510,6 @@
 }
 
 ));
-</pre>
-</section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../../../../";window.currentCrate = "sodiumoxide";</script><script src="../../../../aliases.js"></script><script src="../../../../main.js"></script><script defer src="../../../../search-index.js"></script></body></html>
+</pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="sodiumoxide" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+    <script src="../../../../main.js"></script><script src="../../../../source-script.js"></script><script src="../../../../source-files.js"></script></body></html>

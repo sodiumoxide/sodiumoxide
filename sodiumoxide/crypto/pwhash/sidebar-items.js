@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["scryptsalsa208sha256","`crypto_pwhash_scryptsalsa208sha256`, a particular combination of Scrypt, Salsa20/8 and SHA-256"]]});
+initSidebarItems({"mod":[["argon2i13","Argon2 summarizes the state of the art in the design of memory-hard functions."],["argon2id13","Argon2 summarizes the state of the art in the design of memory-hard functions."],["scryptsalsa208sha256","`crypto_pwhash_scryptsalsa208sha256`, a particular combination of Scrypt, Salsa20/8 and SHA-256"]]});
