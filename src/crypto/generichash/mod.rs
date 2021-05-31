@@ -34,9 +34,9 @@
 //! ```
 use ffi::{
     crypto_generichash, crypto_generichash_BYTES, crypto_generichash_BYTES_MAX,
-    crypto_generichash_BYTES_MIN, crypto_generichash_KEYBYTES_MAX, crypto_generichash_KEYBYTES_MIN,
-    crypto_generichash_final, crypto_generichash_init, crypto_generichash_state,
-    crypto_generichash_update,
+    crypto_generichash_BYTES_MIN, crypto_generichash_KEYBYTES, crypto_generichash_KEYBYTES_MAX,
+    crypto_generichash_KEYBYTES_MIN, crypto_generichash_final, crypto_generichash_init,
+    crypto_generichash_state, crypto_generichash_update,
 };
 
 use libc::c_ulonglong;
@@ -52,11 +52,17 @@ pub const DIGEST_MIN: usize = crypto_generichash_BYTES_MIN as usize;
 /// Maximum of allowed bytes in a `Digest`
 pub const DIGEST_MAX: usize = crypto_generichash_BYTES_MAX as usize;
 
+/// Recommended `Digest` size
+pub const DIGEST_RECOMMENDED: usize = crypto_generichash_BYTES as usize;
+
 /// Minimium of allowed bytes in a key
 pub const KEY_MIN: usize = crypto_generichash_KEYBYTES_MIN as usize;
 
 /// Maximum of allowed bytes in a key
 pub const KEY_MAX: usize = crypto_generichash_KEYBYTES_MAX as usize;
+
+/// Recommended key size
+pub const KEY_RECOMMENDED: usize = crypto_generichash_KEYBYTES as usize;
 
 /// `State` contains the state for multi-part (streaming) hash computations. This allows the caller
 /// to process a message as a sequence of multiple chunks.
