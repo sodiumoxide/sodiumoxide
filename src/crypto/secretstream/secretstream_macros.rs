@@ -199,14 +199,10 @@ impl Stream<Push> {
     /// message `m` and its `tag`. Optionally includes additional data `ad`,
     /// which is not encrypted.
     pub fn push(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag) -> Result<Vec<u8>, ()> {
-        let buf_len = self.push_check(m, tag)?;
+        self.push_check(m, tag)?;
 
-        let mut buf = Vec::with_capacity(buf_len);
-        // SAFETY: The initialisation of buf via Vec::with_capacity(buf_len) ensures that the
-        // vector has at least m.len() + $abytes of capacity.
-        unsafe {
-            self.push_impl(m, ad, tag, &mut buf)?;
-        }
+        let mut buf = Vec::new();
+        self.push_impl(m, ad, tag, &mut buf)?;
         Ok(buf)
     }
 
@@ -216,14 +212,8 @@ impl Stream<Push> {
     ///
     /// The encrypted message is written to the `out` vector, overwriting any existing data there.
     pub fn push_to_vec(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, out: &mut Vec<u8>) -> Result<(), ()> {
-        let buf_len = self.push_check(m, tag)?;
-        out.clear();
-        out.reserve(buf_len);
-        // SAFETY: The previous call to out.reserve(buf_len) ensures that the vector has at least
-        // m.len() + $abytes of capacity.
-        unsafe {
-            self.push_impl(m, ad, tag, out)
-        }
+        self.push_check(m, tag)?;
+        self.push_impl(m, ad, tag, out)
     }
 
     /// All data (including optional fields) is authenticated. Encrypts a
@@ -235,8 +225,8 @@ impl Stream<Push> {
     /// ABYTES` bytes. An error will be returned if the slice is not long enough. If the push is
     /// successful, the length of data written to the slice will be returned.
     pub fn push_to_slice(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, out: &mut [u8]) -> Result<usize, ()> {
-        let buf_len = self.push_check(m, tag)?;
-        if out.len() < buf_len {
+        self.push_check(m, tag)?;
+        if out.len() < self.ciphertext_len(m) {
             return Err(());
         }
         // SAFETY: The previous if block ensures that the slice has at least m.len() + $abytes of
@@ -246,7 +236,7 @@ impl Stream<Push> {
         }
     }
 
-    fn push_check(&mut self, m: &[u8], tag: Tag) -> Result<usize, ()> {
+    fn push_check(&mut self, m: &[u8], tag: Tag) -> Result<(), ()> {
         if self.finalized {
             return Err(());
         }
@@ -257,13 +247,24 @@ impl Stream<Push> {
         if tag == Tag::Final {
             self.finalized = true;
         }
-        Ok(m_len + ABYTES)
+        Ok(())
     }
 
-    // SAFETY: buf must have a capacity of at least m.len() + $abytes.
-    unsafe fn push_impl(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, buf: &mut Vec<u8>) -> Result<(), ()> {
-        let c_len = self.push_impl_ptr(m, ad, tag, buf.as_mut_ptr())?;
-        buf.set_len(c_len);
+    // Avoid duplication of ciphertext length calculation
+    fn ciphertext_len(&self, m: &[u8]) -> usize {
+        m.len() + ABYTES
+    }
+
+    fn push_impl(&mut self, m: &[u8], ad: Option<&[u8]>, tag: Tag, buf: &mut Vec<u8>) -> Result<(), ()> {
+        buf.clear();
+        buf.reserve(self.ciphertext_len(m));
+        // SAFETY: The call to buf.reserve() above ensures that the vector has sufficient capacity
+        // to store the ciphertext. The buf.set_len() call is safe because it will only be reached
+        // if the push is successful, and c_len bytes are written to buf.
+        unsafe {
+            let c_len = self.push_impl_ptr(m, ad, tag, buf.as_mut_ptr())?;
+            buf.set_len(c_len);
+        }
         Ok(())
     }
 
@@ -344,13 +345,10 @@ impl Stream<Pull> {
     /// Applications will typically use a `while stream.is_not_finalized()`
     /// loop to authenticate and decrypt a stream of messages.
     pub fn pull(&mut self, c: &[u8], ad: Option<&[u8]>) -> Result<(Vec<u8>, Tag), ()> {
-        let m_len = self.pull_check(c)?;
-        let mut buf = Vec::with_capacity(m_len);
-        // SAFETY: The initialisation of buf via Vec::with_capacity(m_len) ensures that the vector
-        // has at least c.len() - $abytes of capacity.
-        let tag = unsafe {
-            self.pull_impl(c, ad, &mut buf)?
-        };
+        self.pull_check(c)?;
+
+        let mut buf = Vec::new();
+        let tag = self.pull_impl(c, ad, &mut buf)?;
         Ok((buf, tag))
     }
 
@@ -368,14 +366,8 @@ impl Stream<Pull> {
     ///
     /// The decrypted message is written to the `out` vector, overwriting any existing data there.
     pub fn pull_to_vec(&mut self, c: &[u8], ad: Option<&[u8]>, out: &mut Vec<u8>) -> Result<Tag, ()> {
-        let m_len = self.pull_check(c)?;
-        out.clear();
-        out.reserve(m_len);
-        // SAFETY: The previous call to out.reserve(m_len) ensures that the vector has at least
-        // c.len() - $abytes of capacity.
-        unsafe {
-            self.pull_impl(c, ad, out)
-        }
+        self.pull_check(c)?;
+        self.pull_impl(c, ad, out)
     }
 
     /// Verifies that `c` is a valid ciphertext with a correct authentication tag
@@ -397,8 +389,8 @@ impl Stream<Pull> {
     /// successful, the length of the data written to the slice will be returned, alongside the
     /// decrypted message tag.
     pub fn pull_to_slice(&mut self, c: &[u8], ad: Option<&[u8]>, out: &mut [u8]) -> Result<(Tag, usize), ()> {
-        let m_len = self.pull_check(c)?;
-        if out.len() < m_len {
+        self.pull_check(c)?;
+        if out.len() < self.plaintext_len(c) {
             return Err(());
         }
         // SAFETY: The previous if block ensures that the slice has at least c.len() - $abytes of
@@ -408,7 +400,7 @@ impl Stream<Pull> {
         }
     }
 
-    fn pull_check(&self, c: &[u8]) -> Result<usize, ()> {
+    fn pull_check(&self, c: &[u8]) -> Result<(), ()> {
         if self.finalized {
             return Err(());
         }
@@ -421,14 +413,24 @@ impl Stream<Pull> {
         if m_len > messagebytes_max() {
             return Err(());
         }
-        Ok(m_len)
+        Ok(())
     }
 
-    // SAFETY: buf must have a capacity of at least c.len() - $abytes.
-    unsafe fn pull_impl(&mut self, c: &[u8], ad: Option<&[u8]>, buf: &mut Vec<u8>) -> Result<Tag, ()> {
-        let (tag, m_len) = self.pull_impl_ptr(c, ad, buf.as_mut_ptr())?;
-        buf.set_len(m_len);
-        Ok(tag)
+    fn plaintext_len(&self, c: &[u8]) -> usize {
+        c.len() - ABYTES
+    }
+
+    fn pull_impl(&mut self, c: &[u8], ad: Option<&[u8]>, buf: &mut Vec<u8>) -> Result<Tag, ()> {
+        buf.clear();
+        buf.reserve(self.plaintext_len(c));
+        // SAFETY: The call to buf.reserve ensures the vector has sufficient capacity allocated to
+        // store the plaintext. The buf.set_len call is safe because it will only be reached if the
+        // pull is successful, and m_len bytes are written to buf.
+        unsafe {
+            let (tag, m_len) = self.pull_impl_ptr(c, ad, buf.as_mut_ptr())?;
+            buf.set_len(m_len);
+            Ok(tag)
+        }
     }
 
     // SAFETY: buf must be a mutable pointer to at least c.len() - $abytes of allocated memory, to
