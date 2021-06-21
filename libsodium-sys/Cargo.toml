@@ -9,7 +9,7 @@ links = "sodium"
 name = "libsodium-sys"
 repository = "https://github.com/sodiumoxide/sodiumoxide.git"
 categories = ["cryptography", "api-bindings"]
-version = "0.2.6"
+version = "0.2.7"
 
 [build-dependencies]
 pkg-config = "0.3"

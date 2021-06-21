@@ -1,3 +1,14 @@
+# 0.2.7 (Jun 21, 2021)
+
+* Add ed25519 to x25519 conversion methods (#456)
+* Update prebuilt windows binaries to those published at 2020-12-31 at libsodium.org
+* Update libsodium submodule to stable branch commit 8acd227
+* Fix no_std build
+* Expose the sodium_pad and sodium_unpad functions
+* Switch from using xcopy to using walkdir + fs::copy in build script
+* Add support for the AES256-GCM AEAD construction
+* Expose randombytes_buf_deterministic function (#431)
+
 # 0.2.6 (Jul 19, 2020)
 
 * Remove support for using vcpkg for windows (msvc) builds since it was undertested
