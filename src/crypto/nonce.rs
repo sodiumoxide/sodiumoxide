@@ -4,7 +4,7 @@ use randombytes::randombytes_into;
 /// from an array of bytes, e.g. to generically create random nonces.
 pub trait Nonce {
     type Bytes: Default + AsMut<[u8]>;
-    fn from_bytes(Self::Bytes) -> Self;
+    fn from_bytes(bs: Self::Bytes) -> Self;
 }
 
 /// `gen_random_nonce()` randomly generates a nonce for symmetric encryption
