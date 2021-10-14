@@ -109,6 +109,7 @@ pub mod padding;
 pub mod randombytes;
 pub mod utils;
 pub mod version;
+pub mod vrf;
 
 #[cfg(test)]
 mod test_utils;
