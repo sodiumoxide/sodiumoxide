@@ -1,3 +1,19 @@
+[DEPRECATED]
+
+This project has reached the end of its development as a cryptographic library
+for rust. Feel free to browse the code, and feel free to use it, but it will
+not see any more updates (unless a security issue arises, those will be fixed).
+
+The cryptographic landscape of rust has vastly changed since this library was
+introduced to the community, and we believe that if you need a featureset that
+goes beyond what this library delivers there are other libraries that would
+work well.
+
+It's been fun, but the last couple of years I haven't been able to give this
+library the attention I feel that it deserves, so now it's time to formally
+deprecate it.
+
+
 # sodiumoxide
 
 |Crate|Documentation|Gitter|
