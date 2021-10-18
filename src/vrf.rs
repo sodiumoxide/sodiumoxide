@@ -1,4 +1,4 @@
-//! Libsodium Base64 encoding/decoding helper functions
+//! Libsodium VRF helper functions
 use ffi;
 #[cfg(not(feature = "std"))]
 use prelude::*;
@@ -188,6 +188,8 @@ mod tests {
 
     #[test]
     fn test_vrf_test_vectors() {
+        ::init().unwrap();
+
         test_vector(
 		String::from("9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60"), //sk
 		String::from("d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"), //pk
