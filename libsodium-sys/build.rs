@@ -149,7 +149,11 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
     let build_compiler = cc::Build::new().get_compiler();
     let mut compiler = build_compiler.path().to_str().unwrap().to_string();
     let mut cflags = build_compiler.cflags_env().into_string().unwrap();
-    let mut host_arg = format!("--host={}", target);
+    let mut host_arg = format!("--host={}", if target == "riscv64gc-unknown-linux-gnu" {
+        "riscv64-unknown-linux-gnu"
+    } else {
+        target
+    });
     let mut cross_compiling = target != env::var("HOST").unwrap();
     if target.contains("-ios") {
         // Determine Xcode directory path
