@@ -24,7 +24,8 @@ pub struct VrfProof([u8; 80]);
 /// The VRF scheme guarantees that such output will be unique
 #[derive(PartialEq, Debug)]
 pub struct VrfOutput([u8; 64]);
-type HashID = [u8; 2]; // This is a bit oversimplified
+
+type HashID<'a> = &'a str;
 
 /// Trait for types that can be encoded into byte slices
 pub trait Hashable {
@@ -34,8 +35,7 @@ pub trait Hashable {
 
 fn hash_rep<H: Hashable>(h: H) -> Vec<u8> {
     let (hashid, data) = h.to_be_hashed();
-    let mut r = vec![];
-    r.extend_from_slice(&hashid);
+    let mut r = hashid.as_bytes().to_vec();
     r.extend_from_slice(&data);
     r
 }
