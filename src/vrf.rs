@@ -2,7 +2,6 @@
 use ffi;
 #[cfg(not(feature = "std"))]
 use prelude::*;
-//use std::ptr;
 
 /// defining public key length
 pub const VRF_PUBKEY_BYTE_LENGTH: usize = ffi::crypto_vrf_PUBLICKEYBYTES as usize;
@@ -30,7 +29,7 @@ type HashID = [u8; 2]; // This is a bit oversimplified
 /// Trait for types that can be encoded into byte slices
 pub trait Hashable {
     /// Encode type into a hashID and byte slice
-    fn to_be_hashed(&self) -> (HashID, &'static [u8]);
+    fn to_be_hashed(&self) -> (HashID, Vec<u8>);
 }
 
 fn hash_rep<H: Hashable>(h: H) -> Vec<u8> {
