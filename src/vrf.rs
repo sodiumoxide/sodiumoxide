@@ -17,7 +17,7 @@ pub struct VrfPubkey([u8; VRF_PUBKEY_BYTE_LENGTH]);
 
 /// A VrfProof for a message can be generated with a secret key and verified against a public key, like a signature.
 /// Proofs are malleable, however, for a given message and public key, the VRF output that can be computed from a proof is unique.
-#[derive(PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct VrfProof([u8; 80]);
 
 /// VrfOutput is a 64-byte pseudorandom value that can be computed from a VrfProof.
@@ -25,6 +25,7 @@ pub struct VrfProof([u8; 80]);
 #[derive(PartialEq, Debug)]
 pub struct VrfOutput([u8; 64]);
 
+/// HashID hashed object identifier
 pub type HashID<'a> = &'a str;
 
 /// Trait for types that can be encoded into byte slices
