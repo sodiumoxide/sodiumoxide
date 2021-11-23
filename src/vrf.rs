@@ -25,7 +25,7 @@ pub struct VrfProof([u8; 80]);
 #[derive(PartialEq, Debug)]
 pub struct VrfOutput([u8; 64]);
 
-type HashID<'a> = &'a str;
+pub type HashID<'a> = &'a str;
 
 /// Trait for types that can be encoded into byte slices
 pub trait Hashable {
