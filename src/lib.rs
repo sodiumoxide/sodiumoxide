@@ -69,6 +69,7 @@ extern crate ed25519;
 extern crate libc;
 #[cfg(any(test, feature = "serde"))]
 extern crate serde;
+extern crate sha2;
 #[cfg(not(feature = "std"))]
 #[macro_use]
 extern crate alloc;

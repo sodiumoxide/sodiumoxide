@@ -3,6 +3,9 @@ use ffi;
 #[cfg(not(feature = "std"))]
 use prelude::*;
 
+use sha2::{Digest, Sha512Trunc256};
+use std::convert::TryInto;
+
 /// defining public key length
 pub const VRF_PUBKEY_BYTE_LENGTH: usize = ffi::crypto_vrf_PUBLICKEYBYTES as usize;
 
@@ -28,10 +31,40 @@ pub struct VrfOutput([u8; 64]);
 /// HashID hashed object identifier
 pub type HashID<'a> = &'a str;
 
+/// Digest represents a 32-byte value holding the 256-bit Hash digest.
+pub struct CryptoDigest([u8; 32]);
+
+impl CryptoDigest {
+    /// Create a new CryptoDigest from a 32-byte slice
+    pub fn new(d: [u8; 32]) -> CryptoDigest {
+        CryptoDigest(d)
+    }
+}
+
 /// Trait for types that can be encoded into byte slices
 pub trait Hashable {
     /// Encode type into a hashID and byte slice
     fn to_be_hashed(&self) -> (HashID, Vec<u8>);
+}
+
+/// HashObj computes a hash of a Hashable object and its type
+pub fn hash_obj<H: Hashable>(h: H) -> CryptoDigest {
+    hash(hash_rep(h))
+}
+
+/// Hash computes the SHASum512_256 hash of an array of bytes
+pub fn hash(h: Vec<u8>) -> CryptoDigest {
+    let mut hasher = Sha512Trunc256::new();
+
+    // write input message
+    hasher.update(h);
+
+    // read hash digest and consume hasher
+    let r: [u8; 32] = hasher
+        .finalize()
+        .try_into()
+        .expect("Hashing failed due to wrong lenght");
+    CryptoDigest(r)
 }
 
 fn hash_rep<H: Hashable>(h: H) -> Vec<u8> {
