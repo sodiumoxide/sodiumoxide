@@ -32,6 +32,7 @@ pub struct VrfOutput([u8; 64]);
 pub type HashID<'a> = &'a str;
 
 /// Digest represents a 32-byte value holding the 256-bit Hash digest.
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct CryptoDigest([u8; 32]);
 
 impl CryptoDigest {
