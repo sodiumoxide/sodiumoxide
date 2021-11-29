@@ -65,7 +65,7 @@ pub fn hash(h: Vec<u8>) -> CryptoDigest {
         .finalize()
         .try_into()
         .expect("Hashing failed due to wrong lenght");
-    CryptoDigest(r)
+    CryptoDigest::new(r)
 }
 
 fn hash_rep<H: Hashable>(h: H) -> Vec<u8> {
