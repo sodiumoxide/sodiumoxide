@@ -40,6 +40,11 @@ impl CryptoDigest {
     pub fn new(d: [u8; 32]) -> CryptoDigest {
         CryptoDigest(d)
     }
+
+    /// Return CryptoDigest as a 32 long array of bytes
+    pub fn as_byte_array(&self) -> [u8; 32] {
+        self.0
+    }
 }
 
 /// Trait for types that can be encoded into byte slices
