@@ -28,6 +28,13 @@ pub struct VrfProof([u8; 80]);
 #[derive(PartialEq, Debug)]
 pub struct VrfOutput([u8; 64]);
 
+impl VrfOutput {
+    /// VrfOutput as a bytes vector
+    pub fn to_vec(&self) -> Vec<u8> {
+        self.0.to_vec()
+    }
+}
+
 /// HashID hashed object identifier
 pub type HashID<'a> = &'a str;
 
