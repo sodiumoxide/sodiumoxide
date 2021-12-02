@@ -14,9 +14,9 @@ pub const VRF_PUBKEY_BYTE_LENGTH: usize = ffi::crypto_vrf_PUBLICKEYBYTES as usiz
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub struct VrfPrivKey([u8; 64]);
 
-/// A VrfPubkey is a public key that can be used to verify VRF proofs.
+/// A VrfPubKey is a public key that can be used to verify VRF proofs.
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct VrfPubkey([u8; VRF_PUBKEY_BYTE_LENGTH]);
+pub struct VrfPubKey([u8; VRF_PUBKEY_BYTE_LENGTH]);
 
 /// A VrfProof for a message can be generated with a secret key and verified against a public key, like a signature.
 /// Proofs are malleable, however, for a given message and public key, the VRF output that can be computed from a proof is unique.
@@ -88,9 +88,9 @@ fn hash_rep<H: Hashable>(h: H) -> Vec<u8> {
 }
 
 /// VrfKeygenFromSeed deterministically generates a VRF keypair from 32 bytes of (secret) entropy.
-pub fn vrf_keygen_from_seed(seed: [u8; 32]) -> (VrfPubkey, VrfPrivKey) {
+pub fn vrf_keygen_from_seed(seed: [u8; 32]) -> (VrfPubKey, VrfPrivKey) {
     unsafe {
-        let mut pubkey = VrfPubkey([0; VRF_PUBKEY_BYTE_LENGTH]);
+        let mut pubkey = VrfPubKey([0; VRF_PUBKEY_BYTE_LENGTH]);
         let mut privkey = VrfPrivKey([0; 64]);
         ffi::crypto_vrf_keypair_from_seed(
             pubkey.0.as_mut_ptr(),
@@ -102,9 +102,9 @@ pub fn vrf_keygen_from_seed(seed: [u8; 32]) -> (VrfPubkey, VrfPrivKey) {
 }
 
 /// VrfKeygen generates a random VRF keypair.
-pub fn vrf_keygen() -> (VrfPubkey, VrfPrivKey) {
+pub fn vrf_keygen() -> (VrfPubKey, VrfPrivKey) {
     unsafe {
-        let mut pubkey = VrfPubkey([0; VRF_PUBKEY_BYTE_LENGTH]);
+        let mut pubkey = VrfPubKey([0; VRF_PUBKEY_BYTE_LENGTH]);
         let mut privkey = VrfPrivKey([0; 64]);
         ffi::crypto_vrf_keypair(pubkey.0.as_mut_ptr(), privkey.0.as_mut_ptr());
         return (pubkey, privkey);
@@ -113,9 +113,9 @@ pub fn vrf_keygen() -> (VrfPubkey, VrfPrivKey) {
 
 impl VrfPrivKey {
     /// Pubkey returns the public key that corresponds to the given private key.
-    pub fn pubkey(&self) -> VrfPubkey {
+    pub fn pubkey(&self) -> VrfPubKey {
         unsafe {
-            let mut pubkey = VrfPubkey([0; VRF_PUBKEY_BYTE_LENGTH]);
+            let mut pubkey = VrfPubKey([0; VRF_PUBKEY_BYTE_LENGTH]);
             ffi::crypto_vrf_sk_to_pk(pubkey.0.as_mut_ptr(), self.0.as_ptr());
             return pubkey;
         }
@@ -152,7 +152,7 @@ impl VrfProof {
     }
 }
 
-impl VrfPubkey {
+impl VrfPubKey {
     /// Verify bytes
     pub fn verify_bytes(&self, proof: VrfProof, msg: &[u8]) -> (bool, VrfOutput) {
         unsafe {
@@ -201,7 +201,7 @@ mod tests {
     ) {
         let seed: [u8; 32] = must_decode(sk_hex).try_into().expect("ERROR: seed size");
 
-        let pk: VrfPubkey = VrfPubkey(must_decode(pk_hex).try_into().expect("ERROR: pk size"));
+        let pk: VrfPubKey = VrfPubKey(must_decode(pk_hex).try_into().expect("ERROR: pk size"));
         let alpha_vec = must_decode(alpha_hex);
         let alpha: &[u8] = alpha_vec.as_slice();
         let pi: VrfProof = VrfProof(must_decode(pi_hex).try_into().expect("ERROR: pi size"));
