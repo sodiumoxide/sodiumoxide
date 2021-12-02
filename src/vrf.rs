@@ -25,7 +25,7 @@ pub struct VrfProof([u8; 80]);
 
 /// VrfOutput is a 64-byte pseudorandom value that can be computed from a VrfProof.
 /// The VRF scheme guarantees that such output will be unique
-#[derive(PartialEq, Debug)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct VrfOutput([u8; 64]);
 
 impl VrfOutput {
