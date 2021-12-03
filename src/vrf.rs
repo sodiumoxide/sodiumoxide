@@ -12,21 +12,21 @@ pub const VRF_PUBKEY_BYTE_LENGTH: usize = ffi::crypto_vrf_PUBLICKEYBYTES as usiz
 /// A VrfPrivkey is a private key used for producing VRF proofs.
 /// Specifically, we use a 64-byte ed25519 private key (the latter 32-bytes are the precomputed public key)
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct VrfPrivKey([u8; 64]);
+pub struct VrfPrivKey(pub [u8; 64]);
 
 /// A VrfPubKey is a public key that can be used to verify VRF proofs.
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct VrfPubKey([u8; VRF_PUBKEY_BYTE_LENGTH]);
+pub struct VrfPubKey(pub [u8; VRF_PUBKEY_BYTE_LENGTH]);
 
 /// A VrfProof for a message can be generated with a secret key and verified against a public key, like a signature.
 /// Proofs are malleable, however, for a given message and public key, the VRF output that can be computed from a proof is unique.
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct VrfProof([u8; 80]);
+pub struct VrfProof(pub [u8; 80]);
 
 /// VrfOutput is a 64-byte pseudorandom value that can be computed from a VrfProof.
 /// The VRF scheme guarantees that such output will be unique
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct VrfOutput([u8; 64]);
+pub struct VrfOutput(pub [u8; 64]);
 
 impl VrfOutput {
     /// VrfOutput as a bytes vector
@@ -40,19 +40,7 @@ pub type HashID<'a> = &'a str;
 
 /// Digest represents a 32-byte value holding the 256-bit Hash digest.
 #[derive(Copy, Clone, PartialEq, Debug)]
-pub struct CryptoDigest([u8; 32]);
-
-impl CryptoDigest {
-    /// Create a new CryptoDigest from a 32-byte slice
-    pub fn new(d: [u8; 32]) -> CryptoDigest {
-        CryptoDigest(d)
-    }
-
-    /// Return CryptoDigest as a 32 long array of bytes
-    pub fn as_byte_array(&self) -> [u8; 32] {
-        self.0
-    }
-}
+pub struct CryptoDigest(pub [u8; 32]);
 
 /// Trait for types that can be encoded into byte slices
 pub trait Hashable {
@@ -77,7 +65,7 @@ pub fn hash(h: Vec<u8>) -> CryptoDigest {
         .finalize()
         .try_into()
         .expect("Hashing failed due to wrong lenght");
-    CryptoDigest::new(r)
+    CryptoDigest(r)
 }
 
 fn hash_rep<H: Hashable>(h: H) -> Vec<u8> {
