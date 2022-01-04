@@ -1,8 +1,4 @@
-#[cfg(not(windows))]
 extern crate cc;
-
-#[cfg(target_env = "msvc")]
-extern crate libc;
 
 extern crate pkg_config;
 extern crate walkdir;
@@ -83,19 +79,25 @@ fn find_libsodium_env() {
     );
 }
 
+fn find_libsodium_pkg() {
+    if env::var("CARGO_CFG_TARGET_ENV").unwrap() == "msvc" {
+        find_libsodium_pkg_msvc();
+    } else {
+        find_libsodium_pkg_no_msvc();
+    }
+}
+
 /* Must be called when no SODIUM_USE_PKG_CONFIG env var is set
 This function will set `cargo` flags.
 */
-#[cfg(target_env = "msvc")]
-fn find_libsodium_pkg() {
+fn find_libsodium_pkg_msvc() {
     panic!("SODIUM_USE_PKG_CONFIG is not supported on msvc");
 }
 
 /* Must be called when SODIUM_USE_PKG_CONFIG env var is set
 This function will set `cargo` flags.
 */
-#[cfg(not(target_env = "msvc"))]
-fn find_libsodium_pkg() {
+fn find_libsodium_pkg_no_msvc() {
     match pkg_config::Config::new().probe("libsodium") {
         Ok(lib) => {
             if lib.version != VERSION {
@@ -134,15 +136,21 @@ You can try fixing this by installing pkg-config:
     }
 }
 
-#[cfg(windows)]
-fn make_libsodium(_: &str, _: &Path, _: &Path) -> PathBuf {
+fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBuf {
+    if env::var("CARGO_CFG_TARGET_FAMILY").unwrap() == "windows" {
+        make_libsodium_link(target, source_dir, install_dir)
+    } else {
+        make_libsodium_build(target, source_dir, install_dir)
+    }
+}
+
+fn make_libsodium_link(_: &str, _: &Path, _: &Path) -> PathBuf {
     // We don't build anything on windows, we simply linked to precompiled
     // libs.
     get_lib_dir()
 }
 
-#[cfg(not(windows))]
-fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBuf {
+fn make_libsodium_build(target: &str, source_dir: &Path, install_dir: &Path) -> PathBuf {
     use std::{fs, process::Command, str};
 
     // Decide on CC, CFLAGS and the --host configure argument
@@ -293,42 +301,41 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
     install_dir.join("lib")
 }
 
-#[cfg(any(windows, target_env = "msvc"))]
 fn get_crate_dir() -> PathBuf {
     env::var("CARGO_MANIFEST_DIR").unwrap().into()
 }
 
-#[cfg(target_env = "msvc")]
 fn is_release_profile() -> bool {
     env::var("PROFILE").unwrap() == "release"
 }
 
-#[cfg(all(target_env = "msvc", target_pointer_width = "32"))]
 fn get_lib_dir() -> PathBuf {
-    if is_release_profile() {
-        get_crate_dir().join("msvc/Win32/Release/v142/")
-    } else {
-        get_crate_dir().join("msvc/Win32/Debug/v142/")
+    match env::var("CARGO_CFG_TARGET_ENV").unwrap().as_str() {
+        "msvc" => match env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap().as_str() {
+            "32" => {
+                if is_release_profile() {
+                    get_crate_dir().join("msvc/Win32/Release/v142/")
+                } else {
+                    get_crate_dir().join("msvc/Win32/Debug/v142/")
+                }
+            }
+            "64" => {
+                if is_release_profile() {
+                    get_crate_dir().join("msvc/x64/Release/v142/")
+                } else {
+                    get_crate_dir().join("msvc/x64/Debug/v142/")
+                }
+            }
+            _ => unreachable!(),
+        },
+        "gnu" => match env::var("CARGO_CFG_TARGET_POINTER_WIDTH").unwrap().as_str() {
+            "32" => get_crate_dir().join("mingw/win32/"),
+            "64" => get_crate_dir().join("mingw/win64/"),
+            _ => unreachable!(),
+        },
+
+        _ => unreachable!(),
     }
-}
-
-#[cfg(all(target_env = "msvc", target_pointer_width = "64"))]
-fn get_lib_dir() -> PathBuf {
-    if is_release_profile() {
-        get_crate_dir().join("msvc/x64/Release/v142/")
-    } else {
-        get_crate_dir().join("msvc/x64/Debug/v142/")
-    }
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "32"))]
-fn get_lib_dir() -> PathBuf {
-    get_crate_dir().join("mingw/win32/")
-}
-
-#[cfg(all(windows, not(target_env = "msvc"), target_pointer_width = "64"))]
-fn get_lib_dir() -> PathBuf {
-    get_crate_dir().join("mingw/win64/")
 }
 
 fn build_libsodium() {
