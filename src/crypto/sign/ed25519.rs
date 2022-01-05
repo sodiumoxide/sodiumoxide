@@ -70,7 +70,7 @@ new_type! {
 
 impl Verifier<Signature> for PublicKey {
     fn verify(&self, msg: &[u8], sig: &Signature) -> Result<(), Error> {
-        if verify_detached(sig, msg, self) {
+        if verify_detached(sig.as_ref(), msg, self) {
             Ok(())
         } else {
             Err(Error::new())
@@ -167,13 +167,13 @@ pub fn sign_detached(m: &[u8], sk: &SecretKey) -> Signature {
     Signature::new(sig)
 }
 
-/// `verify_detached()` verifies the signature in `sig` against the message `m`
+/// `verify_detached()` verifies the signature `sig` against the message `m`
 /// and the signer's public key `pk`.
 /// `verify_detached()` returns true if the signature is valid, false otherwise.
-pub fn verify_detached(sig: &Signature, m: &[u8], pk: &PublicKey) -> bool {
+pub fn verify_detached(sig: &[u8], m: &[u8], pk: &PublicKey) -> bool {
     let ret = unsafe {
         ffi::crypto_sign_ed25519_verify_detached(
-            sig.as_ref().as_ptr(),
+            sig.as_ptr(),
             m.as_ptr(),
             m.len() as c_ulonglong,
             pk.0.as_ptr(),
@@ -323,7 +323,7 @@ mod test {
             let (pk, sk) = gen_keypair();
             let m = randombytes(i);
             let sig = sign_detached(&m, &sk);
-            assert!(verify_detached(&sig, &m, &pk));
+            assert!(verify_detached(sig.as_ref(), &m, &pk));
         }
     }
 
@@ -336,7 +336,7 @@ mod test {
             let mut sig = sign_detached(&m, &sk).to_bytes();
             for j in 0..SIGNATUREBYTES {
                 sig[j] ^= 0x20;
-                assert!(!verify_detached(&Signature::new(sig), &m, &pk));
+                assert!(!verify_detached(&sig, &m, &pk));
                 sig[j] ^= 0x20;
             }
         }
@@ -426,7 +426,7 @@ mod test {
             let (pk, sk) = keypair_from_seed(&seed);
             let m = hex::decode(x2).unwrap();
             let sig = sign_detached(&m, &sk);
-            assert!(verify_detached(&sig, &m, &pk));
+            assert!(verify_detached(sig.as_ref(), &m, &pk));
             assert!(x1 == hex::encode(pk));
             let sm = hex::encode(sig) + x2; // x2 is m hex encoded
             assert!(x3 == sm);
