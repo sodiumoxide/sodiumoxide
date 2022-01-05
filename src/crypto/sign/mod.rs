@@ -38,7 +38,7 @@
 //! let (pk, sk) = sign::gen_keypair();
 //! let data_to_sign = b"some data";
 //! let signature = sign::sign_detached(data_to_sign, &sk);
-//! assert!(sign::verify_detached(&signature, data_to_sign, &pk));
+//! assert!(sign::verify_detached(signature.as_ref(), data_to_sign, &pk));
 //! ```
 pub use self::ed25519::*;
 pub mod ed25519;
