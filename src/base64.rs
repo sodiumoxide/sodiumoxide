@@ -55,8 +55,8 @@ pub fn decode<T: AsRef<[u8]>>(b64: T, variant: Variant) -> Result<Vec<u8>, ()> {
     // `Variant` contains only valid variant codes.
     // If `sodium_base642bin` returns zero,
     // it has written `bin_len` bytes to `bin`.
-    unsafe {
-        let rc = ffi::sodium_base642bin(
+    
+        let rc = unsafe { ffi::sodium_base642bin(
             bin.as_mut_ptr(),
             bin.len(),
             b64.as_ptr() as *const _,
@@ -65,13 +65,13 @@ pub fn decode<T: AsRef<[u8]>>(b64: T, variant: Variant) -> Result<Vec<u8>, ()> {
             &mut bin_len,
             ptr::null_mut(),
             variant as _,
-        );
-        if rc != 0 {
-            return Err(());
-        }
-        bin.truncate(bin_len);
-        Ok(bin)
+        ) };
+    
+    if rc != 0 {
+        return Err(());
     }
+    bin.truncate(bin_len);
+    Ok(bin)
 }
 
 fn decoded_len(b64_len: usize) -> Option<usize> {

@@ -42,8 +42,8 @@ pub fn decode<T: AsRef<[u8]>>(hex: T) -> Result<Vec<u8>, ()> {
 
     // SAFETY: If `sodium_hex2bin` returns zero,
     // it has written `bin_len` bytes to `bin`.
-    unsafe {
-        let rc = ffi::sodium_hex2bin(
+    
+        let rc = unsafe { ffi::sodium_hex2bin(
             bin.as_mut_ptr(),
             bin.len(),
             hex.as_ptr() as *const _,
@@ -51,13 +51,13 @@ pub fn decode<T: AsRef<[u8]>>(hex: T) -> Result<Vec<u8>, ()> {
             ptr::null(),
             &mut bin_len,
             ptr::null_mut(),
-        );
-        if rc != 0 {
-            return Err(());
-        }
-        bin.truncate(bin_len);
-        Ok(bin)
+        ) };
+    
+    if rc != 0 {
+        return Err(());
     }
+    bin.truncate(bin_len);
+    Ok(bin)
 }
 
 fn decoded_len(len: usize) -> Result<usize, ()> {

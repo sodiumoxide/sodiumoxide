@@ -15,11 +15,11 @@ pub const SEEDBYTES: usize = ffi::randombytes_SEEDBYTES as usize;
 /// called `sodiumoxide::init()` once before using any other function
 /// from sodiumoxide.
 pub fn randombytes(size: usize) -> Vec<u8> {
+    let mut buf = vec![0u8; size];
     unsafe {
-        let mut buf = vec![0u8; size];
         ffi::randombytes_buf(buf.as_mut_ptr() as *mut _, size);
-        buf
     }
+    buf
 }
 
 /// `randombytes_into()` fills a buffer `buf` with random data.
