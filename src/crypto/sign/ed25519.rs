@@ -164,7 +164,7 @@ pub fn sign_detached(m: &[u8], sk: &SecretKey) -> Signature {
         );
     }
     assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
-    Signature::new(sig)
+    Signature::from_bytes(&sig).expect("ed25519 signature produced by libsodium was invalid")
 }
 
 /// `verify_detached()` verifies the signature in `sig` against the message `m`
@@ -220,7 +220,7 @@ impl State {
             );
         }
         assert_eq!(siglen, SIGNATUREBYTES as c_ulonglong);
-        Signature::new(sig)
+        Signature::from_bytes(&sig).expect("ed25519 signature produced by libsodium was invalid")
     }
 
     /// `verify` verifies the signature in `sm` using the signer's public key `pk`.
@@ -336,7 +336,9 @@ mod test {
             let mut sig = sign_detached(&m, &sk).to_bytes();
             for j in 0..SIGNATUREBYTES {
                 sig[j] ^= 0x20;
-                assert!(!verify_detached(&Signature::new(sig), &m, &pk));
+                if let Ok(sig) = Signature::from_bytes(&sig) {
+                    assert!(!verify_detached(&sig, &m, &pk));
+                }
                 sig[j] ^= 0x20;
             }
         }
