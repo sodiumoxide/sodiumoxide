@@ -68,13 +68,15 @@ pub fn seal(m: &[u8], n: &Nonce, k: &Key) -> Vec<u8> {
     let clen = m.len() + MACBYTES;
     let mut c = Vec::with_capacity(clen);
     unsafe {
-        ffi::crypto_secretbox_easy(
+        let ret = ffi::crypto_secretbox_easy(
             c.as_mut_ptr(),
             m.as_ptr(),
             m.len() as u64,
             n.0.as_ptr(),
             k.0.as_ptr(),
         );
+
+        assert!(ret == 0);
         c.set_len(clen);
     }
     c
