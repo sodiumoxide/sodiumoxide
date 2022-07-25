@@ -34,7 +34,7 @@ deprecate it.
 
 This package aims to provide a type-safe and efficient Rust binding that's just
 as easy to use.
-Rust >= 1.36.0 is required because of mem::MaybeUninit.
+Rust >= 1.56.0 is required because the latest versions of some dependencies use `edition = "2021"` - by downgrading dependencies, the crate should be compatible with Rust >= 1.36.0.
 
 ## Basic usage
 
@@ -176,7 +176,7 @@ linker = "arm-buildroot-linux-musleabihf-gcc"
 2. Dockerfile:
 
 ```
-FROM rust:1.36.0
+FROM rust:1.56.0
 
 ENV TARGET="armv7-unknown-linux-musleabihf"
 
