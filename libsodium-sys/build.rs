@@ -9,6 +9,7 @@ extern crate walkdir;
 
 use std::{
     env,
+    fmt::Write,
     path::{Path, PathBuf},
 };
 
@@ -182,35 +183,45 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
         match &*target {
             "aarch64-apple-ios" => {
                 cflags += " -arch arm64";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
+                write!(cflags, " -isysroot {}", sdk_dir_ios).unwrap();
+                write!(cflags, " -mios-version-min={}", ios_version_min).unwrap();
                 cflags += " -fembed-bitcode";
                 host_arg = "--host=arm-apple-darwin10".to_string();
             }
             "armv7-apple-ios" => {
                 cflags += " -arch armv7";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
+                write!(cflags, " -isysroot {}", sdk_dir_ios).unwrap();
+                write!(cflags, " -mios-version-min={}", ios_version_min).unwrap();
                 cflags += " -mthumb";
                 host_arg = "--host=arm-apple-darwin10".to_string();
             }
             "armv7s-apple-ios" => {
                 cflags += " -arch armv7s";
-                cflags += &format!(" -isysroot {}", sdk_dir_ios);
-                cflags += &format!(" -mios-version-min={}", ios_version_min);
+                write!(cflags, " -isysroot {}", sdk_dir_ios).unwrap();
+                write!(cflags, " -mios-version-min={}", ios_version_min).unwrap();
                 cflags += " -mthumb";
                 host_arg = "--host=arm-apple-darwin10".to_string();
             }
             "i386-apple-ios" => {
                 cflags += " -arch i386";
-                cflags += &format!(" -isysroot {}", sdk_dir_simulator);
-                cflags += &format!(" -mios-simulator-version-min={}", ios_simulator_version_min);
+                write!(cflags, " -isysroot {}", sdk_dir_simulator).unwrap();
+                write!(
+                    cflags,
+                    " -mios-simulator-version-min={}",
+                    ios_simulator_version_min
+                )
+                .unwrap();
                 host_arg = "--host=i686-apple-darwin10".to_string();
             }
             "x86_64-apple-ios" => {
                 cflags += " -arch x86_64";
-                cflags += &format!(" -isysroot {}", sdk_dir_simulator);
-                cflags += &format!(" -mios-simulator-version-min={}", ios_simulator_version_min);
+                write!(cflags, " -isysroot {}", sdk_dir_simulator).unwrap();
+                write!(
+                    cflags,
+                    " -mios-simulator-version-min={}",
+                    ios_simulator_version_min
+                )
+                .unwrap();
                 host_arg = "--host=x86_64-apple-darwin10".to_string();
             }
             _ => panic!("Unknown iOS build target: {}", target),

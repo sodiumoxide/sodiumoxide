@@ -127,8 +127,7 @@ pub fn seal(m: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> Vec<u8> {
     let clen = m.len() + MACBYTES;
     let mut c = Vec::with_capacity(clen);
     unsafe {
-        c.set_len(clen);
-        ffi::crypto_box_easy(
+        let ret = ffi::crypto_box_easy(
             c.as_mut_ptr(),
             m.as_ptr(),
             m.len() as u64,
@@ -136,6 +135,9 @@ pub fn seal(m: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> Vec<u8> {
             pk.0.as_ptr(),
             sk.0.as_ptr(),
         );
+
+        assert!(ret == 0);
+        c.set_len(clen);
     }
     c
 }
@@ -169,21 +171,22 @@ pub fn open(c: &[u8], n: &Nonce, pk: &PublicKey, sk: &SecretKey) -> Result<Vec<u
     }
     let mlen = c.len() - MACBYTES;
     let mut m = Vec::with_capacity(mlen);
-    let ret = unsafe {
-        m.set_len(mlen);
-        ffi::crypto_box_open_easy(
+    unsafe {
+        let ret = ffi::crypto_box_open_easy(
             m.as_mut_ptr(),
             c.as_ptr(),
             c.len() as u64,
             n.0.as_ptr(),
             pk.0.as_ptr(),
             sk.0.as_ptr(),
-        )
-    };
-    if ret == 0 {
-        Ok(m)
-    } else {
-        Err(())
+        );
+
+        if ret == 0 {
+            m.set_len(mlen);
+            Ok(m)
+        } else {
+            Err(())
+        }
     }
 }
 
@@ -246,13 +249,15 @@ pub fn seal_precomputed(m: &[u8], n: &Nonce, k: &PrecomputedKey) -> Vec<u8> {
     let clen = m.len() + MACBYTES;
     let mut c = Vec::with_capacity(clen);
     unsafe {
-        ffi::crypto_box_easy_afternm(
+        let ret = ffi::crypto_box_easy_afternm(
             c.as_mut_ptr(),
             m.as_ptr(),
             m.len() as u64,
             n.0.as_ptr(),
             k.0.as_ptr(),
         );
+
+        assert!(ret == 0);
         c.set_len(clen);
     }
     c
