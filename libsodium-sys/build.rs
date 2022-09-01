@@ -181,6 +181,9 @@ fn make_libsodium(target: &str, source_dir: &Path, install_dir: &Path) -> PathBu
 
         // Roughly based on `dist-build/ios.sh` in the libsodium sources
         match &*target {
+            "aarch64-apple-ios-sim" => {
+                host_arg = "--host=arm-apple-darwin10".to_string();
+            }
             "aarch64-apple-ios" => {
                 cflags += " -arch arm64";
                 write!(cflags, " -isysroot {}", sdk_dir_ios).unwrap();
