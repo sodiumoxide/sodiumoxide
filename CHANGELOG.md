@@ -1,10 +1,3 @@
-# 0.2.8 (Jun 13, 2022)
-
-* Fix a warning about an unnamed trait parameter
-* Fix the minimum version of the `cc` dependency in libsodium-sys
-* Bump the Minimum Supported Rust Version (MSRV) to 1.56. Older releases will probably still work,
-  but they are not tested for anymore.
-
 # 0.2.7 (Jun 21, 2021)
 
 * Add ed25519 to x25519 conversion methods (#456)
